@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+out
+*.tsbuildinfo
+
+# Generated runtime packs
+packages/electron/resources/runtime/
+
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editors
+.idea
+.vscode
+
+# OS
+.DS_Store
+
+# Misc
+.turbo
+tmp
+logs

@@ -1,0 +1,29 @@
+# Kowork office runtime — top-level Python deps (shared by the document skills).
+# Regenerate the lock after editing this file:
+#   uv pip compile requirements.in -o requirements.lock --generate-hashes --python-version 3.12
+#
+# The committed lock is portable across all target platforms: versions are fully
+# pinned and --generate-hashes records every published wheel hash (lxml ships
+# per-platform wheels, so the lock lists all of them). build-runtime.ts consumes
+# this lock as-is on each platform via `pip install --require-hashes`; CI does NOT
+# regenerate it per runner. Bump a version here, re-run the command above, and
+# commit both files together.
+# docx skill
+lxml==6.1.1
+defusedxml==0.7.1
+mammoth==1.12.0
+
+# pdf skill. pillow and pypdfium2 are transitive (via pdfplumber) but pinned
+# explicitly: pillow is the shared imaging library and pypdfium2 is used directly
+# for rendering.
+pypdf==6.13.3
+pdfplumber==0.11.10
+reportlab==5.0.0
+pillow==12.2.0
+pypdfium2==5.10.1
+
+# xlsx skill
+openpyxl==3.1.5
+
+# pptx skill
+python-pptx==1.0.2

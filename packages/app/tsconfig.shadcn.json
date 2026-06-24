@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "outDir": "node_modules/.ts-dist-generated",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "strict": false,
+    "noUncheckedIndexedAccess": false
+  },
+  "include": [
+    "src/components/ui",
+    "src/components/ai-elements",
+    "src/hooks/use-mobile.ts",
+    "src/lib/utils.ts"
+  ]
+}

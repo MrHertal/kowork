@@ -1,0 +1,57 @@
+{
+  "skill_name": "docx",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a Word document called quarterly-summary.docx with the title \"Q3 Summary\", a 3-row table (a header row plus two data rows of metric/value), and a bulleted list of three takeaways.",
+      "expected_output": "A new, valid .docx authored with docx-js containing the title, a 3-row table, and a 3-item bulleted list.",
+      "files": [],
+      "expectations": [
+        "A new .docx file is produced",
+        "The file is a valid OOXML package: it opens as a zip containing word/document.xml and validate.py reports it valid",
+        "The create path was used (docx-js via node / create_docx.cjs), not a hand-assembled zip",
+        "The document contains a title, a table with exactly 3 rows, and a bulleted list with 3 items",
+        "No python-docx, pandoc, LibreOffice/soffice, or other system tools were used"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "In contract.docx, change the contract term from \"twelve months\" to \"twenty-four months\" as a tracked change so a reviewer can accept or reject it.",
+      "expected_output": "contract.docx (or a copy) where 'twelve months' is deleted and 'twenty-four months' inserted as a Word tracked change, and the package still validates.",
+      "files": ["evals/files/contract.docx"],
+      "expectations": [
+        "The edit is a tracked change: 'twelve months' is wrapped in w:del/w:delText and 'twenty-four months' in w:ins/w:t with a unique w:id",
+        "No w:t element appears inside a w:del",
+        "validate.py reports the resulting package as valid",
+        "Reading the result with mammoth (accepted view) shows 'twenty-four months' and not 'twelve months'",
+        "The unpack/edit/validate/pack round-trip was used (e.g. edit_text.py --tracked), not string replacement on the raw .docx",
+        "No python-docx, pandoc, LibreOffice/soffice, or other system tools were used"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Summarize what contract.docx says in a few bullet points.",
+      "expected_output": "A short text or Markdown summary reflecting the document's actual content (payment terms, term length, responsibilities).",
+      "files": ["evals/files/contract.docx"],
+      "expectations": [
+        "Document text was extracted with mammoth (read_docx.py)",
+        "The summary reflects real content of the document, e.g. the 30-day payment term and the twelve-month term",
+        "No python-docx, pandoc, LibreOffice/soffice, or other system tools were used"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Add a comment on the first paragraph of contract.docx that says \"Please confirm these terms with legal.\"",
+      "expected_output": "contract.docx (or a copy) with a Word comment anchored in the first paragraph, still a valid package.",
+      "files": ["evals/files/contract.docx"],
+      "expectations": [
+        "A word/comments.xml part exists containing the comment text",
+        "[Content_Types].xml has an Override for /word/comments.xml and word/_rels/document.xml.rels has a comments relationship",
+        "document.xml contains w:commentRangeStart and w:commentRangeEnd plus a w:commentReference sharing one w:id",
+        "validate.py reports the resulting package as valid",
+        "The comment.py flow was used",
+        "No python-docx, pandoc, LibreOffice/soffice, or other system tools were used"
+      ]
+    }
+  ]
+}

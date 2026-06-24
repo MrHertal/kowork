@@ -1,0 +1,10 @@
+packages:
+  - "packages/*"
+allowBuilds:
+  electron: true
+  electron-winstaller: true
+  esbuild: true
+  msw: false
+overrides:
+  "@types/react": "^19"
+  "@types/react-dom": "^19"

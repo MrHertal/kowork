@@ -1,0 +1,18 @@
+# Dependencies
+pnpm-lock.yaml
+
+# Vendored
+/opencode
+packages/electron/resources/skills
+
+# Tanstack Router
+routeTree.gen.ts
+
+# Shadcn
+packages/app/src/components/ui
+packages/app/src/components/ai-elements
+
+# Paraglide / inlang
+packages/app/src/paraglide
+packages/app/project.inlang/*
+!packages/app/project.inlang/settings.json

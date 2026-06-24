@@ -1,0 +1,89 @@
+{
+  "skill_name": "pdf",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a PDF called quarterly.pdf with the title \"Quarterly Report\", a 3-row table (a header row plus two data rows of item/units/revenue), and a short summary paragraph.",
+      "expected_output": "A new, valid PDF authored with reportlab containing the title, a 3-row table, and a paragraph.",
+      "files": [],
+      "expectations": [
+        "A new .pdf file is produced",
+        "The create path was used: create_pdf.py (reportlab) run via kowork-python, copied into a temp dir and edited — not a hand-assembled or string-built PDF",
+        "The document contains the title, a table with exactly 3 rows, and a summary paragraph",
+        "validate.py reports the result valid (it opens and all pages render)",
+        "No OCR, LibreOffice/soffice, or external CLI tools (pdftoppm/qpdf/pdftk) were used"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Extract the table from report.pdf and tell me the revenue for each item.",
+      "expected_output": "The table rows from report.pdf read out of the document: Widgets 120 $2,400 and Gadgets 80 $1,600.",
+      "files": ["evals/files/report.pdf"],
+      "expectations": [
+        "Tables were extracted with read_pdf.py --tables (pdfplumber), run via kowork-python",
+        "The answer reflects the real table contents: Widgets 120 $2,400 and Gadgets 80 $1,600",
+        "No OCR or image conversion was used to read the text (the PDF has a real text layer)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Merge report.pdf and appendix.pdf into one file called combined.pdf, with the appendix last.",
+      "expected_output": "combined.pdf containing report.pdf's pages followed by appendix.pdf's page (3 pages total).",
+      "files": ["evals/files/report.pdf", "evals/files/appendix.pdf"],
+      "expectations": [
+        "pages.py merge was used (pypdf) via kowork-python, in the requested order",
+        "The merged file has 3 pages (report's 2 pages then appendix's 1), confirmed via pages.py metadata or validate.py",
+        "No external tools such as qpdf, pdftk, or Ghostscript were used"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Show me what page 1 of report.pdf looks like.",
+      "expected_output": "A rendered image of report.pdf page 1 that the assistant actually viewed by reading the produced image file.",
+      "files": ["evals/files/report.pdf"],
+      "expectations": [
+        "Page 1 was rendered to an image with render.py (pypdfium2) via kowork-python",
+        "The produced image file was then opened with the Read tool so the page could actually be seen (writing the PNG alone does not put it in context)",
+        "The description matches page 1 (the \"Quarterly Report\" title and the table)",
+        "No external rasterizer (pdftoppm/pdf2image/ImageMagick) or OCR was used"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Fill application-form.pdf: full name \"Dana Lee\", subscribe to updates, and select the Pro plan. Save it as application-filled.pdf.",
+      "expected_output": "application-filled.pdf with the full-name text set to Dana Lee, the subscribe checkbox checked, and the plan radio set to Pro.",
+      "files": ["evals/files/application-form.pdf"],
+      "expectations": [
+        "forms.py inspect (and/or fields) was used to discover the AcroForm fields before filling",
+        "forms.py fill was used with a values JSON (pypdf) via kowork-python",
+        "In the output, the full-name field is 'Dana Lee', the subscribe checkbox is on, and the plan is 'Pro'",
+        "The values were set as real AcroForm field values (verifiable with forms.py fields / pypdf), not stamped as overlay text",
+        "validate.py confirms the filled PDF still opens and renders"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "survey-flat.pdf is a printed form with no fillable fields. Write the name \"Dana Lee\" and email \"dana@example.com\" on their lines and put an X in the \"Yes\" subscribe box, then save survey-filled.pdf.",
+      "expected_output": "survey-filled.pdf with the name and email stamped on their lines and an X in the Yes box.",
+      "files": ["evals/files/survey-flat.pdf"],
+      "expectations": [
+        "The PDF was recognized as flat (forms.py inspect reports no fillable fields) and the overlay workflow was chosen",
+        "forms.py structure was used to locate the lines/labels/boxes, and a fields.json of boxes+text authored",
+        "forms.py check-boxes validated the boxes, then forms.py overlay stamped the text (via kowork-python)",
+        "The result shows 'Dana Lee' and 'dana@example.com' near the Name/Email lines and an X on the Yes box (confirmed by rendering / preview-boxes and reading the image)",
+        "The text was overlaid onto the page, with no attempt to create AcroForm fields and no OCR/LibreOffice"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Password-protect report.pdf so it cannot be opened without the password \"s3cret\". Save it as report-protected.pdf.",
+      "expected_output": "report-protected.pdf encrypted so that opening it requires the password s3cret.",
+      "files": ["evals/files/report.pdf"],
+      "expectations": [
+        "pages.py encrypt was used (pypdf) via kowork-python with the given password",
+        "The output is encrypted: a PDF reader reports it as encrypted, and opening it without the password fails",
+        "No external tools such as qpdf or pdftk were used"
+      ]
+    }
+  ]
+}

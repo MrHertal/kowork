@@ -1,0 +1,84 @@
+{
+  "skill_name": "pptx",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a 5-slide deck called review.pptx: a title slide, an agenda, two content slides (one with a 3-row table, one with a column chart), and a closing slide.",
+      "expected_output": "A new, valid .pptx authored with pptxgenjs: a title slide, an agenda slide, a slide with a table, a slide with a column chart, and a closing slide, passing the structure + layout checks.",
+      "files": [],
+      "expectations": [
+        "A new review.pptx file is produced",
+        "The create path was used: create_pptx.cjs (pptxgenjs) copied into a temp dir, edited, and run via kowork-node — not a hand-assembled zip or a string-built file",
+        "The deck has about five slides including one slide with a table and one slide with a column (bar) chart",
+        "validate.py reports the result OK via kowork-python (the structure check passes and the layout linter finds no off-slide shapes, partial-overlap collisions, or leftover placeholder text)",
+        "No markitdown, pandas, numpy, LibreOffice/soffice, sharp, react-icons, or system tools were used"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Summarize quarterly.pptx: its slide titles, the table, and any speaker notes.",
+      "expected_output": "A 5-slide deck titled Quarterly Review, Agenda, Revenue by Region, Revenue Trend, and Thank You. The Revenue by Region slide has a table of Region/Revenue with North $4.2M, South $3.1M, and West $2.8M; the closing slide's speaker notes read 'Thank the team and invite questions.'",
+      "files": ["evals/files/quarterly.pptx"],
+      "expectations": [
+        "The deck was read with read_pptx.py (python-pptx) via kowork-python",
+        "The answer reports the slide titles: Quarterly Review, Agenda, Revenue by Region, Revenue Trend, and Thank You",
+        "The answer reflects the real table contents: Region/Revenue with North $4.2M, South $3.1M, and West $2.8M",
+        "The answer surfaces the speaker notes 'Thank the team and invite questions.'",
+        "No markitdown, pandas/numpy, LibreOffice, or system tools were used to read the file"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use draft.pptx as a template: replace its placeholder text with real content, remove the leftover boilerplate, and resolve the layout problems, saving the finished deck as final.pptx.",
+      "expected_output": "final.pptx — a new file with the placeholder text replaced by real content, the boilerplate shapes gone, and no off-slide or overlapping shapes — that passes validate.py.",
+      "files": ["evals/files/draft.pptx"],
+      "expectations": [
+        "The edit round-trip was used: unpack.py to a temp dir, hand-editing ppt/slides/slideN.xml, then pack.py via kowork-python — not a string-replacement on the raw .pptx",
+        "The leftover boilerplate is gone: no 'Lorem ipsum' and no 'Click to edit' text remains in the result",
+        "The off-slide shape and the partially-overlapping text boxes were removed or repositioned so they no longer collide or run off the slide",
+        "validate.py reports final.pptx OK via kowork-python — it no longer flags leftover placeholder text, off-slide shapes, or overlaps",
+        "The output is a new file (final.pptx, not the original draft.pptx)",
+        "No markitdown, pandas/numpy, LibreOffice, sharp, or system tools were used"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "In quarterly.pptx, move the last slide to the front, then delete what is now slide 2, saving the result as reordered.pptx.",
+      "expected_output": "reordered.pptx with four slides — the original closing slide (Thank You) first, followed by Agenda, Revenue by Region, and Revenue Trend — reopening cleanly.",
+      "files": ["evals/files/quarterly.pptx"],
+      "expectations": [
+        "slides.py reorder was used via kowork-python (writing a new -o file) to move the last slide to the front (e.g. --order 5,1,2,3,4)",
+        "slides.py delete was used via kowork-python (writing a new -o file) to remove a slide",
+        "The result reordered.pptx has four slides and its first slide is the closing 'Thank You' slide",
+        "The deleted slide's now-orphaned parts were swept, and the result reopens cleanly",
+        "The output is a new file (reordered.pptx, not the original) and no whole-slide rewiring was done by hand",
+        "No markitdown, pandas/numpy, LibreOffice, or system tools were used"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Check draft.pptx for layout problems.",
+      "expected_output": "validate.py FAILS draft.pptx: it flags leftover placeholder text (Lorem ipsum / Click to edit) on slides 1 and 2, a shape running off the slide on slide 2, and a partial-overlap collision on slide 2.",
+      "files": ["evals/files/draft.pptx"],
+      "expectations": [
+        "validate.py was run on draft.pptx via kowork-python",
+        "It reports FAILED with a non-zero exit, not OK",
+        "It flags the leftover placeholder text (Lorem ipsum and/or Click to edit) on slides 1 and 2",
+        "It flags the geometric problems on slide 2: a shape extending past the slide (off-slide) and a partial-overlap collision between two text boxes",
+        "No renderer, LibreOffice/soffice, or system tools were used; the check is structural"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "What are the speaker notes in quarterly.pptx?",
+      "expected_output": "The only speaker notes are on the closing slide and read: 'Thank the team and invite questions.'",
+      "files": ["evals/files/quarterly.pptx"],
+      "expectations": [
+        "The notes were read with read_pptx.py (python-pptx) via kowork-python",
+        "The answer reports the closing slide's notes: 'Thank the team and invite questions.'",
+        "The answer does not invent notes for the other slides (only the closing slide carries any)",
+        "No markitdown, pandas/numpy, LibreOffice, or system tools were used"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "skill_name": "xlsx",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a spreadsheet called sales.xlsx with a header row (Item, Quantity, Unit Price, Amount), three data rows, an Amount column that multiplies quantity by unit price, a SUM total of the Amount column, and a bar chart of Amount by item.",
+      "expected_output": "A new, valid .xlsx authored with openpyxl containing the header, three data rows, a live per-row Amount formula and a live SUM total, and a bar chart.",
+      "files": [],
+      "expectations": [
+        "A new .xlsx file is produced",
+        "The create path was used: create_xlsx.py (openpyxl) copied into a temp dir, its build_workbook() edited, and run via kowork-python — not a hand-assembled zip or a string-built file",
+        "The workbook has the header row, exactly three data rows, an Amount column, and a total row",
+        "The Amount cells and the total are LIVE formulas (e.g. =B2*C2 and =SUM(D2:D4)), not Python-computed hardcoded numbers",
+        "A bar chart is present in the sheet",
+        "validate.py reports the result valid via kowork-python (it reopens and reports no Excel error values)",
+        "No pandas, numpy, LibreOffice/soffice, or system tools were used"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Summarize budget.xlsx — what sheets does it have, and what's in the Q3 sheet?",
+      "expected_output": "The workbook has two sheets, Q3 and Notes. Q3 lists Marketing, Engineering, Sales, and Operations with Budget and Spent columns plus Remaining and Used % columns and a Total row; the budgets are 5000, 12000, 8000, and 3000.",
+      "files": ["evals/files/budget.xlsx"],
+      "expectations": [
+        "Values were read with read_xlsx.py (openpyxl) via kowork-python, and/or structure with sheets.py info via kowork-python",
+        "The answer reports both sheet names: Q3 and Notes",
+        "The answer reflects the real Q3 contents: the four categories (Marketing, Engineering, Sales, Operations) and their budgets (5000, 12000, 8000, 3000)",
+        "No pandas/numpy, LibreOffice, or system tools were used to read the file"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "In budget.xlsx, add an 'Owner' column to the Q3 sheet (header 'Owner' in F1, with a name in each category row), append a new 'Research' category row (budget 2000, spent 1500), and add a new empty sheet named 'Q4'. Save the result as budget-updated.xlsx.",
+      "expected_output": "budget-updated.xlsx with an Owner column added to Q3, a new Research data row, and a new Q4 sheet — reopening cleanly.",
+      "files": ["evals/files/budget.xlsx"],
+      "expectations": [
+        "edit_xlsx.py (openpyxl) was used via kowork-python to add the Owner column and the Research row, writing to a new -o file (never editing in place)",
+        "sheets.py add was used via kowork-python to add the 'Q4' sheet",
+        "The result has an 'Owner' header in F1, a 'Research' row with budget 2000 and spent 1500, and three sheets including 'Q4'",
+        "The output is a new file (budget-updated.xlsx, not the original) and reopens cleanly (validate.py OK)",
+        "If the new Research row falls outside the existing =SUM(...) total range, the agent extended the total or noted that openpyxl does not auto-adjust formula references when rows are inserted",
+        "No pandas/numpy, LibreOffice, or system tools were used"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Export the Q3 sheet of budget.xlsx to q3.csv. Separately, build a new spreadsheet employees.xlsx from employees.csv, keeping the EmployeeID column's leading zeros intact.",
+      "expected_output": "q3.csv containing the Q3 rows, and employees.xlsx whose EmployeeID column preserves 007, 013, and 042 as text while Salary stays numeric.",
+      "files": ["evals/files/budget.xlsx", "evals/files/employees.csv"],
+      "expectations": [
+        "The CSV export used read_xlsx.py --format csv (openpyxl + the stdlib csv module) via kowork-python on the Q3 sheet",
+        "q3.csv contains the Q3 category rows (Marketing, Engineering, Sales, Operations)",
+        "The import used sheets.py from-csv with --text-columns for the EmployeeID column (A or 1) via kowork-python",
+        "In employees.xlsx the EmployeeID cells are the strings '007', '013', '042' (leading zeros preserved), and the Salary cells are numbers",
+        "employees.xlsx reopens with openpyxl (validate.py OK)",
+        "No pandas/numpy, LibreOffice, or system tools were used for either conversion"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "In budget.xlsx, format the Spent column (C) as currency ($#,##0) and make sure the Q3 header row is bold. Save as budget-formatted.xlsx.",
+      "expected_output": "budget-formatted.xlsx where the Spent column carries a currency number format and the header row is bold, reopening cleanly.",
+      "files": ["evals/files/budget.xlsx"],
+      "expectations": [
+        "edit_xlsx.py number-format was used (openpyxl) via kowork-python to set the Spent column (C) to a currency format such as $#,##0",
+        "edit_xlsx.py style --bold was used (openpyxl) via kowork-python to bold the Q3 header row",
+        "In the output, the Spent column cells carry a currency number format (not General) and the header-row cells are bold",
+        "Other cell styling (e.g. the header fill, the Budget and Used % formats) is preserved, and the output is a new -o file that reopens cleanly",
+        "No pandas/numpy, LibreOffice, or system tools were used"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "What is the total budget in budget.xlsx?",
+      "expected_output": "The total budget is 28000 (the sum of 5000, 12000, 8000, and 3000). The Total cell holds the live formula =SUM(B2:B5); because the file was authored by openpyxl it has no cached result, so the number is derived from the Budget column rather than read from a cached value.",
+      "files": ["evals/files/budget.xlsx"],
+      "expectations": [
+        "budget.xlsx was read with read_xlsx.py (openpyxl) via kowork-python",
+        "The reported total budget is 28000",
+        "The agent handled the no-cached-value reality correctly: it computed the total from the Budget column values (or read the =SUM(B2:B5) formula), rather than inventing a cached number or claiming the cell was empty/zero",
+        "No recalculation engine (LibreOffice/soffice) and no pandas/numpy or system tools were used"
+      ]
+    }
+  ]
+}
