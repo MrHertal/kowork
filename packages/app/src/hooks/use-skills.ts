@@ -8,7 +8,13 @@ import { useMemo } from "react";
 import { useGlobalSDK } from "@/contexts/global-sdk";
 import { usePlatform } from "@/contexts/platform";
 
-const HIDDEN_SKILL_NAMES = new Set(["customize-opencode"]);
+const HIDDEN_SKILL_NAMES = new Set([
+  "customize-opencode",
+  "kowork-docx",
+  "kowork-pdf",
+  "kowork-pptx",
+  "kowork-xlsx",
+]);
 
 export type Skill = AppSkillsResponses[200][number];
 

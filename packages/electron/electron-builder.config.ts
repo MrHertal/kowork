@@ -167,6 +167,7 @@ const getBase = (): Configuration => ({
     "out/**/*",
     "resources/**/*",
     "!resources/skills/**",
+    "!resources/skills-builtin/**",
     "!resources/runtime/**",
   ],
   extraResources: [
@@ -183,6 +184,10 @@ const getBase = (): Configuration => ({
     {
       from: "resources/skills/",
       to: "skills/",
+    },
+    {
+      from: "resources/skills-builtin/",
+      to: "skills-builtin/",
     },
     {
       from: "resources/runtime/",

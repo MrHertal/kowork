@@ -1,5 +1,5 @@
 ---
-name: docx
+name: kowork-docx
 description: >-
   Create, edit, read, summarize, and comment on Microsoft Word (.docx)
   documents. Use whenever the user wants to author, change, review, annotate,

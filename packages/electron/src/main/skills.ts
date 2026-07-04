@@ -1,10 +1,11 @@
+import { existsSync } from "node:fs";
 import { cp, rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { app } from "electron";
 
-import { ensureSkillsPath } from "./opencode-config";
+import { ensureSkillsPath, registerBuiltinSkillsPath } from "./opencode-config";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -12,6 +13,21 @@ function bundledSkillsDir(): string {
   return app.isPackaged
     ? path.join(process.resourcesPath, "skills")
     : path.join(root, "../../resources/skills");
+}
+
+function builtinSkillsDir(): string {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, "skills-builtin")
+    : path.join(root, "../../resources/skills-builtin");
+}
+
+// Office document skills (docx/pdf/xlsx/pptx) ship bundled and are always on:
+// no install step, and hidden from the UI. Register their dir on each startup
+// so a moved or updated install self-heals (see registerBuiltinSkillsPath).
+export async function ensureBuiltinSkillsRegistered(): Promise<void> {
+  const dir = builtinSkillsDir();
+  if (!existsSync(dir)) return;
+  await registerBuiltinSkillsPath(dir);
 }
 
 export function managedSkillsDir(): string {

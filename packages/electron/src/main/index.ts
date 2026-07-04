@@ -44,6 +44,7 @@ import { checkAppExists, resolveAppPath, wslPath } from "./apps";
 import { type Channel, CHANNEL, UPDATER_ENABLED } from "./constants";
 import { patchConfig, readConfig } from "./opencode-config";
 import {
+  ensureBuiltinSkillsRegistered,
   installBundledSkill,
   managedSkillsDir,
   uninstallBundledSkill,
@@ -175,6 +176,12 @@ function focusMainWindow() {
 }
 
 async function initialize() {
+  // Register always-on bundled skills before the sidecar starts, so its first
+  // config read already sees them.
+  await ensureBuiltinSkillsRegistered().catch((error) =>
+    logger.warn("failed to register builtin skills", error),
+  );
+
   const port = await getSidecarPort();
   const hostname = "127.0.0.1";
   const url = `http://${hostname}:${port}`;

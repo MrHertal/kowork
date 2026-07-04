@@ -65,3 +65,18 @@ export async function ensureSkillsPath(dir: string): Promise<void> {
   if (paths.includes(dir)) return;
   await patchConfig(["skills", "paths"], [...paths, dir]);
 }
+
+// Register an always-on skills directory whose absolute path lives inside the
+// app bundle, so it changes when the app moves or updates. We can't just append
+// like ensureSkillsPath, or a moved/updated install would leave a dead path
+// behind. Self-heal instead: drop any prior entry that shares this dir's
+// basename (our marker, e.g. "skills-builtin") and re-add the current one. User
+// folders never share that basename, so they're left untouched.
+export async function registerBuiltinSkillsPath(dir: string): Promise<void> {
+  const marker = path.basename(dir);
+  const paths = readPaths(await readConfig());
+  const hasStale = paths.some((p) => p !== dir && path.basename(p) === marker);
+  if (paths.includes(dir) && !hasStale) return;
+  const next = [...paths.filter((p) => path.basename(p) !== marker), dir];
+  await patchConfig(["skills", "paths"], next);
+}

@@ -1,5 +1,5 @@
 ---
-name: pdf
+name: kowork-pdf
 description: >-
   Create, read, manipulate, render, and fill PDF (.pdf) files. Use whenever the
   user wants to author a PDF; extract text or tables; merge, split, extract,

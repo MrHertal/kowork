@@ -1,5 +1,5 @@
 ---
-name: xlsx
+name: kowork-xlsx
 description: >-
   Create, read, edit, summarize, and style Microsoft Excel (.xlsx) spreadsheets,
   and bridge them to and from CSV. Use whenever the user wants to build a workbook

@@ -1,5 +1,5 @@
 ---
-name: pptx
+name: kowork-pptx
 description: >-
   Create, read, edit, and check Microsoft PowerPoint (.pptx) presentations. Use
   whenever the user wants to build a deck or slides from scratch; read,
