@@ -407,7 +407,7 @@
   "settings_skills_custom_type_remote": "Remote-URL",
   "settings_skills_custom_type_remote_description": "Skills von einer gehosteten Index-URL abrufen.",
   "settings_skills_navItem": "Skills",
-  "settings_skills_popular_skillCreator_description": "Erstellen Sie neue Skills, ändern und verbessern Sie bestehende Skills und messen Sie deren Leistung. Verwenden Sie dies, um einen Skill von Grund auf zu erstellen, einen bestehenden zu bearbeiten oder zu optimieren, Evaluierungen zum Testen auszuführen, die Leistung mit Varianzanalyse zu vergleichen oder die Beschreibung für eine bessere Auslösegenauigkeit zu optimieren.",
+  "settings_skills_popular_skillCreator_description": "Erstellen Sie einen neuen Skill oder verbessern Sie einen bestehenden. Kowork stellt Ihnen ein paar Fragen und schreibt dann klare Anweisungen, die der Agent jedes Mal wiederverwendet — ganz ohne Programmierung.",
   "settings_skills_remove": "Entfernen",
   "settings_skills_remove_confirm_description": "Alle {count} Skills in diesem Ordner werden entfernt.",
   "settings_skills_remove_confirm_title": "Diesen Ordner entfernen?",

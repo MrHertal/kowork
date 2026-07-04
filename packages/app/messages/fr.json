@@ -407,7 +407,7 @@
   "settings_skills_custom_type_remote": "URL distante",
   "settings_skills_custom_type_remote_description": "Récupérer les compétences depuis une URL d'index hébergée.",
   "settings_skills_navItem": "Compétences",
-  "settings_skills_popular_skillCreator_description": "Créez de nouvelles compétences, modifiez et améliorez des compétences existantes, et mesurez leurs performances. À utiliser pour créer une compétence de zéro, modifier ou optimiser une compétence existante, exécuter des évaluations pour la tester, comparer ses performances avec une analyse de variance, ou optimiser sa description pour un meilleur déclenchement.",
+  "settings_skills_popular_skillCreator_description": "Créez une nouvelle compétence ou améliorez-en une existante. Kowork vous pose quelques questions, puis rédige des instructions claires que l'agent réutilise à chaque fois — sans aucune programmation.",
   "settings_skills_remove": "Supprimer",
   "settings_skills_remove_confirm_description": "Les {count} compétences de ce dossier seront supprimées.",
   "settings_skills_remove_confirm_title": "Supprimer ce dossier ?",
