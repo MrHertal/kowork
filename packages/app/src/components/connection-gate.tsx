@@ -9,7 +9,7 @@ import {
 import { useServer } from "@/contexts/server";
 import { useCheckServerHealth } from "@/utils/server-health";
 import { m } from "@/paraglide/messages";
-import { Splash } from "./splash";
+import { Logo } from "./logo";
 
 const STARTUP_TIMEOUT_MS = 10_000;
 const RETRY_INTERVAL_MS = 1_000;
@@ -120,7 +120,7 @@ export function ConnectionGate({
 function SplashLoadingScreen() {
   return (
     <div className="flex h-dvh w-screen flex-col items-center justify-center bg-background">
-      <Splash className="h-20 w-16 animate-pulse text-muted-foreground/50" />
+      <Logo className="w-20 animate-pulse text-muted-foreground/50" />
     </div>
   );
 }
@@ -142,7 +142,7 @@ function ConnectionError({ onRetry }: { onRetry?: () => void }) {
   return (
     <div className="flex h-dvh w-screen flex-col items-center justify-center gap-6 bg-background p-6">
       <div className="flex max-w-md flex-col items-center text-center">
-        <Splash className="mb-4 h-15 w-12 text-foreground" />
+        <Logo className="mb-4 w-15 text-foreground" />
         <p className="text-sm text-foreground">
           {parts[0]}
           <span className="font-medium">{name}</span>
