@@ -257,51 +257,65 @@ export function Page({
   const isSubmitDisabled =
     status === "streaming" ? false : !text.trim() || sending || isChildSession;
 
+  const promptComposer = (
+    <SessionComposerRegion state={composerState}>
+      <div className="relative">
+        <PromptInput onSubmit={handleSubmit}>
+          <PromptInputBody>
+            <PromptImageAttachments />
+            <PromptInputTextarea
+              onChange={handleTextChange}
+              onPaste={handlePromptPaste}
+              value={text}
+              placeholder={m.session_prompt_placeholder()}
+              className="p-4"
+            />
+          </PromptInputBody>
+          <PromptInputFooter>
+            <PromptInputTools>
+              <PromptAttachButton />
+              <FolderPicker
+                directory={directory}
+                onDirectoryChange={!sessionId ? onDirectoryChange : undefined}
+              />
+              <ModelPicker model={local.model} />
+            </PromptInputTools>
+            <PromptInputSubmit
+              disabled={isSubmitDisabled}
+              status={status}
+              onStop={handleStop}
+            />
+          </PromptInputFooter>
+        </PromptInput>
+        <PromptDragOverlay isDragging={isDragging} />
+      </div>
+    </SessionComposerRegion>
+  );
+
+  if (!sessionId) {
+    return (
+      <div className="relative flex size-full flex-col overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="flex min-h-full flex-col items-center justify-center px-4 py-8">
+            <div className="flex w-full max-w-2xl flex-col gap-6">
+              <NewSessionView />
+              {promptComposer}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex size-full flex-col overflow-hidden">
       <div className="flex min-h-0 flex-1 flex-col">
-        {sessionId && messagesReady ? (
+        {messagesReady ? (
           <MessageTimeline sessionID={sessionId} contextRef={conversationRef} />
-        ) : !sessionId ? (
-          <NewSessionView />
         ) : null}
       </div>
       <div className="mx-auto w-full max-w-4xl shrink-0">
-        <div className="w-full px-4 pb-4">
-          <SessionComposerRegion state={composerState}>
-            <div className="relative">
-              <PromptInput onSubmit={handleSubmit}>
-                <PromptInputBody>
-                  <PromptImageAttachments />
-                  <PromptInputTextarea
-                    onChange={handleTextChange}
-                    onPaste={handlePromptPaste}
-                    value={text}
-                    className="p-4"
-                  />
-                </PromptInputBody>
-                <PromptInputFooter>
-                  <PromptInputTools>
-                    <PromptAttachButton />
-                    <FolderPicker
-                      directory={directory}
-                      onDirectoryChange={
-                        !sessionId ? onDirectoryChange : undefined
-                      }
-                    />
-                    <ModelPicker model={local.model} />
-                  </PromptInputTools>
-                  <PromptInputSubmit
-                    disabled={isSubmitDisabled}
-                    status={status}
-                    onStop={handleStop}
-                  />
-                </PromptInputFooter>
-              </PromptInput>
-              <PromptDragOverlay isDragging={isDragging} />
-            </div>
-          </SessionComposerRegion>
-        </div>
+        <div className="w-full px-4 pb-4">{promptComposer}</div>
       </div>
     </div>
   );
