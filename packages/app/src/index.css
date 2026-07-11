@@ -146,6 +146,22 @@
   padding-top: var(--titlebar-height, 0px);
 }
 
+/* Draggable titlebar; disabled while a modal marks #root aria-hidden. */
+#root:not([aria-hidden]) [data-drag-region] {
+  -webkit-app-region: drag;
+}
+
+[data-drag-region] button,
+[data-drag-region] a,
+[data-drag-region] input,
+[data-drag-region] textarea,
+[data-drag-region] select,
+[data-drag-region] [role="button"],
+[data-drag-region] [role="menuitem"],
+[data-drag-region] [contenteditable] {
+  -webkit-app-region: no-drag;
+}
+
 /* Suppress enter and exit animations when swapping between dialogs */
 body[data-swapping] [data-slot="dialog-overlay"],
 body[data-swapping] [data-slot="dialog-content"] {

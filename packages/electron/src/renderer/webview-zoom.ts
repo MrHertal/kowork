@@ -42,5 +42,7 @@ export function getWebviewZoom() {
 
 export function onWebviewZoomChange(cb: (zoom: number) => void) {
   listeners.add(cb);
-  return () => listeners.delete(cb);
+  return () => {
+    listeners.delete(cb);
+  };
 }

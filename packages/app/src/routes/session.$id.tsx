@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { SessionHeader } from "@/components/header/session-header";
+import { SessionTitlebar } from "@/components/header/session-titlebar";
 import { Spinner } from "@/components/ui/spinner";
 import { LocalProvider } from "@/contexts/local";
 import { useNotification, useNotificationData } from "@/contexts/notification";
@@ -55,11 +55,9 @@ function SessionRoute() {
       <SyncProvider>
         <LocalProvider sessionId={session.id}>
           <PromptProvider sessionId={session.id}>
-            <div className="flex h-full flex-col">
-              <SessionHeader sessionId={session.id} />
-              <div className="min-h-0 flex-1">
-                <Page sessionId={session.id} />
-              </div>
+            <SessionTitlebar sessionId={session.id} />
+            <div className="h-full">
+              <Page sessionId={session.id} />
             </div>
           </PromptProvider>
         </LocalProvider>

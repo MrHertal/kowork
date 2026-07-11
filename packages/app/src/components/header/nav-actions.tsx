@@ -26,7 +26,7 @@ export function NavActions({
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 data-[state=open]:bg-accent"
+          className="h-7 w-7"
           aria-label={m.common_moreActions()}
         >
           <MoreHorizontal />

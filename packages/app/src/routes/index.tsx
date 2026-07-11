@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 
-import { AppHeader } from "@/components/header/app-header";
 import { useGlobalData } from "@/contexts/global-sync";
 import { LocalProvider } from "@/contexts/local";
 import { PromptProvider } from "@/contexts/prompt";
@@ -42,11 +41,8 @@ function IndexRoute() {
       <SyncProvider>
         <LocalProvider>
           <PromptProvider>
-            <div className="flex h-full flex-col">
-              <AppHeader />
-              <div className="min-h-0 flex-1">
-                <Page onDirectoryChange={onDirectoryChange} />
-              </div>
+            <div className="h-full">
+              <Page onDirectoryChange={onDirectoryChange} />
             </div>
           </PromptProvider>
         </LocalProvider>

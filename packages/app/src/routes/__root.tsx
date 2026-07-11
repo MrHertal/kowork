@@ -3,7 +3,8 @@ import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { Fragment, type ReactNode, useEffect } from "react";
 import { ConnectionGate } from "@/components/connection-gate";
 import { ServerKey } from "@/components/server-key";
-import { Titlebar } from "@/components/titlebar";
+import { Titlebar, titlebarHeightPx } from "@/components/titlebar";
+import { TitlebarSidebarToggle } from "@/components/titlebar-sidebar-toggle";
 import { usePlatform } from "@/contexts/platform";
 import { GlobalSDKProvider } from "@/contexts/global-sdk";
 import { GlobalSyncProvider } from "@/contexts/global-sync";
@@ -50,26 +51,24 @@ function RootLayout() {
   const { platform, os, webviewZoom } = usePlatform();
   useMcpBrowserFailedToast();
 
-  const hasTitlebar = platform === "desktop" && os !== "linux";
   const mac = platform === "desktop" && os === "macos";
+  const windows = platform === "desktop" && os === "windows";
   const zoom = webviewZoom ?? 1;
 
   // On :root so portaled overlays (mobile sheet) inherit the var.
-  // Mirror Titlebar's render height: h-10 (2.5rem) with a 40px/zoom floor on macOS.
   useEffect(() => {
-    const root = document.documentElement;
-    if (hasTitlebar) {
-      const value = mac ? `max(2.5rem, ${40 / zoom}px)` : "2.5rem";
-      root.style.setProperty("--titlebar-height", value);
-    } else {
-      root.style.removeProperty("--titlebar-height");
-    }
-  }, [hasTitlebar, mac, zoom]);
+    const value =
+      mac || windows
+        ? `max(2.5rem, ${titlebarHeightPx(mac, windows, zoom)}px)`
+        : "2.5rem";
+    document.documentElement.style.setProperty("--titlebar-height", value);
+  }, [mac, windows, zoom]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <Titlebar />
       <SidebarProvider className="min-h-0 flex-1">
+        <TitlebarSidebarToggle />
         <SidebarLeft />
         <SidebarInset className="min-w-0">
           <div className="min-h-0 flex-1">

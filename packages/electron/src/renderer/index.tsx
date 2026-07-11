@@ -15,7 +15,7 @@ import {
 import type { ServerReadyData } from "../preload/types";
 import pkg from "../../package.json";
 import { UPDATER_ENABLED } from "./updater";
-import { getWebviewZoom } from "./webview-zoom";
+import { getWebviewZoom, onWebviewZoomChange } from "./webview-zoom";
 import "./styles.css";
 
 const root = document.getElementById("root");
@@ -240,8 +240,6 @@ function createPlatform(): Platform {
     parseMarkdown: (markdown: string) =>
       window.api.parseMarkdownCommand(markdown),
 
-    webviewZoom: getWebviewZoom(),
-
     checkAppExists: async (appName: string) => {
       return window.api.checkAppExists(appName);
     },
@@ -272,6 +270,9 @@ listenForDeepLinks();
 
 function ElectronApp() {
   const platform = useMemo(() => createPlatform(), []);
+  const [zoom, setZoom] = useState(getWebviewZoom());
+
+  useEffect(() => onWebviewZoomChange(setZoom), []);
 
   const [sidecar, setSidecar] = useState<ServerReadyData | null>(null);
   const [defaultServer, setDefaultServer] =
@@ -325,11 +326,16 @@ function ElectronApp() {
     return () => document.removeEventListener("click", handleClick);
   }, [platform]);
 
+  const platformWithZoom = useMemo<Platform>(
+    () => ({ ...platform, webviewZoom: zoom }),
+    [platform, zoom],
+  );
+
   if (loading) return null;
 
   return (
     <App
-      platform={platform}
+      platform={platformWithZoom}
       memoryHistory
       defaultServer={defaultServer ?? ServerConnection.Key.make("sidecar")}
       disableHealthCheck
