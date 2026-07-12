@@ -9,7 +9,7 @@ import {
 import { ThemeProvider } from "next-themes";
 import { useMemo } from "react";
 
-import { TitlebarThemeSync } from "@/components/titlebar-theme-sync";
+import { NativeThemeSync } from "@/components/native-theme-sync";
 import type { Platform } from "./contexts/platform";
 import { PlatformProvider } from "./contexts/platform";
 import type { ServerConnection } from "./contexts/server";
@@ -45,6 +45,7 @@ declare global {
   interface Window {
     api?: {
       setTitlebar?: (theme: { mode: "light" | "dark" }) => Promise<void>;
+      setBackgroundColor?: (color: string) => Promise<void>;
     };
   }
 }
@@ -88,7 +89,7 @@ export function App({
         enableSystem
         disableTransitionOnChange
       >
-        <TitlebarThemeSync />
+        <NativeThemeSync />
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
         </QueryClientProvider>

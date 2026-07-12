@@ -10,6 +10,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useDialog } from "@/contexts/dialog";
+import { usePlatform } from "@/contexts/platform";
 import { m } from "@/paraglide/messages";
 
 import { AppBranding } from "./app-branding";
@@ -183,7 +184,7 @@ const data = {
   ],
   user: {
     name: "Greg",
-    email: "greg@kowork.app",
+    email: "greg@kowork.io",
     avatar: "https://github.com/MrHertal.png",
     avatarFallback: "GH",
   },
@@ -191,6 +192,7 @@ const data = {
 
 export function SidebarLeft({ ...props }: ComponentProps<typeof Sidebar>) {
   const dialog = useDialog();
+  const platform = usePlatform();
 
   const navSecondary = [
     {
@@ -200,7 +202,7 @@ export function SidebarLeft({ ...props }: ComponentProps<typeof Sidebar>) {
     },
     {
       title: m.sidebar_nav_help(),
-      url: "#",
+      onClick: () => platform.openLink("https://github.com/MrHertal/kowork"),
       icon: MessageCircleQuestion,
     },
   ];

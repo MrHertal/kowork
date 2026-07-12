@@ -49,7 +49,7 @@ export function NavSessions() {
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>{m.sidebar_group_conversations()}</SidebarGroupLabel>
+      <SidebarGroupLabel>{m.sidebar_group_sessions()}</SidebarGroupLabel>
       <SidebarMenu>
         {visible.map((session) => (
           <SessionRow

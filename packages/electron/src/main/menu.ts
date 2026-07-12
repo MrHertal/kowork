@@ -129,18 +129,18 @@ export function createMenu(deps: Deps) {
       submenu: [
         {
           label: "Kowork Documentation",
-          click: () => shell.openExternal("https://kowork.app/docs"),
+          click: () => shell.openExternal("https://github.com/MrHertal/kowork"),
         },
         { type: "separator" },
         {
           label: "Share Feedback",
           click: () =>
-            shell.openExternal("https://github.com/kowork/kowork/issues/new"),
+            shell.openExternal("https://github.com/MrHertal/kowork/issues"),
         },
         {
           label: "Report a Bug",
           click: () =>
-            shell.openExternal("https://github.com/kowork/kowork/issues/new"),
+            shell.openExternal("https://github.com/MrHertal/kowork/issues/new"),
         },
       ],
     },

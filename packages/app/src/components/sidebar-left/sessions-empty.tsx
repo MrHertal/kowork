@@ -45,8 +45,8 @@ export function SessionsEmpty() {
 
   const Icon = isSearching ? SearchX : MessageCircleOff;
   const message = isSearching
-    ? m.sidebar_conversations_no_matches()
-    : m.sidebar_conversations_empty();
+    ? m.sidebar_sessions_no_matches()
+    : m.sidebar_sessions_empty();
 
   return (
     <Empty>

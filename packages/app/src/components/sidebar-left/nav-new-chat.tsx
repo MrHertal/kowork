@@ -13,10 +13,10 @@ export function NavNewChat() {
   return (
     <SidebarGroup>
       <SidebarGroupContent>
-        <SidebarMenuButton tooltip={m.sidebar_new_conversation()} asChild>
+        <SidebarMenuButton tooltip={m.sidebar_new_session()} asChild>
           <Button variant="outline" asChild>
             <Link to="/">
-              <SquarePen /> {m.sidebar_new_conversation()}
+              <SquarePen /> {m.sidebar_new_session()}
             </Link>
           </Button>
         </SidebarMenuButton>

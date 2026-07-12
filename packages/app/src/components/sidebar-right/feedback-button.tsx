@@ -8,8 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { usePlatform } from "@/contexts/platform";
 
 export function FeedbackButton() {
+  const { openLink } = usePlatform();
+
   return (
     <Card className="gap-2 py-4 shadow-none">
       <CardHeader className="px-4">
@@ -21,6 +24,9 @@ export function FeedbackButton() {
           <Button
             className="w-full bg-sidebar-primary text-sidebar-primary-foreground shadow-none"
             size="sm"
+            onClick={() =>
+              openLink("https://github.com/MrHertal/kowork/issues")
+            }
           >
             {m.feedback_button()}
           </Button>

@@ -67,7 +67,7 @@ export function SessionTitle({
             <BreadcrumbItem className="shrink-0">
               <BreadcrumbLink asChild>
                 <Link to="/session/$id" params={{ id: parentID }}>
-                  {m.header_main_conversation()}
+                  {m.header_main_session()}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>

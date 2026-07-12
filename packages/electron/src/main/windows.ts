@@ -15,6 +15,8 @@ let backgroundColor: string | undefined;
 
 export function setBackgroundColor(color: string) {
   backgroundColor = color;
+  for (const win of BrowserWindow.getAllWindows())
+    win.setBackgroundColor(color);
 }
 
 export function getBackgroundColor(): string | undefined {
