@@ -89,8 +89,7 @@ export function SessionRow({
           align={isMobile ? "end" : "start"}
         >
           <DropdownMenuItem
-            onSelect={(e) => {
-              e.preventDefault();
+            onSelect={() => {
               if (isPinned) unpin(session.id);
               else pin(session);
             }}

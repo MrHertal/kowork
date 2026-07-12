@@ -10,15 +10,9 @@ export function SessionTitlebar({ sessionId }: { sessionId: string }) {
   const model = useSessionHeader(sessionId);
 
   return (
-    <>
-      <TitlebarSlot name="center">
-        <SessionTitle title={model.title} parentID={model.parentID} />
-      </TitlebarSlot>
-      {!model.parentID && (
-        <TitlebarSlot name="right">
-          <SessionActions {...model} />
-        </TitlebarSlot>
-      )}
-    </>
+    <TitlebarSlot name="center">
+      <SessionTitle title={model.title} parentID={model.parentID} />
+      {!model.parentID && <SessionActions {...model} />}
+    </TitlebarSlot>
   );
 }

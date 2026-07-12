@@ -73,13 +73,14 @@ export function createMainWindow(globals: Globals) {
     width: state.width,
     height: state.height,
     show: false,
+    autoHideMenuBar: true,
     title: "Kowork",
     icon: iconPath(),
     backgroundColor: bg,
     ...(process.platform === "darwin"
       ? {
           titleBarStyle: "hidden" as const,
-          trafficLightPosition: { x: 12, y: 14 },
+          trafficLightPosition: { x: 12, y: 13 },
         }
       : {}),
     ...(process.platform === "win32"

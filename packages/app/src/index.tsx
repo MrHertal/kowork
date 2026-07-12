@@ -14,6 +14,7 @@ export {
 } from "./contexts/server";
 export type { ServerContextValue } from "./contexts/server";
 export { ConnectionGate } from "./components/connection-gate";
+export { MENU_COMMAND_EVENT } from "./components/menu-commands";
 export { ServerKey } from "./components/server-key";
 export { checkServerHealth, useCheckServerHealth } from "./utils/server-health";
 export type { ServerHealth } from "./utils/server-health";

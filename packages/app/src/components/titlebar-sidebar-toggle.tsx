@@ -1,6 +1,7 @@
+import { useEffect } from "react";
 import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
 
-import { TitlebarSlot } from "@/components/titlebar";
+import { SIDEBAR_EXPANDED_WIDTH, TitlebarSlot } from "@/components/titlebar";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
@@ -16,6 +17,16 @@ export function TitlebarSidebarToggle() {
   const { os } = usePlatform();
   const label = m.sidebar_toggle();
   const expanded = isMobile ? openMobile : open;
+
+  // The sidebar only pushes the chat area on desktop; on mobile it overlays.
+  // Drive the titlebar's left region so the session title tracks that edge.
+  const pushesContent = !isMobile && open;
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--titlebar-left-width",
+      pushesContent ? SIDEBAR_EXPANDED_WIDTH : "0px",
+    );
+  }, [pushesContent]);
 
   return (
     <TitlebarSlot name="left">

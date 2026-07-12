@@ -1,6 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { formatDistanceToNow } from "date-fns";
-import { Pin } from "lucide-react";
 
 import {
   Breadcrumb,
@@ -10,7 +8,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import { useChildData } from "@/contexts/global-sync";
 import {
   usePinnedSessions,
@@ -21,7 +18,6 @@ import { useDeleteSession } from "@/hooks/use-delete-session";
 import { useRenameSession } from "@/hooks/use-rename-session";
 import { useSession } from "@/hooks/use-session";
 import { m } from "@/paraglide/messages";
-import { getDateLocale } from "@/utils/locale";
 import { sessionTitle } from "@/utils/session-title";
 
 import { NavActions } from "./nav-actions";
@@ -40,36 +36,21 @@ export function useSessionHeader(sessionId: string) {
     directory,
     (s) => s.session.find((item) => item.id === sessionId)?.parentID,
   );
-  const storeUpdatedMs = useChildData(
-    directory,
-    (s) => s.session.find((item) => item.id === sessionId)?.time.updated,
-  );
-
-  const title = sessionTitle(storeTitle ?? session?.title);
-  const parentID = storeParentID ?? session?.parentID;
-  const updatedMs = storeUpdatedMs ?? session?.time.updated;
-  const updatedAt = updatedMs
-    ? formatDistanceToNow(updatedMs, {
-        addSuffix: true,
-        locale: getDateLocale(),
-      })
-    : undefined;
 
   const isPinned = usePinnedSessionsData((s) => s.ids.includes(sessionId));
   const { pin, unpin } = usePinnedSessions();
 
+  const title = sessionTitle(storeTitle ?? session?.title);
+  const parentID = storeParentID ?? session?.parentID;
   const togglePin = () => {
-    if (isPinned) {
-      unpin(sessionId);
-      return;
-    }
-    if (session) pin(session);
+    if (isPinned) unpin(sessionId);
+    else if (session) pin(session);
   };
   const remove = () => deleteSession({ id: sessionId, directory });
   const rename = (newTitle: string) =>
     renameSession({ id: sessionId, directory }, newTitle);
 
-  return { title, parentID, updatedAt, isPinned, togglePin, remove, rename };
+  return { title, parentID, isPinned, togglePin, remove, rename };
 }
 
 export type SessionHeaderModel = ReturnType<typeof useSessionHeader>;
@@ -105,37 +86,21 @@ export function SessionTitle({
 
 export function SessionActions({
   title,
-  updatedAt,
   isPinned,
   togglePin,
   remove,
   rename,
-}: SessionHeaderModel) {
+}: Pick<
+  SessionHeaderModel,
+  "title" | "isPinned" | "togglePin" | "remove" | "rename"
+>) {
   return (
-    <>
-      {updatedAt && (
-        <div className="mr-1.5 hidden text-sm font-medium text-muted-foreground md:inline-block">
-          {updatedAt}
-        </div>
-      )}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7"
-        onClick={togglePin}
-        aria-pressed={isPinned}
-        aria-label={isPinned ? m.common_unpin() : m.common_pin()}
-      >
-        <Pin
-          className={isPinned ? "text-primary" : undefined}
-          fill={isPinned ? "currentColor" : "none"}
-        />
-      </Button>
-      <NavActions
-        onDelete={remove}
-        onRename={rename}
-        title={title || m.common_untitled()}
-      />
-    </>
+    <NavActions
+      isPinned={isPinned}
+      onTogglePin={togglePin}
+      onDelete={remove}
+      onRename={rename}
+      title={title || m.common_untitled()}
+    />
   );
 }

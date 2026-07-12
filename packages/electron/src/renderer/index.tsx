@@ -6,6 +6,7 @@ import {
   ACCEPTED_FILE_EXTENSIONS,
   ACCEPTED_FILE_TYPES,
   App,
+  MENU_COMMAND_EVENT,
   ServerConnection,
   type Platform,
   type AsyncStorage,
@@ -15,7 +16,13 @@ import {
 import type { ServerReadyData } from "../preload/types";
 import pkg from "../../package.json";
 import { UPDATER_ENABLED } from "./updater";
-import { getWebviewZoom, onWebviewZoomChange } from "./webview-zoom";
+import {
+  getWebviewZoom,
+  onWebviewZoomChange,
+  resetZoom,
+  zoomIn,
+  zoomOut,
+} from "./webview-zoom";
 import "./styles.css";
 
 const root = document.getElementById("root");
@@ -262,9 +269,11 @@ function createPlatform(): Platform {
   };
 }
 
-let menuTrigger = null as null | ((id: string) => void);
 window.api.onMenuCommand((id) => {
-  menuTrigger?.(id);
+  if (id === "view.zoomIn") return zoomIn();
+  if (id === "view.zoomOut") return zoomOut();
+  if (id === "view.zoomReset") return resetZoom();
+  window.dispatchEvent(new CustomEvent(MENU_COMMAND_EVENT, { detail: id }));
 });
 listenForDeepLinks();
 

@@ -1,19 +1,15 @@
 // @opencode-ref: opencode/packages/app/src/components/titlebar.tsx
-import {
-  useEffect,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { usePlatform } from "@/contexts/platform";
-import { cn } from "@/lib/utils";
 
 const TITLEBAR_HEIGHT = 40;
 const MIN_TITLEBAR_ZOOM = 0.25;
 const MAC_TRAFFIC_LIGHT_INSET = 84;
 const WINDOWS_CONTROLS_WIDTH = 138;
+
+export const SIDEBAR_EXPANDED_WIDTH = "16rem";
 
 export function titlebarHeightPx(mac: boolean, windows: boolean, zoom: number) {
   if (mac) return TITLEBAR_HEIGHT / zoom;
@@ -52,7 +48,6 @@ export function Titlebar() {
   const style: CSSProperties = {
     minHeight:
       mac || windows ? `${titlebarHeightPx(mac, windows, zoom)}px` : undefined,
-    paddingLeft: mac ? `${MAC_TRAFFIC_LIGHT_INSET / zoom}px` : undefined,
     width: windows ? availableWidth : undefined,
     maxWidth: windows ? availableWidth : undefined,
     alignSelf: windows ? "flex-start" : undefined,
@@ -65,22 +60,26 @@ export function Titlebar() {
       style={style}
     >
       <div
-        className="grid h-full w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center"
+        className="flex h-full w-full items-center"
         style={{ zoom: counterZoom }}
       >
         <div
           id="kowork-titlebar-left"
-          className={cn("flex min-w-0 items-center gap-1", !mac && "pl-2")}
+          className="flex h-full min-w-max flex-none items-center pr-2 [transition:width_200ms_linear]"
+          style={{
+            width: `var(--titlebar-left-width, ${SIDEBAR_EXPANDED_WIDTH})`,
+            paddingLeft: mac ? `${MAC_TRAFFIC_LIGHT_INSET / zoom}px` : "8px",
+          }}
         />
-        <div className="pointer-events-none flex min-w-0 items-center justify-center">
+        <div className="pointer-events-none flex h-full min-w-0 flex-1 items-center justify-start pl-4">
           <div
             id="kowork-titlebar-center"
-            className="pointer-events-auto flex w-fit min-w-0 max-w-full justify-center"
+            className="pointer-events-auto flex w-fit max-w-full min-w-0 items-center justify-start gap-2"
           />
         </div>
         <div
           id="kowork-titlebar-right"
-          className="flex min-w-0 items-center justify-end gap-1 pr-2"
+          className="flex h-full flex-none items-center justify-end gap-1 pr-2"
         />
       </div>
     </header>

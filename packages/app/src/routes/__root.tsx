@@ -5,6 +5,7 @@ import { ConnectionGate } from "@/components/connection-gate";
 import { ServerKey } from "@/components/server-key";
 import { Titlebar, titlebarHeightPx } from "@/components/titlebar";
 import { TitlebarSidebarToggle } from "@/components/titlebar-sidebar-toggle";
+import { MenuCommands } from "@/components/menu-commands";
 import { usePlatform } from "@/contexts/platform";
 import { GlobalSDKProvider } from "@/contexts/global-sdk";
 import { GlobalSyncProvider } from "@/contexts/global-sync";
@@ -69,6 +70,7 @@ function RootLayout() {
       <Titlebar />
       <SidebarProvider className="min-h-0 flex-1">
         <TitlebarSidebarToggle />
+        <MenuCommands />
         <SidebarLeft />
         <SidebarInset className="min-w-0">
           <div className="min-h-0 flex-1">

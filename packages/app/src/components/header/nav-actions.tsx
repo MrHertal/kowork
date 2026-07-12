@@ -1,4 +1,4 @@
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 
 import { DeleteSessionDialog } from "@/components/session/delete-session-dialog";
 import { RenameSessionDialog } from "@/components/session/rename-session-dialog";
@@ -12,10 +12,14 @@ import {
 import { m } from "@/paraglide/messages";
 
 export function NavActions({
+  isPinned,
+  onTogglePin,
   onDelete,
   onRename,
   title,
 }: {
+  isPinned: boolean;
+  onTogglePin: () => void;
   onDelete: () => void;
   onRename: (newTitle: string) => void;
   title: string;
@@ -29,10 +33,14 @@ export function NavActions({
           className="h-7 w-7"
           aria-label={m.common_moreActions()}
         >
-          <MoreHorizontal />
+          <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-fit min-w-48 rounded-lg" align="end">
+        <DropdownMenuItem onSelect={() => onTogglePin()}>
+          {isPinned ? <PinOff /> : <Pin />}
+          <span>{isPinned ? m.common_unpin() : m.common_pin()}</span>
+        </DropdownMenuItem>
         <RenameSessionDialog title={title} onConfirm={onRename}>
           {(openDialog) => (
             <DropdownMenuItem
@@ -41,7 +49,7 @@ export function NavActions({
                 openDialog();
               }}
             >
-              <Pencil className="text-muted-foreground" />
+              <Pencil />
               <span>{m.common_rename()}</span>
             </DropdownMenuItem>
           )}
@@ -54,7 +62,7 @@ export function NavActions({
                 openDialog();
               }}
             >
-              <Trash2 className="text-muted-foreground" />
+              <Trash2 />
               <span>{m.common_delete()}</span>
             </DropdownMenuItem>
           )}

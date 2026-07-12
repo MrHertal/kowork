@@ -14,26 +14,38 @@ const listeners = new Set<(zoom: number) => void>();
 
 const MAX_ZOOM_LEVEL = 10;
 const MIN_ZOOM_LEVEL = 0.2;
+const ZOOM_STEP = 0.2;
 
 const clamp = (value: number) =>
   Math.min(Math.max(value, MIN_ZOOM_LEVEL), MAX_ZOOM_LEVEL);
 
 const applyZoom = (next: number) => {
-  currentZoom = next;
-  void window.api.setZoomFactor(next);
-  for (const cb of listeners) cb(next);
+  currentZoom = clamp(Math.round(next * 10) / 10);
+  void window.api.setZoomFactor(currentZoom);
+  for (const cb of listeners) cb(currentZoom);
 };
+
+export function zoomIn() {
+  applyZoom(currentZoom + ZOOM_STEP);
+}
+
+export function zoomOut() {
+  applyZoom(currentZoom - ZOOM_STEP);
+}
+
+export function resetZoom() {
+  applyZoom(1);
+}
 
 window.addEventListener("keydown", (event) => {
   if (!(OS_NAME === "macos" ? event.metaKey : event.ctrlKey)) return;
 
-  let newZoom = currentZoom;
+  if (event.key === "-") zoomOut();
+  else if (event.key === "=" || event.key === "+") zoomIn();
+  else if (event.key === "0") resetZoom();
+  else return;
 
-  if (event.key === "-") newZoom -= 0.2;
-  if (event.key === "=" || event.key === "+") newZoom += 0.2;
-  if (event.key === "0") newZoom = 1;
-
-  applyZoom(clamp(newZoom));
+  event.preventDefault();
 });
 
 export function getWebviewZoom() {
