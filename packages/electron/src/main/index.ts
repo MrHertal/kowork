@@ -6,7 +6,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { getCACertificates, setDefaultCACertificates } from "node:tls";
 import type { Event } from "electron";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, dialog } from "electron";
 
 import contextMenu from "electron-context-menu";
 contextMenu({
@@ -15,11 +15,7 @@ contextMenu({
   showSearchWithGoogle: false,
 });
 
-try {
-  const defaultDir = join(homedir(), "kowork");
-  mkdirSync(defaultDir, { recursive: true });
-  process.chdir(defaultDir);
-} catch {}
+const defaultDir = join(homedir(), "kowork");
 
 process.env.OPENCODE_DISABLE_EMBEDDED_WEB_UI = "true";
 
@@ -156,6 +152,19 @@ function setupApp() {
   }
 
   void app.whenReady().then(async () => {
+    try {
+      mkdirSync(defaultDir, { recursive: true });
+      process.chdir(defaultDir);
+    } catch (error) {
+      const detail = error instanceof Error ? `\n\n${error.message}` : "";
+      dialog.showErrorBox(
+        "Unable to start Kowork",
+        `Kowork could not access its default folder:\n\n${defaultDir}${detail}`,
+      );
+      app.exit(1);
+      return;
+    }
+
     app.setAsDefaultProtocolClient("kowork");
     setDockIcon();
     setupAutoUpdater();

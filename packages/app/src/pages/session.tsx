@@ -25,6 +25,7 @@ import {
 import { buildRequestParts } from "@/components/prompt-input/build-request-parts";
 import { PromptDragOverlay } from "@/components/prompt-input/drag-overlay";
 import { PromptImageAttachments } from "@/components/prompt-input/image-attachments";
+import { ComposerTray } from "@/components/session/composer-tray";
 import { FolderPicker } from "@/components/session/folder-picker";
 import { MessageTimeline } from "@/components/session/message-timeline";
 import { ModelPicker } from "@/components/session/model-picker";
@@ -34,6 +35,7 @@ import { useLocal } from "@/contexts/local";
 import { usePrompt, type ImageAttachmentPart } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useSync } from "@/contexts/sync";
+import { cn } from "@/lib/utils";
 import { m } from "@/paraglide/messages";
 import {
   SessionComposerRegion,
@@ -45,15 +47,24 @@ import {
 } from "@/pages/session/session-model-helpers";
 import { ascending } from "@/utils/id";
 import { formatServerError, translate } from "@/utils/server-errors";
+import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
 
 const emptyMessages: OpenCodeMessage[] = [];
 
 export function Page({
   sessionId,
+  attachedDirectory,
+  defaultDirectory,
+  folderAttached,
   onDirectoryChange,
+  onDirectoryDetach,
 }: {
   sessionId?: string;
+  attachedDirectory?: string;
+  defaultDirectory?: string;
+  folderAttached?: boolean;
   onDirectoryChange?: (directory: string) => void;
+  onDirectoryDetach?: () => void;
 }) {
   const sdk = useSDK();
   const sync = useSync();
@@ -162,7 +173,13 @@ export function Page({
 
       try {
         if (!sid) {
-          const result = await sdk.client.session.create();
+          const result = await sdk.client.session.create({
+            metadata: {
+              [SESSION_DIRECTORY_MODE_METADATA_KEY]: attachedDirectory
+                ? "attached"
+                : "default",
+            },
+          });
           const session = result.data;
           if (!session) throw new Error(m.session_error_create_failed());
           sid = session.id;
@@ -239,6 +256,7 @@ export function Page({
       queryClient,
       isChildSession,
       prompt,
+      attachedDirectory,
     ],
   );
 
@@ -257,10 +275,21 @@ export function Page({
   const isSubmitDisabled =
     status === "streaming" ? false : !text.trim() || sending || isChildSession;
 
+  const showComposerTray =
+    !sessionId &&
+    !!defaultDirectory &&
+    !!onDirectoryChange &&
+    !!onDirectoryDetach;
+
   const promptComposer = (
     <SessionComposerRegion state={composerState}>
       <div className="relative">
-        <PromptInput onSubmit={handleSubmit}>
+        <PromptInput
+          onSubmit={handleSubmit}
+          className={cn(
+            showComposerTray && "relative z-10 rounded-3xl bg-background",
+          )}
+        >
           <PromptInputBody>
             <PromptImageAttachments />
             <PromptInputTextarea
@@ -274,19 +303,32 @@ export function Page({
           <PromptInputFooter>
             <PromptInputTools>
               <PromptAttachButton />
-              <FolderPicker
-                directory={directory}
-                onDirectoryChange={!sessionId ? onDirectoryChange : undefined}
-              />
-              <ModelPicker model={local.model} />
             </PromptInputTools>
-            <PromptInputSubmit
-              disabled={isSubmitDisabled}
-              status={status}
-              onStop={handleStop}
-            />
+            <PromptInputTools className="justify-end">
+              {sessionId && folderAttached && (
+                <FolderPicker directory={directory} />
+              )}
+              <ModelPicker model={local.model} />
+              <PromptInputSubmit
+                disabled={isSubmitDisabled}
+                status={status}
+                onStop={handleStop}
+              />
+            </PromptInputTools>
           </PromptInputFooter>
         </PromptInput>
+        {showComposerTray &&
+          defaultDirectory &&
+          onDirectoryChange &&
+          onDirectoryDetach && (
+            <ComposerTray
+              attachedDirectory={attachedDirectory}
+              defaultDirectory={defaultDirectory}
+              disabled={sending}
+              onDirectoryChange={onDirectoryChange}
+              onDirectoryDetach={onDirectoryDetach}
+            />
+          )}
         <PromptDragOverlay isDragging={isDragging} />
       </div>
     </SessionComposerRegion>

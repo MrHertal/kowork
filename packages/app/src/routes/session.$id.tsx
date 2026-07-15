@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import { SessionTitlebar } from "@/components/header/session-titlebar";
 import { Spinner } from "@/components/ui/spinner";
+import { useGlobalData } from "@/contexts/global-sync";
 import { LocalProvider } from "@/contexts/local";
 import { useNotification, useNotificationData } from "@/contexts/notification";
 import { PromptProvider } from "@/contexts/prompt";
@@ -12,6 +13,7 @@ import { useDelayedShow } from "@/hooks/use-delayed-show";
 import { useSession } from "@/hooks/use-session";
 import { m } from "@/paraglide/messages";
 import { Page } from "@/pages/session";
+import { getSessionDirectoryMode } from "@/utils/session-directory";
 
 export const Route = createFileRoute("/session/$id")({
   component: SessionRoute,
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/session/$id")({
 function SessionRoute() {
   const { id } = Route.useParams();
   const { isPending, isError, data: session } = useSession(id);
+  const defaultDirectory = useGlobalData((s) => s.path.directory);
   const { sessionMarkViewed } = useNotification();
   const unseenCount = useNotificationData(
     (s) => s.index.session.unseenCount[id] ?? 0,
@@ -57,7 +60,13 @@ function SessionRoute() {
           <PromptProvider sessionId={session.id}>
             <SessionTitlebar sessionId={session.id} />
             <div className="h-full">
-              <Page sessionId={session.id} />
+              <Page
+                sessionId={session.id}
+                folderAttached={
+                  getSessionDirectoryMode(session, defaultDirectory) ===
+                  "attached"
+                }
+              />
             </div>
           </PromptProvider>
         </LocalProvider>
