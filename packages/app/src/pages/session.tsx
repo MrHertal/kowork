@@ -30,8 +30,13 @@ import { FolderPicker } from "@/components/session/folder-picker";
 import { MessageTimeline } from "@/components/session/message-timeline";
 import { ModelPicker } from "@/components/session/model-picker";
 import { NewSessionView } from "@/components/session/new-session-view";
+import {
+  PermissionModeSelector,
+  type PermissionMode,
+} from "@/components/session/permission-mode-selector";
 import { useChildData } from "@/contexts/global-sync";
 import { useLocal } from "@/contexts/local";
+import { usePermission } from "@/contexts/permission";
 import { usePrompt, type ImageAttachmentPart } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useSync } from "@/contexts/sync";
@@ -48,6 +53,11 @@ import {
 import { ascending } from "@/utils/id";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
+import {
+  applyPermissionMode,
+  defaultPermissionMode,
+  getPermissionMode,
+} from "@/utils/permission-mode";
 
 const emptyMessages: OpenCodeMessage[] = [];
 
@@ -69,19 +79,31 @@ export function Page({
   const sdk = useSDK();
   const sync = useSync();
   const local = useLocal();
+  const permission = usePermission();
   const prompt = usePrompt();
   const { handlePaste: handlePromptPaste } = usePromptAttachments();
   const { isDragging } = useGlobalAttachmentDrop();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const conversationRef = useRef<StickToBottomContext>(null);
+  const directory = sdk.directory;
 
   const [text, setText] = useState<string>("");
   const [sending, setSending] = useState(false);
+  const [newSessionPermissionMode, setNewSessionPermissionMode] =
+    useState<PermissionMode>(defaultPermissionMode);
+  const [sessionPermissionMode, setSessionPermissionMode] =
+    useState<PermissionMode>(defaultPermissionMode);
+
+  useEffect(() => {
+    if (!sessionId || !permission.ready) return;
+    setSessionPermissionMode(
+      getPermissionMode(permission.isAutoAccepting(sessionId, directory)),
+    );
+  }, [sessionId, directory, permission]);
   const sendingRef = useRef(false);
   const blockedRef = useRef(false);
 
-  const directory = sdk.directory;
   const sessionMessages = useChildData(directory, (s) =>
     sessionId ? (s.message[sessionId] ?? emptyMessages) : emptyMessages,
   );
@@ -184,6 +206,12 @@ export function Page({
           if (!session) throw new Error(m.session_error_create_failed());
           sid = session.id;
           queryClient.setQueryData(["session", sid], session);
+          applyPermissionMode(
+            permission,
+            newSessionPermissionMode,
+            sid,
+            directory,
+          );
           isNewSession = true;
         }
 
@@ -257,6 +285,9 @@ export function Page({
       isChildSession,
       prompt,
       attachedDirectory,
+      directory,
+      newSessionPermissionMode,
+      permission,
     ],
   );
 
@@ -274,6 +305,12 @@ export function Page({
 
   const isSubmitDisabled =
     status === "streaming" ? false : !text.trim() || sending || isChildSession;
+
+  const handleSessionPermissionModeChange = (mode: PermissionMode) => {
+    if (!sessionId) return;
+    setSessionPermissionMode(mode);
+    applyPermissionMode(permission, mode, sessionId, directory);
+  };
 
   const showComposerTray =
     !sessionId &&
@@ -303,6 +340,13 @@ export function Page({
           <PromptInputFooter>
             <PromptInputTools>
               <PromptAttachButton />
+              {sessionId && (
+                <PermissionModeSelector
+                  value={sessionPermissionMode}
+                  onValueChange={handleSessionPermissionModeChange}
+                  disabled={!permission.ready}
+                />
+              )}
             </PromptInputTools>
             <PromptInputTools className="justify-end">
               {sessionId && folderAttached && (
@@ -324,7 +368,9 @@ export function Page({
             <ComposerTray
               attachedDirectory={attachedDirectory}
               defaultDirectory={defaultDirectory}
-              disabled={sending}
+              disabled={sending || !permission.ready}
+              permissionMode={newSessionPermissionMode}
+              onPermissionModeChange={setNewSessionPermissionMode}
               onDirectoryChange={onDirectoryChange}
               onDirectoryDetach={onDirectoryDetach}
             />

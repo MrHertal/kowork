@@ -1,10 +1,16 @@
 import { ComposerFolderPicker } from "@/components/session/composer-folder-picker";
+import {
+  PermissionModeSelector,
+  type PermissionMode,
+} from "@/components/session/permission-mode-selector";
 import { cn } from "@/lib/utils";
 
 interface ComposerTrayProps {
   attachedDirectory?: string;
   defaultDirectory: string;
   disabled?: boolean;
+  permissionMode: PermissionMode;
+  onPermissionModeChange: (mode: PermissionMode) => void;
   onDirectoryChange: (directory: string) => void;
   onDirectoryDetach: () => void;
   className?: string;
@@ -14,6 +20,8 @@ export function ComposerTray({
   attachedDirectory,
   defaultDirectory,
   disabled,
+  permissionMode,
+  onPermissionModeChange,
   onDirectoryChange,
   onDirectoryDetach,
   className,
@@ -36,7 +44,11 @@ export function ComposerTray({
             onDirectoryChange={onDirectoryChange}
             onDirectoryDetach={onDirectoryDetach}
           />
-          {/* Permission mode control is not ready yet. */}
+          <PermissionModeSelector
+            value={permissionMode}
+            onValueChange={onPermissionModeChange}
+            disabled={disabled}
+          />
         </div>
       </div>
     </div>

@@ -37,9 +37,6 @@ export interface Settings {
     theme: "light" | "dark" | "system";
     language: string;
   };
-  permissions: {
-    autoApprove: boolean;
-  };
   notifications: NotificationSettings;
   sounds: SoundSettings;
 }
@@ -53,9 +50,6 @@ const createDefaultSettings = (): Settings => ({
   general: {
     theme: "system",
     language: "en",
-  },
-  permissions: {
-    autoApprove: false,
   },
   notifications: {
     agent: true,
@@ -89,10 +83,6 @@ export interface SettingsContextValue {
     setTheme: (value: "light" | "dark" | "system") => void;
     language: string;
     setLanguage: (value: string) => void;
-  };
-  permissions: {
-    autoApprove: boolean;
-    setAutoApprove: (value: boolean) => void;
   };
   notifications: {
     agent: boolean;
@@ -174,10 +164,6 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     },
     [update],
   );
-  const setAutoApprove = useCallback(
-    (value: boolean) => update("permissions", { autoApprove: value }),
-    [update],
-  );
   const setNotifAgent = useCallback(
     (value: boolean) => update("notifications", { agent: value }),
     [update],
@@ -249,10 +235,6 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
         language: settings.general.language,
         setLanguage,
       },
-      permissions: {
-        autoApprove: settings.permissions.autoApprove,
-        setAutoApprove,
-      },
       notifications: {
         agent: settings.notifications.agent,
         setAgent: setNotifAgent,
@@ -282,7 +264,6 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       setFontSize,
       setTheme,
       setLanguage,
-      setAutoApprove,
       setNotifAgent,
       setNotifPermissions,
       setNotifErrors,

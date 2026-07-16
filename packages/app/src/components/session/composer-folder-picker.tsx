@@ -6,7 +6,11 @@ import {
   PromptInputActionMenuItem,
   PromptInputActionMenuTrigger,
 } from "@/components/ai-elements/prompt-input";
-import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { usePlatform } from "@/contexts/platform";
 import { useRecentSessionsData } from "@/contexts/recent-sessions";
 import { useServer } from "@/contexts/server";
@@ -40,6 +44,9 @@ export function ComposerFolderPicker({
     (project) => project.worktree !== defaultDirectory,
   );
   const recentFolders = getRecentFolders(projects, sessions);
+  const folderOptions = attachedDirectory
+    ? [attachedDirectory, ...recentFolders.filter((p) => p !== attachedDirectory)]
+    : recentFolders;
 
   function handleChooseDifferent() {
     if (disabled || !canChooseDifferent) return;
@@ -69,24 +76,30 @@ export function ComposerFolderPicker({
         <ChevronDown className="size-3 opacity-60" />
       </PromptInputActionMenuTrigger>
       <PromptInputActionMenuContent className="w-80 max-w-[calc(100vw-2rem)]">
-        {recentFolders.map((folder) => (
-          <PromptInputActionMenuItem
-            key={folder}
-            className="items-start"
-            disabled={disabled}
-            onSelect={() => onDirectoryChange(folder)}
-            title={folder}
-          >
-            <Folder className="mt-0.5" />
-            <div className="min-w-0 flex-1">
-              <div className="truncate">{getFilename(folder) || folder}</div>
-              <div className="truncate text-xs font-normal text-muted-foreground opacity-75">
-                {truncateMiddle(folder, 32)}
+        <DropdownMenuRadioGroup
+          value={attachedDirectory}
+          onValueChange={onDirectoryChange}
+          className="**:data-[slot=dropdown-menu-radio-item-indicator]:top-1/2 **:data-[slot=dropdown-menu-radio-item-indicator]:-translate-y-1/2"
+        >
+          {folderOptions.map((folder) => (
+            <DropdownMenuRadioItem
+              key={folder}
+              value={folder}
+              className="items-start"
+              disabled={disabled}
+              title={folder}
+            >
+              <Folder className="mt-0.5" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate">{getFilename(folder) || folder}</div>
+                <div className="truncate text-xs font-normal text-muted-foreground opacity-75">
+                  {truncateMiddle(folder, 32)}
+                </div>
               </div>
-            </div>
-          </PromptInputActionMenuItem>
-        ))}
-        {recentFolders.length > 0 && <DropdownMenuSeparator />}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        {folderOptions.length > 0 && <DropdownMenuSeparator />}
         <PromptInputActionMenuItem
           disabled={disabled || !canChooseDifferent}
           onSelect={handleChooseDifferent}

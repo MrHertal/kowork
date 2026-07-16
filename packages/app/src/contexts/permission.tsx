@@ -113,6 +113,18 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
   const storeRef = useRef(store);
   storeRef.current = store;
 
+  const updateAutoAccept = useCallback(
+    (update: (current: Record<string, boolean>) => Record<string, boolean>) => {
+      const next = {
+        ...storeRef.current,
+        autoAccept: update(storeRef.current.autoAccept),
+      };
+      storeRef.current = next;
+      setStore(next);
+    },
+    [setStore],
+  );
+
   const [maps] = useState(() => ({
     responded: new Map<string, number>(),
     enableVersion: new Map<string, number>(),
@@ -224,10 +236,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
   const enableDirectory = useCallback(
     (directory: string) => {
       const key = directoryAcceptKey(directory);
-      setStore((prev) => ({
-        ...prev,
-        autoAccept: { ...prev.autoAccept, [key]: true },
-      }));
+      updateAutoAccept((current) => ({ ...current, [key]: true }));
 
       globalSDK.client.permission
         .list({ directory })
@@ -243,25 +252,25 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
         })
         .catch(() => undefined);
     },
-    [globalSDK, shouldAutoRespond, respondOnce],
+    [globalSDK, updateAutoAccept, shouldAutoRespond, respondOnce],
   );
 
-  const disableDirectory = useCallback((directory: string) => {
-    const key = directoryAcceptKey(directory);
-    setStore((prev) => ({
-      ...prev,
-      autoAccept: { ...prev.autoAccept, [key]: false },
-    }));
-  }, []);
+  const disableDirectory = useCallback(
+    (directory: string) => {
+      const key = directoryAcceptKey(directory);
+      updateAutoAccept((current) => ({ ...current, [key]: false }));
+    },
+    [updateAutoAccept],
+  );
 
   const enable = useCallback(
     (sessionID: string, directory: string) => {
       const key = acceptKey(sessionID, directory);
       const version = bumpEnableVersion(sessionID, directory);
-      setStore((prev) => {
-        const next = { ...prev.autoAccept, [key]: true };
+      updateAutoAccept((current) => {
+        const next = { ...current, [key]: true };
         delete next[sessionID];
-        return { ...prev, autoAccept: next };
+        return next;
       });
 
       globalSDK.client.permission
@@ -291,6 +300,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
       globalSync,
       maps,
       bumpEnableVersion,
+      updateAutoAccept,
       shouldAutoRespond,
       respondOnce,
     ],
@@ -300,13 +310,13 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
     (sessionID: string, directory?: string) => {
       bumpEnableVersion(sessionID, directory);
       const key = directory ? acceptKey(sessionID, directory) : sessionID;
-      setStore((prev) => {
-        const next = { ...prev.autoAccept, [key]: false };
+      updateAutoAccept((current) => {
+        const next = { ...current, [key]: false };
         if (directory) delete next[sessionID];
-        return { ...prev, autoAccept: next };
+        return next;
       });
     },
-    [bumpEnableVersion],
+    [bumpEnableVersion, updateAutoAccept],
   );
 
   const toggleAutoAccept = useCallback(
