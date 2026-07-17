@@ -226,6 +226,7 @@
   "session_permission_doom_loop_description": "The assistant appears to be repeating the same action. You can allow it to continue or deny to stop.",
   "session_permission_required": "Permission required",
   "session_permission_stuck_in_loop": "Stuck in a loop",
+  "session_prompt_message_placeholder": "Write a message...",
   "session_prompt_placeholder": "How can I help you today?",
   "session_question_answered_count": "Answered ({count})",
   "session_question_count": "{count} questions",

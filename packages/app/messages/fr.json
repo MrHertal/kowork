@@ -226,6 +226,7 @@
   "session_permission_doom_loop_description": "L'assistant semble répéter la même action. Vous pouvez le laisser continuer ou refuser pour arrêter.",
   "session_permission_required": "Permission requise",
   "session_permission_stuck_in_loop": "Bloqué dans une boucle",
+  "session_prompt_message_placeholder": "Écrivez un message...",
   "session_prompt_placeholder": "Comment puis-je vous aider aujourd'hui ?",
   "session_question_answered_count": "Répondu ({count})",
   "session_question_count": "{count} questions",

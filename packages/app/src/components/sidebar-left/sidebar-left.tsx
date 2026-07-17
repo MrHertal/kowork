@@ -14,8 +14,8 @@ import { usePlatform } from "@/contexts/platform";
 import { m } from "@/paraglide/messages";
 
 import { AppBranding } from "./app-branding";
-import { NavNewChat } from "./nav-new-chat";
 import { NavPinnedSessions } from "./nav-pinned-sessions";
+import { NavPrimary } from "./nav-primary";
 import { NavSecondary } from "./nav-secondary";
 import { NavSessions } from "./nav-sessions";
 import { SearchForm } from "./search-form";
@@ -211,7 +211,7 @@ export function SidebarLeft({ ...props }: ComponentProps<typeof Sidebar>) {
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
         <AppBranding />
-        <NavNewChat />
+        <NavPrimary />
       </SidebarHeader>
       <SidebarContent>
         <SearchForm />

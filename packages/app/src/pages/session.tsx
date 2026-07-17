@@ -333,7 +333,11 @@ export function Page({
               onChange={handleTextChange}
               onPaste={handlePromptPaste}
               value={text}
-              placeholder={m.session_prompt_placeholder()}
+              placeholder={
+                sessionId
+                  ? m.session_prompt_message_placeholder()
+                  : m.session_prompt_placeholder()
+              }
               className="p-4"
             />
           </PromptInputBody>

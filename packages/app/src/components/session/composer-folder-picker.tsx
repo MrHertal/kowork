@@ -45,7 +45,10 @@ export function ComposerFolderPicker({
   );
   const recentFolders = getRecentFolders(projects, sessions);
   const folderOptions = attachedDirectory
-    ? [attachedDirectory, ...recentFolders.filter((p) => p !== attachedDirectory)]
+    ? [
+        attachedDirectory,
+        ...recentFolders.filter((p) => p !== attachedDirectory),
+      ]
     : recentFolders;
 
   function handleChooseDifferent() {

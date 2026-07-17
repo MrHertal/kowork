@@ -226,6 +226,7 @@
   "session_permission_doom_loop_description": "Der Assistent scheint dieselbe Aktion zu wiederholen. Sie können fortfahren lassen oder ablehnen, um zu stoppen.",
   "session_permission_required": "Berechtigung erforderlich",
   "session_permission_stuck_in_loop": "In einer Schleife gefangen",
+  "session_prompt_message_placeholder": "Schreiben Sie eine Nachricht...",
   "session_prompt_placeholder": "Wie kann ich Ihnen heute helfen?",
   "session_question_answered_count": "Beantwortet ({count})",
   "session_question_count": "{count} Fragen",

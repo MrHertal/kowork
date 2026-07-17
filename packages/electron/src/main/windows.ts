@@ -74,6 +74,8 @@ export function createMainWindow(globals: Globals) {
     y: state.y,
     width: state.width,
     height: state.height,
+    minWidth: 600,
+    minHeight: 400,
     show: false,
     autoHideMenuBar: true,
     title: "Kowork",

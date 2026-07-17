@@ -56,10 +56,7 @@ export function PermissionModeSelector({
             if (next === "ask" || next === "auto") onValueChange(next);
           }}
         >
-          <DropdownMenuRadioItem
-            value="ask"
-            className="items-start py-2.5"
-          >
+          <DropdownMenuRadioItem value="ask" className="items-start py-2.5">
             <Hand className="mt-0.5" />
             <span className="min-w-0 flex-1">
               <span className="block">
@@ -70,10 +67,7 @@ export function PermissionModeSelector({
               </span>
             </span>
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem
-            value="auto"
-            className="items-start py-2.5"
-          >
+          <DropdownMenuRadioItem value="auto" className="items-start py-2.5">
             <FastForward className="mt-0.5" />
             <span className="min-w-0 flex-1">
               <span className="block">
