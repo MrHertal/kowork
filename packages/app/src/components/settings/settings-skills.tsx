@@ -17,8 +17,10 @@ import { useDialog } from "@/contexts/dialog";
 import { shallowArrayEqual, useGlobalData } from "@/contexts/global-sync";
 import { useServer } from "@/contexts/server";
 import { POPULAR_SKILLS, type PopularSkill } from "@/data/popular-skills";
+import { useDelayedShow } from "@/hooks/use-delayed-show";
 import { type Skill, useManagedSkillsDir, useSkills } from "@/hooks/use-skills";
 import { useSkillsMutation } from "@/hooks/use-skills-mutation";
+import { cn } from "@/lib/utils";
 import { m } from "@/paraglide/messages";
 import {
   bundledSkillId,
@@ -190,15 +192,22 @@ function ConnectedSection({
   onRemove,
 }: ConnectedSectionProps) {
   const showList = ready && items.length > 0;
+  const showLoading = useDelayedShow(!ready, 150);
   return (
     <SettingsSection
       title={m.settings_skills_section_connected()}
       bordered={showList}
     >
-      {!ready ? (
+      {!ready && showLoading ? (
         <ConnectedLoading />
-      ) : items.length === 0 ? (
-        <p className="py-4 text-center text-xs text-muted-foreground">
+      ) : !ready || items.length === 0 ? (
+        <p
+          className={cn(
+            "py-4 text-center text-xs text-muted-foreground",
+            !ready && "invisible",
+          )}
+          aria-hidden={!ready || undefined}
+        >
           {m.settings_skills_connected_empty()}
         </p>
       ) : (

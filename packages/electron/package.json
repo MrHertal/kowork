@@ -12,11 +12,13 @@
     "prebuild": "tsx ./scripts/prebuild.ts",
     "build": "electron-vite build",
     "build:runtime": "tsx ./scripts/build-runtime.ts",
-    "preview": "electron-vite preview",
-    "package": "electron-builder --config electron-builder.config.ts",
-    "package:mac": "electron-builder --mac --config electron-builder.config.ts",
-    "package:win": "electron-builder --win --config electron-builder.config.ts",
-    "package:linux": "electron-builder --linux --config electron-builder.config.ts"
+    "ensure:runtime": "tsx ./scripts/ensure-runtime.ts",
+    "smoke:runtime": "tsx ./scripts/smoke-runtime.ts",
+    "preview": "pnpm run ensure:runtime && electron-vite preview",
+    "package": "pnpm run ensure:runtime && electron-builder --config electron-builder.config.ts",
+    "package:mac": "pnpm run ensure:runtime && electron-builder --mac --config electron-builder.config.ts",
+    "package:win": "pnpm run ensure:runtime && electron-builder --win --config electron-builder.config.ts",
+    "package:linux": "pnpm run ensure:runtime && electron-builder --linux --config electron-builder.config.ts"
   },
   "dependencies": {
     "drizzle-orm": "1.0.0-beta.19-d95b7a4",

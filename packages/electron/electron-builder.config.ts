@@ -10,7 +10,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-import type { Configuration } from "electron-builder";
+import { Arch, type Configuration } from "electron-builder";
+
+import {
+  assertRuntimePack,
+  computeRuntimeSourceFingerprint,
+} from "./src/main/runtime-pack";
 
 const execFileAsync = promisify(execFile);
 const electronDir = path.dirname(fileURLToPath(import.meta.url));
@@ -36,22 +41,28 @@ async function signWindows(configuration: { path: string }) {
   );
 }
 
-// The runtime pack is generated + gitignored, and electron-builder only *warns*
-// on a missing extraResources source — so without this a skipped `build:runtime`
-// ships an app with no python/node_libs that still signs + notarizes cleanly.
-function ensureRuntimePackPresent() {
-  const manifest = path.join(
-    electronDir,
-    "resources",
-    "runtime",
-    "MANIFEST.json",
-  );
-  if (!existsSync(manifest)) {
-    throw new Error(
-      `Office runtime pack missing (${path.relative(electronDir, manifest)}). ` +
-        `Run \`pnpm --filter @kowork/electron build:runtime\` before packaging.`,
-    );
+type RuntimePackContext = {
+  electronPlatformName: string;
+  arch: Arch;
+};
+
+// Package scripts prepare the pack; this hook is the final gate for direct
+// electron-builder calls and target/host mismatches.
+function ensureRuntimePackPresent(context: RuntimePackContext) {
+  const platform = context.electronPlatformName;
+  if (platform !== "darwin" && platform !== "linux" && platform !== "win32") {
+    throw new Error(`Unsupported runtime target platform: ${platform}`);
   }
+  const arch = Arch[context.arch];
+  if (arch !== "arm64" && arch !== "x64") {
+    throw new Error(`Unsupported runtime target architecture: ${arch}`);
+  }
+  assertRuntimePack({
+    dir: path.join(electronDir, "resources", "runtime"),
+    platform,
+    arch,
+    sourceFingerprint: computeRuntimeSourceFingerprint(electronDir),
+  });
 }
 
 // Mach-O magic numbers (first 4 bytes, both endiannesses; incl. fat/universal).

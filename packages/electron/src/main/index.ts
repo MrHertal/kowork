@@ -49,6 +49,7 @@ import { registerIpcHandlers, sendDeepLinks, sendMenuCommand } from "./ipc";
 import { initLogging } from "./logging";
 import { parseMarkdown } from "./markdown";
 import { createMenu } from "./menu";
+import { requireRuntimePack } from "./runtime";
 import {
   checkForUpdates,
   checkUpdate,
@@ -152,6 +153,20 @@ function setupApp() {
   }
 
   void app.whenReady().then(async () => {
+    if (app.isPackaged) {
+      try {
+        requireRuntimePack();
+      } catch (error) {
+        const detail = error instanceof Error ? `\n\n${error.message}` : "";
+        dialog.showErrorBox(
+          "Unable to start Kowork",
+          `Kowork's built-in document runtime is missing or invalid. Reinstall Kowork and try again.${detail}`,
+        );
+        app.exit(1);
+        return;
+      }
+    }
+
     try {
       mkdirSync(defaultDir, { recursive: true });
       process.chdir(defaultDir);

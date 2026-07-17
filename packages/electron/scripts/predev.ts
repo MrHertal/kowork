@@ -1,5 +1,6 @@
 import { execSync } from "node:child_process";
 
+execSync("tsx ./scripts/ensure-runtime.ts", { stdio: "inherit" });
 execSync(`tsx ./scripts/copy-icons.ts ${process.env.KOWORK_CHANNEL ?? "dev"}`, {
   stdio: "inherit",
 });

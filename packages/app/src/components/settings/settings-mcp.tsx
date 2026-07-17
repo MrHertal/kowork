@@ -17,8 +17,10 @@ import { useDialog } from "@/contexts/dialog";
 import { useChildData, useGlobalData } from "@/contexts/global-sync";
 import { useServer } from "@/contexts/server";
 import { POPULAR_MCP, type PopularMcp } from "@/data/popular-mcp";
+import { useDelayedShow } from "@/hooks/use-delayed-show";
 import { useMcpMutation } from "@/hooks/use-mcp-mutation";
 import { useMcpStatusSync } from "@/hooks/use-mcp-status-sync";
+import { cn } from "@/lib/utils";
 import { m } from "@/paraglide/messages";
 
 import { CustomMcp } from "./custom-mcp";
@@ -141,15 +143,22 @@ function ConnectedSection({
   onRemove,
 }: ConnectedSectionProps) {
   const showList = ready && items.length > 0;
+  const showLoading = useDelayedShow(!ready, 150);
   return (
     <SettingsSection
       title={m.settings_mcp_section_connected()}
       bordered={showList}
     >
-      {!ready ? (
+      {!ready && showLoading ? (
         <ConnectedLoading />
-      ) : items.length === 0 ? (
-        <p className="py-4 text-center text-xs text-muted-foreground">
+      ) : !ready || items.length === 0 ? (
+        <p
+          className={cn(
+            "py-4 text-center text-xs text-muted-foreground",
+            !ready && "invisible",
+          )}
+          aria-hidden={!ready || undefined}
+        >
           {m.settings_mcp_connected_empty()}
         </p>
       ) : (

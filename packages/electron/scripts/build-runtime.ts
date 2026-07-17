@@ -30,6 +30,11 @@ import {
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  computeRuntimeSourceFingerprint,
+  RUNTIME_SCHEMA_VERSION,
+} from "../src/main/runtime-pack";
+
 // --- Pinned versions (reproducible; bump deliberately) -----------------------
 const PYTHON_VERSION = "3.12.13";
 const PY_MAJOR_MINOR = PYTHON_VERSION.split(".").slice(0, 2).join("."); // "3.12"
@@ -310,9 +315,10 @@ async function main() {
   const sizeBytes = dirSize(outDir);
   const manifest = {
     runtime: "office",
-    schemaVersion: 1,
+    schemaVersion: RUNTIME_SCHEMA_VERSION,
     platform: process.platform,
     arch: process.arch,
+    sourceFingerprint: computeRuntimeSourceFingerprint(electronDir),
     triple,
     python: {
       version: PYTHON_VERSION,

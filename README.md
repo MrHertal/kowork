@@ -49,16 +49,31 @@ pnpm dev
 `pnpm dev` builds the OpenCode sidecar automatically before launching Electron.
 Build it on its own with `pnpm build:sidecar`.
 
-### Office document skills (optional)
+### Office document skills
 
-The built-in document skills (docx, pdf, xlsx, pptx) are always available to the
-agent, but they run on a bundled Python/Node "runtime pack" that packaged builds
-include automatically. To exercise these skills in dev, build the pack once:
+The built-in document skills (docx, pdf, xlsx, pptx) and their embedded
+Python/Node runtime are a required Kowork feature. `pnpm dev`, the Electron
+preview script, and the local package scripts validate the runtime before
+starting. A missing, incomplete, wrong-platform, or stale development runtime is
+rebuilt automatically; packaging and packaged startup reject an invalid runtime.
+
+The first runtime build downloads standalone Python and the document libraries
+for the current platform. You can prepare or validate it explicitly with:
 
 ```bash
-pnpm --filter @kowork/electron build:runtime
+pnpm --filter @kowork/electron ensure:runtime
 ```
 
-This downloads a standalone Python and the document libraries (a few hundred MB,
-for your current platform only). Skip it if you're not testing document
-handling — the skills still load, they just can't execute without the pack.
+Run the executable smoke check against the development runtime with:
+
+```bash
+pnpm --filter @kowork/electron smoke:runtime
+```
+
+The same script checks an unpacked packaged app when given its runtime directory
+and Electron executable:
+
+```bash
+cd packages/electron
+pnpm run smoke:runtime -- "<app-runtime-dir>" "<app-electron-executable>"
+```
