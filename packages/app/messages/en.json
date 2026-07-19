@@ -179,6 +179,13 @@
   "sessionInfo_toggle": "Toggle task info",
   "sessionInfo_tokenUsage": "Token Usage",
 
+  "session_activity_hide": "Hide activity",
+  "session_activity_making_changes": "Making changes...",
+  "session_activity_preparing": "Preparing...",
+  "session_activity_running_command": "Running a command...",
+  "session_activity_show": "Show activity",
+  "session_activity_working": "Working...",
+  "session_activity_working_subtask": "Working on a subtask...",
   "session_composer_folder_choose_different": "Choose a different folder",
   "session_composer_folder_detach": "Detach folder",
   "session_composer_folder_label": "Folder",

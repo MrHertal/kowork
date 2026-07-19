@@ -26,7 +26,6 @@ import { buildRequestParts } from "@/components/prompt-input/build-request-parts
 import { PromptDragOverlay } from "@/components/prompt-input/drag-overlay";
 import { PromptImageAttachments } from "@/components/prompt-input/image-attachments";
 import { ComposerTray } from "@/components/session/composer-tray";
-import { FolderPicker } from "@/components/session/folder-picker";
 import { MessageTimeline } from "@/components/session/message-timeline";
 import { ModelPicker } from "@/components/session/model-picker";
 import { NewSessionView } from "@/components/session/new-session-view";
@@ -65,14 +64,12 @@ export function Page({
   sessionId,
   attachedDirectory,
   defaultDirectory,
-  folderAttached,
   onDirectoryChange,
   onDirectoryDetach,
 }: {
   sessionId?: string;
   attachedDirectory?: string;
   defaultDirectory?: string;
-  folderAttached?: boolean;
   onDirectoryChange?: (directory: string) => void;
   onDirectoryDetach?: () => void;
 }) {
@@ -353,9 +350,6 @@ export function Page({
               )}
             </PromptInputTools>
             <PromptInputTools className="justify-end">
-              {sessionId && folderAttached && (
-                <FolderPicker directory={directory} />
-              )}
               <ModelPicker model={local.model} />
               <PromptInputSubmit
                 disabled={isSubmitDisabled}

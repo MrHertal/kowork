@@ -6,6 +6,7 @@ import type {
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { MessageContent } from "@/components/ai-elements/message";
+import { Activity } from "@/components/session/activity";
 import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useSDK } from "@/contexts/sdk";
 
@@ -177,15 +178,19 @@ export function Part({
 
 const HIDDEN_TOOLS = new Set(["todowrite"]);
 
+function isPendingQuestion(part: Part): boolean {
+  return (
+    part.type === "tool" &&
+    part.tool === "question" &&
+    (part.state.status === "pending" || part.state.status === "running")
+  );
+}
+
 export function renderable(part: Part, showReasoningSummaries = true): boolean {
   switch (part.type) {
     case "tool":
       if (HIDDEN_TOOLS.has(part.tool)) return false;
-      if (
-        part.tool === "question" &&
-        (part.state.status === "pending" || part.state.status === "running")
-      )
-        return false;
+      if (isPendingQuestion(part)) return false;
       return true;
     case "text":
       return !!part.text?.trim();
@@ -324,7 +329,11 @@ export function AssistantPartsDisplay({
       const parts = partsList[i];
       if (!parts) return;
       for (const part of parts) {
-        if (!renderable(part, showReasoningSummaries)) continue;
+        if (
+          !renderable(part, showReasoningSummaries) &&
+          !isPendingQuestion(part)
+        )
+          continue;
         entries.push({ messageID: id, part });
       }
     });
@@ -353,7 +362,50 @@ function isProseGroup(
 ): boolean {
   if (group.type !== "part") return false;
   const part = partsIndex.get(group.ref.messageID)?.get(group.ref.partID);
-  return part?.type === "text" || part?.type === "reasoning";
+  return part?.type === "text";
+}
+
+function isActivityGroup(
+  group: PartGroup,
+  partsIndex: Map<string, Map<string, Part>>,
+): boolean {
+  if (group.type === "context") return true;
+  const part = partsIndex.get(group.ref.messageID)?.get(group.ref.partID);
+  return (
+    part?.type === "reasoning" ||
+    (part?.type === "tool" && part.tool !== "question")
+  );
+}
+
+function activityStatus(
+  group: PartGroup,
+  partsIndex: Map<string, Map<string, Part>>,
+): string {
+  if (group.type === "context") return m.session_status_gathering_context();
+  const part = partsIndex.get(group.ref.messageID)?.get(group.ref.partID);
+  if (part?.type === "reasoning") return m.session_status_thinking();
+  if (part?.type !== "tool") return m.session_activity_working();
+
+  switch (part.tool) {
+    case "read":
+    case "list":
+    case "glob":
+    case "grep":
+    case "webfetch":
+      return m.session_status_gathering_context();
+    case "edit":
+    case "write":
+    case "apply_patch":
+      return m.session_activity_making_changes();
+    case "bash":
+      return m.session_activity_running_command();
+    case "task":
+      return m.session_activity_working_subtask();
+    case "skill":
+      return m.session_activity_preparing();
+    default:
+      return m.session_activity_working();
+  }
 }
 
 function GroupedPartsRenderer({
@@ -388,7 +440,7 @@ function GroupedPartsRenderer({
       );
     }
     const part = partsIndex.get(group.ref.messageID)?.get(group.ref.partID);
-    if (!part) return null;
+    if (!part || isPendingQuestion(part)) return null;
     const message = messagesByID.get(group.ref.messageID);
     const streaming = !!message && typeof message.time.completed !== "number";
     return (
@@ -407,6 +459,7 @@ function GroupedPartsRenderer({
 
   const output: ReactNode[] = [];
   let prose: PartGroup[] = [];
+  let activity: PartGroup[] = [];
 
   const flushProse = () => {
     if (prose.length === 0) return;
@@ -421,7 +474,32 @@ function GroupedPartsRenderer({
     prose = [];
   };
 
+  const flushActivity = () => {
+    if (activity.length === 0) return;
+    const last = activity[activity.length - 1]!;
+    const rendered = activity.map(renderGroup).filter(Boolean);
+    if (rendered.length > 0) {
+      output.push(
+        <Activity
+          key={`activity:${activity[0]!.key}`}
+          running={busy && last.key === lastKey}
+          status={activityStatus(last, partsIndex)}
+        >
+          {rendered}
+        </Activity>,
+      );
+    }
+    activity = [];
+  };
+
   for (const group of grouped) {
+    if (isActivityGroup(group, partsIndex)) {
+      flushProse();
+      activity.push(group);
+      continue;
+    }
+
+    flushActivity();
     if (isProseGroup(group, partsIndex)) {
       prose.push(group);
     } else {
@@ -430,6 +508,7 @@ function GroupedPartsRenderer({
     }
   }
   flushProse();
+  flushActivity();
 
   return <>{output}</>;
 }

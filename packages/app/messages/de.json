@@ -179,6 +179,13 @@
   "sessionInfo_toggle": "Aufgabeninfo ein-/ausblenden",
   "sessionInfo_tokenUsage": "Token-Verbrauch",
 
+  "session_activity_hide": "Aktivität ausblenden",
+  "session_activity_making_changes": "Nehme Änderungen vor...",
+  "session_activity_preparing": "Bereite vor...",
+  "session_activity_running_command": "Führe einen Befehl aus...",
+  "session_activity_show": "Aktivität anzeigen",
+  "session_activity_working": "Wird bearbeitet...",
+  "session_activity_working_subtask": "Bearbeite eine Unteraufgabe...",
   "session_composer_folder_choose_different": "Anderen Ordner auswählen",
   "session_composer_folder_detach": "Ordner entfernen",
   "session_composer_folder_label": "Ordner",
