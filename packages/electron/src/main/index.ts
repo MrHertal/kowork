@@ -110,7 +110,7 @@ function setupApp() {
     return;
   }
 
-  preferAppEnv(app.getPath("userData"));
+  preferAppEnv();
 
   app.on("second-instance", (_event: Event, argv: string[]) => {
     const urls = argv.filter((arg: string) => arg.startsWith("kowork://"));
@@ -219,6 +219,7 @@ async function initialize() {
       password,
       {
         userDataPath: app.getPath("userData"),
+        tempPath: app.getPath("temp"),
         onStdout: (message) => logger.log("server stdout", { message }),
         onStderr: (message) => logger.warn("server stderr", { message }),
         onExit: (code) => logger.warn("sidecar exited", { code }),

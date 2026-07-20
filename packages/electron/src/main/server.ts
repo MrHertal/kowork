@@ -5,6 +5,7 @@ import type { Details } from "electron";
 import { DEFAULT_SERVER_URL_KEY, WSL_ENABLED_KEY } from "./constants";
 import { resolveRuntimePack } from "./runtime";
 import { getUserShell, loadShellEnv } from "./shell-env";
+import { createSidecarStorageEnv } from "./sidecar-storage";
 import { getStore } from "./store";
 
 export type WslConfig = { enabled: boolean };
@@ -21,9 +22,25 @@ export type SidecarListener = { stop: () => Promise<void> };
 const SIDECAR_SERVICE_NAME = "kowork server";
 const SIDECAR_START_STALL_TIMEOUT = 60_000;
 const SIDECAR_STOP_TIMEOUT = 6_000;
+const ISOLATED_ENV_KEYS = new Set([
+  "OPENCODE_CONFIG",
+  "OPENCODE_CONFIG_DIR",
+  "OPENCODE_CONFIG_CONTENT",
+  "OPENCODE_DB",
+  "OPENCODE_PLUGIN_META_FILE",
+  "OPENCODE_TEST_HOME",
+  "XDG_CONFIG_HOME",
+  "XDG_DATA_HOME",
+  "XDG_CACHE_HOME",
+  "XDG_STATE_HOME",
+  "TMPDIR",
+  "TMP",
+  "TEMP",
+]);
 
 type SpawnLocalServerOptions = {
   userDataPath: string;
+  tempPath: string;
   onStdout?: (message: string) => void;
   onStderr?: (message: string) => void;
   onExit?: (code: number) => void;
@@ -52,7 +69,7 @@ export function setWslConfig(config: WslConfig) {
   getStore().set(WSL_ENABLED_KEY, config.enabled);
 }
 
-export function preferAppEnv(userDataPath: string) {
+export function preferAppEnv() {
   const shell = process.platform === "win32" ? null : getUserShell();
   Object.assign(process.env, {
     ...(shell ? loadShellEnv(shell) : null),
@@ -60,7 +77,6 @@ export function preferAppEnv(userDataPath: string) {
     OPENCODE_DISABLE_EXTERNAL_SKILLS: "true",
     OPENCODE_DISABLE_PROJECT_CONFIG: "true",
     OPENCODE_CLIENT: "desktop",
-    XDG_STATE_HOME: process.env.XDG_STATE_HOME ?? userDataPath,
   });
 }
 
@@ -73,7 +89,7 @@ export async function spawnLocalServer(
   const sidecar = join(dirname(fileURLToPath(import.meta.url)), "sidecar.js");
   const child = utilityProcess.fork(sidecar, [], {
     cwd: process.cwd(),
-    env: createSidecarEnv(),
+    env: createSidecarEnv(options.userDataPath, options.tempPath),
     serviceName: SIDECAR_SERVICE_NAME,
     stdio: "pipe",
   });
@@ -163,7 +179,6 @@ export async function spawnLocalServer(
       hostname,
       port,
       password,
-      userDataPath: options.userDataPath,
     });
   }).catch((error) => {
     if (!exited) child.kill();
@@ -243,12 +258,19 @@ export async function checkHealth(
   }
 }
 
-function createSidecarEnv(): Record<string, string> {
+function createSidecarEnv(
+  userDataPath: string,
+  tempPath: string,
+): Record<string, string> {
   const env = Object.fromEntries(
     Object.entries(process.env).flatMap(([key, value]) =>
       value === undefined ? [] : [[key, String(value)]],
     ),
   );
+  for (const key of Object.keys(env)) {
+    if (ISOLATED_ENV_KEYS.has(key.toUpperCase())) delete env[key];
+  }
+  Object.assign(env, createSidecarStorageEnv(userDataPath, tempPath));
   delete env.DEBUG;
   if (process.platform === "linux") delete env.LD_PRELOAD;
   applyRuntimeEnv(env);

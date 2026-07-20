@@ -49,11 +49,13 @@ Keynote. Pick the path that matches the request, then follow it.
 ## Create (pptxgenjs, Node)
 
 pptxgenjs is a library, not a CLI, so creating a deck means running a short
-script. Author it as a **working copy in a temporary directory — never in the
-user's folder** — so nothing is left sitting beside their deck.
+script. Author it as a **working copy in Kowork's runtime-provided temporary
+directory — never in the user's folder** — so nothing is left sitting beside
+their deck. Use the temporary directory reported by the runtime; never guess,
+derive, or hard-code a platform-specific path.
 
-1. Copy `scripts/create_pptx.cjs` into your temp directory and edit the copy to
-   build the requested slides.
+1. Copy `scripts/create_pptx.cjs` into that temporary directory and edit the
+   copy to build the requested slides.
 2. Run the copy, writing the deck to the path the user asked for:
 
    ```sh

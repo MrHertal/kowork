@@ -17,7 +17,6 @@ type StartCommand = {
   hostname: string;
   port: number;
   password: string;
-  userDataPath: string;
 };
 
 type StopCommand = { type: "stop" };
@@ -52,7 +51,7 @@ parentPort.on("message", (event) => {
 
 async function start(command: StartCommand) {
   try {
-    prepareSidecarEnv(command.password, command.userDataPath);
+    prepareSidecarEnv(command.password);
     ensureLoopbackNoProxy();
     useSystemCertificates();
     useEnvProxy();
@@ -82,11 +81,10 @@ async function stop() {
   }
 }
 
-function prepareSidecarEnv(password: string, userDataPath: string) {
+function prepareSidecarEnv(password: string) {
   Object.assign(process.env, {
     OPENCODE_SERVER_USERNAME: "opencode",
     OPENCODE_SERVER_PASSWORD: password,
-    XDG_STATE_HOME: process.env.XDG_STATE_HOME ?? userDataPath,
   });
 }
 
@@ -140,13 +138,11 @@ function parseCommand(value: unknown): SidecarCommand | undefined {
   if (typeof command.hostname !== "string") return;
   if (typeof command.port !== "number") return;
   if (typeof command.password !== "string") return;
-  if (typeof command.userDataPath !== "string") return;
   return {
     type: "start",
     hostname: command.hostname,
     port: command.port,
     password: command.password,
-    userDataPath: command.userDataPath,
   };
 }
 

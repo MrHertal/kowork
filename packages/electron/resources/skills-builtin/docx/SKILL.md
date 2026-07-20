@@ -45,11 +45,13 @@ parts directly (Python). Pick the path that matches the request, then follow it.
 ## Create (docx-js, Node)
 
 docx-js is a library, not a CLI, so creating a document means running a short
-script. Author it as a **working copy in a temporary directory — never in the
-user's folder** — so nothing is left sitting beside their document.
+script. Author it as a **working copy in Kowork's runtime-provided temporary
+directory — never in the user's folder** — so nothing is left sitting beside
+their document. Use the temporary directory reported by the runtime; never
+guess, derive, or hard-code a platform-specific path.
 
-1. Copy `scripts/create_docx.cjs` into your platform's temp directory and edit
-   the copy's `children` array to build the requested content.
+1. Copy `scripts/create_docx.cjs` into that temporary directory and edit the
+   copy's `children` array to build the requested content.
 2. Run the copy, writing the document to the path the user asked for:
 
    ```sh

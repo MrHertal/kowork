@@ -1,18 +1,19 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
 import path from "node:path";
 
+import { app } from "electron";
 import { applyEdits, modify, parse } from "jsonc-parser";
 
-const CONFIG_DIR = path.join(homedir(), ".config", "kowork");
-const JSONC_PATH = path.join(CONFIG_DIR, "opencode.jsonc");
-const JSON_PATH = path.join(CONFIG_DIR, "opencode.json");
+import { getSidecarConfigPath } from "./sidecar-storage";
 
 function getConfigPath(): string {
-  if (existsSync(JSONC_PATH)) return JSONC_PATH;
-  if (existsSync(JSON_PATH)) return JSON_PATH;
-  return JSONC_PATH;
+  const dir = getSidecarConfigPath(app.getPath("userData"));
+  const jsonc = path.join(dir, "opencode.jsonc");
+  const json = path.join(dir, "opencode.json");
+  if (existsSync(jsonc)) return jsonc;
+  if (existsSync(json)) return json;
+  return jsonc;
 }
 
 async function readSource(file: string): Promise<string> {
@@ -42,7 +43,7 @@ export async function patchConfig(
     formattingOptions: { insertSpaces: true, tabSize: 2, eol: "\n" },
   });
   const next = applyEdits(source, edits);
-  await mkdir(CONFIG_DIR, { recursive: true });
+  await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, next, "utf8");
 }
 
