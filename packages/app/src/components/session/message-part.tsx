@@ -373,7 +373,7 @@ function isActivityGroup(
   const part = partsIndex.get(group.ref.messageID)?.get(group.ref.partID);
   return (
     part?.type === "reasoning" ||
-    (part?.type === "tool" && part.tool !== "question")
+    (part?.type === "tool" && part.tool !== "question" && part.tool !== "task")
   );
 }
 
@@ -399,8 +399,6 @@ function activityStatus(
       return m.session_activity_making_changes();
     case "bash":
       return m.session_activity_running_command();
-    case "task":
-      return m.session_activity_working_subtask();
     case "skill":
       return m.session_activity_preparing();
     default:

@@ -10,6 +10,7 @@ import { SessionQuestionDock } from "./session-question-dock";
 
 interface SessionComposerRegionProps {
   state: SessionComposerState;
+  inactive?: boolean;
   children: ReactNode;
 }
 
@@ -35,10 +36,12 @@ function Dock({ keyId, children }: { keyId: string; children: ReactNode }) {
 
 export function SessionComposerRegion({
   state,
+  inactive = false,
   children,
 }: SessionComposerRegionProps) {
   const showPermission = useDelayedShow(!!state.permissionRequest);
   const showQuestion = useDelayedShow(!!state.questionRequest);
+  const blocked = state.blocked || inactive;
 
   const question =
     showQuestion && state.questionRequest ? state.questionRequest : null;
@@ -66,10 +69,10 @@ export function SessionComposerRegion({
         )}
       </AnimatePresence>
       <div
-        inert={state.blocked}
+        inert={blocked}
         className={cn(
           "transition-opacity duration-200",
-          state.blocked && "opacity-50",
+          blocked && "opacity-50",
         )}
       >
         {children}

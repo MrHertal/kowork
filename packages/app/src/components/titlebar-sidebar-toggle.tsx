@@ -9,14 +9,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePlatform } from "@/contexts/platform";
 import { m } from "@/paraglide/messages";
 
 export function TitlebarSidebarToggle() {
   const { open, openMobile, isMobile, toggleSidebar } = useSidebar();
-  const { os } = usePlatform();
-  const label = m.sidebar_toggle();
   const expanded = isMobile ? openMobile : open;
+  const label = expanded ? m.sidebar_toggle_hide() : m.sidebar_toggle_show();
 
   // The sidebar only pushes the chat area on desktop; on mobile it overlays.
   // Drive the titlebar's left region so the session title tracks that edge.
@@ -43,15 +41,7 @@ export function TitlebarSidebarToggle() {
             {expanded ? <PanelLeftCloseIcon /> : <PanelLeftOpenIcon />}
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {label}
-          <kbd
-            data-slot="kbd"
-            className="bg-background/20 px-1.5 py-0.5 text-[11px]"
-          >
-            {os === "macos" ? "⌘B" : "Ctrl+B"}
-          </kbd>
-        </TooltipContent>
+        <TooltipContent side="bottom">{label}</TooltipContent>
       </Tooltip>
     </TitlebarSlot>
   );

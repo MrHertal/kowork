@@ -316,7 +316,7 @@ export function Page({
     !!onDirectoryDetach;
 
   const promptComposer = (
-    <SessionComposerRegion state={composerState}>
+    <SessionComposerRegion state={composerState} inactive={isChildSession}>
       <div className="relative">
         <PromptInput
           onSubmit={handleSubmit}
