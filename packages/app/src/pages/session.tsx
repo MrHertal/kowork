@@ -33,6 +33,7 @@ import {
   PermissionModeSelector,
   type PermissionMode,
 } from "@/components/session/permission-mode-selector";
+import { KOWORK_SYSTEM_PROMPT } from "@/constants/kowork-system-prompt";
 import { useChildData } from "@/contexts/global-sync";
 import { useLocal } from "@/contexts/local";
 import { usePermission } from "@/contexts/permission";
@@ -242,6 +243,7 @@ export function Page({
         await sdk.client.session.promptAsync({
           sessionID: sid,
           messageID,
+          system: KOWORK_SYSTEM_PROMPT,
           agent: currentAgentVal.name,
           model: {
             modelID: currentModelVal.id,
