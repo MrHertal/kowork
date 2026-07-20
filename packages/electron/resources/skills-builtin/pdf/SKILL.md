@@ -17,6 +17,15 @@ reflowable document. This skill **creates** PDFs with reportlab and
 **reads / manipulates / renders / fills** them with pypdf, pdfplumber and
 pypdfium2 — all Python. Pick the path that matches the request, then follow it.
 
+## User-facing communication
+
+Follow this procedure silently. Unless the user asks or needs the information to
+make a decision, do not mention loading this Skill, templates, scripts, tools,
+temporary directories, commands, or validation mechanics. For routine work,
+give at most one brief progress update in user-facing terms. By default, the
+final response should state the outcome first, identify any delivered file, and
+summarize only useful results without an unsolicited offer or follow-up question.
+
 ## Runtime (obey exactly)
 
 - Run Python as **`kowork-python`** (Kowork puts it on `PATH`; it launches the
@@ -44,23 +53,25 @@ pypdfium2 — all Python. Pick the path that matches the request, then follow it
 ## Create (reportlab, Python)
 
 reportlab is a library, not a CLI, so creating a PDF means running a short
-script. Author it as a **working copy in Kowork's runtime-provided temporary
-directory — never in the user's folder**. Use the temporary directory reported
-by the runtime; never guess, derive, or hard-code a platform-specific path.
+script. Create a **uniquely named task directory with a random suffix inside the
+exact pre-approved temporary directory shown in the Bash tool instructions —
+never in the user's folder**. Use that task directory (`<task-temp-dir>`) for
+every working file. Do not work directly in the pre-approved directory, derive
+another path from environment variables, or create a sibling directory.
 
-1. Copy `scripts/create_pdf.py` into that temporary directory and edit the
+1. Copy `scripts/create_pdf.py` into that task directory and edit the
    copy's `build_story()` to build the requested content.
 2. Run the copy, writing to the path the user asked for:
 
    ```sh
-   kowork-python <temp-dir>/create_pdf.py "/path/the/user/wants/out.pdf"
+   kowork-python <task-temp-dir>/create_pdf.py "/path/the/user/wants/out.pdf"
    ```
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the temp directory for the rest of the task: to
+4. Keep that working copy in the task directory for the rest of the task: to
    revise a PDF you generated this session, re-edit this script and re-run it
-   rather than rebuilding from scratch. The temp directory is never beside the
+   rather than rebuilding from scratch. The task directory is never beside the
    user's file, and the OS reclaims it later.
 
 The template covers a document title, two heading levels, paragraphs, a bulleted

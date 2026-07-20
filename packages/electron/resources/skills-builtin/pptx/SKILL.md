@@ -20,6 +20,15 @@ bundled, verification is **structural** — reopen the file and run a layout lin
 — not visual; for true WYSIWYG review the user opens the deck in PowerPoint or
 Keynote. Pick the path that matches the request, then follow it.
 
+## User-facing communication
+
+Follow this procedure silently. Unless the user asks or needs the information to
+make a decision, do not mention loading this Skill, templates, scripts, tools,
+temporary directories, commands, or validation mechanics. For routine work,
+give at most one brief progress update in user-facing terms. By default, the
+final response should state the outcome first, identify any delivered file, and
+summarize only useful results without an unsolicited offer or follow-up question.
+
 ## Runtime (obey exactly)
 
 - Run Python as **`kowork-python`** (Kowork puts it on `PATH`; it launches the
@@ -49,26 +58,27 @@ Keynote. Pick the path that matches the request, then follow it.
 ## Create (pptxgenjs, Node)
 
 pptxgenjs is a library, not a CLI, so creating a deck means running a short
-script. Author it as a **working copy in Kowork's runtime-provided temporary
-directory — never in the user's folder** — so nothing is left sitting beside
-their deck. Use the temporary directory reported by the runtime; never guess,
-derive, or hard-code a platform-specific path.
+script. Create a **uniquely named task directory with a random suffix inside the
+exact pre-approved temporary directory shown in the Bash tool instructions —
+never in the user's folder**. Use that task directory (`<task-temp-dir>`) for
+every working file. Do not work directly in the pre-approved directory, derive
+another path from environment variables, or create a sibling directory.
 
-1. Copy `scripts/create_pptx.cjs` into that temporary directory and edit the
+1. Copy `scripts/create_pptx.cjs` into that task directory and edit the
    copy to build the requested slides.
 2. Run the copy, writing the deck to the path the user asked for:
 
    ```sh
-   kowork-node <temp-dir>/create_pptx.cjs "/path/the/user/wants/out.pptx"
+   kowork-node <task-temp-dir>/create_pptx.cjs "/path/the/user/wants/out.pptx"
    ```
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the temp directory for the rest of the task: to
+4. Keep that working copy in the task directory for the rest of the task: to
    revise a deck you generated this session, re-edit this script and re-run it
    rather than rebuilding from scratch. (For a deck you did **not** generate
    here, use the raw-OOXML **Edit a template** path or **Slide operations**.)
-   The temp directory is never beside the user's deck, and the OS reclaims it
+   The task directory is never beside the user's deck, and the OS reclaims it
    later.
 
 The template defaults to **16:9 widescreen** and keeps its whole look in
@@ -96,14 +106,14 @@ present, otherwise the top-most text box as a fallback), the **body** text, any
 ## Edit a template (raw-OOXML, Python)
 
 To change a slide's content, round-trip through the XML: unpack, hand-edit the
-slide part, repack, validate. **Unpack into a temporary directory, never the
-user's folder**, and pack with `--cleanup` so no unpacked XML is left behind. Do
-not string-replace inside the raw `.pptx`.
+slide part, repack, validate. **Unpack inside the same unique task directory
+described above, never the user's folder**, and pack with `--cleanup` so no
+unpacked XML is left behind. Do not string-replace inside the raw `.pptx`.
 
 ```sh
-kowork-python scripts/unpack.py in.pptx <temp-dir>/work/
-# edit <temp-dir>/work/ppt/slides/slideN.xml (and other parts)
-kowork-python scripts/pack.py <temp-dir>/work/ "/path/the/user/wants/out.pptx" --cleanup
+kowork-python scripts/unpack.py in.pptx <task-temp-dir>/work/
+# edit <task-temp-dir>/work/ppt/slides/slideN.xml (and other parts)
+kowork-python scripts/pack.py <task-temp-dir>/work/ "/path/the/user/wants/out.pptx" --cleanup
 kowork-python scripts/validate.py "/path/the/user/wants/out.pptx"
 ```
 

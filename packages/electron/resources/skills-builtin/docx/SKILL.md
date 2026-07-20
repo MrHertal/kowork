@@ -16,6 +16,15 @@ A `.docx` is a ZIP of XML parts (Open Packaging Conventions). This skill creates
 them with docx-js (Node), and edits/reads/annotates them by manipulating the XML
 parts directly (Python). Pick the path that matches the request, then follow it.
 
+## User-facing communication
+
+Follow this procedure silently. Unless the user asks or needs the information to
+make a decision, do not mention loading this Skill, templates, scripts, tools,
+temporary directories, commands, or validation mechanics. For routine work,
+give at most one brief progress update in user-facing terms. By default, the
+final response should state the outcome first, identify any delivered file, and
+summarize only useful results without an unsolicited offer or follow-up question.
+
 ## Runtime (obey exactly)
 
 - Run Python as **`kowork-python`** (Kowork puts it on `PATH`; it launches the
@@ -45,17 +54,18 @@ parts directly (Python). Pick the path that matches the request, then follow it.
 ## Create (docx-js, Node)
 
 docx-js is a library, not a CLI, so creating a document means running a short
-script. Author it as a **working copy in Kowork's runtime-provided temporary
-directory — never in the user's folder** — so nothing is left sitting beside
-their document. Use the temporary directory reported by the runtime; never
-guess, derive, or hard-code a platform-specific path.
+script. Create a **uniquely named task directory with a random suffix inside the
+exact pre-approved temporary directory shown in the Bash tool instructions —
+never in the user's folder**. Use that task directory (`<task-temp-dir>`) for
+every working file. Do not work directly in the pre-approved directory, derive
+another path from environment variables, or create a sibling directory.
 
-1. Copy `scripts/create_docx.cjs` into that temporary directory and edit the
+1. Copy `scripts/create_docx.cjs` into that task directory and edit the
    copy's `children` array to build the requested content.
 2. Run the copy, writing the document to the path the user asked for:
 
    ```sh
-   kowork-node <temp-dir>/create_docx.cjs "/path/the/user/wants/output.docx"
+   kowork-node <task-temp-dir>/create_docx.cjs "/path/the/user/wants/output.docx"
    ```
 
 3. Validate the result (see Validate, below):
@@ -67,10 +77,10 @@ guess, derive, or hard-code a platform-specific path.
    If validation fails, repair via the Edit path (unpack → fix XML → validate →
    pack) — do not hand back an unvalidated file.
 
-4. Keep that working copy in the temp directory for the rest of the task: to
+4. Keep that working copy in the task directory for the rest of the task: to
    revise a document you generated this session, re-edit this script and
    re-run it rather than rebuilding from scratch. (For a document you did
-   **not** generate here, use the **Edit** path.) The temp directory is never
+   **not** generate here, use the **Edit** path.) The task directory is never
    beside the user's document, and the OS reclaims it later.
 
 The template covers headings, paragraphs, bulleted and numbered lists, a table,
@@ -108,15 +118,16 @@ says so — target a smaller in-run substring, or take the structural path (its
 ### Structural / complex edits: round-trip by hand
 
 For what the helper can't express — new paragraphs, tables, styles, reordering,
-many edits at once — unpack, edit the XML, validate, repack. **Unpack into a
-temporary directory, never the user's folder**, and pack with `--cleanup` so no
-unpacked XML is left behind. Do not string-replace inside the raw `.docx`.
+many edits at once — unpack, edit the XML, validate, repack. **Unpack inside the
+same unique task directory described above, never the user's folder**, and pack
+with `--cleanup` so no unpacked XML is left behind. Do not string-replace inside
+the raw `.docx`.
 
 ```sh
-kowork-python scripts/unpack.py in.docx <temp-dir>/work/
-# edit <temp-dir>/work/word/document.xml (and other parts)
-kowork-python scripts/validate.py <temp-dir>/work/ --fix
-kowork-python scripts/pack.py <temp-dir>/work/ "/path/the/user/wants/out.docx" --cleanup
+kowork-python scripts/unpack.py in.docx <task-temp-dir>/work/
+# edit <task-temp-dir>/work/word/document.xml (and other parts)
+kowork-python scripts/validate.py <task-temp-dir>/work/ --fix
+kowork-python scripts/pack.py <task-temp-dir>/work/ "/path/the/user/wants/out.docx" --cleanup
 kowork-python scripts/validate.py "/path/the/user/wants/out.docx"
 ```
 
