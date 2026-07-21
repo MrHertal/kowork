@@ -38,7 +38,7 @@ app.setPath("userData", join(app.getPath("appData"), appId));
 import type { ServerReadyData, WslConfig } from "../preload/types";
 import { checkAppExists, resolveAppPath, wslPath } from "./apps";
 import { type Channel, CHANNEL, UPDATER_ENABLED } from "./constants";
-import { patchConfig, readConfig } from "./opencode-config";
+import { ensureSkillDenied, patchConfig, readConfig } from "./opencode-config";
 import {
   ensureBuiltinSkillsRegistered,
   installBundledSkill,
@@ -204,6 +204,9 @@ async function initialize() {
   // config read already sees them.
   await ensureBuiltinSkillsRegistered().catch((error) =>
     logger.warn("failed to register builtin skills", error),
+  );
+  await ensureSkillDenied("customize-opencode").catch((error) =>
+    logger.warn("failed to hide customize-opencode skill", error),
   );
 
   const port = await getSidecarPort();

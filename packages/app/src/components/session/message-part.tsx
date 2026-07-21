@@ -7,6 +7,10 @@ import { type ReactNode, useEffect, useMemo, useRef } from "react";
 
 import { MessageContent } from "@/components/ai-elements/message";
 import { Activity } from "@/components/session/activity";
+import {
+  PresentedFiles,
+  type PresentedFile,
+} from "@/components/session/presented-files";
 import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useSDK } from "@/contexts/sdk";
 
@@ -176,7 +180,45 @@ export function Part({
   }
 }
 
-const HIDDEN_TOOLS = new Set(["todowrite"]);
+const HIDDEN_TOOLS = new Set(["present_files", "todowrite"]);
+
+function presentedFiles(partsList: Part[][]): PresentedFile[] {
+  const files = new Map<string, PresentedFile>();
+  for (const parts of partsList) {
+    for (const part of parts) {
+      if (
+        part.type !== "tool" ||
+        part.tool !== "present_files" ||
+        part.state.status !== "completed"
+      )
+        continue;
+      const metadata = part.state.metadata;
+      if (!metadata || typeof metadata !== "object") continue;
+      const values = "files" in metadata ? metadata.files : undefined;
+      if (!Array.isArray(values)) continue;
+      for (const value of values) {
+        if (!value || typeof value !== "object") continue;
+        if (!("path" in value) || typeof value.path !== "string") continue;
+        if (!("filename" in value) || typeof value.filename !== "string")
+          continue;
+        if (!("mime" in value) || typeof value.mime !== "string") continue;
+        if (!("size" in value) || typeof value.size !== "number") continue;
+        if (!value.path.trim() || !value.filename.trim() || !value.mime.trim())
+          continue;
+        if (!Number.isFinite(value.size) || value.size < 0) continue;
+        const file = {
+          path: value.path,
+          filename: value.filename,
+          mime: value.mime,
+          size: value.size,
+        };
+        files.delete(file.path);
+        files.set(file.path, file);
+      }
+    }
+  }
+  return [...files.values()];
+}
 
 function isPendingQuestion(part: Part): boolean {
   return (
@@ -341,18 +383,25 @@ export function AssistantPartsDisplay({
   }, [messageIDs, partsList, showReasoningSummaries]);
 
   const grouped = useStable(computed, sameGroups);
+  const presented = useMemo(() => presentedFiles(partsList), [partsList]);
+  const showPresented = !working && presented.length > 0;
 
-  if (grouped.length === 0) return null;
+  if (grouped.length === 0 && !showPresented) return null;
 
   return (
-    <GroupedPartsRenderer
-      grouped={grouped}
-      partsIndex={partsIndex}
-      messagesByID={messagesByID}
-      busy={working}
-      shellToolDefaultOpen={shellToolDefaultOpen}
-      editToolDefaultOpen={editToolDefaultOpen}
-    />
+    <>
+      {grouped.length > 0 && (
+        <GroupedPartsRenderer
+          grouped={grouped}
+          partsIndex={partsIndex}
+          messagesByID={messagesByID}
+          busy={working}
+          shellToolDefaultOpen={shellToolDefaultOpen}
+          editToolDefaultOpen={editToolDefaultOpen}
+        />
+      )}
+      {showPresented && <PresentedFiles files={presented} />}
+    </>
   );
 }
 

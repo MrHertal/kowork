@@ -226,7 +226,11 @@ export function registerIpcHandlers(deps: Deps) {
   ipcMain.handle(
     "open-path",
     async (_event: IpcMainInvokeEvent, path: string, app?: string) => {
-      if (!app) return shell.openPath(path);
+      if (!app) {
+        const error = await shell.openPath(path);
+        if (error) throw new Error(error);
+        return;
+      }
       await new Promise<void>((resolve, reject) => {
         const [cmd, args] =
           process.platform === "darwin"

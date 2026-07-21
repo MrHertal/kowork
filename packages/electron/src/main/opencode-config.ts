@@ -61,6 +61,83 @@ function readPaths(config: unknown): string[] {
     : [];
 }
 
+const permissionActions = new Set(["allow", "ask", "deny"]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isPermissionAction(value: unknown): value is string {
+  return typeof value === "string" && permissionActions.has(value);
+}
+
+export async function ensureSkillDenied(name: string): Promise<void> {
+  const config = await readConfig();
+  const permission = isRecord(config) ? config.permission : undefined;
+  if (permission === "deny") return;
+
+  if (isPermissionAction(permission)) {
+    await patchConfig(["permission"], {
+      "*": permission,
+      skill: { [name]: "deny" },
+    });
+    return;
+  }
+  if (permission !== undefined && !isRecord(permission)) {
+    throw new Error("invalid permission configuration");
+  }
+
+  const skill = permission?.skill;
+  if (skill !== undefined && !isPermissionAction(skill) && !isRecord(skill)) {
+    throw new Error("invalid skill permission configuration");
+  }
+  const skillLast = Object.keys(permission ?? {}).at(-1) === "skill";
+  if (
+    skillLast &&
+    (skill === "deny" ||
+      (isRecord(skill) &&
+        skill[name] === "deny" &&
+        Object.keys(skill).at(-1) === name))
+  ) {
+    return;
+  }
+
+  if (!skillLast) {
+    const nextSkill =
+      skill === "deny"
+        ? skill
+        : isRecord(skill)
+          ? {
+              ...Object.fromEntries(
+                Object.entries(skill).filter(([key]) => key !== name),
+              ),
+              [name]: "deny",
+            }
+          : {
+              ...(isPermissionAction(skill) ? { "*": skill } : {}),
+              [name]: "deny",
+            };
+    if (skill !== undefined) {
+      await patchConfig(["permission", "skill"], undefined);
+    }
+    await patchConfig(["permission", "skill"], nextSkill);
+    return;
+  }
+
+  if (isRecord(skill)) {
+    if (Object.hasOwn(skill, name)) {
+      await patchConfig(["permission", "skill", name], undefined);
+    }
+    await patchConfig(["permission", "skill", name], "deny");
+    return;
+  }
+
+  await patchConfig(["permission", "skill"], {
+    ...(isPermissionAction(skill) ? { "*": skill } : {}),
+    [name]: "deny",
+  });
+}
+
 export async function ensureSkillsPath(dir: string): Promise<void> {
   const paths = readPaths(await readConfig());
   if (paths.includes(dir)) return;
