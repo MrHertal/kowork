@@ -8,6 +8,10 @@ import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { MessageContent } from "@/components/ai-elements/message";
 import { Activity } from "@/components/session/activity";
 import {
+  type ActivityCategory,
+  classifyActivityPart,
+} from "@/components/session/activity-classification";
+import {
   PresentedFiles,
   type PresentedFile,
 } from "@/components/session/presented-files";
@@ -430,29 +434,90 @@ function activityStatus(
   group: PartGroup,
   partsIndex: Map<string, Map<string, Part>>,
 ): string {
-  if (group.type === "context") return m.session_status_gathering_context();
-  const part = partsIndex.get(group.ref.messageID)?.get(group.ref.partID);
-  if (part?.type === "reasoning") return m.session_status_thinking();
-  if (part?.type !== "tool") return m.session_activity_working();
+  const category = (() => {
+    if (group.type === "context") return "context";
+    const part = partsIndex.get(group.ref.messageID)?.get(group.ref.partID);
+    if (!part) return undefined;
+    return classifyActivityPart(part);
+  })();
 
-  switch (part.tool) {
-    case "read":
-    case "list":
-    case "glob":
-    case "grep":
-    case "webfetch":
+  switch (category) {
+    case "thinking":
+      return m.session_status_thinking();
+    case "context":
       return m.session_status_gathering_context();
-    case "edit":
-    case "write":
-    case "apply_patch":
+    case "modification":
       return m.session_activity_making_changes();
-    case "bash":
+    case "command":
       return m.session_activity_running_command();
     case "skill":
-      return m.session_activity_preparing();
+      return m.session_activity_loading_skill();
     default:
       return m.session_activity_working();
   }
+}
+
+function activitySummary(
+  groups: PartGroup[],
+  partsIndex: Map<string, Map<string, Part>>,
+): string {
+  const counts = new Map<Exclude<ActivityCategory, "thinking">, number>();
+  const seen = new Set<string>();
+
+  for (const group of groups) {
+    const refs = group.type === "context" ? group.refs : [group.ref];
+    for (const ref of refs) {
+      const part = partsIndex.get(ref.messageID)?.get(ref.partID);
+      if (
+        part?.type !== "tool" ||
+        part.state.status !== "completed" ||
+        seen.has(part.id)
+      )
+        continue;
+      seen.add(part.id);
+
+      const category = classifyActivityPart(part);
+      if (!category || category === "thinking") continue;
+      counts.set(category, (counts.get(category) ?? 0) + 1);
+    }
+  }
+
+  const entries = [...counts];
+  const labels = (entries.length > 3 ? entries.slice(0, 2) : entries).map(
+    ([category, count], index) => {
+      switch (category) {
+        case "context":
+          return index === 0
+            ? m.session_activity_summary_context()
+            : m.session_activity_summary_context_following();
+        case "modification":
+          return count === 1
+            ? m.session_activity_summary_modification_one({ count })
+            : m.session_activity_summary_modification_other({ count });
+        case "command":
+          return count === 1
+            ? m.session_activity_summary_command_one({ count })
+            : m.session_activity_summary_command_other({ count });
+        case "skill":
+          return count === 1
+            ? m.session_activity_summary_skill_one({ count })
+            : m.session_activity_summary_skill_other({ count });
+        case "other":
+          return count === 1
+            ? m.session_activity_summary_other_one({ count })
+            : m.session_activity_summary_other_other({ count });
+      }
+    },
+  );
+
+  if (entries.length > 3) {
+    const count = entries
+      .slice(2)
+      .reduce((total, [, value]) => total + value, 0);
+    labels.push(m.session_activity_summary_more_other({ count }));
+  }
+
+  return labels.join(", ") || m.session_activity_summary_completed();
 }
 
 function GroupedPartsRenderer({
@@ -531,6 +596,7 @@ function GroupedPartsRenderer({
           key={`activity:${activity[0]!.key}`}
           running={busy && last.key === lastKey}
           status={activityStatus(last, partsIndex)}
+          summary={activitySummary(activity, partsIndex)}
         >
           {rendered}
         </Activity>,
