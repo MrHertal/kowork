@@ -30,7 +30,7 @@ export function KoworkIcon({ busy = false }: { busy?: boolean }) {
         transition={
           busy
             ? {
-                duration: 1.2,
+                duration: 0.6,
                 repeat: Number.POSITIVE_INFINITY,
                 ease: "linear",
               }

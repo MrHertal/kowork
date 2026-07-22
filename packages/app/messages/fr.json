@@ -37,6 +37,9 @@
 
   "dialog_delete_description": "« {title} » sera définitivement supprimée. Cette action est irréversible.",
   "dialog_delete_title": "Supprimer la tâche ?",
+  "dialog_externalLink_action": "Ouvrir le lien",
+  "dialog_externalLink_description": "Vous êtes sur le point de visiter un site web externe.",
+  "dialog_externalLink_title": "Ouvrir le lien externe ?",
   "dialog_provider_custom_label": "Personnalisé",
   "dialog_provider_empty": "Aucun fournisseur trouvé",
   "dialog_provider_group_other": "Autre",

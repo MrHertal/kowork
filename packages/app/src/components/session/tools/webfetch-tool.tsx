@@ -1,6 +1,7 @@
 import { ExternalLinkIcon, GlobeIcon } from "lucide-react";
 
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { streamdownLinkSafety } from "@/components/session/external-link-dialog";
 import { usePlatform } from "@/contexts/platform";
 
 import { MessageResponse } from "@/components/ai-elements/message";
@@ -56,7 +57,9 @@ export function WebFetchTool(props: ToolProps) {
       {props.output &&
         (isMarkdown ? (
           <div className="max-h-64 overflow-auto border-l-2 border-muted pl-4">
-            <MessageResponse>{props.output}</MessageResponse>
+            <MessageResponse linkSafety={streamdownLinkSafety}>
+              {props.output}
+            </MessageResponse>
           </div>
         ) : (
           <div className="max-h-64 overflow-auto">

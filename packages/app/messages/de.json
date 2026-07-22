@@ -37,6 +37,9 @@
 
   "dialog_delete_description": "„{title}“ wird unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
   "dialog_delete_title": "Aufgabe löschen?",
+  "dialog_externalLink_action": "Link öffnen",
+  "dialog_externalLink_description": "Sie sind dabei, eine externe Website zu besuchen.",
+  "dialog_externalLink_title": "Externen Link öffnen?",
   "dialog_provider_custom_label": "Benutzerdefiniert",
   "dialog_provider_empty": "Keine Anbieter gefunden",
   "dialog_provider_group_other": "Andere",

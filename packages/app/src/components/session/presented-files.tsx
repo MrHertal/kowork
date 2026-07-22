@@ -118,9 +118,13 @@ function PresentedFileCard({
             onClick={handleOpen}
           >
             {opening ? (
-              <Loader2Icon className="animate-spin" aria-hidden="true" />
+              <Loader2Icon
+                data-icon="inline-start"
+                className="animate-spin"
+                aria-hidden="true"
+              />
             ) : (
-              <ExternalLinkIcon aria-hidden="true" />
+              <ExternalLinkIcon data-icon="inline-start" aria-hidden="true" />
             )}
             {m.session_document_open()}
           </Button>

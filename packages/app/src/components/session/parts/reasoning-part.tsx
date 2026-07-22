@@ -7,6 +7,7 @@ import {
   Reasoning,
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
+import { streamdownLinkSafety } from "@/components/session/external-link-dialog";
 import { CollapsibleContent } from "@/components/ui/collapsible";
 
 import { usePacedText } from "./paced-text";
@@ -45,7 +46,7 @@ export function ReasoningPart({
       <CollapsibleContent className="overflow-hidden text-sm text-muted-foreground outline-none data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
         <div className="pt-4">
           <div className="border-l-2 border-muted pl-4">
-            <Streamdown>{paced}</Streamdown>
+            <Streamdown linkSafety={streamdownLinkSafety}>{paced}</Streamdown>
           </div>
         </div>
       </CollapsibleContent>

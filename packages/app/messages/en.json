@@ -37,6 +37,9 @@
 
   "dialog_delete_description": "This will permanently delete “{title}”. This action cannot be undone.",
   "dialog_delete_title": "Delete task?",
+  "dialog_externalLink_action": "Open link",
+  "dialog_externalLink_description": "You're about to visit an external website.",
+  "dialog_externalLink_title": "Open external link?",
   "dialog_provider_custom_label": "Custom",
   "dialog_provider_empty": "No providers found",
   "dialog_provider_group_other": "Other",
