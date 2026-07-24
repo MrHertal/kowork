@@ -169,7 +169,7 @@ export function SelectProvider() {
               aria-label={m.common_search_clear()}
               onClick={() => setSearch("")}
             >
-              <XIcon />
+              <XIcon aria-hidden="true" />
             </InputGroupButton>
           </InputGroupAddon>
         )}

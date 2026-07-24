@@ -17,7 +17,7 @@ export function SidebarRightTrigger() {
       data-state={open ? "open" : "closed"}
       onClick={toggle}
     >
-      <InfoIcon />
+      <InfoIcon aria-hidden="true" />
       <span className="sr-only">{m.sessionInfo_toggle()}</span>
     </Button>
   );

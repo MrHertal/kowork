@@ -33,7 +33,7 @@ export function NavActions({
           className="h-7 w-7"
           aria-label={m.common_moreActions()}
         >
-          <ChevronDown />
+          <ChevronDown aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-fit min-w-48 rounded-lg" align="end">

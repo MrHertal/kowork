@@ -33,16 +33,28 @@ export function PermissionModeSelector({
       <DropdownMenuTrigger asChild>
         <PromptInputButton disabled={disabled} className={className}>
           {auto ? (
-            <FastForward className="size-3" />
+            <FastForward
+              data-icon="inline-start"
+              className="size-3"
+              aria-hidden="true"
+            />
           ) : (
-            <Hand className="size-3" />
+            <Hand
+              data-icon="inline-start"
+              className="size-3"
+              aria-hidden="true"
+            />
           )}
           <span className="truncate">
             {auto
               ? m.session_composer_permission_auto_label()
               : m.session_composer_permission_ask_label()}
           </span>
-          <ChevronDown className="size-3 opacity-60" />
+          <ChevronDown
+            data-icon="inline-end"
+            className="size-3 opacity-60"
+            aria-hidden="true"
+          />
         </PromptInputButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent

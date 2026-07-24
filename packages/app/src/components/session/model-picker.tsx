@@ -62,7 +62,11 @@ export function ModelPicker({ model }: { model: ModelState }) {
       <ModelSelectorTrigger asChild>
         <PromptInputButton className="max-w-[10rem] min-w-0 sm:max-w-[14rem]">
           {model.current && (
-            <ModelSelectorLogo provider={model.current.provider.id} />
+            <ModelSelectorLogo
+              provider={model.current.provider.id}
+              data-icon="inline-start"
+              aria-hidden="true"
+            />
           )}
           {model.current && (
             <ModelSelectorName>{model.current.name}</ModelSelectorName>
@@ -103,7 +107,7 @@ export function ModelPicker({ model }: { model: ModelState }) {
             className="self-start"
             onClick={handleManage}
           >
-            <SettingsIcon />
+            <SettingsIcon data-icon="inline-start" aria-hidden="true" />
             {m.session_model_manage_link()}
           </Button>
         </div>

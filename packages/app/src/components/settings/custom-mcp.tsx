@@ -257,7 +257,7 @@ function CustomMcpForm({ directory }: { directory: string }) {
                             disabled={arrayField.state.value.length <= 1}
                             aria-label={m.settings_mcp_custom_headers_remove()}
                           >
-                            <TrashIcon className="size-4" />
+                            <TrashIcon className="size-4" aria-hidden="true" />
                           </Button>
                         </Field>
                       ))}
@@ -270,7 +270,11 @@ function CustomMcpForm({ directory }: { directory: string }) {
                           arrayField.pushValue({ key: "", value: "" })
                         }
                       >
-                        <PlusIcon className="size-4" />
+                        <PlusIcon
+                          data-icon="inline-start"
+                          className="size-4"
+                          aria-hidden="true"
+                        />
                         {m.settings_mcp_custom_headers_add()}
                       </Button>
                     </FieldSet>
@@ -341,7 +345,7 @@ function CustomMcpForm({ directory }: { directory: string }) {
                             disabled={arrayField.state.value.length <= 1}
                             aria-label={m.settings_mcp_custom_environment_remove()}
                           >
-                            <TrashIcon className="size-4" />
+                            <TrashIcon className="size-4" aria-hidden="true" />
                           </Button>
                         </Field>
                       ))}
@@ -354,7 +358,11 @@ function CustomMcpForm({ directory }: { directory: string }) {
                           arrayField.pushValue({ key: "", value: "" })
                         }
                       >
-                        <PlusIcon className="size-4" />
+                        <PlusIcon
+                          data-icon="inline-start"
+                          className="size-4"
+                          aria-hidden="true"
+                        />
                         {m.settings_mcp_custom_environment_add()}
                       </Button>
                     </FieldSet>

@@ -68,7 +68,7 @@ export function SettingsModels() {
               aria-label={m.common_search_clear()}
               onClick={list.clear}
             >
-              <XIcon />
+              <XIcon aria-hidden="true" />
             </InputGroupButton>
           </InputGroupAddon>
         )}

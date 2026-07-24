@@ -136,9 +136,9 @@ function ResponseActions({
         onClick={handleCopy}
       >
         {copied ? (
-          <CheckIcon className="size-3.5" />
+          <CheckIcon className="size-3.5" aria-hidden="true" />
         ) : (
-          <CopyIcon className="size-3.5" />
+          <CopyIcon className="size-3.5" aria-hidden="true" />
         )}
       </MessageAction>
       {duration && (

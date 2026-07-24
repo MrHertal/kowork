@@ -238,7 +238,7 @@ function FolderField({
           size="sm"
           onClick={handlePick}
         >
-          <FolderIcon />
+          <FolderIcon data-icon="inline-start" aria-hidden="true" />
           {value
             ? m.settings_skills_custom_field_folder_change()
             : m.settings_skills_custom_field_folder_choose()}

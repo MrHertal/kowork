@@ -3,7 +3,6 @@ import {
   FileIcon,
   FileSpreadsheetIcon,
   FileTextIcon,
-  Loader2Icon,
   PresentationIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -12,6 +11,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { usePlatform } from "@/contexts/platform";
 import { useServer } from "@/contexts/server";
 import { cn } from "@/lib/utils";
@@ -118,11 +118,7 @@ function PresentedFileCard({
             onClick={handleOpen}
           >
             {opening ? (
-              <Loader2Icon
-                data-icon="inline-start"
-                className="animate-spin"
-                aria-hidden="true"
-              />
+              <Spinner data-icon="inline-start" />
             ) : (
               <ExternalLinkIcon data-icon="inline-start" aria-hidden="true" />
             )}

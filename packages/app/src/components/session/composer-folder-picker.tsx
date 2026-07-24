@@ -70,13 +70,21 @@ export function ComposerFolderPicker({
         disabled={disabled}
         title={attachedDirectory}
       >
-        <FolderOpen className="size-3" />
+        <FolderOpen
+          data-icon="inline-start"
+          className="size-3"
+          aria-hidden="true"
+        />
         <span className="truncate">
           {attachedDirectory
             ? getFilename(attachedDirectory) || attachedDirectory
             : m.session_composer_folder_label()}
         </span>
-        <ChevronDown className="size-3 opacity-60" />
+        <ChevronDown
+          data-icon="inline-end"
+          className="size-3 opacity-60"
+          aria-hidden="true"
+        />
       </PromptInputActionMenuTrigger>
       <PromptInputActionMenuContent className="w-80 max-w-[calc(100vw-2rem)]">
         <DropdownMenuRadioGroup

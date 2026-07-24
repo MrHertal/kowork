@@ -38,7 +38,11 @@ export function TitlebarSidebarToggle() {
             aria-label={label}
             aria-expanded={expanded}
           >
-            {expanded ? <PanelLeftCloseIcon /> : <PanelLeftOpenIcon />}
+            {expanded ? (
+              <PanelLeftCloseIcon aria-hidden="true" />
+            ) : (
+              <PanelLeftOpenIcon aria-hidden="true" />
+            )}
           </Button>
         </TooltipTrigger>
         <TooltipContent side="bottom">{label}</TooltipContent>

@@ -245,7 +245,7 @@ function ConnectButton({ onClick, ariaLabel, disabled }: ConnectButtonProps) {
         onClick={onClick}
         aria-label={ariaLabel ?? m.settings_mcp_connect()}
       >
-        <PlusIcon />
+        <PlusIcon aria-hidden="true" />
       </Button>
       <Button
         variant="secondary"
@@ -254,7 +254,7 @@ function ConnectButton({ onClick, ariaLabel, disabled }: ConnectButtonProps) {
         disabled={disabled}
         onClick={onClick}
       >
-        <PlusIcon />
+        <PlusIcon data-icon="inline-start" aria-hidden="true" />
         {m.settings_mcp_connect()}
       </Button>
     </>
@@ -312,14 +312,14 @@ function McpRow({
         <div className="flex items-center gap-2">
           {isAuth ? (
             <IconAction
-              icon={<LogInIcon />}
+              icon={<LogInIcon aria-hidden="true" />}
               label={m.settings_mcp_authenticate()}
               onClick={onAuthenticate}
               disabled={busy}
             />
           ) : isError ? (
             <IconAction
-              icon={<RotateCcwIcon />}
+              icon={<RotateCcwIcon aria-hidden="true" />}
               label={m.settings_mcp_retry()}
               onClick={onEnable}
               disabled={busy}
@@ -336,7 +336,7 @@ function McpRow({
             />
           )}
           <IconAction
-            icon={<Trash2Icon />}
+            icon={<Trash2Icon aria-hidden="true" />}
             label={m.settings_mcp_remove()}
             onClick={onRemove}
             disabled={busy}

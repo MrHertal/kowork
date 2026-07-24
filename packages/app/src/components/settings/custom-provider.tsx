@@ -283,7 +283,7 @@ export function CustomProvider({ back }: { back?: "providers" | "settings" }) {
                       disabled={arrayField.state.value.length <= 1}
                       aria-label={m.provider_custom_models_remove()}
                     >
-                      <TrashIcon className="size-4" />
+                      <TrashIcon className="size-4" aria-hidden="true" />
                     </Button>
                   </Field>
                 ))}
@@ -294,7 +294,11 @@ export function CustomProvider({ back }: { back?: "providers" | "settings" }) {
                   className="self-start"
                   onClick={() => arrayField.pushValue({ id: "", name: "" })}
                 >
-                  <PlusIcon className="size-4" />
+                  <PlusIcon
+                    data-icon="inline-start"
+                    className="size-4"
+                    aria-hidden="true"
+                  />
                   {m.provider_custom_models_add()}
                 </Button>
               </FieldSet>
@@ -345,7 +349,7 @@ export function CustomProvider({ back }: { back?: "providers" | "settings" }) {
                       disabled={arrayField.state.value.length <= 1}
                       aria-label={m.provider_custom_headers_remove()}
                     >
-                      <TrashIcon className="size-4" />
+                      <TrashIcon className="size-4" aria-hidden="true" />
                     </Button>
                   </Field>
                 ))}
@@ -356,7 +360,11 @@ export function CustomProvider({ back }: { back?: "providers" | "settings" }) {
                   className="self-start"
                   onClick={() => arrayField.pushValue({ key: "", value: "" })}
                 >
-                  <PlusIcon className="size-4" />
+                  <PlusIcon
+                    data-icon="inline-start"
+                    className="size-4"
+                    aria-hidden="true"
+                  />
                   {m.provider_custom_headers_add()}
                 </Button>
               </FieldSet>

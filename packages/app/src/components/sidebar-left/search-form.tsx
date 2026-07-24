@@ -48,7 +48,7 @@ export function SearchForm() {
                   aria-label={m.common_search_clear()}
                   onClick={() => setQuery("")}
                 >
-                  <X />
+                  <X aria-hidden="true" />
                 </InputGroupButton>
               </InputGroupAddon>
             ) : null}

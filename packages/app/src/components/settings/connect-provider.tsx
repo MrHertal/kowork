@@ -450,7 +450,7 @@ export function ConnectProvider({
             aria-label={m.common_back()}
             tabIndex={showBack ? 0 : -1}
           >
-            <ArrowLeftIcon className="size-4" />
+            <ArrowLeftIcon className="size-4" aria-hidden="true" />
           </Button>
         </div>
         <ModelSelectorLogo provider={providerID} className="size-5 shrink-0" />
@@ -1014,7 +1014,7 @@ function OAuthAutoView({
               }}
               aria-label={m.provider_copyConfirmationCode()}
             >
-              <ClipboardCopyIcon className="size-4" />
+              <ClipboardCopyIcon className="size-4" aria-hidden="true" />
             </Button>
           </div>
         </Field>

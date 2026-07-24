@@ -220,7 +220,7 @@ export function SettingsProviders() {
                   action={
                     canDisconnect ? (
                       <IconAction
-                        icon={<UnplugIcon />}
+                        icon={<UnplugIcon aria-hidden="true" />}
                         label={m.provider_disconnect_label()}
                         tooltip={
                           isPending
@@ -270,7 +270,7 @@ export function SettingsProviders() {
                       onClick={() => handleConnect(item.id)}
                       aria-label={m.settings_providers_custom_connect()}
                     >
-                      <PlusIcon />
+                      <PlusIcon aria-hidden="true" />
                     </Button>
                     <Button
                       variant="secondary"
@@ -278,7 +278,7 @@ export function SettingsProviders() {
                       className="hidden sm:inline-flex"
                       onClick={() => handleConnect(item.id)}
                     >
-                      <PlusIcon />
+                      <PlusIcon data-icon="inline-start" aria-hidden="true" />
                       {m.settings_providers_custom_connect()}
                     </Button>
                   </>
@@ -305,7 +305,7 @@ export function SettingsProviders() {
                   onClick={handleCustom}
                   aria-label={m.settings_providers_custom_connect()}
                 >
-                  <PlusIcon />
+                  <PlusIcon aria-hidden="true" />
                 </Button>
                 <Button
                   variant="secondary"
@@ -313,7 +313,7 @@ export function SettingsProviders() {
                   className="hidden sm:inline-flex"
                   onClick={handleCustom}
                 >
-                  <PlusIcon />
+                  <PlusIcon data-icon="inline-start" aria-hidden="true" />
                   {m.settings_providers_custom_connect()}
                 </Button>
               </>
@@ -327,7 +327,7 @@ export function SettingsProviders() {
           className="self-start"
           onClick={handleViewAll}
         >
-          <ChevronRightIcon />
+          <ChevronRightIcon data-icon="inline-start" aria-hidden="true" />
           {m.dialog_provider_viewAll()}
         </Button>
       </div>
