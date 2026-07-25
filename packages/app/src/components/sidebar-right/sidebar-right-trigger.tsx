@@ -1,24 +1,52 @@
-import { InfoIcon } from "lucide-react";
+import { useEffect } from "react";
+import { PanelRightCloseIcon, PanelRightOpenIcon } from "lucide-react";
 
+import { SIDEBAR_EXPANDED_WIDTH, TitlebarSlot } from "@/components/titlebar";
 import { m } from "@/paraglide/messages";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { useSidebarRight } from "./sidebar-right-context";
 
 export function SidebarRightTrigger() {
-  const { open, toggle } = useSidebarRight();
+  const { available, open, toggle, visible } = useSidebarRight();
+  const label = open ? m.sessionInfo_hide() : m.sessionInfo_show();
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--titlebar-right-width",
+      visible ? SIDEBAR_EXPANDED_WIDTH : "0px",
+    );
+  }, [visible]);
+
+  if (!available) return null;
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="size-7 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
-      data-state={open ? "open" : "closed"}
-      onClick={toggle}
-    >
-      <InfoIcon aria-hidden="true" />
-      <span className="sr-only">{m.sessionInfo_toggle()}</span>
-    </Button>
+    <TitlebarSlot name="right">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden h-7 w-7 lg:inline-flex"
+            onClick={toggle}
+            aria-label={label}
+            aria-expanded={visible}
+          >
+            {open ? (
+              <PanelRightCloseIcon aria-hidden="true" />
+            ) : (
+              <PanelRightOpenIcon aria-hidden="true" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">{label}</TooltipContent>
+      </Tooltip>
+    </TitlebarSlot>
   );
 }

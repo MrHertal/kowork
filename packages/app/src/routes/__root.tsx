@@ -1,5 +1,9 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import {
+  createRootRouteWithContext,
+  Outlet,
+  useRouterState,
+} from "@tanstack/react-router";
 import { Fragment, type ReactNode, useEffect } from "react";
 import { ConnectionGate } from "@/components/connection-gate";
 import { ServerKey } from "@/components/server-key";
@@ -23,10 +27,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorScreen } from "@/components/error-screen";
 import { SidebarLeft } from "@/components/sidebar-left/sidebar-left";
 import { SidebarRight } from "@/components/sidebar-right/sidebar-right";
-import {
-  SidebarRightProvider,
-  useSidebarRight,
-} from "@/components/sidebar-right/sidebar-right-context";
+import { SidebarRightProvider } from "@/components/sidebar-right/sidebar-right-context";
+import { SidebarRightTrigger } from "@/components/sidebar-right/sidebar-right-trigger";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useMcpBrowserFailedToast } from "@/hooks/use-mcp-browser-failed-toast";
 
@@ -48,7 +50,6 @@ function LocaleRemountBoundary({ children }: { children: ReactNode }) {
 }
 
 function RootLayout() {
-  const { open: rightSidebarOpen } = useSidebarRight();
   const { platform, os, webviewZoom } = usePlatform();
   useMcpBrowserFailedToast();
 
@@ -70,6 +71,7 @@ function RootLayout() {
       <Titlebar />
       <SidebarProvider className="min-h-0 flex-1">
         <TitlebarSidebarToggle />
+        <SidebarRightTrigger />
         <MenuCommands />
         <SidebarLeft />
         <SidebarInset className="min-w-0">
@@ -77,7 +79,7 @@ function RootLayout() {
             <Outlet />
           </div>
         </SidebarInset>
-        {rightSidebarOpen && <SidebarRight />}
+        <SidebarRight />
       </SidebarProvider>
     </div>
   );
@@ -86,6 +88,10 @@ function RootLayout() {
 function RootRoute() {
   const { defaultServer, disableHealthCheck, servers } =
     Route.useRouteContext();
+  const rightSidebarAvailable = useRouterState({
+    select: (state) =>
+      state.matches.some((match) => match.routeId === "/session/$id"),
+  });
 
   return (
     <ServerProvider
@@ -107,7 +113,9 @@ function RootRoute() {
                             <TooltipProvider>
                               <DialogProvider>
                                 <LocaleRemountBoundary>
-                                  <SidebarRightProvider>
+                                  <SidebarRightProvider
+                                    routeAvailable={rightSidebarAvailable}
+                                  >
                                     <RootLayout />
                                   </SidebarRightProvider>
                                   <Toaster

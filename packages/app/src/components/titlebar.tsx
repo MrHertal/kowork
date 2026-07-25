@@ -79,7 +79,14 @@ export function Titlebar() {
         </div>
         <div
           id="kowork-titlebar-right"
-          className="flex h-full flex-none items-center justify-end gap-1 pr-2"
+          className="flex h-full min-w-max flex-none items-center justify-end gap-1 pr-2 [transition:width_200ms_linear] lg:w-[max(0px,calc(var(--titlebar-right-width,0px)-var(--titlebar-right-controls-width,0px)))]"
+          style={
+            {
+              "--titlebar-right-controls-width": windows
+                ? controlsWidth
+                : "0px",
+            } as CSSProperties
+          }
         />
       </div>
     </header>

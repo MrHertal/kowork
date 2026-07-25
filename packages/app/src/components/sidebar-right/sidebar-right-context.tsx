@@ -7,8 +7,11 @@ import {
 } from "react";
 
 interface SidebarRightContextProps {
+  available: boolean;
   open: boolean;
+  visible: boolean;
   toggle: () => void;
+  _registerContent: () => () => void;
 }
 
 const SidebarRightContext = createContext<SidebarRightContextProps | null>(
@@ -26,13 +29,31 @@ export function useSidebarRight() {
 }
 
 export function SidebarRightProvider({
+  routeAvailable,
   children,
 }: {
+  routeAvailable: boolean;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const [contentAvailable, setContentAvailable] = useState(false);
+  const [open, setOpen] = useState(true);
+  const available = routeAvailable && contentAvailable;
   const toggle = useCallback(() => setOpen((prev) => !prev), []);
-  const value = useMemo(() => ({ open, toggle }), [open, toggle]);
+  const registerContent = useCallback(() => {
+    setContentAvailable(true);
+    return () => setContentAvailable(false);
+  }, []);
+  const visible = available && open;
+  const value = useMemo(
+    () => ({
+      available,
+      open,
+      visible,
+      toggle,
+      _registerContent: registerContent,
+    }),
+    [available, open, visible, toggle, registerContent],
+  );
 
   return (
     <SidebarRightContext.Provider value={value}>
