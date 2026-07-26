@@ -71,7 +71,7 @@ export function Titlebar() {
             paddingLeft: mac ? `${MAC_TRAFFIC_LIGHT_INSET / zoom}px` : "8px",
           }}
         />
-        <div className="pointer-events-none flex h-full min-w-0 flex-1 items-center justify-start pl-4">
+        <div className="pointer-events-none flex h-full min-w-0 flex-1 items-center justify-start px-4">
           <div
             id="kowork-titlebar-center"
             className="pointer-events-auto flex w-fit max-w-full min-w-0 items-center justify-start gap-2"
@@ -79,7 +79,7 @@ export function Titlebar() {
         </div>
         <div
           id="kowork-titlebar-right"
-          className="flex h-full min-w-max flex-none items-center justify-end gap-1 pr-2 [transition:width_200ms_linear] lg:w-[max(0px,calc(var(--titlebar-right-width,0px)-var(--titlebar-right-controls-width,0px)))]"
+          className="flex h-full min-w-max flex-none items-center justify-end gap-1 pr-2 [transition:width_200ms_linear] motion-reduce:transition-none lg:w-[max(0px,calc(var(--titlebar-right-width,0px)-var(--titlebar-right-controls-width,0px)))]"
           style={
             {
               "--titlebar-right-controls-width": windows
