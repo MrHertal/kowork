@@ -21,8 +21,8 @@ export function SearchForm() {
   const { setQuery } = useSearchSessions();
 
   return (
-    <form onSubmit={(e) => e.preventDefault()}>
-      <SidebarGroup className="mt-1 px-4 py-0">
+    <form className="mb-2" onSubmit={(e) => e.preventDefault()}>
+      <SidebarGroup className="mt-4 px-4 py-0">
         <SidebarGroupContent>
           <Label htmlFor="search" className="sr-only">
             {m.sidebar_search_label()}

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 
 import { ErrorAlert } from "@/components/error-alert";
+import { TitlebarSlot } from "@/components/titlebar";
 import { Button } from "@/components/ui/button";
 import { useGlobalData, useGlobalSync } from "@/contexts/global-sync";
 import { LocalProvider } from "@/contexts/local";
@@ -13,8 +14,19 @@ import { m } from "@/paraglide/messages";
 import { Page } from "@/pages/session";
 
 export const Route = createFileRoute("/")({
-  component: IndexRoute,
+  component: IndexPage,
 });
+
+function IndexPage() {
+  return (
+    <>
+      <TitlebarSlot name="center">
+        <span className="truncate text-sm text-foreground">Kowork</span>
+      </TitlebarSlot>
+      <IndexRoute />
+    </>
+  );
+}
 
 function IndexRoute() {
   const defaultDirectory = useGlobalData((s) => s.path.directory);

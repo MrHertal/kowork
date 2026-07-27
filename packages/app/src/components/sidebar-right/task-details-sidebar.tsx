@@ -35,7 +35,7 @@ export function TaskDetailsSidebar({
           {label}
         </h2>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="gap-0">
         {showProgress && <TaskProgressSection todos={todos} />}
       </SidebarContent>
       <SidebarFooter />

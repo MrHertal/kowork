@@ -61,8 +61,8 @@ export function TaskProgressSection({ todos }: { todos: Todo[] }) {
                 {completed}/{todos.length}
               </span>
             </QueueSectionTrigger>
-            <QueueSectionContent>
-              <QueueList className="mt-1 mb-0">
+            <QueueSectionContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+              <QueueList className="mt-1 mb-0 [&_.max-h-40]:max-h-none">
                 {todos.map((todo, index) => {
                   const completed = todo.status === "completed";
                   const cancelled = todo.status === "cancelled";
