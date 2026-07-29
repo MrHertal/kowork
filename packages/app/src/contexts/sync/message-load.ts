@@ -6,7 +6,7 @@ import type { GlobalSyncContextValue } from "@/contexts/global-sync";
 import { sortParts, merge, keyFor } from "./utils";
 import { mergeOptimisticPage, type OptimisticItem } from "./optimistic";
 
-const SKIP_PARTS = new Set(["patch", "step-start", "step-finish"]);
+const SKIP_PARTS = new Set(["step-start", "step-finish"]);
 
 function preferDeltaExtension(cached: Part, fetched: Part): Part {
   if (cached.id !== fetched.id || cached.type !== fetched.type) return fetched;

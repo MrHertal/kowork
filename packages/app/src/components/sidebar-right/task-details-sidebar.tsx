@@ -1,5 +1,6 @@
 import type { SessionHeaderModel } from "@/components/header/session-header-content";
 import { SidebarRightSlot } from "@/components/sidebar-right/sidebar-right-slot";
+import { TaskFilesSection } from "@/components/sidebar-right/task-files-section";
 import { TaskProgressSection } from "@/components/sidebar-right/task-progress-section";
 import {
   SidebarContent,
@@ -8,6 +9,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useChildData } from "@/contexts/global-sync";
 import { useSDK } from "@/contexts/sdk";
+import { useSessionFiles } from "@/hooks/use-session-files";
 import { useSessionTodos } from "@/hooks/use-session-todos";
 import { m } from "@/paraglide/messages";
 
@@ -17,6 +19,7 @@ export function TaskDetailsSidebar({
 }: Pick<SessionHeaderModel, "title"> & { sessionId: string }) {
   const sdk = useSDK();
   const label = title || m.common_untitled();
+  const files = useSessionFiles(sessionId);
   const todos = useSessionTodos(sessionId);
   const sessionStatus = useChildData(
     sdk.directory,
@@ -37,6 +40,7 @@ export function TaskDetailsSidebar({
       </SidebarHeader>
       <SidebarContent className="gap-0">
         {showProgress && <TaskProgressSection todos={todos} />}
+        {files.length > 0 && <TaskFilesSection files={files} />}
       </SidebarContent>
       <SidebarFooter />
     </SidebarRightSlot>

@@ -16,7 +16,7 @@ import { dropSessionCaches } from "./session-cache";
 import { trimSessions } from "./session-trim";
 import type { State } from "./types";
 
-const SKIP_PARTS = new Set(["patch", "step-start", "step-finish"]);
+const SKIP_PARTS = new Set(["step-start", "step-finish"]);
 
 export function applyGlobalEvent(input: {
   event: { type: string; properties?: unknown };

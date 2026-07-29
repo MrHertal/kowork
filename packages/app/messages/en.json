@@ -162,6 +162,9 @@
   "server_retrying": "Retrying automatically...",
   "server_unreachable": "Could not reach {server}",
 
+  "sessionInfo_fileCount_one": "{count} file",
+  "sessionInfo_fileCount_other": "{count} files",
+  "sessionInfo_filesChanged": "Changes",
   "sessionInfo_hide": "Hide task information",
   "sessionInfo_progress": "Progress",
   "sessionInfo_show": "Show task information",

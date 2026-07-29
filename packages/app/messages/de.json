@@ -162,6 +162,9 @@
   "server_retrying": "Automatische erneute Verbindung...",
   "server_unreachable": "Konnte {server} nicht erreichen",
 
+  "sessionInfo_fileCount_one": "{count} Datei",
+  "sessionInfo_fileCount_other": "{count} Dateien",
+  "sessionInfo_filesChanged": "Änderungen",
   "sessionInfo_hide": "Aufgabeninformationen ausblenden",
   "sessionInfo_progress": "Fortschritt",
   "sessionInfo_show": "Aufgabeninformationen anzeigen",
