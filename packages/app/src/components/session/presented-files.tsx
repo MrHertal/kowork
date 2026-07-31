@@ -6,7 +6,7 @@ import {
   PresentationIcon,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { usePlatform } from "@/contexts/platform";
 import { useServer } from "@/contexts/server";
+import { useDelayedShow } from "@/hooks/use-delayed-show";
 import { cn } from "@/lib/utils";
 import { m } from "@/paraglide/messages";
 
@@ -25,6 +26,9 @@ export type PresentedFile = {
 };
 
 type DocumentKind = "word" | "excel" | "powerpoint" | "pdf";
+
+const openSpinnerDelay = 250;
+const openSpinnerMinimum = 300;
 
 const icons: Record<DocumentKind, LucideIcon> = {
   word: FileTextIcon,
@@ -65,12 +69,19 @@ function PresentedFileCard({
   canOpen: boolean;
   openPath?: (path: string) => Promise<void>;
 }) {
+  const openingRef = useRef(false);
   const [opening, setOpening] = useState(false);
+  const showOpening = useDelayedShow(
+    opening,
+    openSpinnerDelay,
+    openSpinnerMinimum,
+  );
   const kind = documentKind(file);
   const Icon = icons[kind];
 
   const handleOpen = async () => {
-    if (opening || !canOpen || !openPath) return;
+    if (openingRef.current || !canOpen || !openPath) return;
+    openingRef.current = true;
     setOpening(true);
     try {
       await openPath(file.path);
@@ -79,6 +90,7 @@ function PresentedFileCard({
         description: m.session_document_open_failed_description(),
       });
     } finally {
+      openingRef.current = false;
       setOpening(false);
     }
   };
@@ -114,11 +126,16 @@ function PresentedFileCard({
             type="button"
             variant="outline"
             size="sm"
-            disabled={opening}
+            disabled={showOpening}
+            aria-busy={opening || showOpening}
+            aria-disabled={opening || showOpening}
             onClick={handleOpen}
           >
-            {opening ? (
-              <Spinner data-icon="inline-start" />
+            {showOpening ? (
+              <Spinner
+                data-icon="inline-start"
+                aria-label={m.common_loading()}
+              />
             ) : (
               <ExternalLinkIcon data-icon="inline-start" aria-hidden="true" />
             )}

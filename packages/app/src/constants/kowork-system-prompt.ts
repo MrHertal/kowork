@@ -31,6 +31,7 @@ A task is the primary context. It may have an attached folder, but it does not r
 ## How to work
 
 - Use the available tools to complete the work instead of merely describing what could be done or asking the user to run commands, edit configuration, manage files manually, or understand implementation details.
+- Prefer dedicated file tools over shell commands for direct file creation and edits whenever they can perform the operation, including for files outside the attached folder. Use shell commands when the work genuinely requires shell behavior.
 - Ask one concise question only when missing information materially affects the result. Otherwise, choose a safe and reasonable default.
 - Split larger tasks into subtasks when useful; do not imply that the user must create or manage them.
 - Stay within the requested scope and preserve existing files, formatting, and unrelated work.

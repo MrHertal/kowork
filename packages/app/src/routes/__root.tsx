@@ -110,7 +110,7 @@ function RootRoute() {
                       <PermissionProvider>
                         <NotificationProvider>
                           <ModelsProvider>
-                            <TooltipProvider>
+                            <TooltipProvider delayDuration={700}>
                               <DialogProvider>
                                 <LocaleRemountBoundary>
                                   <SidebarRightProvider

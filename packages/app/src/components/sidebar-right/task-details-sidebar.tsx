@@ -7,7 +7,6 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { useChildData } from "@/contexts/global-sync";
 import { useSDK } from "@/contexts/sdk";
 import { useSessionFiles } from "@/hooks/use-session-files";
 import { useSessionTodos } from "@/hooks/use-session-todos";
@@ -21,15 +20,9 @@ export function TaskDetailsSidebar({
   const label = title || m.common_untitled();
   const files = useSessionFiles(sessionId);
   const todos = useSessionTodos(sessionId);
-  const sessionStatus = useChildData(
-    sdk.directory,
-    (state) => state.session_status[sessionId],
-  );
-  const working = !!sessionStatus && sessionStatus.type !== "idle";
-  const hasOpenSteps = todos.some(
+  const showProgress = todos.some(
     (todo) => todo.status !== "completed" && todo.status !== "cancelled",
   );
-  const showProgress = todos.length > 0 && (working || hasOpenSteps);
 
   return (
     <SidebarRightSlot>
@@ -40,7 +33,9 @@ export function TaskDetailsSidebar({
       </SidebarHeader>
       <SidebarContent className="gap-0">
         {showProgress && <TaskProgressSection todos={todos} />}
-        {files.length > 0 && <TaskFilesSection files={files} />}
+        {files.length > 0 && (
+          <TaskFilesSection files={files} directory={sdk.directory} />
+        )}
       </SidebarContent>
       <SidebarFooter />
     </SidebarRightSlot>

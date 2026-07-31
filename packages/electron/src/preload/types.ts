@@ -56,6 +56,7 @@ export type ElectronAPI = {
   }) => Promise<string | null>;
   openLink: (url: string) => void;
   openPath: (path: string, app?: string) => Promise<void>;
+  showItemInFolder: (path: string) => Promise<void>;
   readClipboardImage: () => Promise<{
     buffer: ArrayBuffer;
     width: number;

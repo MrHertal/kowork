@@ -79,15 +79,28 @@ function createPlatform(): Platform {
     return undefined;
   })();
 
+  const isWslEnabled = async () => {
+    if (os !== "windows") return false;
+    return window.api
+      .getWslConfig()
+      .then((config) => config.enabled)
+      .catch(() => false);
+  };
+
+  const resolveNativePath = async (path: string) => {
+    if (os !== "windows" || !(await isWslEnabled())) return path;
+    return window.api.wslPath(path, "windows").catch(() => path);
+  };
+
   const wslHome = async () => {
-    if (os !== "windows" || !window.__KOWORK__?.wsl) return undefined;
+    if (!(await isWslEnabled())) return undefined;
     return window.api.wslPath("~", "windows").catch(() => undefined);
   };
 
   const handleWslPicker = async <T extends string | string[]>(
     result: T | null,
   ): Promise<T | null> => {
-    if (!result || !window.__KOWORK__?.wsl) return result;
+    if (!result || !(await isWslEnabled())) return result;
     if (Array.isArray(result)) {
       return Promise.all(
         result.map((path) =>
@@ -108,7 +121,7 @@ function createPlatform(): Platform {
     async openDirectoryPickerDialog(opts) {
       const defaultPath = await (async () => {
         if (!opts?.defaultPath) return wslHome();
-        if (!window.__KOWORK__?.wsl) return opts.defaultPath;
+        if (!(await isWslEnabled())) return opts.defaultPath;
         return window.api
           .wslPath(opts.defaultPath, "windows")
           .catch(() => opts.defaultPath);
@@ -148,18 +161,14 @@ function createPlatform(): Platform {
         const resolvedApp = app
           ? await window.api.resolveAppPath(app).catch(() => null)
           : null;
-        const resolvedPath = await (async () => {
-          if (window.__KOWORK__?.wsl) {
-            const converted = await window.api
-              .wslPath(path, "windows")
-              .catch(() => null);
-            if (converted) return converted;
-          }
-          return path;
-        })();
+        const resolvedPath = await resolveNativePath(path);
         return window.api.openPath(resolvedPath, resolvedApp ?? undefined);
       }
       return window.api.openPath(path, app);
+    },
+
+    async showItemInFolder(path: string) {
+      return window.api.showItemInFolder(await resolveNativePath(path));
     },
 
     back() {

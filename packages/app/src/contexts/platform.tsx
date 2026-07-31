@@ -27,6 +27,7 @@ export type Platform = {
 
   openLink: (url: string) => void;
   openPath?: (path: string, app?: string) => Promise<void>;
+  showItemInFolder?: (path: string) => Promise<void>;
 
   back: () => void;
   forward: () => void;

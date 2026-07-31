@@ -1,3 +1,5 @@
+// @opencode-ref: opencode/packages/app/src/components/dialog-select-directory.tsx
+
 export function getFilename(path: string | undefined) {
   if (!path) return "";
   const trimmed = path.replace(/[/\\]+$/, "");
@@ -44,6 +46,31 @@ export function relativizePath(path: string, directory?: string): string {
     : directory + separator;
   if (!path.startsWith(prefix)) return path;
   return path.slice(directory.length);
+}
+
+export function abbreviateHomePath(path: string, home: string): string {
+  if (!path || !home) return path;
+  const normalized = path.replaceAll("\\", "/").replace(/\/+$/, "");
+  const normalizedHome = home.replaceAll("\\", "/").replace(/\/+$/, "");
+  const insensitive =
+    /^[A-Za-z]:\//.test(normalizedHome) || normalizedHome.startsWith("//");
+  const comparable = insensitive ? normalized.toLowerCase() : normalized;
+  const comparableHome = insensitive
+    ? normalizedHome.toLowerCase()
+    : normalizedHome;
+
+  if (comparable === comparableHome) return "~";
+  if (!comparable.startsWith(`${comparableHome}/`)) return path;
+  return `~${normalized.slice(normalizedHome.length)}`;
+}
+
+export function absolutizePath(path: string, directory: string): string {
+  if (!path || !directory) return path;
+  const normalized = path.replaceAll("\\", "/");
+  if (normalized.startsWith("/") || /^[A-Za-z]:\//.test(normalized))
+    return normalized;
+  const root = directory.replaceAll("\\", "/").replace(/\/+$/, "");
+  return `${root}/${normalized.replace(/^\/+/, "")}`;
 }
 
 export function truncateMiddle(text: string, maxLength: number = 20) {

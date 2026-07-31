@@ -11,11 +11,12 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useGlobalData } from "@/contexts/global-sync";
 import { usePlatform } from "@/contexts/platform";
 import { useRecentSessionsData } from "@/contexts/recent-sessions";
 import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
-import { getFilename, truncateMiddle } from "@/utils/path";
+import { abbreviateHomePath, getFilename, truncateMiddle } from "@/utils/path";
 import { getRecentFolders } from "@/utils/recent-folders";
 
 interface ComposerFolderPickerProps {
@@ -35,6 +36,7 @@ export function ComposerFolderPicker({
 }: ComposerFolderPickerProps) {
   const platform = usePlatform();
   const server = useServer();
+  const home = useGlobalData((state) => state.path.home);
   const canChooseDifferent =
     !!platform.openDirectoryPickerDialog &&
     (server.isLocal ||
@@ -68,7 +70,11 @@ export function ComposerFolderPicker({
       <PromptInputActionMenuTrigger
         className="max-w-[10rem] min-w-0 sm:max-w-[14rem]"
         disabled={disabled}
-        title={attachedDirectory}
+        title={
+          attachedDirectory
+            ? abbreviateHomePath(attachedDirectory, home)
+            : undefined
+        }
       >
         <FolderOpen
           data-icon="inline-start"
@@ -86,29 +92,35 @@ export function ComposerFolderPicker({
           aria-hidden="true"
         />
       </PromptInputActionMenuTrigger>
-      <PromptInputActionMenuContent className="w-80 max-w-[calc(100vw-2rem)]">
+      <PromptInputActionMenuContent className="w-[22rem] max-w-[calc(100vw-2rem)]">
         <DropdownMenuRadioGroup
           value={attachedDirectory}
           onValueChange={onDirectoryChange}
           className="**:data-[slot=dropdown-menu-radio-item-indicator]:top-1/2 **:data-[slot=dropdown-menu-radio-item-indicator]:-translate-y-1/2"
         >
-          {folderOptions.map((folder) => (
-            <DropdownMenuRadioItem
-              key={folder}
-              value={folder}
-              className="items-start"
-              disabled={disabled}
-              title={folder}
-            >
-              <Folder className="mt-0.5" />
-              <div className="min-w-0 flex-1">
-                <div className="truncate">{getFilename(folder) || folder}</div>
-                <div className="truncate text-xs font-normal text-muted-foreground opacity-75">
-                  {truncateMiddle(folder, 32)}
+          {folderOptions.map((folder) => {
+            const displayPath = abbreviateHomePath(folder, home);
+
+            return (
+              <DropdownMenuRadioItem
+                key={folder}
+                value={folder}
+                className="items-start"
+                disabled={disabled}
+                title={displayPath}
+              >
+                <Folder className="mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate">
+                    {getFilename(folder) || folder}
+                  </div>
+                  <div className="truncate text-xs font-normal text-muted-foreground opacity-75">
+                    {truncateMiddle(displayPath, 40)}
+                  </div>
                 </div>
-              </div>
-            </DropdownMenuRadioItem>
-          ))}
+              </DropdownMenuRadioItem>
+            );
+          })}
         </DropdownMenuRadioGroup>
         {folderOptions.length > 0 && <DropdownMenuSeparator />}
         <PromptInputActionMenuItem

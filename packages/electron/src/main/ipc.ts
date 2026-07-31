@@ -1,6 +1,7 @@
 // @opencode-ref: opencode/packages/desktop-electron/src/main/ipc.ts
 
 import { execFile } from "node:child_process";
+import { lstat } from "node:fs/promises";
 import {
   BrowserWindow,
   Notification,
@@ -238,6 +239,14 @@ export function registerIpcHandlers(deps: Deps) {
             : ([app, [path]] as const);
         execFile(cmd, args, (err) => (err ? reject(err) : resolve()));
       });
+    },
+  );
+
+  ipcMain.handle(
+    "show-item-in-folder",
+    async (_event: IpcMainInvokeEvent, path: string) => {
+      await lstat(path);
+      shell.showItemInFolder(path);
     },
   );
 

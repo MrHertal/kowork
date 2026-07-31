@@ -27,6 +27,11 @@ import {
   renderable,
 } from "@/components/session/message-part";
 import { SessionRetry } from "@/components/session/session-retry";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useSDK } from "@/contexts/sdk";
 import { m } from "@/paraglide/messages";
@@ -128,19 +133,22 @@ function ResponseActions({
 
   const duration =
     typeof durationMs === "number" ? formatDuration(durationMs) : "";
+  const copyLabel = copied ? m.common_copied() : m.common_copy_response();
 
   return (
     <MessageActions>
-      <MessageAction
-        tooltip={copied ? m.common_copied() : m.common_copy_response()}
-        onClick={handleCopy}
-      >
-        {copied ? (
-          <CheckIcon className="size-3.5" aria-hidden="true" />
-        ) : (
-          <CopyIcon className="size-3.5" aria-hidden="true" />
-        )}
-      </MessageAction>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <MessageAction label={copyLabel} onClick={handleCopy}>
+            {copied ? (
+              <CheckIcon className="size-3.5" aria-hidden="true" />
+            ) : (
+              <CopyIcon className="size-3.5" aria-hidden="true" />
+            )}
+          </MessageAction>
+        </TooltipTrigger>
+        <TooltipContent>{copyLabel}</TooltipContent>
+      </Tooltip>
       {duration && (
         <span className="text-xs text-muted-foreground">{duration}</span>
       )}
