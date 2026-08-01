@@ -30,7 +30,7 @@ export function ComposerTray({
     <div
       inert={disabled}
       className={cn(
-        "relative z-0 -mt-6 rounded-b-3xl bg-input/20 px-2.5 pt-8 pb-2 transition-opacity duration-200",
+        "relative z-0 -mt-6 rounded-b-3xl bg-input/20 px-3 pt-8 pb-2 transition-opacity duration-200",
         disabled && "opacity-50",
         className,
       )}

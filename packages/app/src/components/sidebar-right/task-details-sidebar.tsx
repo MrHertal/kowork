@@ -1,12 +1,9 @@
 import type { SessionHeaderModel } from "@/components/header/session-header-content";
 import { SidebarRightSlot } from "@/components/sidebar-right/sidebar-right-slot";
 import { TaskFilesSection } from "@/components/sidebar-right/task-files-section";
+import { TaskFolderFooter } from "@/components/sidebar-right/task-folder-footer";
 import { TaskProgressSection } from "@/components/sidebar-right/task-progress-section";
-import {
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-} from "@/components/ui/sidebar";
+import { SidebarContent, SidebarHeader } from "@/components/ui/sidebar";
 import { useSDK } from "@/contexts/sdk";
 import { useSessionFiles } from "@/hooks/use-session-files";
 import { useSessionTodos } from "@/hooks/use-session-todos";
@@ -37,7 +34,7 @@ export function TaskDetailsSidebar({
           <TaskFilesSection files={files} directory={sdk.directory} />
         )}
       </SidebarContent>
-      <SidebarFooter />
+      <TaskFolderFooter directory={sdk.directory} />
     </SidebarRightSlot>
   );
 }

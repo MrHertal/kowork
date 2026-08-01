@@ -207,7 +207,7 @@ export function TaskFilesSection({
                               canOpen && "opacity-50",
                             )}
                           >
-                            <div>{content}</div>
+                            <div tabIndex={0}>{content}</div>
                           </SidebarMenuButton>
                         )}
                       </TooltipTrigger>

@@ -168,6 +168,7 @@
   "sessionInfo_hide": "Aufgabeninformationen ausblenden",
   "sessionInfo_openContainingFolder": "Übergeordneten Ordner öffnen",
   "sessionInfo_openFileFailed": "Datei konnte nicht geöffnet werden",
+  "sessionInfo_openFolder": "Ordner öffnen",
   "sessionInfo_openFolderFailed": "Ordner konnte nicht geöffnet werden",
   "sessionInfo_openPathFailedDescription": "Die Datei oder der Ordner wurde möglicherweise verschoben oder gelöscht.",
   "sessionInfo_progress": "Fortschritt",

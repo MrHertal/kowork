@@ -16,7 +16,7 @@ import { usePlatform } from "@/contexts/platform";
 import { useRecentSessionsData } from "@/contexts/recent-sessions";
 import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
-import { abbreviateHomePath, getFilename, truncateMiddle } from "@/utils/path";
+import { abbreviateHomePath, getFilename } from "@/utils/path";
 import { getRecentFolders } from "@/utils/recent-folders";
 
 interface ComposerFolderPickerProps {
@@ -115,7 +115,7 @@ export function ComposerFolderPicker({
                     {getFilename(folder) || folder}
                   </div>
                   <div className="truncate text-xs font-normal text-muted-foreground opacity-75">
-                    {truncateMiddle(displayPath, 40)}
+                    {displayPath}
                   </div>
                 </div>
               </DropdownMenuRadioItem>

@@ -15,7 +15,7 @@ contextMenu({
   showSearchWithGoogle: false,
 });
 
-const defaultDir = join(homedir(), "kowork");
+const defaultDir = join(homedir(), "Kowork");
 
 process.env.OPENCODE_DISABLE_EMBEDDED_WEB_UI = "true";
 

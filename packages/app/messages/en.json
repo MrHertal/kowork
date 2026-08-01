@@ -168,6 +168,7 @@
   "sessionInfo_hide": "Hide task information",
   "sessionInfo_openContainingFolder": "Open containing folder",
   "sessionInfo_openFileFailed": "Could not open file",
+  "sessionInfo_openFolder": "Open folder",
   "sessionInfo_openFolderFailed": "Could not open folder",
   "sessionInfo_openPathFailedDescription": "The file or folder may have been moved or deleted.",
   "sessionInfo_progress": "Progress",
