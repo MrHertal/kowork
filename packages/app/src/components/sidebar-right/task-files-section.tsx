@@ -143,7 +143,7 @@ export function TaskFilesSection({
   return (
     <SidebarGroup>
       <SidebarGroupLabel asChild>
-        <h3 id={headingID}>{m.sessionInfo_filesChanged()}</h3>
+        <h2 id={headingID}>{m.sessionInfo_filesChanged()}</h2>
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <Collapsible defaultOpen>

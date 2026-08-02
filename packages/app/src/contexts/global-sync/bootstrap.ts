@@ -20,7 +20,6 @@ import { getFilename } from "@/utils/path";
 import { retry } from "@/utils/retry";
 import { formatServerError } from "@/utils/server-errors";
 import { toast } from "sonner";
-import { loadSessionsQuery } from "@/contexts/global-sync";
 import { skillsQueryOptions } from "@/hooks/use-skills";
 import type { State } from "./types";
 import { cmp, normalizeAgentList, normalizeProviderList } from "./utils";
@@ -64,9 +63,13 @@ function errors(list: PromiseSettledResult<unknown>[]) {
 }
 
 const providerRev = new Map<string, number>();
+let nextProviderRev = 0;
 
-export function clearProviderRev(directory: string) {
-  providerRev.delete(directory);
+const providerKey = (serverUrl: string, directory: string) =>
+  `${serverUrl}\0${directory}`;
+
+export function clearProviderRev(serverUrl: string, directory: string) {
+  providerRev.delete(providerKey(serverUrl, directory));
 }
 
 function runAll(list: Array<() => Promise<unknown>>) {
@@ -76,7 +79,6 @@ function runAll(list: Array<() => Promise<unknown>>) {
 export async function bootstrapGlobal(input: {
   globalSDK: OpencodeClient;
   setGlobalStore: (fn: (draft: GlobalStore) => void) => void;
-  queryClient: QueryClient;
 }) {
   const fast = [
     () =>
@@ -88,18 +90,13 @@ export async function bootstrapGlobal(input: {
         }),
       ),
     () =>
-      input.queryClient.fetchQuery({
-        ...loadProvidersQuery(null),
-        queryFn: () =>
-          retry(() =>
-            input.globalSDK.provider.list().then((x) => {
-              input.setGlobalStore((d) => {
-                d.provider = normalizeProviderList(x.data!);
-              });
-              return null;
-            }),
-          ),
-      }),
+      retry(() => input.globalSDK.provider.list())
+        .then((x) => normalizeProviderList(x.data!))
+        .then((providers) => {
+          input.setGlobalStore((d) => {
+            d.provider = providers;
+          });
+        }),
   ];
 
   const slow = [
@@ -192,12 +189,6 @@ function warmSessions(input: {
   ).then(() => undefined);
 }
 
-export const loadProvidersQuery = (directory: string | null) =>
-  queryOptions<null>({
-    queryKey: [directory, "providers"],
-    queryFn: skipToken,
-  });
-
 export const loadAgentsQuery = (directory: string | null) =>
   queryOptions<null>({
     queryKey: [directory, "agents"],
@@ -206,6 +197,7 @@ export const loadAgentsQuery = (directory: string | null) =>
 
 export async function bootstrapDirectory(input: {
   directory: string;
+  serverUrl: string;
   sdk: OpencodeClient;
   getState: () => State;
   setState: (fn: (draft: State) => void) => void;
@@ -219,6 +211,9 @@ export async function bootstrapDirectory(input: {
   };
   queryClient: QueryClient;
 }) {
+  const key = providerKey(input.serverUrl, input.directory);
+  const rev = ++nextProviderRev;
+  providerRev.set(key, rev);
   const loading = input.getState().status !== "complete";
   const seededProject = projectID(input.directory, input.global.project);
   const seededPath =
@@ -438,30 +433,26 @@ export async function bootstrapDirectory(input: {
       });
     }
 
-    const rev = (providerRev.get(input.directory) ?? 0) + 1;
-    providerRev.set(input.directory, rev);
-    void input.queryClient.ensureQueryData({
-      ...loadSessionsQuery(input.directory),
-      queryFn: () =>
-        retry(() => input.sdk.provider.list())
-          .then((x) => {
-            if (providerRev.get(input.directory) !== rev) return;
-            input.setState((d) => {
-              d.provider = normalizeProviderList(x.data!);
-              d.provider_ready = true;
-            });
-          })
-          .catch((err) => {
-            if (providerRev.get(input.directory) !== rev) {
-              console.error("Failed to refresh provider list", err);
-            }
-            const project = getFilename(input.directory);
-            toast.error(
-              input.translate("toast.project.reloadFailed.title", { project }),
-              { description: formatServerError(err, input.translate) },
-            );
-          })
-          .then(() => null),
-    });
+    void retry(() => input.sdk.provider.list())
+      .then((x) => normalizeProviderList(x.data!))
+      .then((providers) => {
+        if (providerRev.get(key) !== rev) return;
+        input.setState((d) => {
+          d.provider = providers;
+          d.provider_ready = true;
+        });
+      })
+      .catch((err) => {
+        if (providerRev.get(key) !== rev) return;
+        input.setState((d) => {
+          d.provider_ready = true;
+        });
+        console.error("Failed to refresh provider list", err);
+        const project = getFilename(input.directory);
+        toast.error(
+          input.translate("toast.project.reloadFailed.title", { project }),
+          { description: formatServerError(err, input.translate) },
+        );
+      });
   })();
 }

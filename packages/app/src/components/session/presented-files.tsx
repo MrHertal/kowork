@@ -157,7 +157,7 @@ export function PresentedFiles({ files }: { files: PresentedFile[] }) {
       (server.current?.type === "sidecar" && server.current.variant === "wsl"));
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-3">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,20rem),1fr))] gap-3 pl-1">
       {files.map((file) => (
         <PresentedFileCard
           key={file.path}

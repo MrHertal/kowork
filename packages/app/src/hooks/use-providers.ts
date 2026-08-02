@@ -50,7 +50,10 @@ export function useProviders(directory?: string) {
   );
 
   const providers: ProviderListResponse =
-    childStore && childProviderReady && childProvider
+    childStore &&
+    childProviderReady &&
+    childProvider &&
+    (childProvider.all.length > 0 || globalProvider.all.length === 0)
       ? childProvider
       : globalProvider;
 

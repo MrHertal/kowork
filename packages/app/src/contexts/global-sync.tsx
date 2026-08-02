@@ -294,6 +294,7 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
         const sdk = sdkFor(directory);
         await bootstrapDirectory({
           directory,
+          serverUrl: globalSDK.url,
           global: {
             config: stores.global.state.config,
             path: stores.global.state.path,
@@ -315,7 +316,7 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
       });
       return promise;
     },
-    [stores, child, sdkFor, loadSessions, queryClient],
+    [stores, child, sdkFor, loadSessions, queryClient, globalSDK.url],
   );
 
   const bootstrap = useCallback(async () => {
@@ -325,7 +326,6 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
       globalSDK: globalSDK.client,
       setGlobalStore: (fn) =>
         stores.global.setState((prev) => produce(prev, fn)),
-      queryClient,
     })
       .then(() => {
         bootedAt.current = Date.now();
@@ -336,7 +336,7 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
       });
     bootingPromise.current = promise;
     return promise;
-  }, [globalSDK, stores, queryClient]);
+  }, [globalSDK, stores]);
 
   useEffect(() => {
     bootstrapRef.current = bootstrap;
@@ -437,6 +437,12 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
             );
           },
         });
+        if (event.type === "server.connected" && !recent) {
+          void queryClient.refetchQueries({
+            queryKey: ["session-context-cost", globalSDK.url],
+            type: "active",
+          });
+        }
         if (
           (event.type === "server.connected" ||
             event.type === "global.disposed") &&
@@ -476,13 +482,13 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
     return () => {
       unsub();
     };
-  }, [globalSDK.event, stores, queue, sdkFor]);
+  }, [globalSDK.event, globalSDK.url, stores, queue, sdkFor, queryClient]);
 
   useEffect(() => {
     return () => {
       for (const directory of stores.children.keys()) {
         queue.clear(directory);
-        clearProviderRev(directory);
+        clearProviderRev(globalSDK.url, directory);
       }
       queue.dispose();
       stores.children.clear();
@@ -491,7 +497,7 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
       stores.sessionMeta.clear();
       stores.booting.clear();
     };
-  }, [stores, queue]);
+  }, [globalSDK.url, stores, queue]);
 
   const ctxValue = useMemo<GlobalSyncContextValue>(
     () => ({

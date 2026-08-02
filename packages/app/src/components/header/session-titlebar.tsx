@@ -16,7 +16,7 @@ export function SessionTitlebar({ sessionId }: { sessionId: string }) {
         <SessionTitle title={model.title} parentID={model.parentID} />
         {!model.parentID && <SessionActions {...model} />}
       </TitlebarSlot>
-      <TaskDetailsSidebar sessionId={sessionId} title={model.title} />
+      <TaskDetailsSidebar sessionId={sessionId} />
     </>
   );
 }

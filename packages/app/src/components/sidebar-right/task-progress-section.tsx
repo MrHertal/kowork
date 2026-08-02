@@ -42,7 +42,7 @@ export function TaskProgressSection({ todos }: { todos: Todo[] }) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel asChild>
-        <h3>{m.sessionInfo_progress()}</h3>
+        <h2>{m.sessionInfo_progress()}</h2>
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <Queue className="rounded-none border-0 bg-transparent p-0 shadow-none">
