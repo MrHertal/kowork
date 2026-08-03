@@ -1,39 +1,24 @@
 import { InfoIcon } from "lucide-react";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  SidebarGroupAction,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useSessionContext } from "@/hooks/use-session-context";
 import { useLocale } from "@/lib/i18n";
 import { m } from "@/paraglide/messages";
-
-function HelpIcon({ label, tooltip }: { label: string; tooltip: string }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label={m.sessionInfo_moreInformation({ label })}
-          className="inline-flex size-4 shrink-0 items-center justify-center rounded-sm text-sidebar-foreground/50 ring-sidebar-ring outline-hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2"
-        >
-          <InfoIcon className="size-3" aria-hidden="true" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="left" className="max-w-64 text-pretty">
-        {tooltip}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
 
 export function TaskContextSection({ sessionId }: { sessionId: string }) {
   const locale = useLocale();
@@ -63,15 +48,47 @@ export function TaskContextSection({ sessionId }: { sessionId: string }) {
       <SidebarGroupLabel asChild>
         <h2>{m.sessionInfo_context()}</h2>
       </SidebarGroupLabel>
+      <Popover>
+        <PopoverTrigger asChild>
+          <SidebarGroupAction
+            aria-label={m.sessionInfo_aboutContext()}
+            className="right-4 text-sidebar-foreground/70 [&>svg]:size-3"
+          >
+            <InfoIcon aria-hidden="true" />
+          </SidebarGroupAction>
+        </PopoverTrigger>
+        <PopoverContent side="left" align="start">
+          <PopoverHeader>
+            <PopoverTitle>{m.sessionInfo_aboutContext()}</PopoverTitle>
+          </PopoverHeader>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                {m.sessionInfo_capacity()}
+              </div>
+              <PopoverDescription>
+                {m.sessionInfo_contextCapacityDescription()}
+              </PopoverDescription>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium">
+                {m.sessionInfo_estimatedProviderCost()}
+              </div>
+              <PopoverDescription>
+                {m.sessionInfo_contextCostDescription()}
+              </PopoverDescription>
+            </div>
+          </div>
+          <PopoverDescription className="text-xs">
+            {m.sessionInfo_contextSubtaskNote()}
+          </PopoverDescription>
+        </PopoverContent>
+      </Popover>
       <SidebarGroupContent className="px-3 py-2">
         <dl>
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
-            <dt className="flex min-w-0 items-center gap-1 text-sm text-sidebar-foreground">
-              <span className="truncate">{m.sessionInfo_capacity()}</span>
-              <HelpIcon
-                label={m.sessionInfo_capacity()}
-                tooltip={m.sessionInfo_capacityTooltip()}
-              />
+            <dt className="min-w-0 text-sm text-sidebar-foreground">
+              <span className="block truncate">{m.sessionInfo_capacity()}</span>
             </dt>
             <dd className="min-w-10 shrink-0 text-right text-xs font-normal text-sidebar-foreground tabular-nums">
               {context.isCapacityPending ? (
@@ -100,32 +117,22 @@ export function TaskContextSection({ sessionId }: { sessionId: string }) {
                   <div className="h-full" aria-hidden="true" />
                 )}
               </div>
-              <div className="mt-2 flex min-h-4 min-w-0 items-center gap-1 text-xs text-sidebar-foreground/70">
+              <div className="mt-2 min-h-4 min-w-0 text-xs text-sidebar-foreground/70">
                 {context.isLoading ? (
                   <Skeleton className="h-4 w-24 rounded-full" />
                 ) : (
-                  <>
-                    <span className="truncate">
-                      {m.sessionInfo_tokensInUse({ tokens })}
-                    </span>
-                    <HelpIcon
-                      label={m.sessionInfo_tokensInUse({ tokens })}
-                      tooltip={m.sessionInfo_tokensTooltip()}
-                    />
-                  </>
+                  <span className="block truncate">
+                    {m.sessionInfo_tokensInUse({ tokens })}
+                  </span>
                 )}
               </div>
             </dd>
           </div>
           <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-sidebar-border pt-3">
-            <dt className="flex min-w-0 items-center gap-1 text-sm text-sidebar-foreground">
-              <span className="truncate">
+            <dt className="min-w-0 text-sm text-sidebar-foreground">
+              <span className="block truncate">
                 {m.sessionInfo_estimatedProviderCost()}
               </span>
-              <HelpIcon
-                label={m.sessionInfo_estimatedProviderCost()}
-                tooltip={m.sessionInfo_estimatedProviderCostTooltip()}
-              />
             </dt>
             <dd className="min-w-16 shrink-0 text-right text-xs font-normal whitespace-nowrap text-sidebar-foreground tabular-nums">
               {context.isCostPending ? (
