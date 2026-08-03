@@ -57,7 +57,7 @@ export function ComposerFolderPicker({
     if (disabled || !canChooseDifferent) return;
     requestAnimationFrame(async () => {
       const selected = await platform.openDirectoryPickerDialog?.({
-        title: m.session_folder_choose_directory(),
+        title: m.session_directory_choose_directory(),
         defaultPath:
           attachedDirectory ?? server.projects.last() ?? defaultDirectory,
       });
@@ -84,7 +84,7 @@ export function ComposerFolderPicker({
         <span className="truncate">
           {attachedDirectory
             ? getFilename(attachedDirectory) || attachedDirectory
-            : m.session_composer_folder_label()}
+            : m.session_composer_directory_label()}
         </span>
         <ChevronDown
           data-icon="inline-end"
@@ -128,7 +128,7 @@ export function ComposerFolderPicker({
           onSelect={handleChooseDifferent}
         >
           <FolderOpen />
-          {m.session_composer_folder_choose_different()}
+          {m.session_composer_directory_choose_different()}
         </PromptInputActionMenuItem>
         {attachedDirectory && (
           <>
@@ -138,7 +138,7 @@ export function ComposerFolderPicker({
               onSelect={onDirectoryDetach}
             >
               <FolderX />
-              {m.session_composer_folder_detach()}
+              {m.session_composer_directory_detach()}
             </PromptInputActionMenuItem>
           </>
         )}

@@ -44,8 +44,8 @@ function IndexRoute() {
         <div className="flex w-full max-w-md flex-col items-center gap-4">
           <ErrorAlert
             className="w-full"
-            title={m.error_defaultFolder_title()}
-            text={m.error_defaultFolder_description()}
+            title={m.error_defaultDirectory_title()}
+            text={m.error_defaultDirectory_description()}
           />
           <Button variant="outline" onClick={() => void globalSync.bootstrap()}>
             {m.common_retry()}

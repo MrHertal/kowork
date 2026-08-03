@@ -106,7 +106,7 @@ export function TaskFilesSection({
       toast.error(
         kind === "file"
           ? m.sessionInfo_openFileFailed()
-          : m.sessionInfo_openFolderFailed(),
+          : m.sessionInfo_openDirectoryFailed(),
         { description: m.sessionInfo_openPathFailedDescription() },
       );
     } finally {
@@ -175,8 +175,8 @@ export function TaskFilesSection({
                   file.status === "deleted" ? canOpen : canShowInFolder;
                 const folderActionLabel =
                   file.status === "deleted"
-                    ? m.sessionInfo_openContainingFolder()
-                    : m.sessionInfo_showInFolder();
+                    ? m.sessionInfo_openContainingDirectory()
+                    : m.sessionInfo_showInDirectory();
                 const content = (
                   <>
                     <Icon

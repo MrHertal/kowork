@@ -217,7 +217,7 @@ function FolderField({
   const handlePick = useCallback(async () => {
     if (!platform.openDirectoryPickerDialog) return;
     const picked = await platform.openDirectoryPickerDialog({
-      title: m.settings_skills_custom_field_folder_pickerTitle(),
+      title: m.settings_skills_custom_field_directory_pickerTitle(),
     });
     if (typeof picked === "string") {
       onChange(picked);
@@ -228,7 +228,7 @@ function FolderField({
   return (
     <Field data-invalid={invalid}>
       <FieldLabel htmlFor="skill-folder">
-        {m.settings_skills_custom_field_folder_label()}
+        {m.settings_skills_custom_field_directory_label()}
       </FieldLabel>
       <div className="flex items-center gap-3">
         <Button
@@ -240,8 +240,8 @@ function FolderField({
         >
           <FolderIcon data-icon="inline-start" aria-hidden="true" />
           {value
-            ? m.settings_skills_custom_field_folder_change()
-            : m.settings_skills_custom_field_folder_choose()}
+            ? m.settings_skills_custom_field_directory_change()
+            : m.settings_skills_custom_field_directory_choose()}
         </Button>
         {value && (
           <span className="truncate text-xs text-muted-foreground">
@@ -253,7 +253,7 @@ function FolderField({
         <FieldError errors={errors} />
       ) : (
         <FieldDescription>
-          {m.settings_skills_custom_field_folder_description()}
+          {m.settings_skills_custom_field_directory_description()}
         </FieldDescription>
       )}
     </Field>

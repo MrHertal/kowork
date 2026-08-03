@@ -34,7 +34,7 @@ export function TaskFolderFooter({ directory }: { directory: string }) {
     try {
       await openPath(directory);
     } catch {
-      toast.error(m.sessionInfo_openFolderFailed(), {
+      toast.error(m.sessionInfo_openDirectoryFailed(), {
         description: m.sessionInfo_openPathFailedDescription(),
       });
     } finally {
@@ -70,13 +70,13 @@ export function TaskFolderFooter({ directory }: { directory: string }) {
                 type="button"
                 className="relative top-auto right-auto after:-inset-0.5 md:after:block"
                 onClick={() => void openFolder()}
-                aria-label={m.sessionInfo_openFolder()}
+                aria-label={m.sessionInfo_openDirectory()}
               >
                 <FolderOpenIcon aria-hidden="true" />
               </SidebarMenuAction>
             </TooltipTrigger>
             <TooltipContent side="top">
-              {m.sessionInfo_openFolder()}
+              {m.sessionInfo_openDirectory()}
             </TooltipContent>
           </Tooltip>
         )}

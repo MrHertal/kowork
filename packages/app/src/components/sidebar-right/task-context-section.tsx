@@ -80,7 +80,7 @@ export function TaskContextSection({ sessionId }: { sessionId: string }) {
             </div>
           </div>
           <PopoverDescription className="text-xs">
-            {m.sessionInfo_contextSubtaskNote()}
+            {m.sessionInfo_contextChildSessionNote()}
           </PopoverDescription>
         </PopoverContent>
       </Popover>

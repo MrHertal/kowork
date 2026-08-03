@@ -14,7 +14,7 @@ export const formSchema = z
         ctx.addIssue({
           code: "custom",
           path: ["folder"],
-          message: m.settings_skills_custom_error_folder_required(),
+          message: m.settings_skills_custom_error_directory_required(),
         });
       }
     } else {

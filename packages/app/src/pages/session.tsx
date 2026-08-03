@@ -127,7 +127,6 @@ export function Page({
 
   const isBusy =
     !!sessionStatus && sessionStatus.type !== "idle" && !!sessionId;
-  const status = isBusy ? "streaming" : "ready";
 
   const isBusyRef = useRef(isBusy);
   isBusyRef.current = isBusy;
@@ -302,8 +301,11 @@ export function Page({
     sdk.client.session.abort({ sessionID: sessionId }).catch(() => {});
   }, [sessionId, sdk.client]);
 
-  const isSubmitDisabled =
-    status === "streaming" ? false : !text.trim() || sending || isChildSession;
+  const hasText = !!text.trim();
+  const canSubmit = hasText && !sending && !blocked && !isChildSession;
+  const canStop = isBusy && !hasText && !blocked && !isChildSession;
+  const status = canStop ? "streaming" : "ready";
+  const isSubmitDisabled = !canSubmit && !canStop;
 
   const handleSessionPermissionModeChange = (mode: PermissionMode) => {
     if (!sessionId) return;
