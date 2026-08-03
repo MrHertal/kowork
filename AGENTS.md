@@ -1,149 +1,130 @@
-# Kowork — AI Agent Guidelines
+# Kowork Agent Guidelines
 
-## What is Kowork?
+Kowork is an open-source alternative to Claude Cowork: an Electron desktop app for **non-technical users**, built with **React** and **shadcn/ui**. It runs a customized [OpenCode](./opencode/) binary as a sidecar.
 
-Kowork is an open-source alternative to Claude Cowork. It is an Electron desktop app designed for **non-technical users**, built with **React** and **shadcn UI**.
+## Priorities
 
-It is built on top of [OpenCode](./opencode/), which is included as a git submodule. OpenCode provides the AI backend that Kowork runs as a sidecar process.
+1. Preserve Kowork's non-technical user experience and terminology.
+2. Treat OpenCode as the source of truth for client/server behavior and protocol details.
+3. Keep the Electron and browser builds working when changing shared app code.
+4. Do not edit generated UI components; adapt them through composition, `className`, or CSS.
 
-## How Kowork relates to OpenCode
+## Repository Map
 
-OpenCode ships its own Electron desktop app (`opencode/packages/desktop-electron/`), which is an **IDE for developers** built with **SolidJS** and OpenCode's own UI library. Kowork is a separate app with a different audience and tech stack, but it communicates with the same OpenCode backend using the same client/server protocol.
+| Path                 | Purpose                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| `packages/app/`      | Shared React application, including the standalone browser build                           |
+| `packages/electron/` | Electron main process, preload, and desktop renderer entry point                           |
+| `packages/web/`      | Placeholder for the future static landing page and documentation site; not yet implemented |
+| `opencode/`          | OpenCode fork submodule used for the sidecar and as a reference implementation             |
 
-The OpenCode submodule serves two purposes:
+`packages/web/` is not the browser build of `packages/app/`.
 
-1. **Build artifact** — Kowork builds its own version of the OpenCode binary and runs it as a sidecar.
-2. **Reference implementation** — The OpenCode Electron app shows the canonical way to interact with the OpenCode client (sending prompts, receiving events, managing sessions, etc.).
+## OpenCode Integration
 
-## Critical Rule: Always Cross-Reference OpenCode
+Before changing any interaction with the OpenCode client, sidecar, or protocol, **first inspect the corresponding implementation in OpenCode's Electron app**. This includes prompts, events, sessions, permissions, IPC, and sidecar lifecycle behavior.
 
-Before implementing or modifying any interaction with the OpenCode client, **always check how the OpenCode Electron desktop app does it first**. The key reference paths are:
+OpenCode's desktop app is an IDE for developers built with SolidJS and its own UI library. Use it as the behavioral reference, not as a visual or component reference for Kowork.
 
-| Concern                 | OpenCode reference path                            |
-| ----------------------- | -------------------------------------------------- |
-| Electron main process   | `opencode/packages/desktop-electron/src/main/`     |
-| Electron preload / IPC  | `opencode/packages/desktop-electron/src/preload/`  |
-| SolidJS UI (renderer)   | `opencode/packages/desktop-electron/src/renderer/` |
-| OpenCode client SDK     | `opencode/packages/sdk/`                           |
-| Shared types / protocol | `opencode/packages/opencode/src/`                  |
+| Concern                   | Reference path                                     |
+| ------------------------- | -------------------------------------------------- |
+| Electron main process     | `opencode/packages/desktop-electron/src/main/`     |
+| Electron preload and IPC  | `opencode/packages/desktop-electron/src/preload/`  |
+| Renderer behavior         | `opencode/packages/desktop-electron/src/renderer/` |
+| Client SDK                | `opencode/packages/sdk/`                           |
+| Shared types and protocol | `opencode/packages/opencode/src/`                  |
 
-When working on protocol or logic in Kowork, compare your approach against the corresponding OpenCode code to ensure compatibility and correctness — but not for UI: Kowork uses shadcn/ui with its own design and audience, and should not mirror OpenCode's visual or component shape.
+### Upstream References
 
-## `@opencode-ref` headers
-
-Ported files carry a one-line header pointing at the upstream source. Repeat for files derived from multiple upstream sources. Skip on Kowork-only files. Grep `@opencode-ref:` to find what to backport.
+Files ported or derived from OpenCode must carry one `@opencode-ref` header per upstream source. Preserve existing headers, add multiple headers when needed, and omit them from Kowork-only files. Search for `@opencode-ref:` when identifying code to backport.
 
 ```ts
 // @opencode-ref: opencode/packages/app/src/context/global-sync.tsx
 ```
 
-## Project Structure
-
-```
-kowork/
-├── opencode/                  # Git submodule — OpenCode fork
-├── packages/
-│   ├── app/                   # React app (the Kowork application)
-│   ├── electron/              # Electron main + preload
-│   └── web/                   # Static website (landing page & docs) — not yet implemented
-├── pnpm-workspace.yaml
-└── package.json
-```
-
-> **Note:** `packages/web/` is a future static website (landing page, documentation) for the Kowork project. It is completely separate from the Kowork application in `packages/app/`.
-
 ## App Build Targets
 
-The React app (`packages/app/`) has two build targets — Electron and web browser. Both targets serve the same Kowork application; the difference is the shell that hosts it:
+The React app has two hosts:
 
-| Target       | Entry point                                 | Shell                      | Use case                 |
-| ------------ | ------------------------------------------- | -------------------------- | ------------------------ |
-| **Electron** | `packages/electron/src/renderer/index.html` | BrowserWindow + native IPC | Desktop app with sidecar |
-| **Web**      | `packages/app/index.html`                   | Regular browser            | Standalone web access    |
+| Target   | Entry point                                 | Shell                                           |
+| -------- | ------------------------------------------- | ----------------------------------------------- |
+| Electron | `packages/electron/src/renderer/index.html` | `BrowserWindow` with native IPC and the sidecar |
+| Browser  | `packages/app/index.html`                   | Standard web browser                            |
 
-When working on HTML-level concerns (meta tags, scripts, styles), always consider both entry points:
+For HTML-level changes:
 
-- **Web-only** (social sharing, manifest, PWA) → `packages/app/index.html` only
-- **Shared** (charset, viewport, title, theme-color, theme preload) → both entry points
+- Add web-only concerns such as social metadata, manifests, and PWA configuration only to `packages/app/index.html`.
+- Add shared concerns such as charset, viewport, title, theme color, and theme preload to both entry points.
 
-These entry points are unrelated to `packages/web/`.
+## Terminology and Translations
 
-## Tech Stack
+Code and translation keys use OpenCode's technical concepts. User-facing values use Kowork's localized terminology.
 
-| Layer                 | Kowork                    | OpenCode desktop (reference) |
-| --------------------- | ------------------------- | ---------------------------- |
-| UI framework          | React                     | SolidJS                      |
-| Component library     | shadcn/ui                 | Custom OpenCode UI           |
-| Desktop shell         | Electron                  | Electron                     |
-| Backend communication | OpenCode client (sidecar) | OpenCode client (embedded)   |
+| Technical concept                                | English   | French     | German       |
+| ------------------------------------------------ | --------- | ---------- | ------------ |
+| Session                                          | Task      | Tâche      | Aufgabe      |
+| Child session                                    | Subtask   | Sous-tâche | Unteraufgabe |
+| Workspace, project, or working/session directory | Folder    | Dossier    | Ordner       |
+| MCP server                                       | Connector | Connecteur | Konnektor    |
+| Skill                                            | Skill     | Compétence | Skill        |
 
-## User-Facing Terminology and Translations
+Apply these rules in `packages/app/messages/*.json`:
 
-Kowork presents OpenCode concepts in language suitable for non-technical users. Code and translation keys use the technical OpenCode terminology; translated values use Kowork's localized user-facing terminology.
+- Keep keys technical, stable, and unlocalized: use concepts such as `session`, `directory`, `mcp`, and `skill`.
+- Keep values user-facing and localized. Technical terms may appear when configuration or interoperability requires precision. Otherwise, do not expose `session`, `child session`, `workspace`, `project`, or `working directory` when a Kowork term applies.
+- In advanced connector configuration, explain once that a connector connects to an MCP server, then use `connector` as the primary term.
+- Before adding a locale, add its terminology to the table above and define every listed concept.
+- Follow the locale's grammar and pluralization while retaining the defined terminology.
 
-| Technical concept (code and translation keys)    | English user-facing term | French user-facing term | German user-facing term |
-| ------------------------------------------------ | ------------------------ | ----------------------- | ----------------------- |
-| Session                                          | Task                     | Tâche                   | Aufgabe                 |
-| Child session                                    | Subtask                  | Sous-tâche              | Unteraufgabe            |
-| Workspace, project, or working/session directory | Folder                   | Dossier                 | Ordner                  |
-| MCP server                                       | Connector                | Connecteur              | Konnektor               |
-| Skill                                            | Skill                    | Compétence              | Skill                   |
+## React and UI
 
-Apply this distinction consistently in `packages/app/messages/*.json`:
+- Do not edit generated files in `packages/app/src/components/ui/` or `packages/app/src/components/ai-elements/`.
+- Use named imports; do not use wildcard imports.
+- Use the `@/` alias for imports within `packages/app/src/` instead of relative paths.
+- Use `cn()` from `@/lib/utils` for conditional class names instead of template literals or ternaries.
 
-- **Keys are technical and stable.** Name keys after the code or protocol concept, such as `session`, `directory`, `mcp`, and `skill`. Do not rename a key to match user-facing wording or localize the key itself.
-- **Values are user-facing and localized.** Use Kowork terminology by default. Technical terms may appear when configuration or interoperability requires precision. In advanced connector setup, explain once that a connector connects to an MCP server, then continue using `connector` as the primary term. Do not expose `session`, `child session`, `workspace`, `project`, or `working directory` when the corresponding Kowork term applies.
-- **Define terminology before adding a language.** Before creating a translation file for a new locale, add its column to the table above and define every user-facing term. Then use those terms consistently throughout the new catalog.
-- Ordinary pluralization and grammar must follow the locale while preserving the defined concept. For example, `session` remains part of an English translation key while its French value uses `tâche` or `tâches` as required by the sentence.
+```tsx
+// Bad
+import * as React from "react";
+import * as m from "@/paraglide/messages";
 
-## UI & React Rules
-
-- **Do not edit** files in `packages/app/src/components/ui/` or `packages/app/src/components/ai-elements/`. These are generated by shadcn and AI Elements lib. Prefer className or CSS overrides instead of modifying the source.
-- **No wildcard imports.** Use named imports instead:
-
-  ```tsx
-  // Bad
-  import * as React from "react";
-  import * as m from "@/paraglide/messages";
-
-  // Good
-  import { useState, useRef } from "react";
-  import { m } from "@/paraglide/messages";
-  ```
-
-- **Use the `@/` alias** for imports instead of relative paths.
-- **Use the `cn()` utility** (from `@/lib/utils`) for conditional classNames instead of template literals or ternaries.
-
-## `lib/` vs `utils/`
-
-- **`lib/`** — UI- or React-coupled primitives (`cn`, optimistic-write scheduling, `i18n`).
-- **`utils/`** — pure data, string, or IO helpers with no UI/framework dependency (`path`, `retry`, `id`, `encode`).
-
-When in doubt, ask whether the helper would still make sense in a Node script with no React. If yes, it's `utils/`.
-
-## Comments
-
-Default to writing none. Code, names, and types describe **what** — comments are only worth their cost when they explain a non-obvious **why**: a hidden constraint, a load-bearing invariant, a workaround for a specific bug, or behaviour that would surprise a reader. The test before adding one: would removing it actually confuse a future reader? If not, drop it.
+// Good
+import { useRef, useState } from "react";
+import { m } from "@/paraglide/messages";
+```
 
 ## State and Reactivity
 
-Shared server state lives in `@tanstack/react-store` instances. Components must subscribe through a hook — `useChildData(directory, selector, compare?)` for the per-directory store, `useSyncData(selector, compare?)` inside a `<SyncProvider>`, or `useStore` directly. **Never expose a getter that returns `store.state` from a context value**: reads like `ctx.data.foo` don't subscribe, so the component won't re-render when the store changes (a Solid-vs-React port footgun).
+Shared server state lives in `@tanstack/react-store` instances. Components must subscribe through `useChildData(directory, selector, compare?)`, `useSyncData(selector, compare?)` within a `<SyncProvider>`, or `useStore` directly.
 
-- **Select narrowly.** The store is updated via immer, so any mutation replaces the reference of the containing sub-tree (`s.part`, `s.session`, …). A whole-subtree selector re-renders on every unrelated change — use `(s) => s.part[messageID] ?? emptyParts`, not `(s) => s.part`.
-- **Pass `compare` for derived values.** Use `shallowArrayEqual` (re-exported from `@/contexts/global-sync` and `@/contexts/sync`) for arrays, or `(a, b) => a?.id === b?.id` for identity-stable items. Keep module-level fallback constants like `const emptyParts: Part[] = []` so references stay stable.
-- **Provider shape.** Use a `Store` when the provider has **≥3 distinct consumers reading different slices**, OR a consumer reads in a **hot render path** (per-keystroke, scroll, animation). Expose it as `_store` (underscore = internal) plus a `useFooData(selector, compare?)` hook (`@/contexts/all-sessions`, `@/contexts/notification`, `@/contexts/global-sync`). Otherwise use `useState`/`useReducer` and build the value with `useMemo<ContextValue>(...)` (`@/contexts/server`, `@/contexts/settings`, `@/contexts/permission`, `@/contexts/models`, `@/contexts/local`, `@/contexts/prompt`). Don't migrate retroactively to satisfy aesthetics — the choice is principled at write-time, not refactor-bait. Either way, imperative reads inside callbacks can use `storeRef.current` to skip subscriptions.
+Never expose a context getter that returns `store.state`. A read such as `ctx.data.foo` does not subscribe and will not re-render when the store changes.
 
-## Useful Commands
+- **Select narrowly.** Immer replaces the containing subtree on mutation, so selecting all of `s.part` or `s.session` causes unrelated re-renders. Prefer `(s) => s.part[messageID] ?? emptyParts`.
+- **Compare derived values.** Use `shallowArrayEqual` from `@/contexts/global-sync` or `@/contexts/sync` for arrays, or an identity comparison such as `(a, b) => a?.id === b?.id`. Keep fallbacks such as `const emptyParts: Part[] = []` at module scope for stable references.
+- **Choose provider shape deliberately.** Use a `Store` when at least three consumers read different slices or when a consumer is on a hot render path such as typing, scrolling, or animation. Expose `_store` for internal access plus a `useFooData(selector, compare?)` hook for consumers. Existing examples include `all-sessions`, `notification`, and `global-sync`.
+- Otherwise, use `useState` or `useReducer` and memoize the context value with `useMemo<ContextValue>(...)`. Existing examples include `server`, `settings`, `permission`, `models`, `local`, and `prompt`.
+- Do not migrate provider styles for consistency alone. Imperative callbacks may read from `storeRef.current` to avoid subscriptions.
 
-- **Typecheck (all packages):** `pnpm typecheck`
-- **Typecheck (single package):** `pnpm --filter app typecheck` (replace `app` with the target package)
+## Code Organization
 
-Before typechecking the `app` package, regenerate types if you edited related files:
+- Put UI- or React-coupled primitives in `lib/`, such as `cn`, i18n, and optimistic-write scheduling.
+- Put framework-independent data, string, and IO helpers in `utils/`, such as path, retry, ID, and encoding helpers.
+- If a helper would make sense in a Node script without React, it belongs in `utils/`.
+- Default to no comments. Add one only to explain a non-obvious constraint, invariant, workaround, or surprising behavior.
 
-- **Generate route types** (after editing app routing): `pnpm --filter app exec npx @tanstack/router-cli generate`
-- **Compile translations** (after editing translations): `pnpm --filter app exec npx @inlang/paraglide-js compile --project ./project.inlang`
+## Verification
 
-Hygiene scripts — run only when explicitly asked:
+Run the narrowest typecheck that covers the change:
 
-- `pnpm prettier . --write` — formats the tree.
-- `pnpm --filter app messages:sort` — alphabetises `packages/app/messages/*.json`.
+- Electron and its referenced React app: `pnpm typecheck`
+- React app only: `pnpm --filter @kowork/app typecheck`
+
+Before typechecking the app, regenerate affected artifacts:
+
+- After route changes: `pnpm --filter @kowork/app exec npx @tanstack/router-cli generate`
+- After translation changes: `pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang`
+
+Run repository-wide hygiene commands only when explicitly requested:
+
+- Format the tree: `pnpm prettier . --write`
+- Sort message catalogs: `pnpm --filter @kowork/app messages:sort`
