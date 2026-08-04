@@ -9,6 +9,7 @@ import {
 } from "@/components/ai-elements/reasoning";
 import { streamdownLinkSafety } from "@/components/session/external-link-dialog";
 import { CollapsibleContent } from "@/components/ui/collapsible";
+import { m } from "@/paraglide/messages";
 
 import { usePacedText } from "./paced-text";
 
@@ -16,14 +17,24 @@ const getThinkingMessage = (isStreaming: boolean, duration?: number) => {
   if (isStreaming || duration === 0) {
     return (
       <Shimmer as="span" duration={1}>
-        Thinking...
+        {m.session_status_thinking()}
       </Shimmer>
     );
   }
   if (duration === undefined) {
-    return <span className="font-medium">Thought for a few seconds</span>;
+    return (
+      <span className="font-medium">
+        {m.session_reasoning_thought_few_seconds()}
+      </span>
+    );
   }
-  return <span className="font-medium">Thought for {duration} seconds</span>;
+  return (
+    <span className="font-medium">
+      {duration === 1
+        ? m.session_reasoning_thought_seconds_one({ count: duration })
+        : m.session_reasoning_thought_seconds_other({ count: duration })}
+    </span>
+  );
 };
 
 export function ReasoningPart({

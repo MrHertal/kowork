@@ -68,6 +68,8 @@
 
   "locale_de": "Deutsch",
   "locale_en": "Englisch",
+  "locale_es_419": "Spanisch (Lateinamerika)",
+  "locale_es_es": "Spanisch (Spanien)",
   "locale_fr": "Französisch",
 
   "notification_permission_title": "Berechtigung erforderlich",
@@ -278,6 +280,9 @@
   "session_question_select_multiple": "(Mehrfachauswahl)",
   "session_question_type_own_answer": "Eigene Antwort eingeben",
   "session_question_type_placeholder": "Ihre Antwort eingeben...",
+  "session_reasoning_thought_few_seconds": "Einige Sekunden nachgedacht",
+  "session_reasoning_thought_seconds_one": "{count} Sekunde nachgedacht",
+  "session_reasoning_thought_seconds_other": "{count} Sekunden nachgedacht",
   "session_retry_gemini_hot": "Gemini-Kontingent überschritten, warte auf Abkühlung",
   "session_status_considering_next_steps": "Überlege nächste Schritte...",
   "session_status_delegating": "Delegiere...",

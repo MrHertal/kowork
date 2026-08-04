@@ -68,6 +68,8 @@
 
   "locale_de": "German",
   "locale_en": "English",
+  "locale_es_419": "Spanish (Latin America)",
+  "locale_es_es": "Spanish (Spain)",
   "locale_fr": "French",
 
   "notification_permission_title": "Permission needed",
@@ -278,6 +280,9 @@
   "session_question_select_multiple": "(select multiple)",
   "session_question_type_own_answer": "Type own answer",
   "session_question_type_placeholder": "Type your answer...",
+  "session_reasoning_thought_few_seconds": "Thought for a few seconds",
+  "session_reasoning_thought_seconds_one": "Thought for {count} second",
+  "session_reasoning_thought_seconds_other": "Thought for {count} seconds",
   "session_retry_gemini_hot": "Gemini quota exceeded, waiting for cooldown",
   "session_status_considering_next_steps": "Considering next steps...",
   "session_status_delegating": "Delegating...",

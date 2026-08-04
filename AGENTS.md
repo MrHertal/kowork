@@ -60,13 +60,13 @@ For HTML-level changes:
 
 Code and translation keys use OpenCode's technical concepts. User-facing values use Kowork's localized terminology.
 
-| Technical concept                                | English   | French     | German       |
-| ------------------------------------------------ | --------- | ---------- | ------------ |
-| Session                                          | Task      | Tâche      | Aufgabe      |
-| Child session                                    | Subtask   | Sous-tâche | Unteraufgabe |
-| Workspace, project, or working/session directory | Folder    | Dossier    | Ordner       |
-| MCP server                                       | Connector | Connecteur | Konnektor    |
-| Skill                                            | Skill     | Compétence | Skill        |
+| Technical concept                                | English   | French     | German       | Spanish (Latin America) | Spanish (Spain) |
+| ------------------------------------------------ | --------- | ---------- | ------------ | ----------------------- | --------------- |
+| Session                                          | Task      | Tâche      | Aufgabe      | Tarea                   | Tarea           |
+| Child session                                    | Subtask   | Sous-tâche | Unteraufgabe | Subtarea                | Subtarea        |
+| Workspace, project, or working/session directory | Folder    | Dossier    | Ordner       | Carpeta                 | Carpeta         |
+| MCP server                                       | Connector | Connecteur | Konnektor    | Conector                | Conector        |
+| Skill                                            | Skill     | Compétence | Skill        | Habilidad               | Skill           |
 
 Apply these rules in `packages/app/messages/*.json`:
 

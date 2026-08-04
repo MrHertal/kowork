@@ -23,6 +23,8 @@ const localeLabel: Record<(typeof locales)[number], () => string> = {
   en: m.locale_en,
   de: m.locale_de,
   fr: m.locale_fr,
+  "es-419": m.locale_es_419,
+  "es-ES": m.locale_es_es,
 };
 
 export function SettingsGeneral() {

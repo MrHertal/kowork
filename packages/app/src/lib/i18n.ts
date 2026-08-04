@@ -4,6 +4,7 @@ import type { AsyncStorage } from "@/contexts/platform";
 import {
   baseLocale,
   defineCustomClientStrategy,
+  extractLocaleFromCookie,
   getLocale,
   locales,
   setLocale,
@@ -24,6 +25,33 @@ function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value);
 }
 
+function getPreferredSpanishLocale(): Locale | undefined {
+  if (typeof navigator === "undefined") return;
+
+  const languages = navigator.languages.length
+    ? navigator.languages
+    : [navigator.language];
+
+  for (const language of languages) {
+    try {
+      const preferred = new Intl.Locale(language);
+      if (preferred.language === "es")
+        return preferred.region === "ES" ? "es-ES" : "es-419";
+
+      const supported = locales.some((locale) => {
+        const candidate = new Intl.Locale(locale);
+        return (
+          candidate.baseName === preferred.baseName ||
+          candidate.language === preferred.language
+        );
+      });
+      if (supported) return;
+    } catch {
+      continue;
+    }
+  }
+}
+
 function applyLocale(locale: Locale) {
   cachedLocale = locale;
   document.documentElement.lang = locale;
@@ -41,7 +69,14 @@ export async function setupI18n(storage?: AsyncStorage): Promise<void> {
     setLocale(saved, { reload: false });
     applyLocale(saved);
   } else {
-    applyLocale(getLocale() as Locale);
+    const cookieLocale = extractLocaleFromCookie();
+    if (cookieLocale) {
+      applyLocale(cookieLocale);
+    } else {
+      const preferred = getPreferredSpanishLocale();
+      if (preferred) setLocale(preferred, { reload: false });
+      applyLocale(preferred ?? (getLocale() as Locale));
+    }
   }
 }
 
