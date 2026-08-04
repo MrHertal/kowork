@@ -100,7 +100,7 @@ export function getToolInfo(
         icon: "task",
         title: type
           ? m.session_tool_agent({ type })
-          : m.session_tool_agent({ type: "" }),
+          : m.session_tool_agent_default(),
         subtitle: input.description ? String(input.description) : undefined,
       };
     }

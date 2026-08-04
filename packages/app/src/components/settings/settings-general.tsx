@@ -19,12 +19,12 @@ const DISPLAY_SIZES = [
 
 const DEFAULT_DISPLAY_SIZE = 16;
 
-const localeLabel: Record<(typeof locales)[number], () => string> = {
-  "en-US": m.locale_en_us,
-  "de-DE": m.locale_de_de,
-  "fr-FR": m.locale_fr_fr,
-  "es-419": m.locale_es_419,
-  "es-ES": m.locale_es_es,
+const localeLabel: Record<(typeof locales)[number], string> = {
+  "en-US": "English (United States)",
+  "de-DE": "Deutsch (Deutschland)",
+  "fr-FR": "Français (France)",
+  "es-419": "Español (Latinoamérica)",
+  "es-ES": "Español (España)",
 };
 
 export function SettingsGeneral() {
@@ -47,13 +47,13 @@ export function SettingsGeneral() {
             value={settings.general.language}
             onValueChange={settings.general.setLanguage}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[240px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {locales.map((locale) => (
                 <SelectItem key={locale} value={locale}>
-                  {localeLabel[locale]()}
+                  {localeLabel[locale]}
                 </SelectItem>
               ))}
             </SelectContent>

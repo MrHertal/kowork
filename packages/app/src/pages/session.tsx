@@ -173,12 +173,16 @@ export function Page({
         return;
 
       const currentModelVal = local.model.current;
-      const currentAgentVal = local.agent.current;
+      const currentAgentVal = local.agent.current ?? local.agent.list[0];
       const variant = local.model.variant.current;
-      if (!currentModelVal || !currentAgentVal) {
+      if (!currentModelVal) {
         toast.error(m.session_model_required_title(), {
           description: m.session_model_required_description(),
         });
+        return;
+      }
+      if (!currentAgentVal) {
+        toast.error(m.session_error_generic_title());
         return;
       }
 

@@ -144,9 +144,15 @@ function ConnectionError({ onRetry }: { onRetry?: () => void }) {
       <div className="flex max-w-md flex-col items-center text-center">
         <Logo className="mb-4 w-15 text-foreground" />
         <p className="text-sm text-foreground">
-          {parts[0]}
-          <span className="font-medium">{name}</span>
-          {parts[1]}
+          {server.isLocal ? (
+            m.server_local_unreachable()
+          ) : (
+            <>
+              {parts[0]}
+              <span className="font-medium">{name}</span>
+              {parts[1]}
+            </>
+          )}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           {m.server_retrying()}

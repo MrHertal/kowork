@@ -66,12 +66,6 @@
 
   "header_main_session": "Hauptaufgabe",
 
-  "locale_de_de": "Deutsch (Deutschland)",
-  "locale_en_us": "Englisch (Vereinigte Staaten)",
-  "locale_es_419": "Spanisch (Lateinamerika)",
-  "locale_es_es": "Spanisch (Spanien)",
-  "locale_fr_fr": "Französisch (Frankreich)",
-
   "notification_permission_title": "Berechtigung erforderlich",
   "notification_session_error_fallbackDescription": "Ein Fehler ist aufgetreten",
   "notification_session_error_title": "Aufgabenfehler",
@@ -161,6 +155,7 @@
   "provider_note_vercel": "Einheitlicher Zugriff auf KI-Modelle mit intelligentem Routing",
   "provider_select_option_placeholder": "Eine Option auswählen",
 
+  "server_local_unreachable": "Kowork kann derzeit keine Verbindung herstellen.",
   "server_retrying": "Automatische erneute Verbindung...",
   "server_unreachable": "Konnte {server} nicht erreichen",
 
