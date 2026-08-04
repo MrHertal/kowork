@@ -49,7 +49,7 @@ const createDefaultSettings = (): Settings => ({
   },
   general: {
     theme: "system",
-    language: "en",
+    language: "en-US",
   },
   notifications: {
     agent: true,

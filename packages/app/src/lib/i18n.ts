@@ -25,7 +25,7 @@ function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value);
 }
 
-function getPreferredSpanishLocale(): Locale | undefined {
+function getPreferredLocale(): Locale | undefined {
   if (typeof navigator === "undefined") return;
 
   const languages = navigator.languages.length
@@ -37,6 +37,8 @@ function getPreferredSpanishLocale(): Locale | undefined {
       const preferred = new Intl.Locale(language);
       if (preferred.language === "es")
         return preferred.region === "ES" ? "es-ES" : "es-419";
+      if (preferred.language === "de") return "de-DE";
+      if (preferred.language === "fr") return "fr-FR";
 
       const supported = locales.some((locale) => {
         const candidate = new Intl.Locale(locale);
@@ -73,7 +75,7 @@ export async function setupI18n(storage?: AsyncStorage): Promise<void> {
     if (cookieLocale) {
       applyLocale(cookieLocale);
     } else {
-      const preferred = getPreferredSpanishLocale();
+      const preferred = getPreferredLocale();
       if (preferred) setLocale(preferred, { reload: false });
       applyLocale(preferred ?? (getLocale() as Locale));
     }

@@ -66,11 +66,11 @@
 
   "header_main_session": "Tarea principal",
 
-  "locale_de": "Alemán",
-  "locale_en": "Inglés",
+  "locale_de_de": "Alemán (Alemania)",
+  "locale_en_us": "Inglés (Estados Unidos)",
   "locale_es_419": "Español (Latinoamérica)",
   "locale_es_es": "Español (España)",
-  "locale_fr": "Francés",
+  "locale_fr_fr": "Francés (Francia)",
 
   "notification_permission_title": "Permiso necesario",
   "notification_session_error_fallbackDescription": "Se ha producido un error",

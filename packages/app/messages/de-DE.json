@@ -66,11 +66,11 @@
 
   "header_main_session": "Hauptaufgabe",
 
-  "locale_de": "Deutsch",
-  "locale_en": "Englisch",
+  "locale_de_de": "Deutsch (Deutschland)",
+  "locale_en_us": "Englisch (Vereinigte Staaten)",
   "locale_es_419": "Spanisch (Lateinamerika)",
   "locale_es_es": "Spanisch (Spanien)",
-  "locale_fr": "Französisch",
+  "locale_fr_fr": "Französisch (Frankreich)",
 
   "notification_permission_title": "Berechtigung erforderlich",
   "notification_session_error_fallbackDescription": "Ein Fehler ist aufgetreten",

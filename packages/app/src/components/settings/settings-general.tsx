@@ -20,9 +20,9 @@ const DISPLAY_SIZES = [
 const DEFAULT_DISPLAY_SIZE = 16;
 
 const localeLabel: Record<(typeof locales)[number], () => string> = {
-  en: m.locale_en,
-  de: m.locale_de,
-  fr: m.locale_fr,
+  "en-US": m.locale_en_us,
+  "de-DE": m.locale_de_de,
+  "fr-FR": m.locale_fr_fr,
   "es-419": m.locale_es_419,
   "es-ES": m.locale_es_es,
 };
