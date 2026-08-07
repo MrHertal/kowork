@@ -214,7 +214,7 @@
   "session_composer_permission_ask_label": "Manual",
   "session_composer_permission_ask_title": "Aprobar manualmente",
   "session_composer_permission_auto_description": "Kowork aprueba automáticamente las acciones sensibles sin preguntarte.",
-  "session_composer_permission_auto_label": "Automático",
+  "session_composer_permission_auto_label": "Auto",
   "session_composer_permission_auto_title": "Aprobar automáticamente",
   "session_composer_permission_label": "Manual",
   "session_context_gathered": "Contexto recopilado",

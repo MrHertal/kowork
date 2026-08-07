@@ -27,7 +27,15 @@ const localeLabel: Record<(typeof locales)[number], string> = {
   "es-ES": "Español (España)",
   "zh-CN": "简体中文（中国大陆）",
   "hi-IN": "हिन्दी (भारत)",
+  "pt-BR": "Português (Brasil)",
 };
+
+const localeCollator = new Intl.Collator("en");
+const sortedLocales = [...locales].sort((a, b) => {
+  if (a === "en-US") return -1;
+  if (b === "en-US") return 1;
+  return localeCollator.compare(localeLabel[a], localeLabel[b]);
+});
 
 export function SettingsGeneral() {
   const settings = useSettings();
@@ -53,7 +61,7 @@ export function SettingsGeneral() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {locales.map((locale) => (
+              {sortedLocales.map((locale) => (
                 <SelectItem key={locale} value={locale}>
                   {localeLabel[locale]}
                 </SelectItem>

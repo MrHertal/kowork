@@ -40,6 +40,7 @@ function getPreferredLocale(): Locale | undefined {
       if (preferred.language === "de") return "de-DE";
       if (preferred.language === "fr") return "fr-FR";
       if (preferred.language === "hi") return "hi-IN";
+      if (preferred.language === "pt") return "pt-BR";
       if (preferred.language === "zh" && preferred.maximize().script === "Hans")
         return "zh-CN";
 
