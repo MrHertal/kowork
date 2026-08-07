@@ -1,4 +1,4 @@
-import { de, enUS, es, fr, zhCN } from "date-fns/locale";
+import { de, enUS, es, fr, hi, zhCN } from "date-fns/locale";
 
 import { getLocale } from "@/paraglide/runtime";
 
@@ -9,6 +9,7 @@ const dateFnsLocales = {
   "es-419": es,
   "es-ES": es,
   "zh-CN": zhCN,
+  "hi-IN": hi,
 } as const;
 
 export function getDateLocale() {

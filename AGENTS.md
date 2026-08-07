@@ -60,13 +60,13 @@ For HTML-level changes:
 
 Code and translation keys use OpenCode's technical concepts. User-facing values use Kowork's localized terminology.
 
-| Technical concept                                | English   | French     | German       | Spanish (Latin America) | Spanish (Spain) | Chinese (Simplified) |
-| ------------------------------------------------ | --------- | ---------- | ------------ | ----------------------- | --------------- | -------------------- |
-| Session                                          | Task      | Tâche      | Aufgabe      | Tarea                   | Tarea           | 任务                 |
-| Child session                                    | Subtask   | Sous-tâche | Unteraufgabe | Subtarea                | Subtarea        | 子任务               |
-| Workspace, project, or working/session directory | Folder    | Dossier    | Ordner       | Carpeta                 | Carpeta         | 文件夹               |
-| MCP server                                       | Connector | Connecteur | Konnektor    | Conector                | Conector        | 连接器               |
-| Skill                                            | Skill     | Compétence | Skill        | Habilidad               | Skill           | 技能                 |
+| Technical concept                                | English   | French     | German       | Spanish (Latin America) | Spanish (Spain) | Chinese (Simplified) | Hindi   |
+| ------------------------------------------------ | --------- | ---------- | ------------ | ----------------------- | --------------- | -------------------- | ------- |
+| Session                                          | Task      | Tâche      | Aufgabe      | Tarea                   | Tarea           | 任务                 | कार्य   |
+| Child session                                    | Subtask   | Sous-tâche | Unteraufgabe | Subtarea                | Subtarea        | 子任务               | उपकार्य |
+| Workspace, project, or working/session directory | Folder    | Dossier    | Ordner       | Carpeta                 | Carpeta         | 文件夹               | फ़ोल्डर |
+| MCP server                                       | Connector | Connecteur | Konnektor    | Conector                | Conector        | 连接器               | कनेक्टर |
+| Skill                                            | Skill     | Compétence | Skill        | Habilidad               | Skill           | 技能                 | स्किल   |
 
 Apply these rules in `packages/app/messages/*.json`:
 

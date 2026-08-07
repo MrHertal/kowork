@@ -39,6 +39,7 @@ function getPreferredLocale(): Locale | undefined {
         return preferred.region === "ES" ? "es-ES" : "es-419";
       if (preferred.language === "de") return "de-DE";
       if (preferred.language === "fr") return "fr-FR";
+      if (preferred.language === "hi") return "hi-IN";
       if (preferred.language === "zh" && preferred.maximize().script === "Hans")
         return "zh-CN";
 

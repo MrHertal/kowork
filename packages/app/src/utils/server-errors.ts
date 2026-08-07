@@ -51,6 +51,7 @@ const messages: Record<string, ((vars: V) => string) | undefined> = {
   "common.requestFailed": () => m.common_requestFailed(),
   "common.moreCountSuffix": (v) =>
     m.common_moreCountSuffix({ count: Number(v?.count ?? 0) }),
+  "common.listSeparator": () => m.common_list_separator(),
 };
 
 export const translate: Translator = (key, vars) => {
@@ -161,7 +162,8 @@ function parseReadableProviderModelNotFoundError(
     "Check your config (opencode.json) provider/model names",
   );
   if (list.length) {
-    const suggestions = list.slice(0, 5).join(m.common_list_separator());
+    const separator = tr(translator, "common.listSeparator", ", ");
+    const suggestions = list.slice(0, 5).join(separator);
     return [
       body,
       tr(translator, "error.chain.didYouMean", `Did you mean: ${suggestions}`, {
