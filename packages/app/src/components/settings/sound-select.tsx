@@ -13,17 +13,17 @@ import { SOUND_IDS, type SoundID, playSoundById } from "@/utils/sound";
 
 const OFF_VALUE = "off";
 
-const SOUND_LABEL: Record<SoundID, () => string> = {
-  "alert-01": m.sound_option_alert01,
-  "alert-05": m.sound_option_alert05,
-  "bip-bop-01": m.sound_option_bipbop01,
-  "bip-bop-05": m.sound_option_bipbop05,
-  "staplebops-01": m.sound_option_staplebops01,
-  "staplebops-02": m.sound_option_staplebops02,
-  "nope-03": m.sound_option_nope03,
-  "nope-07": m.sound_option_nope07,
-  "yup-01": m.sound_option_yup01,
-  "yup-04": m.sound_option_yup04,
+const SOUND_LABEL: Record<SoundID, string> = {
+  "alert-01": "Alert 1",
+  "alert-05": "Alert 2",
+  "bip-bop-01": "Bip-Bop 1",
+  "bip-bop-05": "Bip-Bop 2",
+  "staplebops-01": "Staplebops 1",
+  "staplebops-02": "Staplebops 2",
+  "nope-03": "Nope 1",
+  "nope-07": "Nope 2",
+  "yup-01": "Yup 1",
+  "yup-04": "Yup 2",
 };
 
 const PREVIEW_DEBOUNCE_MS = 100;
@@ -106,7 +106,7 @@ export function SoundSelect({
             onPointerEnter={() => schedulePreview(id)}
             onFocus={() => schedulePreview(id)}
           >
-            {SOUND_LABEL[id]()}
+            {SOUND_LABEL[id]}
           </SelectItem>
         ))}
       </SelectContent>

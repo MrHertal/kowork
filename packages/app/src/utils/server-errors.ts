@@ -145,15 +145,15 @@ function parseReadableProviderModelNotFoundError(
   translator?: Translator,
 ) {
   const p = errorInput.data.providerID.trim();
-  const m = errorInput.data.modelID.trim();
+  const model = errorInput.data.modelID.trim();
   const list = (errorInput.data.suggestions ?? [])
     .map((v) => v.trim())
     .filter(Boolean);
   const body = tr(
     translator,
     "error.chain.modelNotFound",
-    `Model not found: ${p}/${m}`,
-    { provider: p, model: m },
+    `Model not found: ${p}/${model}`,
+    { provider: p, model },
   );
   const tail = tr(
     translator,
@@ -161,7 +161,7 @@ function parseReadableProviderModelNotFoundError(
     "Check your config (opencode.json) provider/model names",
   );
   if (list.length) {
-    const suggestions = list.slice(0, 5).join(", ");
+    const suggestions = list.slice(0, 5).join(m.common_list_separator());
     return [
       body,
       tr(translator, "error.chain.didYouMean", `Did you mean: ${suggestions}`, {

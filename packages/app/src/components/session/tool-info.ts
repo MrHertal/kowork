@@ -73,7 +73,11 @@ export function getToolInfo(
         icon: "code",
         title: m.session_tool_patch(),
         subtitle:
-          count > 0 ? `${count} file${count > 1 ? "s" : ""}` : undefined,
+          count > 0
+            ? count === 1
+              ? m.session_patch_file_count_one({ count })
+              : m.session_patch_file_count({ count })
+            : undefined,
       };
     }
     case "todowrite":

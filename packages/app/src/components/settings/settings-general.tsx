@@ -25,6 +25,7 @@ const localeLabel: Record<(typeof locales)[number], string> = {
   "fr-FR": "Français (France)",
   "es-419": "Español (Latinoamérica)",
   "es-ES": "Español (España)",
+  "zh-CN": "简体中文（中国大陆）",
 };
 
 export function SettingsGeneral() {

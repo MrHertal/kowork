@@ -60,13 +60,13 @@ For HTML-level changes:
 
 Code and translation keys use OpenCode's technical concepts. User-facing values use Kowork's localized terminology.
 
-| Technical concept                                | English   | French     | German       | Spanish (Latin America) | Spanish (Spain) |
-| ------------------------------------------------ | --------- | ---------- | ------------ | ----------------------- | --------------- |
-| Session                                          | Task      | Tâche      | Aufgabe      | Tarea                   | Tarea           |
-| Child session                                    | Subtask   | Sous-tâche | Unteraufgabe | Subtarea                | Subtarea        |
-| Workspace, project, or working/session directory | Folder    | Dossier    | Ordner       | Carpeta                 | Carpeta         |
-| MCP server                                       | Connector | Connecteur | Konnektor    | Conector                | Conector        |
-| Skill                                            | Skill     | Compétence | Skill        | Habilidad               | Skill           |
+| Technical concept                                | English   | French     | German       | Spanish (Latin America) | Spanish (Spain) | Chinese (Simplified) |
+| ------------------------------------------------ | --------- | ---------- | ------------ | ----------------------- | --------------- | -------------------- |
+| Session                                          | Task      | Tâche      | Aufgabe      | Tarea                   | Tarea           | 任务                 |
+| Child session                                    | Subtask   | Sous-tâche | Unteraufgabe | Subtarea                | Subtarea        | 子任务               |
+| Workspace, project, or working/session directory | Folder    | Dossier    | Ordner       | Carpeta                 | Carpeta         | 文件夹               |
+| MCP server                                       | Connector | Connecteur | Konnektor    | Conector                | Conector        | 连接器               |
+| Skill                                            | Skill     | Compétence | Skill        | Habilidad               | Skill           | 技能                 |
 
 Apply these rules in `packages/app/messages/*.json`:
 

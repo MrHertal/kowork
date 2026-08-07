@@ -47,7 +47,8 @@ export function QuestionTool(props: ToolProps) {
             <div key={i} className="space-y-1">
               <div className="text-sm font-medium">{q.question}</div>
               <div className="text-sm text-muted-foreground">
-                {answers[i]?.join(", ") || m.session_question_no_answer()}
+                {answers[i]?.join(m.common_list_separator()) ||
+                  m.session_question_no_answer()}
               </div>
             </div>
           ))}

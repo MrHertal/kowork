@@ -517,7 +517,10 @@ function activitySummary(
     labels.push(m.session_activity_summary_more_other({ count }));
   }
 
-  return labels.join(", ") || m.session_activity_summary_completed();
+  return (
+    labels.join(m.common_list_separator()) ||
+    m.session_activity_summary_completed()
+  );
 }
 
 function GroupedPartsRenderer({

@@ -56,7 +56,7 @@ function formatSummary(summary: {
         : m.session_context_list_other({ count: summary.list }),
     );
   }
-  return parts.join(", ");
+  return parts.join(m.common_list_separator());
 }
 
 function contextToolTrigger(
