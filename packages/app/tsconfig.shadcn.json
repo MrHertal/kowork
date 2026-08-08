@@ -6,7 +6,6 @@
     "emitDeclarationOnly": true,
     "outDir": "node_modules/.ts-dist-generated",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -14,6 +13,7 @@
     "noUncheckedIndexedAccess": false
   },
   "include": [
+    "src/assets.d.ts",
     "src/components/ui",
     "src/components/ai-elements",
     "src/hooks/use-mobile.ts",

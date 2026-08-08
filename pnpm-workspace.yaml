@@ -8,3 +8,4 @@ allowBuilds:
 overrides:
   "@types/react": "^19"
   "@types/react-dom": "^19"
+  tsx: "4.23.10"
