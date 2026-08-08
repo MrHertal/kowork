@@ -1,6 +1,6 @@
 // @opencode-ref: opencode/packages/app/src/context/permission.tsx
 import type { PermissionRequest } from "@opencode-ai/sdk/v2/client";
-import { Store } from "@tanstack/react-store";
+import { Store, useStore } from "@tanstack/react-store";
 import {
   createContext,
   type ReactNode,
@@ -35,7 +35,7 @@ type PermissionRespondFn = (input: {
   directory?: string;
 }) => void;
 
-interface PermissionStore {
+export interface PermissionStore {
   autoAccept: Record<string, boolean>;
 }
 
@@ -83,6 +83,7 @@ function hasPermissionPromptRules(permission: unknown) {
 }
 
 export interface PermissionContextValue {
+  _store: Store<PermissionStore>;
   ready: boolean;
   respond: PermissionRespondFn;
   autoResponds: (permission: PermissionRequest, directory?: string) => boolean;
@@ -422,6 +423,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
 
   const ctxValue = useMemo<PermissionContextValue>(
     () => ({
+      _store: store,
       ready,
       respond,
       autoResponds: shouldAutoRespond,
@@ -435,6 +437,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
       isPermissionAllowAll,
     }),
     [
+      store,
       ready,
       respond,
       shouldAutoRespond,
@@ -461,4 +464,12 @@ export function usePermission(): PermissionContextValue {
   if (!ctx)
     throw new Error("usePermission must be used within PermissionProvider");
   return ctx;
+}
+
+export function usePermissionData<T>(
+  selector: (state: PermissionStore) => T,
+  compare?: (a: T, b: T) => boolean,
+): T {
+  const { _store } = usePermission();
+  return useStore(_store, selector, compare);
 }

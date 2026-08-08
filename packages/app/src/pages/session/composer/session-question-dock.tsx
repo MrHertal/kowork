@@ -35,6 +35,21 @@ interface Store {
 
 const CACHE_MAX = 50;
 const emptyOptions: QuestionOption[] = [];
+
+function initialFocus(
+  questions: QuestionRequest["questions"],
+  answers: QuestionAnswer[],
+  customOn: boolean[],
+  tab: number,
+): number {
+  const list = questions[tab]?.options ?? [];
+  if (customOn[tab] === true) return list.length;
+  return Math.max(
+    0,
+    list.findIndex((item) => answers[tab]?.includes(item.label) ?? false),
+  );
+}
+
 const cache = new Map<
   string,
   {
@@ -84,7 +99,12 @@ export function SessionQuestionDock({ request }: SessionQuestionDockProps) {
     custom: cached?.custom ?? [],
     customOn: cached?.customOn ?? [],
     editing: false,
-    focus: 0,
+    focus: initialFocus(
+      questions,
+      cached?.answers ?? [],
+      cached?.customOn ?? [],
+      cached?.tab ?? 0,
+    ),
   }));
   const [sending, setSending] = useState(false);
 
@@ -125,6 +145,20 @@ export function SessionQuestionDock({ request }: SessionQuestionDockProps) {
     [questions, store.answers, store.customOn, store.tab],
   );
 
+  const focusDom = useCallback(
+    (i: number) => {
+      if (focusFrameRef.current !== undefined)
+        cancelAnimationFrame(focusFrameRef.current);
+      focusFrameRef.current = requestAnimationFrame(() => {
+        focusFrameRef.current = undefined;
+        const el =
+          i === options.length ? customRef.current : optsRef.current[i];
+        el?.focus();
+      });
+    },
+    [options.length],
+  );
+
   const focus = useCallback(
     (i: number) => {
       const next = clamp(i);
@@ -132,20 +166,15 @@ export function SessionQuestionDock({ request }: SessionQuestionDockProps) {
       setStore((prev) =>
         prev.focus === next ? prev : { ...prev, focus: next },
       );
-      if (focusFrameRef.current !== undefined)
-        cancelAnimationFrame(focusFrameRef.current);
-      focusFrameRef.current = requestAnimationFrame(() => {
-        focusFrameRef.current = undefined;
-        const el =
-          next === options.length ? customRef.current : optsRef.current[next];
-        el?.focus();
-      });
+      focusDom(next);
     },
-    [clamp, options.length],
+    [clamp, focusDom],
   );
 
   useEffect(() => {
-    focus(pickFocus());
+    const i = clamp(pickFocus());
+    focusIndexRef.current = i;
+    focusDom(i);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

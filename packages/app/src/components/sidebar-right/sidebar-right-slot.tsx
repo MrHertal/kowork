@@ -10,6 +10,7 @@ export function SidebarRightSlot({ children }: { children: ReactNode }) {
   const { _registerContent } = useSidebarRight();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target exists only after mount
     setTarget(document.getElementById(SIDEBAR_RIGHT_CONTENT_ID));
     return _registerContent();
   }, [_registerContent]);

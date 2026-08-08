@@ -50,16 +50,8 @@ export function ConnectionGate({
   const current = server.current;
 
   useEffect(() => {
-    if (disableHealthCheck) {
-      setHealthResult(true);
-      return;
-    }
-
     const conn = current;
-    if (!conn) {
-      setHealthResult(true);
-      return;
-    }
+    if (disableHealthCheck || !conn) return;
 
     // In background mode, keep the last known result while re-checking.
     if (checkModeRef.current === "blocking") setHealthResult(undefined);
@@ -110,11 +102,13 @@ export function ConnectionGate({
     return () => clearTimeout(timer);
   }, []);
 
-  if (checkMode === "blocking" && healthResult === undefined) {
+  const result = disableHealthCheck || !current ? true : healthResult;
+
+  if (checkMode === "blocking" && result === undefined) {
     return splashReady ? <SplashLoadingScreen /> : null;
   }
 
-  if (healthResult === true) return <>{children}</>;
+  if (result === true) return <>{children}</>;
 
   return <ConnectionError onRetry={refetch} />;
 }

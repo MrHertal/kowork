@@ -34,9 +34,10 @@ import {
   type PermissionMode,
 } from "@/components/session/permission-mode-selector";
 import { KOWORK_SYSTEM_PROMPT } from "@/constants/kowork-system-prompt";
-import { useChildData } from "@/contexts/global-sync";
+import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useLocal } from "@/contexts/local";
-import { usePermission } from "@/contexts/permission";
+import { usePermission, usePermissionData } from "@/contexts/permission";
+import { autoRespondsPermission } from "@/contexts/permission/auto-respond";
 import { usePrompt, type ImageAttachmentPart } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useSync } from "@/contexts/sync";
@@ -90,15 +91,20 @@ export function Page({
   const [sending, setSending] = useState(false);
   const [newSessionPermissionMode, setNewSessionPermissionMode] =
     useState<PermissionMode>(defaultPermissionMode);
-  const [sessionPermissionMode, setSessionPermissionMode] =
-    useState<PermissionMode>(defaultPermissionMode);
 
-  useEffect(() => {
-    if (!sessionId || !permission.ready) return;
-    setSessionPermissionMode(
-      getPermissionMode(permission.isAutoAccepting(sessionId, directory)),
-    );
-  }, [sessionId, directory, permission]);
+  const autoAccept = usePermissionData((s) => s.autoAccept);
+  const sessions = useChildData(directory, (s) => s.session, shallowArrayEqual);
+  const sessionPermissionMode =
+    !sessionId || !permission.ready
+      ? defaultPermissionMode
+      : getPermissionMode(
+          autoRespondsPermission(
+            autoAccept,
+            sessions,
+            { sessionID: sessionId },
+            directory,
+          ),
+        );
   const sendingRef = useRef(false);
   const blockedRef = useRef(false);
 
@@ -315,7 +321,6 @@ export function Page({
 
   const handleSessionPermissionModeChange = (mode: PermissionMode) => {
     if (!sessionId) return;
-    setSessionPermissionMode(mode);
     applyPermissionMode(permission, mode, sessionId, directory);
   };
 

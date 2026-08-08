@@ -297,20 +297,6 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
     [variantList, selectedVariant, configuredVariant],
   );
 
-  useEffect(() => {
-    if (agentList.length === 0) {
-      setEphemeral((prev) => {
-        if (prev.current === undefined) return prev;
-        return { ...prev, current: undefined };
-      });
-      return;
-    }
-    setEphemeral((prev) => {
-      if (agentList.some((item) => item.name === prev.current)) return prev;
-      return { ...prev, current: agentList[0]?.name };
-    });
-  }, [agentList]);
-
   const write = useCallback(
     (next: Partial<State>) => {
       const currentScope = scope ?? { agent: currentAgent?.name };
