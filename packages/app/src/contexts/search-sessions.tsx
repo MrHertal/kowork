@@ -82,7 +82,7 @@ function reconcileResult(
 
 export interface SearchSessionsContextValue {
   _store: Store<SearchSessionsState>;
-  setQuery(q: string): void;
+  setQuery: (q: string) => void;
 }
 
 const SearchSessionsContext = createContext<SearchSessionsContextValue | null>(

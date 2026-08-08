@@ -8,7 +8,11 @@ export function useSession(id: string) {
     queryKey: ["session", id],
     queryFn: async () => {
       const res = await globalSDK.client.session.get({ sessionID: id });
-      if (res.error) throw res.error;
+      if (res.error) {
+        throw res.error instanceof Error
+          ? res.error
+          : Object.assign(new Error(), res.error);
+      }
       return res.data;
     },
   });

@@ -13,15 +13,15 @@ const mockPlatform: Platform = {
   back: () => window.history.back(),
   forward: () => window.history.forward(),
   storage: () => ({
-    getItem: async (key) => localStorage.getItem(key),
-    setItem: async (key, value) => localStorage.setItem(key, value),
-    removeItem: async (key) => localStorage.removeItem(key),
-    clear: async () => localStorage.clear(),
-    key: async (index) => localStorage.key(index) ?? undefined,
-    getLength: async () => localStorage.length,
+    getItem: (key) => Promise.resolve(localStorage.getItem(key)),
+    setItem: (key, value) => Promise.resolve(localStorage.setItem(key, value)),
+    removeItem: (key) => Promise.resolve(localStorage.removeItem(key)),
+    clear: () => Promise.resolve(localStorage.clear()),
+    key: (index) => Promise.resolve(localStorage.key(index) ?? undefined),
+    getLength: () => Promise.resolve(localStorage.length),
   }),
-  restart: async () => window.location.reload(),
-  notify: async () => undefined,
+  restart: () => Promise.resolve(window.location.reload()),
+  notify: () => Promise.resolve(),
   fetch: (input, init) => fetch(input, init),
 };
 

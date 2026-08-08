@@ -73,8 +73,8 @@ function upsertWithinWindow(draft: RecentSessionsState, info: Session) {
 
 export interface RecentSessionsContextValue {
   _store: Store<RecentSessionsState>;
-  loadMore(): Promise<void>;
-  retry(): Promise<void>;
+  loadMore: () => Promise<void>;
+  retry: () => Promise<void>;
 }
 
 const RecentSessionsContext = createContext<RecentSessionsContextValue | null>(

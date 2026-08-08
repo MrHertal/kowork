@@ -7,6 +7,11 @@ export type ToolInfo = {
   subtitle?: string;
 };
 
+function str(value: unknown, map?: (s: string) => string): string | undefined {
+  if (typeof value !== "string" || value === "") return undefined;
+  return map ? map(value) : value;
+}
+
 export function getToolInfo(
   tool: string,
   input: Record<string, unknown> = {},
@@ -16,55 +21,49 @@ export function getToolInfo(
       return {
         icon: "glasses",
         title: m.session_tool_read(),
-        subtitle: input.filePath
-          ? getFilename(String(input.filePath))
-          : undefined,
+        subtitle: str(input.filePath, getFilename),
       };
     case "list":
       return {
         icon: "list",
         title: m.session_tool_list(),
-        subtitle: input.path ? String(input.path) : undefined,
+        subtitle: str(input.path),
       };
     case "glob":
       return {
         icon: "search",
         title: m.session_tool_glob(),
-        subtitle: input.pattern ? String(input.pattern) : undefined,
+        subtitle: str(input.pattern),
       };
     case "grep":
       return {
         icon: "search",
         title: m.session_tool_grep(),
-        subtitle: input.pattern ? String(input.pattern) : undefined,
+        subtitle: str(input.pattern),
       };
     case "webfetch":
       return {
         icon: "globe",
         title: m.session_tool_webfetch(),
-        subtitle: input.url ? String(input.url) : undefined,
+        subtitle: str(input.url),
       };
     case "bash":
       return {
         icon: "terminal",
         title: m.session_tool_shell(),
-        subtitle: input.description ? String(input.description) : undefined,
+        subtitle: str(input.description),
       };
     case "edit":
       return {
         icon: "code",
         title: m.session_tool_edit(),
-        subtitle: input.filePath
-          ? getFilename(String(input.filePath))
-          : undefined,
+        subtitle: str(input.filePath, getFilename),
       };
     case "write":
       return {
         icon: "code",
         title: m.session_tool_write(),
-        subtitle: input.filePath
-          ? getFilename(String(input.filePath))
-          : undefined,
+        subtitle: str(input.filePath, getFilename),
       };
     case "apply_patch": {
       const files = input.files;
@@ -105,7 +104,7 @@ export function getToolInfo(
         title: type
           ? m.session_tool_agent({ type })
           : m.session_tool_agent_default(),
-        subtitle: input.description ? String(input.description) : undefined,
+        subtitle: str(input.description),
       };
     }
     default:

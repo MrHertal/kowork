@@ -572,7 +572,7 @@ export function SessionQuestionDock({ request }: SessionQuestionDockProps) {
               disabled={sending}
               ref={(el) => {
                 if (el) optsRef.current[i] = el;
-                else delete optsRef.current[i];
+                else optsRef.current[i] = null;
               }}
               onFocus={() => {
                 focusIndexRef.current = i;

@@ -196,32 +196,33 @@ function localStorageWithPrefix(prefix: string): AsyncStorage {
       localStorage.removeItem(base + key);
       return Promise.resolve();
     },
-    clear: async () => {
+    clear: () => {
       const toRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (k?.startsWith(base)) toRemove.push(k);
       }
       for (const k of toRemove) localStorage.removeItem(k);
+      return Promise.resolve();
     },
-    key: async (index) => {
+    key: (index) => {
       let count = 0;
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (k?.startsWith(base)) {
-          if (count === index) return k.slice(base.length);
+          if (count === index) return Promise.resolve(k.slice(base.length));
           count++;
         }
       }
-      return undefined;
+      return Promise.resolve(undefined);
     },
-    getLength: async () => {
+    getLength: () => {
       let count = 0;
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (k?.startsWith(base)) count++;
       }
-      return count;
+      return Promise.resolve(count);
     },
   };
 }

@@ -291,10 +291,10 @@ function SessionTurnImpl({
   );
 
   const errorText = useMemo(() => {
-    const msg = error?.data?.message;
+    const msg: unknown = error?.data?.message;
     if (typeof msg === "string") return unwrap(msg);
     if (msg === undefined || msg === null) return "";
-    return unwrap(String(msg));
+    return unwrap(JSON.stringify(msg) ?? "");
   }, [error]);
 
   const resolvedShowReasoningSummaries = showReasoningSummaries ?? true;

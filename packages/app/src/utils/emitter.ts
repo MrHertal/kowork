@@ -8,12 +8,15 @@ type EmitterPayload<EventMap> = {
 }[keyof EventMap & string];
 
 export interface Emitter<EventMap extends Record<string, unknown>> {
-  emit<K extends keyof EventMap & string>(name: K, details: EventMap[K]): void;
-  on<K extends keyof EventMap & string>(
+  emit: <K extends keyof EventMap & string>(
+    name: K,
+    details: EventMap[K],
+  ) => void;
+  on: <K extends keyof EventMap & string>(
     name: K,
     handler: Handler<EventMap[K]>,
-  ): () => void;
-  listen(handler: (payload: EmitterPayload<EventMap>) => void): () => void;
+  ) => () => void;
+  listen: (handler: (payload: EmitterPayload<EventMap>) => void) => () => void;
 }
 
 export function createEmitter<

@@ -1,5 +1,4 @@
 import type {
-  AssistantMessage,
   Message as OpenCodeMessage,
   SessionStatus,
 } from "@opencode-ai/sdk/v2/client";

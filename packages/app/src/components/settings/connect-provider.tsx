@@ -147,7 +147,6 @@ export function ConnectProvider({
   back?: "providers" | "settings";
 }) {
   const dialog = useDialog();
-  const platform = usePlatform();
   const globalSDK = useGlobalSDK();
   const globalSync = useGlobalSync();
   const providers = useProviders();

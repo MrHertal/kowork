@@ -1,8 +1,5 @@
 // @opencode-ref: opencode/packages/app/src/context/notification.tsx
-import type {
-  EventSessionError,
-  PermissionRequest,
-} from "@opencode-ai/sdk/v2/client";
+import type { EventSessionError } from "@opencode-ai/sdk/v2/client";
 import { Store, useStore } from "@tanstack/react-store";
 import {
   createContext,

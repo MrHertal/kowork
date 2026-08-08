@@ -48,8 +48,8 @@ const createDefaultState = (): PinnedSessionsState => ({
 
 export interface PinnedSessionsContextValue {
   _store: Store<PinnedSessionsState>;
-  pin(session: Session): void;
-  unpin(sessionID: string): void;
+  pin: (session: Session) => void;
+  unpin: (sessionID: string) => void;
 }
 
 const PinnedSessionsContext = createContext<PinnedSessionsContextValue | null>(

@@ -32,7 +32,11 @@ export function useSessionContext(sessionId: string) {
         { sessionID: sessionId },
         { signal },
       );
-      if (result.error) throw result.error;
+      if (result.error) {
+        throw result.error instanceof Error
+          ? result.error
+          : Object.assign(new Error(), result.error);
+      }
       return result.data?.cost ?? null;
     },
   });

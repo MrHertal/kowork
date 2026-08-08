@@ -12,7 +12,6 @@ import type {
   Part,
   Project,
   Session,
-  SnapshotFileDiff,
 } from "@opencode-ai/sdk/v2/client";
 import { Binary } from "@/utils/binary";
 import { retry } from "@/utils/retry";
@@ -30,7 +29,6 @@ import {
   type OptimisticItem,
   applyOptimisticAdd,
   applyOptimisticRemove,
-  mergeOptimisticPage,
 } from "./sync/optimistic";
 import {
   type MetaState,
