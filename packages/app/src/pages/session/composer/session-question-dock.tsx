@@ -1,5 +1,6 @@
 import type {
   QuestionAnswer,
+  QuestionOption,
   QuestionRequest,
 } from "@opencode-ai/sdk/v2/client";
 import { CheckIcon, MessageCircleQuestionIcon } from "lucide-react";
@@ -33,6 +34,7 @@ interface Store {
 }
 
 const CACHE_MAX = 50;
+const emptyOptions: QuestionOption[] = [];
 const cache = new Map<
   string,
   {
@@ -87,7 +89,7 @@ export function SessionQuestionDock({ request }: SessionQuestionDockProps) {
   const [sending, setSending] = useState(false);
 
   const question = questions[store.tab];
-  const options = question?.options ?? [];
+  const options = question?.options ?? emptyOptions;
   const input = store.custom[store.tab] ?? "";
   const on = store.customOn[store.tab] === true;
   const multi = question?.multiple === true;

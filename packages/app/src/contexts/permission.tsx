@@ -110,7 +110,10 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
     logName: "permission",
   });
   const disposed = useRef(false);
+  // Must be fresh before child effects run (children call isAutoAccepting,
+  // which reads it), so it updates during render.
   const storeRef = useRef(store);
+  // eslint-disable-next-line react-hooks/refs
   storeRef.current = store;
 
   const updateAutoAccept = useCallback(

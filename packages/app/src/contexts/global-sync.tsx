@@ -550,12 +550,10 @@ export function useChildData<T>(
   compare?: (a: T, b: T) => boolean,
 ): T {
   const ctx = useGlobalSync();
-  const ctxRef = useRef(ctx);
-  ctxRef.current = ctx;
   const store = ctx._child(directory);
   useEffect(() => {
-    void ctxRef.current.bootstrapInstance(directory);
-  }, [directory]);
+    void ctx.bootstrapInstance(directory);
+  }, [ctx, directory]);
   return useStore(store, selector, compare);
 }
 

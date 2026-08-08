@@ -1,5 +1,5 @@
 import { ChevronDownIcon } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Tool } from "@/components/ai-elements/tool";
@@ -60,27 +60,14 @@ export function BasicTool({
 }: BasicToolProps) {
   const [userOpen, setUserOpen] = useState<boolean | undefined>(undefined);
   const [ready, setReady] = useState(!defer || defaultOpen);
-  const frameRef = useRef<number>(undefined);
   const open = forceOpen || (userOpen ?? defaultOpen);
   const pending = status === "pending" || status === "running";
 
   useEffect(() => {
-    if (!defer) {
-      setReady(true);
-      return;
-    }
-    if (!open) {
-      setReady(false);
-      return;
-    }
-    frameRef.current = requestAnimationFrame(() => {
-      setReady(true);
+    const frame = requestAnimationFrame(() => {
+      setReady(!defer || open);
     });
-    return () => {
-      if (frameRef.current !== undefined) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
+    return () => cancelAnimationFrame(frame);
   }, [defer, open]);
 
   const handleOpenChange = (value: boolean) => {

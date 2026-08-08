@@ -115,11 +115,16 @@ export function SyncProvider({ children }: SyncProviderProps) {
     void globalSync.bootstrapInstance(sdk.directory);
   }, [globalSync, sdk.directory]);
 
+  // These refs must be fresh before child effects run (children call the
+  // stable context functions, which read them), so they update during render.
   const sdkRef = useRef(sdk);
+  // eslint-disable-next-line react-hooks/refs
   sdkRef.current = sdk;
   const globalSyncRef = useRef(globalSync);
+  // eslint-disable-next-line react-hooks/refs
   globalSyncRef.current = globalSync;
   const storeRef = useRef(store);
+  // eslint-disable-next-line react-hooks/refs
   storeRef.current = store;
 
   const metaRef = useRef<MetaState>({

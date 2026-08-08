@@ -56,12 +56,16 @@ interface MessageTimelineProps {
   editToolDefaultOpen?: boolean;
 }
 
+function scrollToLatest(el: HTMLElement) {
+  el.scrollTop = el.scrollHeight;
+}
+
 function TimelineScrollButton() {
   const context = useStickToBottomContext();
   const handleScrollToBottom = async () => {
     if (!(await context.scrollToBottom())) return;
     const scrollElement = context.scrollRef.current;
-    if (scrollElement) scrollElement.scrollTop = scrollElement.scrollHeight;
+    if (scrollElement) scrollToLatest(scrollElement);
   };
 
   return (

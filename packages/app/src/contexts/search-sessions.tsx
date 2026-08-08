@@ -171,7 +171,9 @@ export function SearchSessionsProvider({
     [globalSDK, queryClient, stores, setLoading],
   );
 
-  runSearchRef.current = runSearch;
+  useEffect(() => {
+    runSearchRef.current = runSearch;
+  });
 
   const setQuery = useCallback(
     (q: string) => {

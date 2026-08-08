@@ -29,7 +29,10 @@ function ActivityStatus({ status }: { status: string }) {
     status,
     animateEntry: false,
   });
-  const displayedAt = useRef(Date.now());
+  const displayedAt = useRef(0);
+  useEffect(() => {
+    displayedAt.current = Date.now();
+  }, []);
   const showLatestStatus = useEffectEvent(() => {
     displayedAt.current = Date.now();
     setDisplayed({ status, animateEntry: true });

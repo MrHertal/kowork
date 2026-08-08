@@ -144,13 +144,16 @@ export function PromptProvider({ sessionId, children }: PromptProviderProps) {
     [current],
   );
 
-  const set = useCallback((prompt: Prompt, cursorPosition?: number) => {
-    const next = clonePrompt(prompt);
-    setSnapshot((prev) => ({
-      prompt: next,
-      cursor: cursorPosition ?? prev.cursor,
-    }));
-  }, []);
+  const set = useCallback(
+    (prompt: Prompt, cursorPosition?: number) => {
+      const next = clonePrompt(prompt);
+      setSnapshot((prev) => ({
+        prompt: next,
+        cursor: cursorPosition ?? prev.cursor,
+      }));
+    },
+    [setSnapshot],
+  );
 
   const update = useCallback(
     (updater: (prev: Prompt) => Prompt, cursorPosition?: number) => {
@@ -159,12 +162,12 @@ export function PromptProvider({ sessionId, children }: PromptProviderProps) {
         cursor: cursorPosition ?? prev.cursor,
       }));
     },
-    [],
+    [setSnapshot],
   );
 
   const reset = useCallback(() => {
     setSnapshot({ prompt: clonePrompt(DEFAULT_PROMPT), cursor: 0 });
-  }, []);
+  }, [setSnapshot]);
 
   const ctxValue = useMemo<PromptContextValue>(
     () => ({

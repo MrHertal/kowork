@@ -161,9 +161,11 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   const pruned = useRef(false);
 
   const settingsRef = useRef(settings);
-  settingsRef.current = settings;
   const permissionRef = useRef(permission);
-  permissionRef.current = permission;
+  useEffect(() => {
+    settingsRef.current = settings;
+    permissionRef.current = permission;
+  });
 
   const [storage] = useState(() => resolveStorage(platform, PERSIST_TARGET));
 

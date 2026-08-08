@@ -129,7 +129,9 @@ export function Page({
     !!sessionStatus && sessionStatus.type !== "idle" && !!sessionId;
 
   const isBusyRef = useRef(isBusy);
-  isBusyRef.current = isBusy;
+  useEffect(() => {
+    isBusyRef.current = isBusy;
+  }, [isBusy]);
   const sessionSyncedAt = useRef<Map<string, number>>(new Map());
   useEffect(() => {
     if (!sessionId) return;

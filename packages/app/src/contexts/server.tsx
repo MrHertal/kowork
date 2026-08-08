@@ -319,7 +319,9 @@ export function ServerProvider({
   const platform = usePlatform();
   const checkServerHealth = useCheckServerHealth();
   const checkServerHealthRef = useRef(checkServerHealth);
-  checkServerHealthRef.current = checkServerHealth;
+  useEffect(() => {
+    checkServerHealthRef.current = checkServerHealth;
+  });
 
   const [state, dispatch] = useReducer(serverReducer, {
     ...createDefaultPersisted(),

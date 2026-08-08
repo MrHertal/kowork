@@ -36,9 +36,11 @@ export function usePersistedState<T>(
   const dirty = useRef(false);
 
   const createDefaultRef = useRef(createDefault);
-  createDefaultRef.current = createDefault;
   const loadDefaultRef = useRef(loadDefault);
-  loadDefaultRef.current = loadDefault;
+  useEffect(() => {
+    createDefaultRef.current = createDefault;
+    loadDefaultRef.current = loadDefault;
+  });
 
   useEffect(() => {
     let cancelled = false;

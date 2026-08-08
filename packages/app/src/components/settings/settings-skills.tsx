@@ -39,6 +39,7 @@ import { SettingsSection } from "./settings-row";
 import { SkillLogo } from "./skill-logo";
 
 const emptyPaths: string[] = [];
+const emptySkills: Skill[] = [];
 
 interface SettingsSkillsProps {
   directory?: string;
@@ -70,7 +71,7 @@ function SettingsSkillsContent({ directory }: { directory: string }) {
     shallowArrayEqual,
   );
   const skillsMutation = useSkillsMutation(directory);
-  const items = skills.data ?? [];
+  const items = skills.data ?? emptySkills;
   const [removalOpen, setRemovalOpen] = useState(false);
   // Retained through the close animation so the count stays right while fading.
   const [removalData, setRemovalData] = useState<{

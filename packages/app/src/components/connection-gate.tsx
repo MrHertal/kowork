@@ -28,22 +28,26 @@ export function ConnectionGate({
   const server = useServer();
   const checkHealth = useCheckServerHealth();
   const checkHealthRef = useRef(checkHealth);
-  checkHealthRef.current = checkHealth;
+  useEffect(() => {
+    checkHealthRef.current = checkHealth;
+  });
 
   const [checkMode, setCheckMode] = useState<"blocking" | "background">(
     "blocking",
   );
   const checkModeRef = useRef(checkMode);
-  checkModeRef.current = checkMode;
+  useEffect(() => {
+    checkModeRef.current = checkMode;
+  });
 
   const [healthResult, setHealthResult] = useState<boolean | undefined>(
     undefined,
   );
-  const latestRef = useRef<boolean | undefined>(undefined);
-  if (healthResult !== undefined) latestRef.current = healthResult;
 
   const [retryTrigger, setRetryTrigger] = useState(0);
   const fetchIdRef = useRef(0);
+
+  const current = server.current;
 
   useEffect(() => {
     if (disableHealthCheck) {
@@ -51,13 +55,14 @@ export function ConnectionGate({
       return;
     }
 
-    const conn = server.current;
+    const conn = current;
     if (!conn) {
       setHealthResult(true);
       return;
     }
 
-    setHealthResult(undefined);
+    // In background mode, keep the last known result while re-checking.
+    if (checkModeRef.current === "blocking") setHealthResult(undefined);
     const id = ++fetchIdRef.current;
     const controller = new AbortController();
 
@@ -92,7 +97,7 @@ export function ConnectionGate({
       controller.abort();
       clearTimeout(timer);
     };
-  }, [server.current, retryTrigger, disableHealthCheck]);
+  }, [current, retryTrigger, disableHealthCheck]);
 
   const refetch = useCallback(() => {
     setRetryTrigger((n) => n + 1);
@@ -109,10 +114,7 @@ export function ConnectionGate({
     return splashReady ? <SplashLoadingScreen /> : null;
   }
 
-  const effective =
-    checkMode === "background" ? latestRef.current : healthResult;
-
-  if (effective === true) return <>{children}</>;
+  if (healthResult === true) return <>{children}</>;
 
   return <ConnectionError onRetry={refetch} />;
 }

@@ -3,7 +3,13 @@ import type {
   Part,
   ToolPart,
 } from "@opencode-ai/sdk/v2/client";
-import { type ReactNode, useEffect, useMemo, useRef } from "react";
+import {
+  type ReactNode,
+  createElement,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 
 import { MessageContent } from "@/components/ai-elements/message";
 import { Activity } from "@/components/session/activity";
@@ -111,18 +117,15 @@ function ToolPartDisplay({
 
   const registered = ToolRegistry.render(part.tool);
   if (registered) {
-    const Renderer = registered;
-    return (
-      <Renderer
-        input={input}
-        tool={part.tool}
-        metadata={metadata}
-        output={output}
-        status={part.state.status}
-        hideDetails={hideDetails}
-        defaultOpen={defaultOpen}
-      />
-    );
+    return createElement(registered, {
+      input,
+      tool: part.tool,
+      metadata,
+      output,
+      status: part.state.status,
+      hideDetails,
+      defaultOpen,
+    });
   }
 
   return (
