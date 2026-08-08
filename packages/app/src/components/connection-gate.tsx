@@ -65,7 +65,7 @@ export function ConnectionGate({
       controller.abort();
     }, STARTUP_TIMEOUT_MS);
 
-    (async () => {
+    void (async () => {
       try {
         while (!controller.signal.aborted) {
           const res = await checkHealthRef.current(conn.http);

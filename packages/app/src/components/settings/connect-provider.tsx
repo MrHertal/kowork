@@ -281,7 +281,7 @@ export function ConnectProvider({
     if (loading) return;
     if (methods.length === 1) {
       autoSelectedRef.current = true;
-      selectMethod(0);
+      void selectMethod(0);
     }
   }, [loading, methods.length, selectMethod]);
 
@@ -346,7 +346,7 @@ export function ConnectProvider({
         <MethodSelectionView
           methods={methods}
           providerName={provider.name}
-          onSelect={selectMethod}
+          onSelect={(index) => void selectMethod(index)}
         />
       );
     }
@@ -359,7 +359,7 @@ export function ConnectProvider({
           key={promptResetKey}
           method={method}
           methodIndex={state.methodIndex}
-          selectMethod={selectMethod}
+          selectMethod={(index, inputs) => void selectMethod(index, inputs)}
           onStepChange={setPromptStep}
         />
       );
@@ -722,7 +722,7 @@ function ApiAuthView({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          form.handleSubmit();
+          void form.handleSubmit();
         }}
       >
         <FieldGroup className="gap-6">
@@ -858,7 +858,7 @@ function OAuthCodeView({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          form.handleSubmit();
+          void form.handleSubmit();
         }}
       >
         <FieldGroup className="gap-6">

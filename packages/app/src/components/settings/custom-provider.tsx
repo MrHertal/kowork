@@ -162,7 +162,7 @@ export function CustomProvider({ back }: { back?: "providers" | "settings" }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          form.handleSubmit();
+          void form.handleSubmit();
         }}
       >
         <FieldGroup className="gap-6">

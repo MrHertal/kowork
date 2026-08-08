@@ -207,7 +207,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       if (!stores.state.state.ready) return;
       if (!dirty.current) return;
       dirty.current = false;
-      savePersisted(storage, PERSIST_TARGET, {
+      void savePersisted(storage, PERSIST_TARGET, {
         list: stores.state.state.list,
       });
     });

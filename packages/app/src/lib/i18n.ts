@@ -72,7 +72,7 @@ export async function setupI18n(storage?: AsyncStorage): Promise<void> {
   const saved = await storage.getItem("locale");
   if (saved && isLocale(saved)) {
     cachedLocale = saved;
-    setLocale(saved, { reload: false });
+    void setLocale(saved, { reload: false });
     applyLocale(saved);
   } else {
     const cookieLocale = extractLocaleFromCookie();
@@ -80,8 +80,8 @@ export async function setupI18n(storage?: AsyncStorage): Promise<void> {
       applyLocale(cookieLocale);
     } else {
       const preferred = getPreferredLocale();
-      if (preferred) setLocale(preferred, { reload: false });
-      applyLocale(preferred ?? (getLocale()));
+      if (preferred) void setLocale(preferred, { reload: false });
+      applyLocale(preferred ?? getLocale());
     }
   }
 }
@@ -93,7 +93,7 @@ export function initI18nStrategy(storage?: AsyncStorage): void {
       if (!isLocale(newLocale)) return;
       applyLocale(newLocale);
       listeners.forEach((fn) => fn());
-      storage?.setItem("locale", newLocale);
+      void storage?.setItem("locale", newLocale);
     },
   });
 }

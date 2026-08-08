@@ -114,7 +114,7 @@ function CustomSkillForm({ directory }: { directory: string }) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        form.handleSubmit();
+        void form.handleSubmit();
       }}
     >
       <FieldGroup className="gap-6">
@@ -236,7 +236,7 @@ function FolderField({
           type="button"
           variant="secondary"
           size="sm"
-          onClick={handlePick}
+          onClick={() => void handlePick()}
         >
           <FolderIcon data-icon="inline-start" aria-hidden="true" />
           {value

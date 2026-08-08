@@ -137,7 +137,7 @@ export function Page({
     const last = sessionSyncedAt.current.get(sessionId);
     const stale = last !== undefined && now - last > 15_000;
     sessionSyncedAt.current.set(sessionId, now);
-    sync.session.sync(
+    void sync.session.sync(
       sessionId,
       stale && !isBusyRef.current ? { force: true } : undefined,
     );
@@ -241,7 +241,7 @@ export function Page({
 
         setText("");
         prompt.reset();
-        conversationRef.current?.scrollToBottom("smooth");
+        void conversationRef.current?.scrollToBottom("smooth");
 
         await sdk.client.session.promptAsync({
           sessionID: sid,
@@ -258,7 +258,7 @@ export function Page({
 
         if (isNewSession) {
           local.session.promote(sid);
-          navigate({ to: "/session/$id", params: { id: sid } });
+          void navigate({ to: "/session/$id", params: { id: sid } });
         }
       } catch (error) {
         toast.error(m.common_requestFailed(), {
@@ -336,7 +336,7 @@ export function Page({
             <PromptImageAttachments />
             <PromptInputTextarea
               onChange={handleTextChange}
-              onPaste={handlePromptPaste}
+              onPaste={(event) => void handlePromptPaste(event)}
               value={text}
               placeholder={
                 sessionId

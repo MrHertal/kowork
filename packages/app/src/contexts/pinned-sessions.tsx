@@ -109,7 +109,7 @@ export function PinnedSessionsProvider({
       if (!stores.state.state.ready) return;
       if (!dirty.current) return;
       dirty.current = false;
-      savePersisted(storage, PERSIST_TARGET, {
+      void savePersisted(storage, PERSIST_TARGET, {
         ids: stores.state.state.ids,
       } satisfies PersistedShape);
     });

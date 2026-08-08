@@ -73,7 +73,7 @@ export function usePersistedState<T>(
     if (!ready) return;
     if (!dirty.current) return;
     dirty.current = false;
-    savePersisted(storage, target, state);
+    void savePersisted(storage, target, state);
   }, [ready, state, storage, target]);
 
   const setState = useCallback((next: T | ((prev: T) => T)) => {

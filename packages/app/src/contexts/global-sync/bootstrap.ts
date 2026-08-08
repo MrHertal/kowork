@@ -266,7 +266,7 @@ export async function bootstrapDirectory(input: {
     );
   }
 
-  (async () => {
+  void (async () => {
     const slow = [
       () =>
         input.queryClient.ensureQueryData({

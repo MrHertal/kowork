@@ -2,7 +2,7 @@
 type QueueInput = {
   paused: () => boolean;
   bootstrap: () => Promise<void>;
-  bootstrapInstance: (directory: string) => Promise<void> | void;
+  bootstrapInstance: (directory: string) => Promise<void>;
 };
 
 export function createRefreshQueue(input: QueueInput) {

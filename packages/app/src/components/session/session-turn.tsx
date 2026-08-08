@@ -139,7 +139,7 @@ function ResponseActions({
     <MessageActions>
       <Tooltip>
         <TooltipTrigger asChild>
-          <MessageAction label={copyLabel} onClick={handleCopy}>
+          <MessageAction label={copyLabel} onClick={() => void handleCopy()}>
             {copied ? (
               <CheckIcon className="size-3.5" aria-hidden="true" />
             ) : (
@@ -345,8 +345,7 @@ function SessionTurnImpl({
       const parts = assistantPartsList[i] ?? emptyParts;
       for (let j = parts.length - 1; j >= 0; j--) {
         const part = parts[j];
-        if (part?.type === "text" && part.text?.trim())
-          return (part).text;
+        if (part?.type === "text" && part.text?.trim()) return part.text;
       }
     }
     return undefined;

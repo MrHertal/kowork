@@ -7,7 +7,7 @@ export function useRenameSession() {
 
   const renameSession = useCallback(
     (session: { id: string; directory: string }, title: string) => {
-      client.session.update({
+      void client.session.update({
         sessionID: session.id,
         directory: session.directory,
         title,

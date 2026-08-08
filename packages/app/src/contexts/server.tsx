@@ -355,7 +355,7 @@ export function ServerProvider({
     if (!ready) return;
     if (!dirty.current) return;
     dirty.current = false;
-    savePersisted(storage, PERSIST_TARGET, {
+    void savePersisted(storage, PERSIST_TARGET, {
       list: state.list,
       projects: state.projects,
       lastProject: state.lastProject,
@@ -423,7 +423,7 @@ export function ServerProvider({
     const run = () => {
       if (busy) return;
       busy = true;
-      checkServerHealthRef
+      void checkServerHealthRef
         .current(current.http)
         .then((result) => {
           if (!alive) return;

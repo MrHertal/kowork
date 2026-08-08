@@ -32,7 +32,7 @@ function useActiveMessageID(
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
       if (msg?.role === "assistant" && typeof msg.time.completed !== "number") {
-        const parentID = (msg).parentID;
+        const parentID = msg.parentID;
         const parent = messages.find((m) => m.id === parentID);
         if (parent && parent.role === "user") return parent.id;
         break;
@@ -66,7 +66,10 @@ function TimelineScrollButton() {
   };
 
   return (
-    <ConversationScrollButton className="z-10" onClick={handleScrollToBottom} />
+    <ConversationScrollButton
+      className="z-10"
+      onClick={() => void handleScrollToBottom()}
+    />
   );
 }
 

@@ -379,9 +379,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
           return runInflight(maps.inflightDiff, key, () =>
             retry(() => client.session.diff({ sessionID })).then((diff) => {
               gs.updateChild(directory, (draft) => {
-                draft.session_diff[sessionID] = list(
-                  diff.data,
-                );
+                draft.session_diff[sessionID] = list(diff.data);
               });
             }),
           );
