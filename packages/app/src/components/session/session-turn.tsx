@@ -254,7 +254,7 @@ function SessionTurnImpl({
         if (!msg) continue;
         if (msg.role === "user") break;
         if (msg.role === "assistant" && msg.parentID === messageID) {
-          result.push(msg as AssistantMessage);
+          result.push(msg);
         }
       }
       return result.length === 0 ? emptyAssistants : result;
@@ -346,7 +346,7 @@ function SessionTurnImpl({
       for (let j = parts.length - 1; j >= 0; j--) {
         const part = parts[j];
         if (part?.type === "text" && part.text?.trim())
-          return (part as TextPartType).text;
+          return (part).text;
       }
     }
     return undefined;

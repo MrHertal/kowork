@@ -203,7 +203,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
                 continue;
               }
 
-              const payload = event.payload as Event;
+              const payload = event.payload;
 
               const k = key(directory, payload);
               if (k) {
@@ -315,7 +315,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
   }, []);
 
   return (
-    <GlobalSDKContext.Provider value={stableRef.current!.value}>
+    <GlobalSDKContext.Provider value={stableRef.current.value}>
       {children}
     </GlobalSDKContext.Provider>
   );

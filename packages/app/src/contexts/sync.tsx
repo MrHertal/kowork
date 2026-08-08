@@ -143,7 +143,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
   const valueRef = useRef<SyncContextValue | null>(null);
   if (valueRef.current == null) {
     const meta = metaRef.current;
-    const maps = mapsRef.current!;
+    const maps = mapsRef.current;
 
     const setOptimistic = (
       directory: string,
@@ -381,7 +381,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
               gs.updateChild(directory, (draft) => {
                 draft.session_diff[sessionID] = list(
                   diff.data,
-                ) as SnapshotFileDiff[];
+                );
               });
             }),
           );
@@ -457,7 +457,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
     };
   }
 
-  const ctxValue = valueRef.current!;
+  const ctxValue = valueRef.current;
 
   return (
     <SyncContext.Provider value={ctxValue}>{children}</SyncContext.Provider>

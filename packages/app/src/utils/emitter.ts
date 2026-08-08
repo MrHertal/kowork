@@ -29,7 +29,7 @@ export function createEmitter<
   return {
     emit(name, details) {
       for (const fn of globals) fn({ name, details });
-      const set = channels.get(name as string);
+      const set = channels.get(name);
       if (set) {
         for (const fn of set) fn(details);
       }
@@ -45,8 +45,8 @@ export function createEmitter<
       }
       set.add(cb);
       return () => {
-        set!.delete(cb);
-        if (set!.size === 0) channels.delete(key);
+        set.delete(cb);
+        if (set.size === 0) channels.delete(key);
       };
     },
 

@@ -226,7 +226,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
     const unsubscribe = globalSDK.event.listen((e) => {
       const event = e.details;
       if (event?.type !== "permission.asked") return;
-      const perm = event.properties as PermissionRequest;
+      const perm = event.properties;
       if (!shouldAutoRespond(perm, e.name)) return;
       respondOnce(perm, e.name);
     });

@@ -258,10 +258,10 @@ export function ConnectProvider({
             timerRef.current = setTimeout(() => {
               timerRef.current = undefined;
               if (!aliveRef.current) return;
-              dispatch({ type: "auth.complete", authorization: res.data! });
+              dispatch({ type: "auth.complete", authorization: res.data });
             }, delay);
           } else {
-            dispatch({ type: "auth.complete", authorization: res.data! });
+            dispatch({ type: "auth.complete", authorization: res.data });
           }
         } catch (e) {
           if (!aliveRef.current) return;
@@ -387,7 +387,7 @@ export function ConnectProvider({
         <OAuthCodeView
           providerID={providerID}
           providerName={provider.name}
-          methodIndex={state.methodIndex!}
+          methodIndex={state.methodIndex}
           methodLabel={methodLabel(method)}
           authorization={state.authorization}
           globalSDK={globalSDK}
@@ -400,7 +400,7 @@ export function ConnectProvider({
         <OAuthAutoView
           providerID={providerID}
           providerName={provider.name}
-          methodIndex={state.methodIndex!}
+          methodIndex={state.methodIndex}
           authorization={state.authorization}
           globalSDK={globalSDK}
           complete={complete}

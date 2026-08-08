@@ -141,7 +141,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
           ({
             ...prev,
             [category]: { ...prev[category], ...patch },
-          }) as Settings,
+          }),
       );
     },
     [setSettings],

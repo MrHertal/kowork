@@ -65,7 +65,7 @@ function applyLocale(locale: Locale) {
 
 export async function setupI18n(storage?: AsyncStorage): Promise<void> {
   if (!storage) {
-    applyLocale(getLocale() as Locale);
+    applyLocale(getLocale());
     return;
   }
 
@@ -81,7 +81,7 @@ export async function setupI18n(storage?: AsyncStorage): Promise<void> {
     } else {
       const preferred = getPreferredLocale();
       if (preferred) setLocale(preferred, { reload: false });
-      applyLocale(preferred ?? (getLocale() as Locale));
+      applyLocale(preferred ?? (getLocale()));
     }
   }
 }

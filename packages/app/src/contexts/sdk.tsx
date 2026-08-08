@@ -49,7 +49,7 @@ export function SDKProvider({ directory, children }: SDKProviderProps) {
 
   useEffect(() => {
     return globalSDK.event.on(directory, (event) => {
-      emitter.emit(event.type as Event["type"], event as any);
+      emitter.emit(event.type, event);
     });
   }, [globalSDK, directory, emitter]);
 

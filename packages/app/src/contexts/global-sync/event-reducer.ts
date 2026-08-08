@@ -264,7 +264,7 @@ export function applyDirectoryEvent(input: {
         const part = parts[result.index]!;
         const field = props.field as keyof typeof part;
         const existing = part[field] as string | undefined;
-        (part[field] as string) = (existing ?? "") + props.delta;
+        (part as Record<string, unknown>)[field] = (existing ?? "") + props.delta;
       });
       break;
     }

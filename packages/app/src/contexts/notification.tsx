@@ -282,7 +282,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       const time = Date.now();
 
       if (event.type === "permission.asked") {
-        const perm = event.properties as PermissionRequest;
+        const perm = event.properties;
         if (permissionRef.current.autoResponds(perm, directory)) return;
         const sessionID = perm.sessionID;
         void lookup(directory, sessionID).then((session) => {
