@@ -101,9 +101,10 @@ Never expose a context getter that returns `store.state`. A read such as `ctx.da
 
 - **Select narrowly.** Immer replaces the containing subtree on mutation, so selecting all of `s.part` or `s.session` causes unrelated re-renders. Prefer `(s) => s.part[messageID] ?? emptyParts`.
 - **Compare derived values.** Use `shallowArrayEqual` from `@/contexts/global-sync` or `@/contexts/sync` for arrays, or an identity comparison such as `(a, b) => a?.id === b?.id`. Keep fallbacks such as `const emptyParts: Part[] = []` at module scope for stable references.
-- **Choose provider shape deliberately.** Use a `Store` when at least three consumers read different slices or when a consumer is on a hot render path such as typing, scrolling, or animation. Expose `_store` for internal access plus a `useFooData(selector, compare?)` hook for consumers. Existing examples include `all-sessions`, `notification`, and `global-sync`.
-- Otherwise, use `useState` or `useReducer` and memoize the context value with `useMemo<ContextValue>(...)`. Existing examples include `server`, `settings`, `permission`, `models`, `local`, and `prompt`.
-- Do not migrate provider styles for consistency alone. Imperative callbacks may read from `storeRef.current` to avoid subscriptions.
+- **Choose provider shape deliberately.** Use a `Store` when at least three consumers read different slices, when a consumer is on a hot render path such as typing, scrolling, or animation, or when imperative callbacks must read fresh state at call time (event handlers, subscriptions, after `await`). Expose `_store` for internal access plus a `useFooData(selector, compare?)` hook when consumers subscribe. Existing examples include `global-sync`, `notification`, `permission`, `pinned-sessions`, `recent-sessions`, and `search-sessions`.
+- Otherwise, use `useState` or `useReducer` and memoize the context value with `useMemo<ContextValue>(...)`. Existing examples include `server`, `settings`, `models`, `local`, and `prompt`.
+- Do not migrate provider styles for consistency alone. Imperative callbacks read fresh state from `store.state`, never from React state mirrored into a ref.
+- **Never assign refs during render** (`react-hooks/refs` rejects it). Child effects run before parent effects, so provider closures reading such refs observe stale values. Read from a `Store` at call time, or rebuild the context value with `useMemo` when its inputs change. Syncing a ref in `useEffect` is acceptable when every reader is post-commit (own effects, timers, event handlers). Lazy init (`if (ref.current == null) ref.current = ...`) remains fine for non-React instance state such as `Map`s.
 
 ## Code Organization
 
