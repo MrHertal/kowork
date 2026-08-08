@@ -950,7 +950,7 @@ function OAuthAutoView({
             ? { ok: false as const, error: value.error }
             : { ok: true as const },
         )
-        .catch((err) => ({ ok: false as const, error: err }));
+        .catch((err: unknown) => ({ ok: false as const, error: err }));
 
       if (cancelled) return;
 

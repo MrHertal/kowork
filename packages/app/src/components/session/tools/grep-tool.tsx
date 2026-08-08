@@ -10,8 +10,10 @@ import { BasicTool, type ToolProps } from "./basic-tool";
 export function GrepTool(props: ToolProps) {
   const { directory } = useSDK();
   const args: string[] = [];
-  if (props.input.pattern) args.push("pattern=" + props.input.pattern);
-  if (props.input.include) args.push("include=" + props.input.include);
+  if (typeof props.input.pattern === "string" && props.input.pattern)
+    args.push("pattern=" + props.input.pattern);
+  if (typeof props.input.include === "string" && props.input.include)
+    args.push("include=" + props.input.include);
 
   return (
     <BasicTool

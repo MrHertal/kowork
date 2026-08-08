@@ -216,7 +216,7 @@ export function RecentSessionsProvider({
         if (!mounted.current) return;
         const cursor = stores.state.state.cursor;
         if (cursor == null) return;
-        const promise = fetchPage(cursor).catch((error) => {
+        const promise = fetchPage(cursor).catch((error: unknown) => {
           if (!mounted.current) return;
           console.error("[recent-sessions] failed to load sessions", {
             error,

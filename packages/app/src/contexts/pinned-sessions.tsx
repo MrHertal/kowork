@@ -88,7 +88,7 @@ export function PinnedSessionsProvider({
           }),
         );
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         console.error("[pinned-sessions] failed to load persisted state", {
           error,
@@ -147,7 +147,7 @@ export function PinnedSessionsProvider({
           if (result.status === "rejected") {
             console.error("[pinned-sessions] failed to fetch pinned session", {
               id,
-              error: result.reason,
+              error: result.reason as unknown,
             });
             continue;
           }

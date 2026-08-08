@@ -342,7 +342,7 @@ export function ServerProvider({
         }
         setReady(true);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         console.error("[server] failed to load persisted state", { error });
         setReady(true);

@@ -186,6 +186,17 @@ export function Part({
 
 const HIDDEN_TOOLS = new Set(["present_files", "todowrite"]);
 
+function toPresentedFile(value: unknown): PresentedFile | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const v = value as Record<string, unknown>;
+  if (typeof v.path !== "string" || !v.path.trim()) return undefined;
+  if (typeof v.filename !== "string" || !v.filename.trim()) return undefined;
+  if (typeof v.mime !== "string" || !v.mime.trim()) return undefined;
+  if (typeof v.size !== "number" || !Number.isFinite(v.size) || v.size < 0)
+    return undefined;
+  return { path: v.path, filename: v.filename, mime: v.mime, size: v.size };
+}
+
 function presentedFiles(partsList: Part[][]): PresentedFile[] {
   const files = new Map<string, PresentedFile>();
   for (const parts of partsList) {
@@ -201,21 +212,8 @@ function presentedFiles(partsList: Part[][]): PresentedFile[] {
       const values = "files" in metadata ? metadata.files : undefined;
       if (!Array.isArray(values)) continue;
       for (const value of values) {
-        if (!value || typeof value !== "object") continue;
-        if (!("path" in value) || typeof value.path !== "string") continue;
-        if (!("filename" in value) || typeof value.filename !== "string")
-          continue;
-        if (!("mime" in value) || typeof value.mime !== "string") continue;
-        if (!("size" in value) || typeof value.size !== "number") continue;
-        if (!value.path.trim() || !value.filename.trim() || !value.mime.trim())
-          continue;
-        if (!Number.isFinite(value.size) || value.size < 0) continue;
-        const file = {
-          path: value.path,
-          filename: value.filename,
-          mime: value.mime,
-          size: value.size,
-        };
+        const file = toPresentedFile(value);
+        if (!file) continue;
         files.delete(file.path);
         files.set(file.path, file);
       }
