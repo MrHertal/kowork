@@ -73,7 +73,7 @@ const questionRequest = (id: string, sessionID: string, title = id) =>
     ],
   }) as QuestionRequest;
 
-const defaults: State = {
+const defaults = (): State => ({
   status: "complete",
   agent: [],
   command: [],
@@ -81,9 +81,15 @@ const defaults: State = {
   projectMeta: undefined,
   icon: undefined,
   provider_ready: true,
-  provider: {} as State["provider"],
+  provider: { all: [], connected: [], default: {} },
   config: {},
-  path: { directory: "/tmp" } as State["path"],
+  path: {
+    state: "",
+    config: "",
+    worktree: "/tmp",
+    directory: "/tmp",
+    home: "/home",
+  },
   session: [],
   sessionTotal: 0,
   session_status: {},
@@ -100,10 +106,10 @@ const defaults: State = {
   message: {},
   message_loading: {},
   part: {},
-};
+});
 
 const baseState = (input: Partial<State> = {}): State => ({
-  ...defaults,
+  ...defaults(),
   ...input,
 });
 

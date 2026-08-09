@@ -18,7 +18,7 @@ const path = {
   home: "/home",
 };
 
-const defaults: State = {
+const defaults = (): State => ({
   status: "loading",
   agent: [],
   command: [],
@@ -45,10 +45,10 @@ const defaults: State = {
   message: {},
   message_loading: {},
   part: {},
-};
+});
 
 const baseState = (input: Partial<State> = {}): State => ({
-  ...defaults,
+  ...defaults(),
   ...input,
 });
 
