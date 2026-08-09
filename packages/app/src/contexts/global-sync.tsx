@@ -343,6 +343,9 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
     bootstrapInstanceRef.current = bootstrapInstance;
   });
 
+  // The queue is created once but must invoke the latest bootstrap callbacks,
+  // which carry per-mount inflight state — the ref indirection is intentional.
+  // eslint-disable-next-line react-hooks/refs
   const [queue] = useState(() =>
     createRefreshQueue({
       paused: () => stores.global.state.reload !== undefined,

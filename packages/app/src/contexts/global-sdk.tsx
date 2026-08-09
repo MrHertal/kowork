@@ -5,7 +5,7 @@ import {
   type ReactNode,
   useContext,
   useEffect,
-  useRef,
+  useState,
 } from "react";
 import z from "zod";
 
@@ -44,15 +44,13 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
   const server = useServer();
   const platform = usePlatform();
 
-  const stableRef = useRef<{
+  const [stable] = useState<{
     value: GlobalSDKContextValue;
     stop: () => void;
     abort: AbortController;
     flush: () => void;
     onVisibilityChange: () => void;
-  } | null>(null);
-
-  if (stableRef.current == null) {
+  }>(() => {
     const abort = new AbortController();
 
     // Platform fetch bypasses mixed-content for plain HTTP to remote hosts
@@ -150,7 +148,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
     let run: Promise<void> | undefined;
     let started = false;
     const HEARTBEAT_TIMEOUT_MS = 15_000;
-    let lastEventAt = Date.now();
+    let lastEventAt = 0;
     let heartbeat: ReturnType<typeof setTimeout> | undefined;
 
     const resetHeartbeat = () => {
@@ -275,7 +273,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
       throwOnError: true,
     });
 
-    stableRef.current = {
+    return {
       value: {
         url: currentServer.http.url,
         client: sdk,
@@ -299,23 +297,23 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
       flush,
       onVisibilityChange,
     };
-  }
+  });
 
   useEffect(() => {
-    const ref = stableRef.current;
-    if (!ref) return;
-    document.addEventListener("visibilitychange", ref.onVisibilityChange);
+    document.addEventListener("visibilitychange", stable.onVisibilityChange);
     return () => {
-      ref.stop();
-      ref.abort.abort();
-      ref.flush();
-      document.removeEventListener("visibilitychange", ref.onVisibilityChange);
-      stableRef.current = null;
+      stable.stop();
+      stable.abort.abort();
+      stable.flush();
+      document.removeEventListener(
+        "visibilitychange",
+        stable.onVisibilityChange,
+      );
     };
-  }, []);
+  }, [stable]);
 
   return (
-    <GlobalSDKContext.Provider value={stableRef.current.value}>
+    <GlobalSDKContext.Provider value={stable.value}>
       {children}
     </GlobalSDKContext.Provider>
   );

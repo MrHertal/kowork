@@ -3,13 +3,7 @@ import type {
   Part,
   ToolPart,
 } from "@opencode-ai/sdk/v2/client";
-import {
-  type ReactNode,
-  createElement,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { type ReactNode, createElement, useMemo, useState } from "react";
 
 import { MessageContent } from "@/components/ai-elements/message";
 import { Activity } from "@/components/session/activity";
@@ -281,12 +275,10 @@ function sameGroups(a: readonly PartGroup[], b: readonly PartGroup[]) {
 }
 
 function useStable<T>(value: T, equals: (a: T, b: T) => boolean): T {
-  const ref = useRef(value);
-  const result = equals(ref.current, value) ? ref.current : value;
-  useEffect(() => {
-    ref.current = result;
-  }, [result]);
-  return result;
+  const [stable, setStable] = useState(value);
+  if (equals(stable, value)) return stable;
+  setStable(value);
+  return value;
 }
 
 function groupParts(parts: { messageID: string; part: Part }[]): PartGroup[] {
