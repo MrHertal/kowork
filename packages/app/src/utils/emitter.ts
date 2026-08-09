@@ -29,8 +29,7 @@ export function createEmitter<
   const channels = new Map<string, Set<Callback>>();
   const globals = new Set<Callback>();
 
-  // Diverges from upstream: a throwing listener must not drop the rest of an
-  // SSE frame for every other listener and directory (see global-sdk flush).
+  // A throwing listener must not starve the rest of an SSE frame (global-sdk flush).
   const safe = (name: string, fn: Callback, arg: unknown) => {
     try {
       fn(arg);

@@ -477,7 +477,7 @@ function activitySummary(
 
       const category = classifyActivityPart(part);
       if (!category || category === "thinking") continue;
-      // A web search gathers context; keep its summary bucket aligned with webfetch.
+      // The summary counts web searches as context, like webfetch.
       const bucket = category === "websearch" ? "context" : category;
       counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
     }
