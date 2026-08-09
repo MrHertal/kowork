@@ -12,6 +12,8 @@ export function getToolTitle(tool: string): string {
       return m.session_tool_grep();
     case "webfetch":
       return m.session_tool_webfetch();
+    case "websearch":
+      return m.session_tool_websearch();
     case "bash":
       return m.session_tool_shell();
     case "edit":

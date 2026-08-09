@@ -9,6 +9,7 @@ describe("getToolTitle", () => {
       glob: "Find",
       grep: "Search text",
       webfetch: "Read web page",
+      websearch: "Search the web",
       bash: "Command",
       edit: "Edit",
       write: "Write",

@@ -40,6 +40,12 @@ describe("classifyActivityPart", () => {
     expect(classifyActivityPart({ type: "tool", tool: "skill" })).toBe("skill");
   });
 
+  it("classifies web searches", () => {
+    expect(classifyActivityPart({ type: "tool", tool: "websearch" })).toBe(
+      "websearch",
+    );
+  });
+
   it("classifies unknown tools as other", () => {
     expect(classifyActivityPart({ type: "tool", tool: "mcp_search" })).toBe(
       "other",

@@ -4,6 +4,7 @@ export type ActivityCategory =
   | "modification"
   | "command"
   | "skill"
+  | "websearch"
   | "other";
 
 export function classifyActivityPart(part: {
@@ -33,6 +34,8 @@ export function classifyActivityPart(part: {
       return "command";
     case "skill":
       return "skill";
+    case "websearch":
+      return "websearch";
     default:
       return "other";
   }

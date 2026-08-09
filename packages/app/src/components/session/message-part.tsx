@@ -446,6 +446,8 @@ function activityStatus(
       return m.session_activity_running_command();
     case "skill":
       return m.session_activity_loading_skill();
+    case "websearch":
+      return m.session_status_searching_web();
     default:
       return m.session_activity_working();
   }
@@ -455,7 +457,10 @@ function activitySummary(
   groups: PartGroup[],
   partsIndex: Map<string, Map<string, Part>>,
 ): string {
-  const counts = new Map<Exclude<ActivityCategory, "thinking">, number>();
+  const counts = new Map<
+    Exclude<ActivityCategory, "thinking" | "websearch">,
+    number
+  >();
   const seen = new Set<string>();
 
   for (const group of groups) {
@@ -472,7 +477,9 @@ function activitySummary(
 
       const category = classifyActivityPart(part);
       if (!category || category === "thinking") continue;
-      counts.set(category, (counts.get(category) ?? 0) + 1);
+      // A web search gathers context; keep its summary bucket aligned with webfetch.
+      const bucket = category === "websearch" ? "context" : category;
+      counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
     }
   }
 
