@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/core/src/util/retry.ts
 export interface RetryOptions {
   attempts?: number;
   delay?: number;

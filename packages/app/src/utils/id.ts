@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/utils/id.ts
 import z from "zod";
 
 const prefixes = {
