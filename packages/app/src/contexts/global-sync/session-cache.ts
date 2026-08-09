@@ -9,8 +9,6 @@ import type {
   Todo,
 } from "@opencode-ai/sdk/v2/client";
 
-export const SESSION_CACHE_LIMIT = 40;
-
 type SessionCache = {
   session_status: Record<string, SessionStatus | undefined>;
   session_diff: Record<string, SnapshotFileDiff[] | undefined>;
