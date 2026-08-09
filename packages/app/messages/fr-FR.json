@@ -317,6 +317,7 @@
   "session_tool_status_running": "(en cours...)",
   "session_tool_todos": "À faire",
   "session_tool_webfetch": "Lire la page",
+  "session_tool_websearch": "Rechercher sur le web",
   "session_tool_write": "Écriture",
 
   "settings_appearance_displaySize_description": "Choisir la taille d’affichage de Kowork",

@@ -317,6 +317,7 @@
   "session_tool_status_running": "(चल रहा है...)",
   "session_tool_todos": "काम की सूची",
   "session_tool_webfetch": "वेब पेज पढ़ें",
+  "session_tool_websearch": "वेब पर खोजें",
   "session_tool_write": "लिखें",
 
   "settings_appearance_displaySize_description": "चुनें कि Kowork में सब कुछ कितना बड़ा दिखे",
