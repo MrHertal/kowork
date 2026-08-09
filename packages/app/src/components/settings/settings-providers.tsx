@@ -154,8 +154,7 @@ export function SettingsProviders() {
     [globalSDK, disableProvider, isConfigCustom],
   );
 
-  // Clear the spinner once the disconnected row leaves the refreshed list
-  // (env-sourced rows never leave; their source just flips).
+  // Clear the spinner once the row leaves the list (env rows stay; their source flips).
   if (disconnecting) {
     const item = connected.find((p) => p.id === disconnecting);
     if (!item || getSource(item) === "env") {

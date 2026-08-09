@@ -55,7 +55,7 @@ export function projectsKey(key: ServerConnection.Key) {
   return key;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
+// eslint-disable-next-line @typescript-eslint/no-namespace -- upstream API shape
 export namespace ServerConnection {
   type Base = { displayName?: string };
 

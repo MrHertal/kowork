@@ -49,7 +49,7 @@ export function useSessionComposerState(input: SessionComposerStateInput) {
     !!permissionRequest && responding === permissionRequest.id;
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- ref and state must reset together; refs can't be written during render
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- state and its guard ref reset together (refs can't be written during render)
     setResponding(undefined);
     respondingRef.current = undefined;
   }, [input.sessionID]);
