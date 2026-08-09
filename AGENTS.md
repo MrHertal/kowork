@@ -26,13 +26,13 @@ Before changing any interaction with the OpenCode client, sidecar, or protocol, 
 
 OpenCode's desktop app is an IDE for developers built with SolidJS and its own UI library. Use it as the behavioral reference, not as a visual or component reference for Kowork.
 
-| Concern                   | Reference path                                     |
-| ------------------------- | -------------------------------------------------- |
-| Electron main process     | `opencode/packages/desktop-electron/src/main/`     |
-| Electron preload and IPC  | `opencode/packages/desktop-electron/src/preload/`  |
-| Renderer behavior         | `opencode/packages/desktop-electron/src/renderer/` |
-| Client SDK                | `opencode/packages/sdk/`                           |
-| Shared types and protocol | `opencode/packages/opencode/src/`                  |
+| Concern                   | Reference path                            |
+| ------------------------- | ----------------------------------------- |
+| Electron main process     | `opencode/packages/desktop/src/main/`     |
+| Electron preload and IPC  | `opencode/packages/desktop/src/preload/`  |
+| Renderer behavior         | `opencode/packages/desktop/src/renderer/` |
+| Client SDK                | `opencode/packages/sdk/`                  |
+| Shared types and protocol | `opencode/packages/opencode/src/`         |
 
 ### Upstream References
 
