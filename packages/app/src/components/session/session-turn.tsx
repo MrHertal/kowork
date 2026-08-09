@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/ui/src/components/session-turn.tsx
 import type {
   AssistantMessage,
   FilePart as FilePartType,

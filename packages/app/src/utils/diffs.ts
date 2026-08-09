@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/utils/diffs.ts
 import type { SnapshotFileDiff, VcsFileDiff } from "@opencode-ai/sdk/v2";
 import type { Message } from "@opencode-ai/sdk/v2/client";
 

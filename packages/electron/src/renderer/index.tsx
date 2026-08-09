@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/desktop-electron/src/renderer/index.tsx
+// @opencode-ref: opencode/packages/desktop/src/renderer/index.tsx
 
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";

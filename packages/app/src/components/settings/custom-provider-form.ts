@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/components/dialog-custom-provider-form.ts
 import { z } from "zod";
 
 import { m } from "@/paraglide/messages";

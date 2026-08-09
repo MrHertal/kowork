@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/components/dialog-connect-provider.tsx
 import type {
   ProviderAuthAuthorization,
   ProviderAuthMethod,

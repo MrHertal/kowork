@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/session/composer/session-composer-state.ts
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 

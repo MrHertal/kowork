@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/utils/persist.ts
 import type { AsyncStorage, Platform } from "@/contexts/platform";
 
 export type PersistTarget = {

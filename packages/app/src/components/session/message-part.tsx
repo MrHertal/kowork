@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/ui/src/components/message-part.tsx
 import type {
   AssistantMessage,
   Part,

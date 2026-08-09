@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/constants.ts
 import { app } from "electron";
 
 export type Channel = "dev" | "beta" | "prod";

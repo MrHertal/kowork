@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/apps.ts
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, extname, join } from "node:path";

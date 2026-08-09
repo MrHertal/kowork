@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/core/src/util/binary.ts
 // eslint-disable-next-line @typescript-eslint/no-namespace -- upstream API shape
 export namespace Binary {
   export function search<T>(

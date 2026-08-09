@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/store.ts
 import Store from "electron-store";
 
 import { SETTINGS_STORE } from "./constants";

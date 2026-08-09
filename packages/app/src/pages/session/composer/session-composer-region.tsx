@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/session/composer/session-composer-region.tsx
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 

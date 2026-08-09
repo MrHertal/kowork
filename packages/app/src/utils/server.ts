@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/utils/server.ts
 import { createOpencodeClient } from "@opencode-ai/sdk/v2/client";
 import type { ServerConnection } from "@/contexts/server";
 

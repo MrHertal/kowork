@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/windows.ts
 import windowState from "electron-window-state";
 import { app, BrowserWindow, nativeImage, nativeTheme } from "electron";
 import { dirname, join } from "node:path";

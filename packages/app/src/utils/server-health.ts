@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/utils/server-health.ts
 import { usePlatform } from "@/contexts/platform";
 import type { ServerConnection } from "@/contexts/server";
 import { createSdkForServer } from "./server";

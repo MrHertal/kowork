@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/desktop-electron/src/preload/index.ts
+// @opencode-ref: opencode/packages/desktop/src/preload/index.ts
 
 import { contextBridge, ipcRenderer } from "electron";
 import type { ElectronAPI } from "./types";

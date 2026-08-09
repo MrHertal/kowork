@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/components/dialog-custom-provider.tsx
 import { useForm } from "@tanstack/react-form";
 import { PlusIcon, TrashIcon, WandSparklesIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";

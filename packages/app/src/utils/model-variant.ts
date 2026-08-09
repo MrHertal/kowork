@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/context/model-variant.ts
 type AgentModel = {
   providerID: string;
   modelID: string;

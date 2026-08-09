@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/server.ts
 import { delimiter, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, utilityProcess } from "electron";

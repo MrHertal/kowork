@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/session/composer/session-permission-dock.tsx
 import type { PermissionRequest } from "@opencode-ai/sdk/v2/client";
 import { TriangleAlertIcon } from "lucide-react";
 

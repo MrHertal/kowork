@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/components/settings-general.tsx
 import {
   Select,
   SelectContent,

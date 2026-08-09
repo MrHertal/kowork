@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/shell-env.ts
 import { spawnSync } from "node:child_process";
 import { basename } from "node:path";
 
