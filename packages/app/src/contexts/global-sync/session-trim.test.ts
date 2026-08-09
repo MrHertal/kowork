@@ -79,4 +79,50 @@ describe("trimSessions", () => {
       "root-2",
     ]);
   });
+
+  test("keeps protected roots beyond the limit and outside the recency window", () => {
+    const now = 1_000_000;
+    const list = [
+      session({ id: "a", created: now - 100_000 }),
+      session({ id: "b", created: now - 90_000 }),
+      session({ id: "old-protected", created: now - 30_000_000 }),
+      session({ id: "old-unprotected", created: now - 29_000_000 }),
+    ];
+
+    const result = trimSessions(list, {
+      limit: 2,
+      permission: {},
+      protect: ["old-protected"],
+      now,
+    });
+
+    expect(result.map((x) => x.id)).toEqual(["a", "b", "old-protected"]);
+  });
+
+  test("keeps protected children when their parent is trimmed", () => {
+    const now = 1_000_000;
+    const list = [
+      session({ id: "root-1", created: now - 1000 }),
+      session({ id: "z-root", created: now - 30_000_000 }),
+      session({
+        id: "child-protected",
+        parentID: "z-root",
+        created: now - 20_000_000,
+      }),
+      session({
+        id: "child-unprotected",
+        parentID: "z-root",
+        created: now - 20_000_000,
+      }),
+    ];
+
+    const result = trimSessions(list, {
+      limit: 1,
+      permission: {},
+      protect: ["child-protected"],
+      now,
+    });
+
+    expect(result.map((x) => x.id)).toEqual(["child-protected", "root-1"]);
+  });
 });

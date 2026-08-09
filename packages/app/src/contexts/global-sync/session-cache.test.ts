@@ -80,4 +80,30 @@ describe("session cache", () => {
     expect(store.message.ses_1).toBeUndefined();
     expect(store.part[m.id]).toBeUndefined();
   });
+
+  test("dropSessionCaches preserves other sessions", () => {
+    const m1 = msg("msg_1", "ses_1");
+    const m2 = msg("msg_2", "ses_2");
+    const store: Store = {
+      session_status: { ses_1: { type: "busy" }, ses_2: { type: "idle" } },
+      session_diff: { ses_1: [], ses_2: [] },
+      todo: { ses_1: [], ses_2: [] },
+      message: { ses_1: [m1], ses_2: [m2] },
+      part: {
+        [m1.id]: [part("prt_1", "ses_1", m1.id)],
+        [m2.id]: [part("prt_2", "ses_2", m2.id)],
+      },
+      permission: { ses_2: [] },
+      question: {},
+    };
+
+    dropSessionCaches(store, ["ses_1"]);
+
+    expect(store.message.ses_2).toEqual([m2]);
+    expect(store.part[m2.id]).toHaveLength(1);
+    expect(store.session_status.ses_2).toEqual({ type: "idle" });
+    expect(store.todo.ses_2).toEqual([]);
+    expect(store.session_diff.ses_2).toEqual([]);
+    expect(store.permission.ses_2).toEqual([]);
+  });
 });
