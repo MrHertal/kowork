@@ -1,5 +1,4 @@
 import type {
-  AssistantMessage,
   Message as OpenCodeMessage,
   SessionStatus,
 } from "@opencode-ai/sdk/v2/client";
@@ -32,7 +31,7 @@ function useActiveMessageID(
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
       if (msg?.role === "assistant" && typeof msg.time.completed !== "number") {
-        const parentID = (msg as AssistantMessage).parentID;
+        const parentID = msg.parentID;
         const parent = messages.find((m) => m.id === parentID);
         if (parent && parent.role === "user") return parent.id;
         break;
@@ -57,16 +56,23 @@ interface MessageTimelineProps {
   editToolDefaultOpen?: boolean;
 }
 
+function scrollToLatest(el: HTMLElement) {
+  el.scrollTop = el.scrollHeight;
+}
+
 function TimelineScrollButton() {
   const context = useStickToBottomContext();
   const handleScrollToBottom = async () => {
     if (!(await context.scrollToBottom())) return;
     const scrollElement = context.scrollRef.current;
-    if (scrollElement) scrollElement.scrollTop = scrollElement.scrollHeight;
+    if (scrollElement) scrollToLatest(scrollElement);
   };
 
   return (
-    <ConversationScrollButton className="z-10" onClick={handleScrollToBottom} />
+    <ConversationScrollButton
+      className="z-10"
+      onClick={() => void handleScrollToBottom()}
+    />
   );
 }
 

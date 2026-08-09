@@ -122,7 +122,9 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
   const models = useModels();
 
   const modelsRef = useRef(models);
-  modelsRef.current = models;
+  useEffect(() => {
+    modelsRef.current = models;
+  });
 
   const persistTarget = useMemo<PersistTarget>(
     () => ({
@@ -187,9 +189,10 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
     [agentList],
   );
 
+  const ephemeralAgent = ephemeral.current;
   const currentAgent = useMemo(
-    () => pickAgent(scope?.agent ?? ephemeral.current),
-    [pickAgent, scope?.agent, ephemeral.current],
+    () => pickAgent(scope?.agent ?? ephemeralAgent),
+    [pickAgent, scope?.agent, ephemeralAgent],
   );
 
   const configModel = useChildData(sdk.directory, (s) => s.config.model);
@@ -252,7 +255,7 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
 
   const currentModel = useMemo(
     () => (currentModelKey ? models.find(currentModelKey) : undefined),
-    [currentModelKey, models.find],
+    [currentModelKey, models],
   );
 
   const recentModels = useMemo(
@@ -260,7 +263,7 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
       models.recent.list
         .map(models.find)
         .filter((m): m is ListModel => m != null),
-    [models.recent.list, models.find],
+    [models],
   );
 
   const configuredVariant = useMemo(() => {
@@ -282,7 +285,7 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
   const variantList = useMemo(() => {
     if (!currentModel?.variants) return [];
     return Object.keys(currentModel.variants);
-  }, [currentModel?.variants]);
+  }, [currentModel]);
 
   const currentVariant = useMemo(
     () =>
@@ -293,20 +296,6 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
       }),
     [variantList, selectedVariant, configuredVariant],
   );
-
-  useEffect(() => {
-    if (agentList.length === 0) {
-      setEphemeral((prev) => {
-        if (prev.current === undefined) return prev;
-        return { ...prev, current: undefined };
-      });
-      return;
-    }
-    setEphemeral((prev) => {
-      if (agentList.some((item) => item.name === prev.current)) return prev;
-      return { ...prev, current: agentList[0]?.name };
-    });
-  }, [agentList]);
 
   const write = useCallback(
     (next: Partial<State>) => {
@@ -322,7 +311,7 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
       }
       setEphemeral((prev) => ({ ...prev, draft: state }));
     },
-    [scope, currentAgent?.name, sessionId],
+    [scope, currentAgent?.name, sessionId, setSaved],
   );
 
   const setAgent = useCallback(
@@ -468,7 +457,7 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
       }));
       setEphemeral((prev) => ({ ...prev, draft: undefined }));
     },
-    [currentModel, currentAgent, selectedVariant],
+    [currentModel, currentAgent, selectedVariant, setSaved],
   );
 
   const restoreSession = useCallback(
@@ -489,7 +478,7 @@ export function LocalProvider({ sessionId, children }: LocalProviderProps) {
         },
       }));
     },
-    [sessionId, saved.session],
+    [sessionId, saved.session, setSaved],
   );
 
   const ctxValue = useMemo<LocalContextValue>(

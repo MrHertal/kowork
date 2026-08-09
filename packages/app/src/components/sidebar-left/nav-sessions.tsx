@@ -75,7 +75,7 @@ export function NavSessions() {
           <SidebarMenuItem>
             <SidebarMenuButton
               className="text-sidebar-foreground/70"
-              onClick={() => loadMore()}
+              onClick={() => void loadMore()}
             >
               <MoreHorizontal />
               <span>{m.sidebar_action_more()}</span>

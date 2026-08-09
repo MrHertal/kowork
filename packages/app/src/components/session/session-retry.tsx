@@ -37,7 +37,7 @@ export function SessionRetry({
   status: SessionStatus;
   show?: boolean;
 }) {
-  const retry = status.type === "retry" ? (status as RetryStatus) : undefined;
+  const retry = status.type === "retry" ? status : undefined;
   const seconds = useRetryCountdown(retry, show);
 
   if (!retry || !show) return null;

@@ -28,36 +28,33 @@ export function ConnectionGate({
   const server = useServer();
   const checkHealth = useCheckServerHealth();
   const checkHealthRef = useRef(checkHealth);
-  checkHealthRef.current = checkHealth;
+  useEffect(() => {
+    checkHealthRef.current = checkHealth;
+  });
 
   const [checkMode, setCheckMode] = useState<"blocking" | "background">(
     "blocking",
   );
   const checkModeRef = useRef(checkMode);
-  checkModeRef.current = checkMode;
+  useEffect(() => {
+    checkModeRef.current = checkMode;
+  });
 
   const [healthResult, setHealthResult] = useState<boolean | undefined>(
     undefined,
   );
-  const latestRef = useRef<boolean | undefined>(undefined);
-  if (healthResult !== undefined) latestRef.current = healthResult;
 
   const [retryTrigger, setRetryTrigger] = useState(0);
   const fetchIdRef = useRef(0);
 
+  const current = server.current;
+
   useEffect(() => {
-    if (disableHealthCheck) {
-      setHealthResult(true);
-      return;
-    }
+    const conn = current;
+    if (disableHealthCheck || !conn) return;
 
-    const conn = server.current;
-    if (!conn) {
-      setHealthResult(true);
-      return;
-    }
-
-    setHealthResult(undefined);
+    // In background mode, keep the last known result while re-checking.
+    if (checkModeRef.current === "blocking") setHealthResult(undefined);
     const id = ++fetchIdRef.current;
     const controller = new AbortController();
 
@@ -65,7 +62,7 @@ export function ConnectionGate({
       controller.abort();
     }, STARTUP_TIMEOUT_MS);
 
-    (async () => {
+    void (async () => {
       try {
         while (!controller.signal.aborted) {
           const res = await checkHealthRef.current(conn.http);
@@ -92,7 +89,7 @@ export function ConnectionGate({
       controller.abort();
       clearTimeout(timer);
     };
-  }, [server.current, retryTrigger, disableHealthCheck]);
+  }, [current, retryTrigger, disableHealthCheck]);
 
   const refetch = useCallback(() => {
     setRetryTrigger((n) => n + 1);
@@ -105,14 +102,13 @@ export function ConnectionGate({
     return () => clearTimeout(timer);
   }, []);
 
-  if (checkMode === "blocking" && healthResult === undefined) {
+  const result = disableHealthCheck || !current ? true : healthResult;
+
+  if (checkMode === "blocking" && result === undefined) {
     return splashReady ? <SplashLoadingScreen /> : null;
   }
 
-  const effective =
-    checkMode === "background" ? latestRef.current : healthResult;
-
-  if (effective === true) return <>{children}</>;
+  if (result === true) return <>{children}</>;
 
   return <ConnectionError onRetry={refetch} />;
 }

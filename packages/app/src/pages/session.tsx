@@ -34,9 +34,10 @@ import {
   type PermissionMode,
 } from "@/components/session/permission-mode-selector";
 import { KOWORK_SYSTEM_PROMPT } from "@/constants/kowork-system-prompt";
-import { useChildData } from "@/contexts/global-sync";
+import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useLocal } from "@/contexts/local";
-import { usePermission } from "@/contexts/permission";
+import { usePermission, usePermissionData } from "@/contexts/permission";
+import { autoRespondsPermission } from "@/contexts/permission/auto-respond";
 import { usePrompt, type ImageAttachmentPart } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useSync } from "@/contexts/sync";
@@ -90,15 +91,20 @@ export function Page({
   const [sending, setSending] = useState(false);
   const [newSessionPermissionMode, setNewSessionPermissionMode] =
     useState<PermissionMode>(defaultPermissionMode);
-  const [sessionPermissionMode, setSessionPermissionMode] =
-    useState<PermissionMode>(defaultPermissionMode);
 
-  useEffect(() => {
-    if (!sessionId || !permission.ready) return;
-    setSessionPermissionMode(
-      getPermissionMode(permission.isAutoAccepting(sessionId, directory)),
-    );
-  }, [sessionId, directory, permission]);
+  const autoAccept = usePermissionData((s) => s.autoAccept);
+  const sessions = useChildData(directory, (s) => s.session, shallowArrayEqual);
+  const sessionPermissionMode =
+    !sessionId || !permission.ready
+      ? defaultPermissionMode
+      : getPermissionMode(
+          autoRespondsPermission(
+            autoAccept,
+            sessions,
+            { sessionID: sessionId },
+            directory,
+          ),
+        );
   const sendingRef = useRef(false);
   const blockedRef = useRef(false);
 
@@ -129,7 +135,9 @@ export function Page({
     !!sessionStatus && sessionStatus.type !== "idle" && !!sessionId;
 
   const isBusyRef = useRef(isBusy);
-  isBusyRef.current = isBusy;
+  useEffect(() => {
+    isBusyRef.current = isBusy;
+  }, [isBusy]);
   const sessionSyncedAt = useRef<Map<string, number>>(new Map());
   useEffect(() => {
     if (!sessionId) return;
@@ -137,7 +145,7 @@ export function Page({
     const last = sessionSyncedAt.current.get(sessionId);
     const stale = last !== undefined && now - last > 15_000;
     sessionSyncedAt.current.set(sessionId, now);
-    sync.session.sync(
+    void sync.session.sync(
       sessionId,
       stale && !isBusyRef.current ? { force: true } : undefined,
     );
@@ -241,7 +249,7 @@ export function Page({
 
         setText("");
         prompt.reset();
-        conversationRef.current?.scrollToBottom("smooth");
+        void conversationRef.current?.scrollToBottom("smooth");
 
         await sdk.client.session.promptAsync({
           sessionID: sid,
@@ -258,7 +266,7 @@ export function Page({
 
         if (isNewSession) {
           local.session.promote(sid);
-          navigate({ to: "/session/$id", params: { id: sid } });
+          void navigate({ to: "/session/$id", params: { id: sid } });
         }
       } catch (error) {
         toast.error(m.common_requestFailed(), {
@@ -313,7 +321,6 @@ export function Page({
 
   const handleSessionPermissionModeChange = (mode: PermissionMode) => {
     if (!sessionId) return;
-    setSessionPermissionMode(mode);
     applyPermissionMode(permission, mode, sessionId, directory);
   };
 
@@ -336,7 +343,7 @@ export function Page({
             <PromptImageAttachments />
             <PromptInputTextarea
               onChange={handleTextChange}
-              onPaste={handlePromptPaste}
+              onPaste={(event) => void handlePromptPaste(event)}
               value={text}
               placeholder={
                 sessionId

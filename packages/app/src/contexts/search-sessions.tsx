@@ -82,7 +82,7 @@ function reconcileResult(
 
 export interface SearchSessionsContextValue {
   _store: Store<SearchSessionsState>;
-  setQuery(q: string): void;
+  setQuery: (q: string) => void;
 }
 
 const SearchSessionsContext = createContext<SearchSessionsContextValue | null>(
@@ -171,7 +171,9 @@ export function SearchSessionsProvider({
     [globalSDK, queryClient, stores, setLoading],
   );
 
-  runSearchRef.current = runSearch;
+  useEffect(() => {
+    runSearchRef.current = runSearch;
+  });
 
   const setQuery = useCallback(
     (q: string) => {

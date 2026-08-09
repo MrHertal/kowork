@@ -1,5 +1,6 @@
 // @opencode-ref: opencode/packages/app/src/context/permission.tsx
 import type { PermissionRequest } from "@opencode-ai/sdk/v2/client";
+import { Store, useStore } from "@tanstack/react-store";
 import {
   createContext,
   type ReactNode,
@@ -12,8 +13,13 @@ import {
 } from "react";
 
 import { useGlobalSDK } from "./global-sdk";
-import { Persist } from "@/utils/persist";
-import { usePersistedState } from "@/hooks/use-persisted-state";
+import {
+  loadPersisted,
+  Persist,
+  resolveStorage,
+  savePersisted,
+} from "@/utils/persist";
+import { usePlatform } from "./platform";
 import { useGlobalSync } from "./global-sync";
 import {
   acceptKey,
@@ -29,7 +35,7 @@ type PermissionRespondFn = (input: {
   directory?: string;
 }) => void;
 
-interface PermissionStore {
+export interface PermissionStore {
   autoAccept: Record<string, boolean>;
 }
 
@@ -77,6 +83,7 @@ function hasPermissionPromptRules(permission: unknown) {
 }
 
 export interface PermissionContextValue {
+  _store: Store<PermissionStore>;
   ready: boolean;
   respond: PermissionRespondFn;
   autoResponds: (permission: PermissionRequest, directory?: string) => boolean;
@@ -100,29 +107,59 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
   const globalSDK = useGlobalSDK();
   const globalSync = useGlobalSync();
 
-  const {
-    state: store,
-    setState: setStore,
-    ready,
-  } = usePersistedState<PermissionStore>({
-    target: PERSIST_TARGET,
-    createDefault: createDefaultStore,
-    logName: "permission",
-  });
+  const platform = usePlatform();
+  const [store] = useState(
+    () => new Store<PermissionStore>(createDefaultStore()),
+  );
+  const [ready, setReady] = useState(false);
+  const dirty = useRef(false);
+  const [storage] = useState(() => resolveStorage(platform, PERSIST_TARGET));
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadPersisted<PermissionStore>(
+      storage,
+      PERSIST_TARGET,
+      createDefaultStore(),
+    )
+      .then((persisted) => {
+        if (cancelled) return;
+        store.setState(() => persisted);
+        setReady(true);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        console.error("[permission] failed to load persisted state", {
+          error,
+        });
+        setReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [storage, store]);
+
+  useEffect(() => {
+    const sub = store.subscribe(() => {
+      if (!ready) return;
+      if (!dirty.current) return;
+      dirty.current = false;
+      void savePersisted(storage, PERSIST_TARGET, store.state);
+    });
+    return () => sub.unsubscribe();
+  }, [storage, store, ready]);
+
   const disposed = useRef(false);
-  const storeRef = useRef(store);
-  storeRef.current = store;
 
   const updateAutoAccept = useCallback(
     (update: (current: Record<string, boolean>) => Record<string, boolean>) => {
-      const next = {
-        ...storeRef.current,
-        autoAccept: update(storeRef.current.autoAccept),
-      };
-      storeRef.current = next;
-      setStore(next);
+      dirty.current = true;
+      store.setState((prev) => ({
+        ...prev,
+        autoAccept: update(prev.autoAccept),
+      }));
     },
-    [setStore],
+    [store],
   );
 
   const [maps] = useState(() => ({
@@ -177,18 +214,21 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
         ? globalSync._child(directory).state.session
         : [];
       return autoRespondsPermission(
-        storeRef.current.autoAccept,
+        store.state.autoAccept,
         sessions,
         { sessionID },
         directory,
       );
     },
-    [globalSync],
+    [globalSync, store.state.autoAccept],
   );
 
-  const isAutoAcceptingDir = useCallback((directory: string) => {
-    return isDirectoryAutoAccepting(storeRef.current.autoAccept, directory);
-  }, []);
+  const isAutoAcceptingDir = useCallback(
+    (directory: string) => {
+      return isDirectoryAutoAccepting(store.state.autoAccept, directory);
+    },
+    [store.state.autoAccept],
+  );
 
   const shouldAutoRespond = useCallback(
     (permission: PermissionRequest, directory?: string) => {
@@ -196,13 +236,13 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
         ? globalSync._child(directory).state.session
         : [];
       return autoRespondsPermission(
-        storeRef.current.autoAccept,
+        store.state.autoAccept,
         sessions,
         permission,
         directory,
       );
     },
-    [globalSync],
+    [globalSync, store.state.autoAccept],
   );
 
   const bumpEnableVersion = useCallback(
@@ -226,7 +266,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
     const unsubscribe = globalSDK.event.listen((e) => {
       const event = e.details;
       if (event?.type !== "permission.asked") return;
-      const perm = event.properties as PermissionRequest;
+      const perm = event.properties;
       if (!shouldAutoRespond(perm, e.name)) return;
       respondOnce(perm, e.name);
     });
@@ -242,7 +282,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
         .list({ directory })
         .then((x) => {
           if (disposed.current) return;
-          if (!isDirectoryAutoAccepting(storeRef.current.autoAccept, directory))
+          if (!isDirectoryAutoAccepting(store.state.autoAccept, directory))
             return;
           for (const perm of x.data ?? []) {
             if (!perm?.id) continue;
@@ -252,7 +292,13 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
         })
         .catch(() => undefined);
     },
-    [globalSDK, updateAutoAccept, shouldAutoRespond, respondOnce],
+    [
+      globalSDK,
+      updateAutoAccept,
+      shouldAutoRespond,
+      respondOnce,
+      store.state.autoAccept,
+    ],
   );
 
   const disableDirectory = useCallback(
@@ -280,7 +326,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
           if (maps.enableVersion.get(key) !== version) return;
           if (
             !autoRespondsPermission(
-              storeRef.current.autoAccept,
+              store.state.autoAccept,
               globalSync._child(directory).state.session,
               { sessionID },
               directory,
@@ -303,6 +349,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
       updateAutoAccept,
       shouldAutoRespond,
       respondOnce,
+      store.state.autoAccept,
     ],
   );
 
@@ -376,6 +423,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
 
   const ctxValue = useMemo<PermissionContextValue>(
     () => ({
+      _store: store,
       ready,
       respond,
       autoResponds: shouldAutoRespond,
@@ -389,6 +437,7 @@ export function PermissionProvider({ children }: PermissionProviderProps) {
       isPermissionAllowAll,
     }),
     [
+      store,
       ready,
       respond,
       shouldAutoRespond,
@@ -415,4 +464,12 @@ export function usePermission(): PermissionContextValue {
   if (!ctx)
     throw new Error("usePermission must be used within PermissionProvider");
   return ctx;
+}
+
+export function usePermissionData<T>(
+  selector: (state: PermissionStore) => T,
+  compare?: (a: T, b: T) => boolean,
+): T {
+  const { _store } = usePermission();
+  return useStore(_store, selector, compare);
 }

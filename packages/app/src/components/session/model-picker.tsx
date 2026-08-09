@@ -38,7 +38,7 @@ export function ModelPicker({ model }: { model: ModelState }) {
       groups[provider].push(item);
     }
     return groups;
-  }, [model.list, model.visible]);
+  }, [model]);
 
   const handleSelect = useCallback(
     (item: ListModel) => {
@@ -48,7 +48,7 @@ export function ModelPicker({ model }: { model: ModelState }) {
       );
       setOpen(false);
     },
-    [model.set],
+    [model],
   );
 
   const handleManage = useCallback(() => {

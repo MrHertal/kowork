@@ -12,7 +12,6 @@ import type {
   Part,
   Project,
   Session,
-  SnapshotFileDiff,
 } from "@opencode-ai/sdk/v2/client";
 import { Binary } from "@/utils/binary";
 import { retry } from "@/utils/retry";
@@ -30,7 +29,6 @@ import {
   type OptimisticItem,
   applyOptimisticAdd,
   applyOptimisticRemove,
-  mergeOptimisticPage,
 } from "./sync/optimistic";
 import {
   type MetaState,
@@ -117,13 +115,6 @@ export function SyncProvider({ children }: SyncProviderProps) {
     void globalSync.bootstrapInstance(sdk.directory);
   }, [globalSync, sdk.directory]);
 
-  const sdkRef = useRef(sdk);
-  sdkRef.current = sdk;
-  const globalSyncRef = useRef(globalSync);
-  globalSyncRef.current = globalSync;
-  const storeRef = useRef(store);
-  storeRef.current = store;
-
   const metaRef = useRef<MetaState>({
     limit: {},
     cursor: {},
@@ -140,11 +131,10 @@ export function SyncProvider({ children }: SyncProviderProps) {
     };
   }
 
-  const valueRef = useRef<SyncContextValue | null>(null);
-  if (valueRef.current == null) {
-    const meta = metaRef.current;
-    const maps = mapsRef.current!;
+  const meta = metaRef.current;
+  const maps = mapsRef.current;
 
+  const ctxValue = useMemo<SyncContextValue>(() => {
     const setOptimistic = (
       directory: string,
       sessionID: string,
@@ -190,32 +180,29 @@ export function SyncProvider({ children }: SyncProviderProps) {
       ...(maps.optimistic.get(keyFor(directory, sessionID))?.values() ?? []),
     ];
 
-    valueRef.current = {
+    return {
       get status() {
-        return storeRef.current.state.status;
+        return store.state.status;
       },
       get ready() {
-        return storeRef.current.state.status !== "loading";
+        return store.state.status !== "loading";
       },
       get project() {
-        const state = storeRef.current.state;
-        const projects = globalSyncRef.current._globalStore.state.project;
+        const state = store.state;
+        const projects = globalSync._globalStore.state.project;
         const match = Binary.search(projects, state.project, (p) => p.id);
         if (match.found) return projects[match.index];
         return undefined;
       },
       get directory() {
-        return storeRef.current.state.path.directory;
+        return store.state.path.directory;
       },
       absolute(path: string) {
-        return (storeRef.current.state.path.directory + "/" + path).replace(
-          "//",
-          "/",
-        );
+        return (store.state.path.directory + "/" + path).replace("//", "/");
       },
       session: {
         get(sessionID: string) {
-          const state = storeRef.current.state;
+          const state = store.state;
           const match = Binary.search(state.session, sessionID, (s) => s.id);
           if (match.found) return state.session[match.index];
           return undefined;
@@ -227,8 +214,8 @@ export function SyncProvider({ children }: SyncProviderProps) {
             message: Message;
             parts: Part[];
           }) {
-            const dir = input.directory ?? sdkRef.current.directory;
-            const gs = globalSyncRef.current;
+            const dir = input.directory ?? sdk.directory;
+            const gs = globalSync;
             setOptimistic(dir, input.sessionID, {
               message: input.message,
               parts: input.parts,
@@ -246,8 +233,8 @@ export function SyncProvider({ children }: SyncProviderProps) {
             sessionID: string;
             messageID: string;
           }) {
-            const dir = input.directory ?? sdkRef.current.directory;
-            const gs = globalSyncRef.current;
+            const dir = input.directory ?? sdk.directory;
+            const gs = globalSync;
             clearOptimistic(dir, input.sessionID, input.messageID);
             gs.updateChild(dir, (draft) => {
               applyOptimisticRemove(draft, input);
@@ -262,8 +249,8 @@ export function SyncProvider({ children }: SyncProviderProps) {
           model: { providerID: string; modelID: string };
           variant?: string;
         }) {
-          const directory = sdkRef.current.directory;
-          const gs = globalSyncRef.current;
+          const directory = sdk.directory;
+          const gs = globalSync;
           const message: Message = {
             id: input.messageID,
             sessionID: input.sessionID,
@@ -289,8 +276,8 @@ export function SyncProvider({ children }: SyncProviderProps) {
           sessionID: string;
           messageID: string;
         }) {
-          const directory = sdkRef.current.directory;
-          const gs = globalSyncRef.current;
+          const directory = sdk.directory;
+          const gs = globalSync;
           clearOptimistic(directory, input.sessionID, input.messageID);
           gs.updateChild(directory, (draft) => {
             applyOptimisticRemove(draft, {
@@ -301,9 +288,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
           });
         },
         async sync(sessionID: string, opts?: { force?: boolean }) {
-          const directory = sdkRef.current.directory;
-          const client = sdkRef.current.client;
-          const gs = globalSyncRef.current;
+          const directory = sdk.directory;
+          const client = sdk.client;
+          const gs = globalSync;
           const childStore = gs._child(directory);
           const key = keyFor(directory, sessionID);
 
@@ -365,9 +352,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
           });
         },
         async diff(sessionID: string, opts?: { force?: boolean }) {
-          const directory = sdkRef.current.directory;
-          const client = sdkRef.current.client;
-          const gs = globalSyncRef.current;
+          const directory = sdk.directory;
+          const client = sdk.client;
+          const gs = globalSync;
           const childStore = gs._child(directory);
           if (
             childStore.state.session_diff[sessionID] !== undefined &&
@@ -379,17 +366,15 @@ export function SyncProvider({ children }: SyncProviderProps) {
           return runInflight(maps.inflightDiff, key, () =>
             retry(() => client.session.diff({ sessionID })).then((diff) => {
               gs.updateChild(directory, (draft) => {
-                draft.session_diff[sessionID] = list(
-                  diff.data,
-                ) as SnapshotFileDiff[];
+                draft.session_diff[sessionID] = list(diff.data);
               });
             }),
           );
         },
         async todo(sessionID: string, opts?: { force?: boolean }) {
-          const directory = sdkRef.current.directory;
-          const client = sdkRef.current.client;
-          const gs = globalSyncRef.current;
+          const directory = sdk.directory;
+          const client = sdk.client;
+          const gs = globalSync;
           const childStore = gs._child(directory);
           if (childStore.state.todo[sessionID] !== undefined && !opts?.force)
             return;
@@ -405,23 +390,23 @@ export function SyncProvider({ children }: SyncProviderProps) {
         },
         history: {
           more(sessionID: string) {
-            const state = storeRef.current.state;
-            const key = keyFor(sdkRef.current.directory, sessionID);
+            const state = store.state;
+            const key = keyFor(sdk.directory, sessionID);
             if (state.message[sessionID] === undefined) return false;
             if (meta.limit[key] === undefined) return false;
             if (meta.complete[key]) return false;
             return !!meta.cursor[key];
           },
           loading(sessionID: string) {
-            const key = keyFor(sdkRef.current.directory, sessionID);
-            return storeRef.current.state.message_loading[key] ?? false;
+            const key = keyFor(sdk.directory, sessionID);
+            return store.state.message_loading[key] ?? false;
           },
           async loadMore(sessionID: string, count?: number) {
-            const directory = sdkRef.current.directory;
-            const client = sdkRef.current.client;
+            const directory = sdk.directory;
+            const client = sdk.client;
             const key = keyFor(directory, sessionID);
             const step = count ?? historyMessagePageSize;
-            if (storeRef.current.state.message_loading[key]) return;
+            if (store.state.message_loading[key]) return;
             if (meta.complete[key]) return;
             const before = meta.cursor[key];
             if (!before) return;
@@ -434,15 +419,15 @@ export function SyncProvider({ children }: SyncProviderProps) {
               before,
               mode: "prepend",
               meta,
-              globalSync: globalSyncRef.current,
+              globalSync,
               getOptimistic,
               clearOptimistic,
             });
           },
         },
         evict(sessionID: string, directory?: string) {
-          const dir = directory ?? sdkRef.current.directory;
-          const gs = globalSyncRef.current;
+          const dir = directory ?? sdk.directory;
+          const gs = globalSync;
           const key = keyFor(dir, sessionID);
           gs.updateChild(dir, (draft) => {
             dropSessionCaches(draft, [sessionID]);
@@ -455,9 +440,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
         },
       },
     };
-  }
-
-  const ctxValue = valueRef.current!;
+  }, [sdk, store, globalSync, meta, maps]);
 
   return (
     <SyncContext.Provider value={ctxValue}>{children}</SyncContext.Provider>

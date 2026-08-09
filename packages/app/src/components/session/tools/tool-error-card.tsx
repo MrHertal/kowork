@@ -78,7 +78,7 @@ export function ToolErrorCard({
         <button
           type="button"
           className="absolute top-3 right-3 rounded p-1 text-muted-foreground hover:text-foreground"
-          onClick={handleCopy}
+          onClick={() => void handleCopy()}
           aria-label={m.session_tool_error_copy()}
         >
           {copied ? (

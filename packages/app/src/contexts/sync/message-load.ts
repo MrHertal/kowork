@@ -1,7 +1,7 @@
 // @opencode-ref: opencode/packages/app/src/context/sync.tsx
 import type { OpencodeClient, Part } from "@opencode-ai/sdk/v2/client";
 import { retry } from "@/utils/retry";
-import { diffs as list, message as clean } from "@/utils/diffs";
+import { message as clean } from "@/utils/diffs";
 import type { GlobalSyncContextValue } from "@/contexts/global-sync";
 import { sortParts, merge, keyFor } from "./utils";
 import { mergeOptimisticPage, type OptimisticItem } from "./optimistic";

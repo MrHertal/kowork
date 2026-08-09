@@ -10,8 +10,8 @@ export function NativeThemeSync() {
 
   useEffect(() => {
     if (resolvedTheme !== "light" && resolvedTheme !== "dark") return;
-    window.api?.setTitlebar?.({ mode: resolvedTheme });
-    window.api?.setBackgroundColor?.(NATIVE_BACKGROUND[resolvedTheme]);
+    void window.api?.setTitlebar?.({ mode: resolvedTheme });
+    void window.api?.setBackgroundColor?.(NATIVE_BACKGROUND[resolvedTheme]);
   }, [resolvedTheme]);
 
   return null;

@@ -29,10 +29,10 @@ export function usePacedText(text: string, live: boolean): string {
     undefined,
   );
 
-  targetRef.current = text;
-  liveRef.current = live;
-
   useEffect(() => {
+    targetRef.current = text;
+    liveRef.current = live;
+
     const sync = (value: string) => {
       shownRef.current = value;
       setShown(value);

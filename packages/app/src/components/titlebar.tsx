@@ -29,6 +29,7 @@ export function TitlebarSlot({
 }) {
   const [target, setTarget] = useState<HTMLElement | null>(null);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target exists only after mount
     setTarget(document.getElementById(`kowork-titlebar-${name}`));
   }, [name]);
   return target ? createPortal(children, target) : null;

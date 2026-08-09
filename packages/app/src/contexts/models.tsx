@@ -186,27 +186,34 @@ export function ModelsProvider({ children }: ModelsProviderProps) {
     [derived],
   );
 
-  const setVisibility = useCallback((model: ModelKey, show: boolean) => {
-    const visibility: Visibility = show ? "show" : "hide";
-    setStore((prev) => {
-      const index = prev.user.findIndex(
-        (x) => x.modelID === model.modelID && x.providerID === model.providerID,
-      );
-      const nextUser =
-        index >= 0
-          ? prev.user.map((u, i) => (i === index ? { ...u, visibility } : u))
-          : [...prev.user, { ...model, visibility }];
-      return { ...prev, user: nextUser };
-    });
-  }, []);
+  const setVisibility = useCallback(
+    (model: ModelKey, show: boolean) => {
+      const visibility: Visibility = show ? "show" : "hide";
+      setStore((prev) => {
+        const index = prev.user.findIndex(
+          (x) =>
+            x.modelID === model.modelID && x.providerID === model.providerID,
+        );
+        const nextUser =
+          index >= 0
+            ? prev.user.map((u, i) => (i === index ? { ...u, visibility } : u))
+            : [...prev.user, { ...model, visibility }];
+        return { ...prev, user: nextUser };
+      });
+    },
+    [setStore],
+  );
 
-  const pushRecent = useCallback((model: ModelKey) => {
-    setStore((prev) => {
-      const key = modelKey(model);
-      const filtered = prev.recent.filter((x) => modelKey(x) !== key);
-      return { ...prev, recent: [model, ...filtered].slice(0, RECENT_LIMIT) };
-    });
-  }, []);
+  const pushRecent = useCallback(
+    (model: ModelKey) => {
+      setStore((prev) => {
+        const key = modelKey(model);
+        const filtered = prev.recent.filter((x) => modelKey(x) !== key);
+        return { ...prev, recent: [model, ...filtered].slice(0, RECENT_LIMIT) };
+      });
+    },
+    [setStore],
+  );
 
   const getVariant = useCallback(
     (model: ModelKey) =>
@@ -222,7 +229,7 @@ export function ModelsProvider({ children }: ModelsProviderProps) {
         variant: { ...prev.variant, [key]: value },
       }));
     },
-    [],
+    [setStore],
   );
 
   const ctxValue = useMemo<ModelsContextValue>(

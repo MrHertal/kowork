@@ -139,7 +139,7 @@ function ResponseActions({
     <MessageActions>
       <Tooltip>
         <TooltipTrigger asChild>
-          <MessageAction label={copyLabel} onClick={handleCopy}>
+          <MessageAction label={copyLabel} onClick={() => void handleCopy()}>
             {copied ? (
               <CheckIcon className="size-3.5" aria-hidden="true" />
             ) : (
@@ -254,7 +254,7 @@ function SessionTurnImpl({
         if (!msg) continue;
         if (msg.role === "user") break;
         if (msg.role === "assistant" && msg.parentID === messageID) {
-          result.push(msg as AssistantMessage);
+          result.push(msg);
         }
       }
       return result.length === 0 ? emptyAssistants : result;
@@ -291,10 +291,10 @@ function SessionTurnImpl({
   );
 
   const errorText = useMemo(() => {
-    const msg = error?.data?.message;
+    const msg: unknown = error?.data?.message;
     if (typeof msg === "string") return unwrap(msg);
     if (msg === undefined || msg === null) return "";
-    return unwrap(String(msg));
+    return unwrap(JSON.stringify(msg) ?? "");
   }, [error]);
 
   const resolvedShowReasoningSummaries = showReasoningSummaries ?? true;
@@ -345,8 +345,7 @@ function SessionTurnImpl({
       const parts = assistantPartsList[i] ?? emptyParts;
       for (let j = parts.length - 1; j >= 0; j--) {
         const part = parts[j];
-        if (part?.type === "text" && part.text?.trim())
-          return (part as TextPartType).text;
+        if (part?.type === "text" && part.text?.trim()) return part.text;
       }
     }
     return undefined;

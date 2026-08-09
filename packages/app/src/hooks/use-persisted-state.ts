@@ -36,9 +36,11 @@ export function usePersistedState<T>(
   const dirty = useRef(false);
 
   const createDefaultRef = useRef(createDefault);
-  createDefaultRef.current = createDefault;
   const loadDefaultRef = useRef(loadDefault);
-  loadDefaultRef.current = loadDefault;
+  useEffect(() => {
+    createDefaultRef.current = createDefault;
+    loadDefaultRef.current = loadDefault;
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +56,7 @@ export function usePersistedState<T>(
         }
         setReady(true);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         console.error(`[${logName}] failed to load persisted state`, {
           error,
@@ -73,7 +75,7 @@ export function usePersistedState<T>(
     if (!ready) return;
     if (!dirty.current) return;
     dirty.current = false;
-    savePersisted(storage, target, state);
+    void savePersisted(storage, target, state);
   }, [ready, state, storage, target]);
 
   const setState = useCallback((next: T | ((prev: T) => T)) => {

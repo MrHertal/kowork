@@ -1,5 +1,5 @@
 import { ChevronDownIcon } from "lucide-react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Tool } from "@/components/ai-elements/tool";
@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 export type ToolStatus = "pending" | "running" | "completed" | "error";
 
 export interface ToolProps {
-  input: Record<string, any>;
-  metadata: Record<string, any>;
+  input: Record<string, unknown>;
+  metadata: Record<string, unknown>;
   tool: string;
   output?: string;
   status?: ToolStatus;
@@ -60,27 +60,14 @@ export function BasicTool({
 }: BasicToolProps) {
   const [userOpen, setUserOpen] = useState<boolean | undefined>(undefined);
   const [ready, setReady] = useState(!defer || defaultOpen);
-  const frameRef = useRef<number>(undefined);
   const open = forceOpen || (userOpen ?? defaultOpen);
   const pending = status === "pending" || status === "running";
 
   useEffect(() => {
-    if (!defer) {
-      setReady(true);
-      return;
-    }
-    if (!open) {
-      setReady(false);
-      return;
-    }
-    frameRef.current = requestAnimationFrame(() => {
-      setReady(true);
+    const frame = requestAnimationFrame(() => {
+      setReady(!defer || open);
     });
-    return () => {
-      if (frameRef.current !== undefined) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
+    return () => cancelAnimationFrame(frame);
   }, [defer, open]);
 
   const handleOpenChange = (value: boolean) => {
@@ -119,18 +106,26 @@ export function BasicTool({
     "flex w-fit items-center gap-2 text-muted-foreground text-sm transition-colors",
     !pending && (triggerHref || hasContent) && "hover:text-foreground",
   );
-  const TriggerWrapper = triggerHref
-    ? "a"
-    : hasContent
-      ? CollapsibleTrigger
-      : "div";
-  const triggerProps = triggerHref
-    ? {
-        href: triggerHref,
-        onClick: onTriggerClick,
-        className: triggerClassName,
-      }
-    : { className: triggerClassName };
+  const triggerChildren = (
+    <>
+      {triggerContent}
+      {action}
+      {hasContent && !pending && (
+        <ChevronDownIcon className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+      )}
+    </>
+  );
+  const triggerWrapper = triggerHref ? (
+    <a href={triggerHref} onClick={onTriggerClick} className={triggerClassName}>
+      {triggerChildren}
+    </a>
+  ) : hasContent ? (
+    <CollapsibleTrigger className={triggerClassName}>
+      {triggerChildren}
+    </CollapsibleTrigger>
+  ) : (
+    <div className={triggerClassName}>{triggerChildren}</div>
+  );
 
   return (
     <Tool
@@ -138,13 +133,7 @@ export function BasicTool({
       open={open}
       onOpenChange={handleOpenChange}
     >
-      <TriggerWrapper {...(triggerProps as any)}>
-        {triggerContent}
-        {action}
-        {hasContent && !pending && (
-          <ChevronDownIcon className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
-        )}
-      </TriggerWrapper>
+      {triggerWrapper}
       {hasContent && (
         <CollapsibleContent className="overflow-hidden text-sm outline-none data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
           <div className="pt-4">{!defer || ready ? children : null}</div>

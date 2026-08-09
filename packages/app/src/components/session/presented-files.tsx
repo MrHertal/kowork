@@ -129,7 +129,7 @@ function PresentedFileCard({
             disabled={showOpening}
             aria-busy={opening || showOpening}
             aria-disabled={opening || showOpening}
-            onClick={handleOpen}
+            onClick={() => void handleOpen()}
           >
             {showOpening ? (
               <Spinner

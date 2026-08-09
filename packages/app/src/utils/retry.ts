@@ -31,10 +31,10 @@ const TRANSIENT_MESSAGES = [
 function isTransientError(error: unknown): boolean {
   if (!error) return false;
   if (error instanceof HttpError) return error.status >= 500;
-  const message = String(
-    error instanceof Error ? error.message : error,
-  ).toLowerCase();
-  return TRANSIENT_MESSAGES.some((m) => message.includes(m));
+  const message = error instanceof Error ? error.message : error;
+  if (typeof message !== "string") return false;
+  const lower = message.toLowerCase();
+  return TRANSIENT_MESSAGES.some((m) => lower.includes(m));
 }
 
 export async function retry<T>(

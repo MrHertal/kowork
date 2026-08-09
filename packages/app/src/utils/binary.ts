@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-namespace -- upstream API shape
 export namespace Binary {
   export function search<T>(
     array: T[],

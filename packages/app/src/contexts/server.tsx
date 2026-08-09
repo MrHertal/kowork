@@ -55,6 +55,7 @@ export function projectsKey(key: ServerConnection.Key) {
   return key;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace -- upstream API shape
 export namespace ServerConnection {
   type Base = { displayName?: string };
 
@@ -318,7 +319,9 @@ export function ServerProvider({
   const platform = usePlatform();
   const checkServerHealth = useCheckServerHealth();
   const checkServerHealthRef = useRef(checkServerHealth);
-  checkServerHealthRef.current = checkServerHealth;
+  useEffect(() => {
+    checkServerHealthRef.current = checkServerHealth;
+  });
 
   const [state, dispatch] = useReducer(serverReducer, {
     ...createDefaultPersisted(),
@@ -341,7 +344,7 @@ export function ServerProvider({
         }
         setReady(true);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         console.error("[server] failed to load persisted state", { error });
         setReady(true);
@@ -355,7 +358,7 @@ export function ServerProvider({
     if (!ready) return;
     if (!dirty.current) return;
     dirty.current = false;
-    savePersisted(storage, PERSIST_TARGET, {
+    void savePersisted(storage, PERSIST_TARGET, {
       list: state.list,
       projects: state.projects,
       lastProject: state.lastProject,
@@ -423,7 +426,7 @@ export function ServerProvider({
     const run = () => {
       if (busy) return;
       busy = true;
-      checkServerHealthRef
+      void checkServerHealthRef
         .current(current.http)
         .then((result) => {
           if (!alive) return;

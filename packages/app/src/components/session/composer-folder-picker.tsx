@@ -55,13 +55,15 @@ export function ComposerFolderPicker({
 
   function handleChooseDifferent() {
     if (disabled || !canChooseDifferent) return;
-    requestAnimationFrame(async () => {
-      const selected = await platform.openDirectoryPickerDialog?.({
-        title: m.session_directory_choose_directory(),
-        defaultPath:
-          attachedDirectory ?? server.projects.last() ?? defaultDirectory,
-      });
-      if (typeof selected === "string") onDirectoryChange(selected);
+    requestAnimationFrame(() => {
+      void (async () => {
+        const selected = await platform.openDirectoryPickerDialog?.({
+          title: m.session_directory_choose_directory(),
+          defaultPath:
+            attachedDirectory ?? server.projects.last() ?? defaultDirectory,
+        });
+        if (typeof selected === "string") onDirectoryChange(selected);
+      })();
     });
   }
 

@@ -41,33 +41,31 @@ function matches<T>(
   return false;
 }
 
-export function useFilteredList<T>(props: FilteredListProps<T>) {
+export function useFilteredList<T>({
+  items,
+  filterKeys,
+  groupBy: groupByFn,
+  sortBy,
+  sortGroupsBy,
+}: FilteredListProps<T>) {
   const [filter, setFilter] = useState("");
 
   const groups = useMemo<FilteredGroup<T>[]>(() => {
     const needle = filter.trim().toLowerCase();
     const filtered = needle
-      ? props.items.filter((item) => matches(item, needle, props.filterKeys))
-      : props.items;
+      ? items.filter((item) => matches(item, needle, filterKeys))
+      : items;
     return pipe(
       filtered,
-      groupBy((x) => (props.groupBy ? props.groupBy(x) : "")),
+      groupBy((x) => (groupByFn ? groupByFn(x) : "")),
       entries(),
-      map(([category, items]) => ({
+      map(([category, grouped]) => ({
         category,
-        items: props.sortBy ? [...items].sort(props.sortBy) : items,
+        items: sortBy ? [...grouped].sort(sortBy) : grouped,
       })),
-      (result) =>
-        props.sortGroupsBy ? [...result].sort(props.sortGroupsBy) : result,
+      (result) => (sortGroupsBy ? [...result].sort(sortGroupsBy) : result),
     );
-  }, [
-    filter,
-    props.items,
-    props.filterKeys,
-    props.groupBy,
-    props.sortBy,
-    props.sortGroupsBy,
-  ]);
+  }, [filter, items, filterKeys, groupByFn, sortBy, sortGroupsBy]);
 
   const flat = useMemo(() => groups.flatMap((g) => g.items), [groups]);
 

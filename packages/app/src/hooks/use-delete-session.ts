@@ -14,12 +14,12 @@ export function useDeleteSession() {
 
   const deleteSession = useCallback(
     (session: { id: string; directory: string }) => {
-      client.session.delete({
+      void client.session.delete({
         sessionID: session.id,
         directory: session.directory,
       });
       if (activeId === session.id) {
-        navigate({ to: "/" });
+        void navigate({ to: "/" });
       }
     },
     [client, activeId, navigate],

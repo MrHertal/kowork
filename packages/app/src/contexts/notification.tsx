@@ -1,8 +1,5 @@
 // @opencode-ref: opencode/packages/app/src/context/notification.tsx
-import type {
-  EventSessionError,
-  PermissionRequest,
-} from "@opencode-ai/sdk/v2/client";
+import type { EventSessionError } from "@opencode-ai/sdk/v2/client";
 import { Store, useStore } from "@tanstack/react-store";
 import {
   createContext,
@@ -164,9 +161,11 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   const pruned = useRef(false);
 
   const settingsRef = useRef(settings);
-  settingsRef.current = settings;
   const permissionRef = useRef(permission);
-  permissionRef.current = permission;
+  useEffect(() => {
+    settingsRef.current = settings;
+    permissionRef.current = permission;
+  });
 
   const [storage] = useState(() => resolveStorage(platform, PERSIST_TARGET));
 
@@ -186,7 +185,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
           }),
         );
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         console.error("[notification] failed to load persisted state", {
           error,
@@ -207,7 +206,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       if (!stores.state.state.ready) return;
       if (!dirty.current) return;
       dirty.current = false;
-      savePersisted(storage, PERSIST_TARGET, {
+      void savePersisted(storage, PERSIST_TARGET, {
         list: stores.state.state.list,
       });
     });
@@ -282,7 +281,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       const time = Date.now();
 
       if (event.type === "permission.asked") {
-        const perm = event.properties as PermissionRequest;
+        const perm = event.properties;
         if (permissionRef.current.autoResponds(perm, directory)) return;
         const sessionID = perm.sessionID;
         void lookup(directory, sessionID).then((session) => {

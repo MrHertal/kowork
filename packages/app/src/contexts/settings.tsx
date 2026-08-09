@@ -136,13 +136,10 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
   const update = useCallback(
     <K extends keyof Settings>(category: K, patch: Partial<Settings[K]>) => {
-      setSettings(
-        (prev) =>
-          ({
-            ...prev,
-            [category]: { ...prev[category], ...patch },
-          }) as Settings,
-      );
+      setSettings((prev) => ({
+        ...prev,
+        [category]: { ...prev[category], ...patch },
+      }));
     },
     [setSettings],
   );
@@ -158,7 +155,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const setLanguage = useCallback(
     (value: string) => {
       if (isLocale(value)) {
-        setLocale(value, { reload: false });
+        void setLocale(value, { reload: false });
       }
       update("general", { language: value });
     },
@@ -218,7 +215,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     if (!ready) return;
     const lang = settings.general.language;
     if (isLocale(lang)) {
-      setLocale(lang, { reload: false });
+      void setLocale(lang, { reload: false });
     }
   }, [ready, settings.general.language]);
 

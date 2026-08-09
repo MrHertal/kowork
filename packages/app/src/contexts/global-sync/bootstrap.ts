@@ -56,10 +56,10 @@ function waitForPaint() {
   });
 }
 
-function errors(list: PromiseSettledResult<unknown>[]) {
+function errors(list: PromiseSettledResult<unknown>[]): unknown[] {
   return list
     .filter((item): item is PromiseRejectedResult => item.status === "rejected")
-    .map((item) => item.reason);
+    .map((item) => item.reason as unknown);
 }
 
 const providerRev = new Map<string, number>();
@@ -266,7 +266,7 @@ export async function bootstrapDirectory(input: {
     );
   }
 
-  (async () => {
+  void (async () => {
     const slow = [
       () =>
         input.queryClient.ensureQueryData({

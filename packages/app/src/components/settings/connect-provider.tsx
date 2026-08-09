@@ -147,7 +147,6 @@ export function ConnectProvider({
   back?: "providers" | "settings";
 }) {
   const dialog = useDialog();
-  const platform = usePlatform();
   const globalSDK = useGlobalSDK();
   const globalSync = useGlobalSync();
   const providers = useProviders();
@@ -258,10 +257,10 @@ export function ConnectProvider({
             timerRef.current = setTimeout(() => {
               timerRef.current = undefined;
               if (!aliveRef.current) return;
-              dispatch({ type: "auth.complete", authorization: res.data! });
+              dispatch({ type: "auth.complete", authorization: res.data });
             }, delay);
           } else {
-            dispatch({ type: "auth.complete", authorization: res.data! });
+            dispatch({ type: "auth.complete", authorization: res.data });
           }
         } catch (e) {
           if (!aliveRef.current) return;
@@ -281,7 +280,7 @@ export function ConnectProvider({
     if (loading) return;
     if (methods.length === 1) {
       autoSelectedRef.current = true;
-      selectMethod(0);
+      void selectMethod(0);
     }
   }, [loading, methods.length, selectMethod]);
 
@@ -346,7 +345,7 @@ export function ConnectProvider({
         <MethodSelectionView
           methods={methods}
           providerName={provider.name}
-          onSelect={selectMethod}
+          onSelect={(index) => void selectMethod(index)}
         />
       );
     }
@@ -359,7 +358,7 @@ export function ConnectProvider({
           key={promptResetKey}
           method={method}
           methodIndex={state.methodIndex}
-          selectMethod={selectMethod}
+          selectMethod={(index, inputs) => void selectMethod(index, inputs)}
           onStepChange={setPromptStep}
         />
       );
@@ -387,7 +386,7 @@ export function ConnectProvider({
         <OAuthCodeView
           providerID={providerID}
           providerName={provider.name}
-          methodIndex={state.methodIndex!}
+          methodIndex={state.methodIndex}
           methodLabel={methodLabel(method)}
           authorization={state.authorization}
           globalSDK={globalSDK}
@@ -400,7 +399,7 @@ export function ConnectProvider({
         <OAuthAutoView
           providerID={providerID}
           providerName={provider.name}
-          methodIndex={state.methodIndex!}
+          methodIndex={state.methodIndex}
           authorization={state.authorization}
           globalSDK={globalSDK}
           complete={complete}
@@ -722,7 +721,7 @@ function ApiAuthView({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          form.handleSubmit();
+          void form.handleSubmit();
         }}
       >
         <FieldGroup className="gap-6">
@@ -858,7 +857,7 @@ function OAuthCodeView({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          form.handleSubmit();
+          void form.handleSubmit();
         }}
       >
         <FieldGroup className="gap-6">
@@ -951,7 +950,7 @@ function OAuthAutoView({
             ? { ok: false as const, error: value.error }
             : { ok: true as const },
         )
-        .catch((err) => ({ ok: false as const, error: err }));
+        .catch((err: unknown) => ({ ok: false as const, error: err }));
 
       if (cancelled) return;
 

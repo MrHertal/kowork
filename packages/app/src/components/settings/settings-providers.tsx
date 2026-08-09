@@ -4,7 +4,7 @@ import {
   UnplugIcon,
   WandSparklesIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { ModelSelectorLogo } from "@/components/ai-elements/model-selector";
@@ -154,13 +154,13 @@ export function SettingsProviders() {
     [globalSDK, disableProvider, isConfigCustom],
   );
 
-  useEffect(() => {
-    if (!disconnecting) return;
+  // Clear the spinner once the row leaves the list (env rows stay; their source flips).
+  if (disconnecting) {
     const item = connected.find((p) => p.id === disconnecting);
     if (!item || getSource(item) === "env") {
       setDisconnecting(null);
     }
-  }, [disconnecting, connected]);
+  }
 
   const handleConnect = useCallback(
     (providerID: string) => {

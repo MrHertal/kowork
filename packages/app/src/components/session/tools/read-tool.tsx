@@ -13,8 +13,10 @@ const EMPTY_LOADED: string[] = [];
 export function ReadTool(props: ToolProps) {
   const { directory } = useSDK();
   const args: string[] = [];
-  if (props.input.offset) args.push("offset=" + props.input.offset);
-  if (props.input.limit) args.push("limit=" + props.input.limit);
+  if (typeof props.input.offset === "number")
+    args.push("offset=" + String(props.input.offset));
+  if (typeof props.input.limit === "number")
+    args.push("limit=" + String(props.input.limit));
 
   const loaded = useMemo(() => {
     if (props.status !== "completed") return EMPTY_LOADED;
@@ -29,8 +31,8 @@ export function ReadTool(props: ToolProps) {
         icon={<GlassesIcon />}
         title={m.session_tool_read()}
         subtitle={
-          props.input.filePath
-            ? getFilename(String(props.input.filePath))
+          typeof props.input.filePath === "string" && props.input.filePath
+            ? getFilename(props.input.filePath)
             : undefined
         }
         args={args}

@@ -85,6 +85,6 @@ export function useDialog(): DialogContextValue {
 // Re-invokes `render` on locale change so the dialog re-translates without
 // remounting the Radix portal (which would close and reopen the dialog).
 function DialogContentRenderer({ render }: { render: DialogElement }) {
-  useSettings().general.language;
+  void useSettings().general.language;
   return <>{render()}</>;
 }

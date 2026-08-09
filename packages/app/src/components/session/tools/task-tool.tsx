@@ -101,7 +101,7 @@ export function TaskTool(props: ToolProps) {
       )
         return;
       event.preventDefault();
-      navigate({ to: "/session/$id", params: { id: childSessionId } });
+      void navigate({ to: "/session/$id", params: { id: childSessionId } });
     },
     [childSessionId, navigate],
   );

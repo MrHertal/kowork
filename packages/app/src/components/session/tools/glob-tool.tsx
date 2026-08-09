@@ -17,7 +17,11 @@ export function GlobTool(props: ToolProps) {
         getDirectory((props.input.path as string | undefined) || "/"),
         directory,
       )}
-      args={props.input.pattern ? ["pattern=" + props.input.pattern] : []}
+      args={
+        typeof props.input.pattern === "string" && props.input.pattern
+          ? ["pattern=" + props.input.pattern]
+          : []
+      }
       status={props.status}
       hideDetails={props.hideDetails}
     >

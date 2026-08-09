@@ -6,7 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
+  useState,
 } from "react";
 import {
   type GlobalSDKContextValue,
@@ -41,15 +41,11 @@ export function SDKProvider({ directory, children }: SDKProviderProps) {
     [globalSDK, directory],
   );
 
-  const emitterRef = useRef<Emitter<SDKEventMap> | null>(null);
-  if (emitterRef.current == null) {
-    emitterRef.current = createEmitter<SDKEventMap>();
-  }
-  const emitter = emitterRef.current;
+  const [emitter] = useState(() => createEmitter<SDKEventMap>());
 
   useEffect(() => {
     return globalSDK.event.on(directory, (event) => {
-      emitter.emit(event.type as Event["type"], event as any);
+      emitter.emit(event.type, event);
     });
   }, [globalSDK, directory, emitter]);
 

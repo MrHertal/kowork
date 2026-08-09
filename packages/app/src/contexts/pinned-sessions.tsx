@@ -48,8 +48,8 @@ const createDefaultState = (): PinnedSessionsState => ({
 
 export interface PinnedSessionsContextValue {
   _store: Store<PinnedSessionsState>;
-  pin(session: Session): void;
-  unpin(sessionID: string): void;
+  pin: (session: Session) => void;
+  unpin: (sessionID: string) => void;
 }
 
 const PinnedSessionsContext = createContext<PinnedSessionsContextValue | null>(
@@ -88,7 +88,7 @@ export function PinnedSessionsProvider({
           }),
         );
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         console.error("[pinned-sessions] failed to load persisted state", {
           error,
@@ -109,7 +109,7 @@ export function PinnedSessionsProvider({
       if (!stores.state.state.ready) return;
       if (!dirty.current) return;
       dirty.current = false;
-      savePersisted(storage, PERSIST_TARGET, {
+      void savePersisted(storage, PERSIST_TARGET, {
         ids: stores.state.state.ids,
       } satisfies PersistedShape);
     });
@@ -147,7 +147,7 @@ export function PinnedSessionsProvider({
           if (result.status === "rejected") {
             console.error("[pinned-sessions] failed to fetch pinned session", {
               id,
-              error: result.reason,
+              error: result.reason as unknown,
             });
             continue;
           }
