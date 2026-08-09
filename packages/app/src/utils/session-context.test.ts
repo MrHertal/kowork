@@ -1,51 +1,46 @@
 import { describe, expect, it } from "vitest";
 import type {
   AssistantMessage,
-  Message,
   Provider,
+  UserMessage,
 } from "@opencode-ai/sdk/v2/client";
 import { getSessionContextUsage } from "./session-context";
 
+type Tokens = Pick<AssistantMessage["tokens"], "input" | "output"> &
+  Partial<AssistantMessage["tokens"]>;
+
 const assistant = (
   id: string,
-  tokens: {
-    input: number;
-    output: number;
-    reasoning?: number;
-    cache?: { read: number; write: number };
-  },
+  tokens: Tokens,
   providerID = "openai",
   modelID = "gpt-5",
-) =>
-  ({
-    id,
-    sessionID: "ses_1",
-    role: "assistant",
-    time: { created: 1 },
-    parentID: "msg_parent",
-    modelID,
-    providerID,
-    mode: "build",
-    agent: "build",
-    path: { cwd: "/repo", root: "/repo" },
-    cost: 0,
-    tokens: {
-      input: tokens.input,
-      output: tokens.output,
-      reasoning: tokens.reasoning ?? 0,
-      cache: tokens.cache ?? { read: 0, write: 0 },
-    },
-  }) as AssistantMessage;
+): AssistantMessage => ({
+  id,
+  sessionID: "ses_1",
+  role: "assistant",
+  time: { created: 1 },
+  parentID: "msg_parent",
+  modelID,
+  providerID,
+  mode: "build",
+  agent: "build",
+  path: { cwd: "/repo", root: "/repo" },
+  cost: 0,
+  tokens: {
+    reasoning: 0,
+    cache: { read: 0, write: 0 },
+    ...tokens,
+  },
+});
 
-const user = (id: string) =>
-  ({
-    id,
-    sessionID: "ses_1",
-    role: "user",
-    time: { created: 1 },
-    agent: "build",
-    model: { providerID: "openai", modelID: "gpt-5" },
-  }) as Message;
+const user = (id: string): UserMessage => ({
+  id,
+  sessionID: "ses_1",
+  role: "user",
+  time: { created: 1 },
+  agent: "build",
+  model: { providerID: "openai", modelID: "gpt-5" },
+});
 
 const provider = (context: number | undefined) =>
   ({

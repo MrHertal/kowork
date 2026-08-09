@@ -15,13 +15,13 @@ function abortFromInput(input: RequestInfo | URL, init?: RequestInit) {
 
 describe("checkServerHealth", () => {
   test("returns healthy response with version", async () => {
-    const fetch = (() =>
+    const fetch = () =>
       Promise.resolve(
         new Response(JSON.stringify({ healthy: true, version: "1.2.3" }), {
           status: 200,
           headers: { "content-type": "application/json" },
         }),
-      )) as unknown as typeof globalThis.fetch;
+      );
 
     const result = await checkServerHealth(server, fetch);
 
@@ -29,10 +29,7 @@ describe("checkServerHealth", () => {
   });
 
   test("returns unhealthy when request fails", async () => {
-    const fetch = (() =>
-      Promise.reject(
-        new Error("network"),
-      )) as unknown as typeof globalThis.fetch;
+    const fetch = () => Promise.reject(new Error("network"));
 
     const result = await checkServerHealth(server, fetch);
 
@@ -96,7 +93,7 @@ describe("checkServerHealth", () => {
 
   test("retries transient failures and eventually succeeds", async () => {
     let count = 0;
-    const fetch = (() => {
+    const fetch = () => {
       count += 1;
       if (count < 3) return Promise.reject(new TypeError("network"));
       return Promise.resolve(
@@ -105,7 +102,7 @@ describe("checkServerHealth", () => {
           headers: { "content-type": "application/json" },
         }),
       );
-    }) as unknown as typeof globalThis.fetch;
+    };
 
     const result = await checkServerHealth(server, fetch, {
       retryCount: 2,
@@ -118,10 +115,10 @@ describe("checkServerHealth", () => {
 
   test("returns unhealthy when retries are exhausted", async () => {
     let count = 0;
-    const fetch = (() => {
+    const fetch = () => {
       count += 1;
       return Promise.reject(new TypeError("network"));
-    }) as unknown as typeof globalThis.fetch;
+    };
 
     const result = await checkServerHealth(server, fetch, {
       retryCount: 2,

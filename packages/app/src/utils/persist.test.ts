@@ -152,7 +152,7 @@ describe("loadPersisted", () => {
       ...Persist.global("k"),
       migrate: (value: unknown) =>
         typeof value === "object" && value !== null
-          ? { ...(value as Record<string, unknown>), upgraded: true }
+          ? { ...value, upgraded: true }
           : value,
     };
 

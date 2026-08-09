@@ -5,6 +5,9 @@ import {
   estimateRootSessionTotal,
   loadRootSessionsWithFallback,
 } from "./session-load";
+import type { RootLoadArgs } from "./types";
+
+type Query = Parameters<RootLoadArgs["list"]>[0];
 
 const ok = (data: Session[] = []) => ({
   data,
@@ -13,7 +16,7 @@ const ok = (data: Session[] = []) => ({
 
 describe("loadRootSessionsWithFallback", () => {
   test("uses limited roots query when supported", async () => {
-    const calls: Array<{ directory: string; roots: true; limit?: number }> = [];
+    const calls: Query[] = [];
 
     const result = await loadRootSessionsWithFallback({
       directory: "dir",
@@ -30,7 +33,7 @@ describe("loadRootSessionsWithFallback", () => {
   });
 
   test("falls back to full roots query on limited-query failure", async () => {
-    const calls: Array<{ directory: string; roots: true; limit?: number }> = [];
+    const calls: Query[] = [];
 
     const result = await loadRootSessionsWithFallback({
       directory: "dir",

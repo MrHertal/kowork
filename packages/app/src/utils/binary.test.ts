@@ -49,7 +49,11 @@ describe("Binary.insert", () => {
   it("inserts duplicates before existing equal ids", () => {
     const existing = { id: "b", tag: 1 };
     const incoming = { id: "b", tag: 2 };
-    const array = [{ id: "a" }, existing, { id: "c" }];
+    const array: Array<{ id: string; tag?: number }> = [
+      { id: "a" },
+      existing,
+      { id: "c" },
+    ];
 
     Binary.insert(array, incoming, byId);
 
