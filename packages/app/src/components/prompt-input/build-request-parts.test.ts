@@ -107,4 +107,32 @@ describe("buildRequestParts", () => {
       url: "data:image/png;base64,AAA",
     });
   });
+
+  test("omits the text part when only images are sent", () => {
+    const result = buildRequestParts({
+      text: "",
+      images: [image({ id: "img_1", filename: "a.png" })],
+      messageID: "msg_1",
+      sessionID: "ses_1",
+    });
+
+    expect(result.requestParts).toHaveLength(1);
+    expect(result.requestParts[0]).toMatchObject({
+      type: "file",
+      filename: "a.png",
+    });
+    expect(result.optimisticParts).toHaveLength(1);
+  });
+
+  test("returns no parts when text and images are both empty", () => {
+    const result = buildRequestParts({
+      text: "",
+      images: [],
+      messageID: "msg_1",
+      sessionID: "ses_1",
+    });
+
+    expect(result.requestParts).toHaveLength(0);
+    expect(result.optimisticParts).toHaveLength(0);
+  });
 });

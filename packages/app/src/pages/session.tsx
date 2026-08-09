@@ -178,7 +178,13 @@ export function Page({
   const handleSubmit = useCallback(
     async (message: PromptInputMessage) => {
       const input = message.text?.trim();
-      if (!input || sendingRef.current || blockedRef.current || isChildSession)
+      const promptSnapshot = prompt.current;
+      if (
+        (!input && !promptSnapshot.some((part) => part.type === "image")) ||
+        sendingRef.current ||
+        blockedRef.current ||
+        isChildSession
+      )
         return;
 
       const currentModelVal = local.model.current;
@@ -201,7 +207,6 @@ export function Page({
       let sid = sessionId;
       let isNewSession = false;
       let messageID: string | undefined;
-      const promptSnapshot = prompt.current;
 
       try {
         if (!sid) {
@@ -230,7 +235,7 @@ export function Page({
           (part): part is ImageAttachmentPart => part.type === "image",
         );
         const { requestParts, optimisticParts } = buildRequestParts({
-          text: input,
+          text: input ?? "",
           images,
           messageID,
           sessionID: sid,
@@ -273,7 +278,7 @@ export function Page({
         toast.error(m.common_requestFailed(), {
           description: formatServerError(error, translate),
         });
-        setText((prev) => prev || input);
+        setText((prev) => prev || input || "");
         prompt.set(promptSnapshot, prompt.cursor);
         if (sid && messageID) {
           sync.session.rollbackOptimisticMessage({
@@ -315,8 +320,11 @@ export function Page({
   }, [sessionId, sdk.client]);
 
   const hasText = !!text.trim();
-  const canSubmit = hasText && !sending && !blocked && !isChildSession;
-  const canStop = isBusy && !hasText && !blocked && !isChildSession;
+  const hasImages = prompt.current.some((part) => part.type === "image");
+  const canSubmit =
+    (hasText || hasImages) && !sending && !blocked && !isChildSession;
+  const canStop =
+    isBusy && !hasText && !hasImages && !blocked && !isChildSession;
   const status = canStop ? "streaming" : "ready";
   const isSubmitDisabled = !canSubmit && !canStop;
 

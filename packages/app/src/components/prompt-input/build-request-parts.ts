@@ -48,13 +48,15 @@ function toOptimisticPart(
 }
 
 export function buildRequestParts(input: BuildRequestPartsInput) {
-  const requestParts: PromptRequestPart[] = [
-    {
-      id: ascending("part"),
-      type: "text",
-      text: input.text,
-    },
-  ];
+  const requestParts: PromptRequestPart[] = input.text
+    ? [
+        {
+          id: ascending("part"),
+          type: "text",
+          text: input.text,
+        },
+      ]
+    : [];
 
   const images = input.images.map(
     (attachment) =>
