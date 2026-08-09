@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { Event, OpencodeClient } from "@opencode-ai/sdk/v2/client";
-import { render, waitFor } from "@testing-library/react";
+import { act, render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import {
 import { PromptProvider, usePrompt } from "@/contexts/prompt";
 import { SDKProvider } from "@/contexts/sdk";
 import { createEmitter } from "@/utils/emitter";
-import { usePromptAttachments } from "./attachments";
+import { useGlobalAttachmentDrop, usePromptAttachments } from "./attachments";
 
 const directory = "/tmp/project";
 
@@ -86,14 +86,17 @@ const pasteEvent = (input: {
 
 let prompt: ReturnType<typeof usePrompt>;
 let attachments: ReturnType<typeof usePromptAttachments>;
+let drop: ReturnType<typeof useGlobalAttachmentDrop>;
 let platform: Platform;
 
 function Capture() {
   const ctx = usePrompt();
   const api = usePromptAttachments();
+  const globalDrop = useGlobalAttachmentDrop();
   useEffect(() => {
     prompt = ctx;
     attachments = api;
+    drop = globalDrop;
   });
   return null;
 }
@@ -130,6 +133,9 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  document
+    .querySelectorAll('[data-slot="dialog-overlay"]')
+    .forEach((el) => el.remove());
 });
 
 describe("usePromptAttachments", () => {
@@ -255,5 +261,109 @@ describe("usePromptAttachments", () => {
     expect(preventDefault).not.toHaveBeenCalled();
     expect(readClipboardImage).not.toHaveBeenCalled();
     expect(images()).toHaveLength(0);
+  });
+});
+
+const dragEvent = (
+  type: string,
+  init: { files?: File[]; types?: string[]; relatedTarget?: EventTarget } = {},
+) =>
+  Object.assign(new Event(type, { bubbles: true, cancelable: true }), {
+    dataTransfer: { types: init.types ?? [], files: init.files ?? [] },
+    relatedTarget: init.relatedTarget ?? null,
+  });
+
+const dispatch = (target: Document | HTMLElement, event: globalThis.Event) => {
+  act(() => {
+    target.dispatchEvent(event);
+  });
+};
+
+describe("useGlobalAttachmentDrop", () => {
+  test("starts dragging when files are dragged over", async () => {
+    await setup();
+
+    const event = dragEvent("dragover", { types: ["Files"] });
+    dispatch(document, event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(drop.isDragging).toBe(true);
+  });
+
+  test("ignores drags without files", async () => {
+    await setup();
+
+    const event = dragEvent("dragover", { types: ["text/plain"] });
+    dispatch(document, event);
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(drop.isDragging).toBe(false);
+  });
+
+  test("ignores drags while a dialog overlay is open", async () => {
+    const overlay = document.createElement("div");
+    overlay.dataset.slot = "dialog-overlay";
+    document.body.appendChild(overlay);
+    await setup();
+
+    const event = dragEvent("dragover", { types: ["Files"] });
+    dispatch(document, event);
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(drop.isDragging).toBe(false);
+  });
+
+  test("stops dragging only when the drag leaves the window", async () => {
+    await setup();
+    dispatch(document, dragEvent("dragover", { types: ["Files"] }));
+    expect(drop.isDragging).toBe(true);
+
+    const inner = document.createElement("div");
+    dispatch(document, dragEvent("dragleave", { relatedTarget: inner }));
+    expect(drop.isDragging).toBe(true);
+
+    dispatch(document, dragEvent("dragleave"));
+    expect(drop.isDragging).toBe(false);
+  });
+
+  test("drops files as attachments", async () => {
+    await setup();
+    dispatch(document, dragEvent("dragover", { types: ["Files"] }));
+    expect(drop.isDragging).toBe(true);
+
+    const event = dragEvent("drop", { types: ["Files"], files: [png()] });
+    dispatch(document, event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(drop.isDragging).toBe(false);
+    await waitFor(() => expect(images()).toHaveLength(1));
+  });
+
+  test("clears dragging on a drop without files", async () => {
+    await setup();
+    dispatch(document, dragEvent("dragover", { types: ["Files"] }));
+    expect(drop.isDragging).toBe(true);
+
+    const event = dragEvent("drop", { types: ["Files"] });
+    dispatch(document, event);
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(drop.isDragging).toBe(false);
+    expect(images()).toHaveLength(0);
+  });
+
+  test("stops drop propagation so inner listeners do not double-process", async () => {
+    await setup();
+    const child = document.createElement("div");
+    document.body.appendChild(child);
+    const seen = vi.fn();
+    child.addEventListener("drop", seen);
+
+    const event = dragEvent("drop", { types: ["Files"], files: [png()] });
+    dispatch(child, event);
+
+    expect(seen).not.toHaveBeenCalled();
+    await waitFor(() => expect(images()).toHaveLength(1));
+    child.remove();
   });
 });
