@@ -62,6 +62,21 @@ const binary = () =>
     type: "application/octet-stream",
   });
 
+const pasteEvent = (input: {
+  items: Array<{ kind: string; getAsFile: () => File | null }>;
+  text?: string;
+}) => {
+  const preventDefault = vi.fn();
+  const event = {
+    clipboardData: {
+      items: input.items,
+      getData: () => input.text ?? "",
+    },
+    preventDefault,
+  } as unknown as React.ClipboardEvent<HTMLTextAreaElement>;
+  return { event, preventDefault };
+};
+
 let prompt: ReturnType<typeof usePrompt>;
 let attachments: ReturnType<typeof usePromptAttachments>;
 let platform: Platform;
@@ -163,14 +178,9 @@ describe("usePromptAttachments", () => {
 
   test("pastes clipboard files as attachments", async () => {
     await setup();
-    const preventDefault = vi.fn();
-    const event = {
-      clipboardData: {
-        items: [{ kind: "file", getAsFile: () => png() }],
-        getData: () => "",
-      },
-      preventDefault,
-    } as unknown as React.ClipboardEvent<HTMLTextAreaElement>;
+    const { event, preventDefault } = pasteEvent({
+      items: [{ kind: "file", getAsFile: () => png() }],
+    });
 
     await attachments.handlePaste(event);
 
@@ -181,14 +191,9 @@ describe("usePromptAttachments", () => {
   test("falls back to the native clipboard image when the browser paste is empty", async () => {
     platform.readClipboardImage = () => Promise.resolve(png("native.png"));
     await setup();
-    const preventDefault = vi.fn();
-    const event = {
-      clipboardData: {
-        items: [{ kind: "string", getAsFile: () => null }],
-        getData: () => "",
-      },
-      preventDefault,
-    } as unknown as React.ClipboardEvent<HTMLTextAreaElement>;
+    const { event, preventDefault } = pasteEvent({
+      items: [{ kind: "string", getAsFile: () => null }],
+    });
 
     await attachments.handlePaste(event);
 
@@ -201,14 +206,10 @@ describe("usePromptAttachments", () => {
     const readClipboardImage = vi.fn(() => Promise.resolve(null));
     platform.readClipboardImage = readClipboardImage;
     await setup();
-    const preventDefault = vi.fn();
-    const event = {
-      clipboardData: {
-        items: [{ kind: "string", getAsFile: () => null }],
-        getData: () => "hello",
-      },
-      preventDefault,
-    } as unknown as React.ClipboardEvent<HTMLTextAreaElement>;
+    const { event, preventDefault } = pasteEvent({
+      items: [{ kind: "string", getAsFile: () => null }],
+      text: "hello",
+    });
 
     await attachments.handlePaste(event);
 
