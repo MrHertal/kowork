@@ -7,6 +7,7 @@
   "main": "./out/main/index.js",
   "scripts": {
     "typecheck": "tsc -b",
+    "test": "vitest run",
     "predev": "tsx ./scripts/predev.ts",
     "dev": "electron-vite dev",
     "prebuild": "tsx ./scripts/prebuild.ts",
@@ -44,7 +45,8 @@
     "react-dom": "^19.2.8",
     "tsx": "4.23.10",
     "typescript": "~6.0.3",
-    "vite": "^7.3.6"
+    "vite": "^7.3.6",
+    "vitest": "^4.1.10"
   },
   "optionalDependencies": {
     "@lydell/node-pty-darwin-arm64": "1.2.0-beta.10",

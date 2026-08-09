@@ -115,12 +115,12 @@ Never expose a context getter that returns `store.state`. A read such as `ctx.da
 
 ## Verification
 
-Run the narrowest typecheck that covers the change:
+Run the narrowest check that covers the change:
 
 - Electron and its referenced React app: `pnpm typecheck`
 - React app only: `pnpm --filter @kowork/app typecheck`
-
-Lint the React app with `pnpm lint` (auto-fix: `pnpm lint:fix`).
+- Tests: `pnpm test`, or scoped to one package: `pnpm --filter @kowork/app test`
+- Lint the React app: `pnpm lint` (auto-fix: `pnpm lint:fix`)
 
 Before typechecking the app, regenerate affected artifacts:
 
@@ -131,3 +131,17 @@ Run repository-wide hygiene commands only when explicitly requested:
 
 - Format the tree: `pnpm prettier . --write`
 - Sort message catalogs: `pnpm --filter @kowork/app messages:sort`
+
+## Testing
+
+Tests use Vitest and are colocated as `*.test.ts(x)` next to the source.
+
+- Test the real implementation; avoid mocks except at boundaries (the OpenCode SDK client, Electron APIs, network). Do not duplicate logic into tests.
+- Node environment by default. React component tests opt into jsdom with a `// @vitest-environment jsdom` docblock on the first line and use `@testing-library/react` with `@testing-library/user-event`.
+- Keep Vitest `globals` off; import `describe`/`it`/`expect` from `vitest`. jest-dom matchers and DOM cleanup are registered in `packages/app/src/test-setup.ts`.
+- For files with `@opencode-ref` headers: port the upstream `*.test.ts` when one exists (e.g. `contexts/global-sync/*` ↔ `opencode/packages/app/src/context/global-sync/`), adapting `bun:test` imports to `vitest`. Ported tests verify the port and protect future backports.
+
+## Commits
+
+- Branch names are short lowercase kebab-case describing the task, such as `lint-fixes` or `test-scaffolding`, with no prefix conventions.
+- Commit messages are short lowercase imperative summaries, such as `add portuguese language`. PRs are squash-merged, so the PR title becomes the commit message.
