@@ -49,6 +49,13 @@ pnpm dev
 `pnpm dev` builds the OpenCode sidecar automatically before launching Electron.
 Build it on its own with `pnpm build:sidecar`.
 
+## Checks
+
+```bash
+pnpm lint       # ESLint (React app)
+pnpm typecheck  # TypeScript (Electron + React app)
+```
+
 ### Office document skills
 
 The built-in document skills (docx, pdf, xlsx, pptx) and their embedded

@@ -120,6 +120,8 @@ Run the narrowest typecheck that covers the change:
 - Electron and its referenced React app: `pnpm typecheck`
 - React app only: `pnpm --filter @kowork/app typecheck`
 
+Lint the React app with `pnpm lint` (auto-fix: `pnpm lint:fix`).
+
 Before typechecking the app, regenerate affected artifacts:
 
 - After route changes: `pnpm --filter @kowork/app exec npx @tanstack/router-cli generate`
