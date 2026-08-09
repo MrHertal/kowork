@@ -175,8 +175,8 @@ describe("usePromptAttachments", () => {
 
     expect(added).toBe(false);
     expect(images()).toHaveLength(0);
-    expect(toast.error).toHaveBeenCalledWith("Can't attach file", {
-      description: "The file couldn't be read.",
+    expect(toast.error).toHaveBeenCalledWith("Can't read file", {
+      description: "Try again or choose a different file.",
     });
   });
 
@@ -188,8 +188,8 @@ describe("usePromptAttachments", () => {
 
     expect(added).toBe(false);
     expect(toast.error).toHaveBeenCalledTimes(1);
-    expect(toast.error).toHaveBeenCalledWith("Can't attach file", {
-      description: "The file couldn't be read.",
+    expect(toast.error).toHaveBeenCalledWith("Can't read file", {
+      description: "Try again or choose a different file.",
     });
   });
 
