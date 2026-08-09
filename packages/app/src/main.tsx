@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/entry.tsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 

@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/utils/server-errors.ts
 import { m } from "@/paraglide/messages";
 
 export type ConfigInvalidError = {

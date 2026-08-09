@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/session/composer/session-request-tree.ts
 import type {
   PermissionRequest,
   QuestionRequest,

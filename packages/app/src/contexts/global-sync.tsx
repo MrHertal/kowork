@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/app/src/context/global-sync.tsx
+// @opencode-ref: opencode/packages/app/src/context/server-sync.tsx
 import type {
   Config,
   OpencodeClient,

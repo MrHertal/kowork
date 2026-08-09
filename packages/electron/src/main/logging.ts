@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/logging.ts
 import log from "electron-log/main.js";
 import { readFileSync, readdirSync, statSync, unlinkSync } from "node:fs";
 import { dirname, join } from "node:path";

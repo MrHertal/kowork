@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/session.tsx
 import type {
   Message as OpenCodeMessage,
   UserMessage,

@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/renderer/updater.ts
 export const UPDATER_ENABLED = () => window.__KOWORK__?.updaterEnabled ?? false;
 
 export async function runUpdater({ alertOnFail }: { alertOnFail: boolean }) {

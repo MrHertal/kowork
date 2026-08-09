@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/components/settings-providers.tsx
 import {
   ChevronRightIcon,
   PlusIcon,

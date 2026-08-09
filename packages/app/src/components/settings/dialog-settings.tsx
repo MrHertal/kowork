@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/components/dialog-settings.tsx
 import type { ReactNode } from "react";
 import { useState } from "react";
 

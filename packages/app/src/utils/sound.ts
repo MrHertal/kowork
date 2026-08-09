@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/utils/sound.ts
 let files: Record<string, () => Promise<string>> | undefined;
 let loads: Record<SoundID, () => Promise<string>> | undefined;
 

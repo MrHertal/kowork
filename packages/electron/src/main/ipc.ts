@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/desktop-electron/src/main/ipc.ts
+// @opencode-ref: opencode/packages/desktop/src/main/ipc.ts
 
 import { execFile } from "node:child_process";
 import { lstat } from "node:fs/promises";

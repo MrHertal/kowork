@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/menu.ts
 import { Menu, shell } from "electron";
 
 import { UPDATER_ENABLED } from "./constants";

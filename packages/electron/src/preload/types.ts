@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/desktop-electron/src/preload/types.ts
+// @opencode-ref: opencode/packages/desktop/src/preload/types.ts
 
 export type ServerReadyData = {
   url: string;

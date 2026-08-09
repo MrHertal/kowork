@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/session/composer/session-question-dock.tsx
 import type {
   QuestionAnswer,
   QuestionOption,

@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/index.ts
 import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import * as http from "node:http";

@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/main/env.d.ts
 interface ImportMetaEnv {
   readonly KOWORK_CHANNEL: string;
 }

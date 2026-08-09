@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/session/session-model-helpers.ts
 import type { UserMessage } from "@opencode-ai/sdk/v2/client";
 import type { useLocal } from "@/contexts/local";
 

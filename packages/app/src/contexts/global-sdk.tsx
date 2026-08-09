@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/app/src/context/global-sdk.tsx
+// @opencode-ref: opencode/packages/app/src/context/server-sdk.tsx
 import { type Event, type OpencodeClient } from "@opencode-ai/sdk/v2/client";
 import {
   createContext,

@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/desktop/src/renderer/env.d.ts
 import type { ElectronAPI } from "../preload/types";
 
 declare global {

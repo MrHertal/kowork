@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/hooks/use-providers.ts
 import { useMemo } from "react";
 
 import type {
