@@ -179,8 +179,11 @@ export function Page({
     async (message: PromptInputMessage) => {
       const input = message.text?.trim();
       const promptSnapshot = prompt.current;
+      const images = promptSnapshot.filter(
+        (part): part is ImageAttachmentPart => part.type === "image",
+      );
       if (
-        (!input && !promptSnapshot.some((part) => part.type === "image")) ||
+        (!input && images.length === 0) ||
         sendingRef.current ||
         blockedRef.current ||
         isChildSession
@@ -231,9 +234,6 @@ export function Page({
         }
 
         messageID = ascending("message");
-        const images = promptSnapshot.filter(
-          (part): part is ImageAttachmentPart => part.type === "image",
-        );
         const { requestParts, optimisticParts } = buildRequestParts({
           text: input ?? "",
           images,
