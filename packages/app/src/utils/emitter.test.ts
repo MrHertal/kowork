@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { createEmitter } from "./emitter";
+import { createEmitter, type Emitter } from "./emitter";
 
 type Events = {
   loaded: { count: number };
   saved: string;
 };
+
+type Listener = Parameters<Emitter<Events>["listen"]>[0];
 
 describe("createEmitter", () => {
   it("delivers events to handlers subscribed to the same name", () => {
@@ -80,14 +82,15 @@ describe("createEmitter", () => {
     const emitter = createEmitter<Events>();
     const handler = vi.fn<(event: Events["saved"]) => void>();
 
-    emitter.on("saved", handler)();
+    const unsubscribe = emitter.on("saved", handler);
+    unsubscribe();
     emitter.on("saved", handler);
     emitter.emit("saved", "a");
 
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
-  it("emits without listeners without throwing", () => {
+  it("does not throw when emitting without listeners", () => {
     const emitter = createEmitter<Events>();
 
     expect(() => emitter.emit("loaded", { count: 0 })).not.toThrow();
@@ -95,7 +98,7 @@ describe("createEmitter", () => {
 
   it("delivers every event to global listeners with name and details", () => {
     const emitter = createEmitter<Events>();
-    const handler = vi.fn();
+    const handler = vi.fn<Listener>();
 
     emitter.listen(handler);
     emitter.emit("loaded", { count: 3 });
@@ -125,7 +128,7 @@ describe("createEmitter", () => {
 
   it("stops delivering to global listeners after unsubscribe", () => {
     const emitter = createEmitter<Events>();
-    const handler = vi.fn();
+    const handler = vi.fn<Listener>();
 
     const unsubscribe = emitter.listen(handler);
     emitter.emit("saved", "a");

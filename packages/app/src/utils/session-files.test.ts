@@ -22,7 +22,7 @@ const userMessage = (input: {
   time: { created: input.created ?? 1 },
   agent: "agent",
   model: { providerID: "provider", modelID: "model" },
-  ...(input.summary === undefined ? {} : { summary: { diffs: input.summary } }),
+  summary: input.summary ? { diffs: input.summary } : undefined,
 });
 
 const assistantMessage = (input: {
@@ -114,7 +114,7 @@ const diff = (
 const project = (input: {
   messages: Message[];
   parts: Part[];
-  revert?: { messageID: string; partID?: string };
+  revert?: Parameters<typeof projectSessionFiles>[0]["revert"];
   active?: boolean;
   dir?: string;
 }) =>
@@ -375,6 +375,27 @@ describe("projectSessionFiles", () => {
               { path: "  " },
               "not-an-object",
             ],
+          },
+        }),
+      ],
+    });
+
+    expect(files).toEqual([{ path: "docs/guide.md", status: "modified" }]);
+  });
+
+  it("does not filter presented files against temporary paths", () => {
+    const files = project({
+      messages: [
+        userMessage({ id: "m1" }),
+        assistantMessage({ id: "m2", parentID: "m1" }),
+      ],
+      parts: [
+        toolPart({
+          id: "p1",
+          messageID: "m2",
+          tool: "present_files",
+          metadata: {
+            files: [{ path: "/repo/docs/guide.md" }],
             temporaryPaths: ["/repo/docs/guide.md"],
           },
         }),
