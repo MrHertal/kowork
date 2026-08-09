@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { m } from "@/paraglide/messages";
 
-import { getToolInfo } from "../tool-info";
+import { getToolTitle } from "../tool-title";
 import { BasicTool } from "./basic-tool";
 
 export interface ToolErrorCardProps {
@@ -31,7 +31,7 @@ export function ToolErrorCard({
     };
   }, []);
 
-  const info = getToolInfo(tool);
+  const title = getToolTitle(tool);
   const cleaned = error.replace(/^Error:\s*/, "").trim();
 
   const tail = cleaned.startsWith(`${tool} `)
@@ -57,7 +57,7 @@ export function ToolErrorCard({
   const trigger = (
     <div className="flex min-w-0 items-center gap-2">
       <BanIcon className="size-4 shrink-0" />
-      <span className="shrink-0 font-medium">{info.title}</span>
+      <span className="shrink-0 font-medium">{title}</span>
       {href && subtitleProp ? (
         <Link
           to={href}
