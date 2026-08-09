@@ -2,7 +2,7 @@
 import type { Event, OpencodeClient } from "@opencode-ai/sdk/v2/client";
 import { render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { toast } from "sonner";
 
 import {
@@ -61,6 +61,13 @@ const binary = () =>
   new File([Uint8Array.of(0, 255, 1, 2)], "blob.bin", {
     type: "application/octet-stream",
   });
+
+class BrokenFileReader {
+  addEventListener(event: string, cb: () => void) {
+    if (event === "error") queueMicrotask(cb);
+  }
+  readAsDataURL() {}
+}
 
 const pasteEvent = (input: {
   items: Array<{ kind: string; getAsFile: () => File | null }>;
@@ -121,6 +128,10 @@ beforeEach(() => {
   };
 });
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe("usePromptAttachments", () => {
   test("adds an image attachment", async () => {
     await setup();
@@ -145,7 +156,22 @@ describe("usePromptAttachments", () => {
 
     expect(added).toBe(false);
     expect(images()).toHaveLength(0);
-    expect(toast.error).toHaveBeenCalledTimes(1);
+    expect(toast.error).toHaveBeenCalledWith("Can't attach file", {
+      description: "This file type isn't supported as an attachment.",
+    });
+  });
+
+  test("warns when the file cannot be read", async () => {
+    vi.stubGlobal("FileReader", BrokenFileReader);
+    await setup();
+
+    const added = await attachments.addAttachment(png());
+
+    expect(added).toBe(false);
+    expect(images()).toHaveLength(0);
+    expect(toast.error).toHaveBeenCalledWith("Can't attach file", {
+      description: "The file couldn't be read.",
+    });
   });
 
   test("warns only when no attachment could be added", async () => {

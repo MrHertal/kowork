@@ -22,6 +22,12 @@ function warn() {
   });
 }
 
+function warnRead() {
+  toast.error(m.toast_prompt_attachFailed_title(), {
+    description: m.toast_prompt_attachFailed_description(),
+  });
+}
+
 export function usePromptAttachments() {
   const { update } = usePrompt();
   const platform = usePlatform();
@@ -35,7 +41,10 @@ export function usePromptAttachments() {
       }
 
       const url = await dataUrl(file, mime);
-      if (!url) return false;
+      if (!url) {
+        if (showToast) warnRead();
+        return false;
+      }
 
       const attachment: ImageAttachmentPart = {
         type: "image",
