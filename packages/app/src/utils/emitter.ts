@@ -29,12 +29,22 @@ export function createEmitter<
   const channels = new Map<string, Set<Callback>>();
   const globals = new Set<Callback>();
 
+  // Diverges from upstream: a throwing listener must not drop the rest of an
+  // SSE frame for every other listener and directory (see global-sdk flush).
+  const safe = (name: string, fn: Callback, arg: unknown) => {
+    try {
+      fn(arg);
+    } catch (error) {
+      console.error("[emitter] listener failed", { name, error });
+    }
+  };
+
   return {
     emit(name, details) {
-      for (const fn of globals) fn({ name, details });
+      for (const fn of globals) safe(name, fn, { name, details });
       const set = channels.get(name);
       if (set) {
-        for (const fn of set) fn(details);
+        for (const fn of set) safe(name, fn, details);
       }
     },
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEmitter, type Emitter } from "./emitter";
 
 type Events = {
@@ -7,6 +7,10 @@ type Events = {
 };
 
 type Listener = Parameters<Emitter<Events>["listen"]>[0];
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("createEmitter", () => {
   it("delivers events to handlers subscribed to the same name", () => {
@@ -136,5 +140,57 @@ describe("createEmitter", () => {
     emitter.emit("saved", "b");
 
     expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("isolates a throwing channel handler from other listeners", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const emitter = createEmitter<Events>();
+    const healthy = vi.fn<(event: Events["saved"]) => void>();
+    const global = vi.fn<Listener>();
+
+    emitter.listen(global);
+    emitter.on("saved", () => {
+      throw new Error("boom");
+    });
+    emitter.on("saved", healthy);
+
+    expect(() => emitter.emit("saved", "a")).not.toThrow();
+    expect(global).toHaveBeenCalledWith({ name: "saved", details: "a" });
+    expect(healthy).toHaveBeenCalledWith("a");
+    expect(console.error).toHaveBeenCalledWith(
+      "[emitter] listener failed",
+      expect.objectContaining({ name: "saved" }),
+    );
+  });
+
+  it("isolates a throwing global listener from channel handlers", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const emitter = createEmitter<Events>();
+    const handler = vi.fn<(event: Events["saved"]) => void>();
+
+    emitter.listen(() => {
+      throw new Error("boom");
+    });
+    emitter.on("saved", handler);
+
+    expect(() => emitter.emit("saved", "a")).not.toThrow();
+    expect(handler).toHaveBeenCalledWith("a");
+  });
+
+  it("keeps a throwing listener subscribed for later events", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const emitter = createEmitter<Events>();
+    let failing = true;
+    const handler = vi.fn<(event: Events["saved"]) => void>(() => {
+      if (failing) throw new Error("boom");
+    });
+
+    emitter.on("saved", handler);
+    emitter.emit("saved", "a");
+    failing = false;
+    emitter.emit("saved", "b");
+
+    expect(handler).toHaveBeenCalledTimes(2);
+    expect(handler).toHaveBeenLastCalledWith("b");
   });
 });
