@@ -12,6 +12,7 @@
     "typecheck": "pnpm --filter @kowork/electron typecheck",
     "lint": "pnpm --filter @kowork/app lint",
     "lint:fix": "pnpm --filter @kowork/app lint:fix",
+    "test": "pnpm -r test",
     "dev": "pnpm --filter @kowork/electron dev",
     "build": "pnpm --filter @kowork/electron build",
     "build:sidecar": "cd opencode/packages/opencode && bun script/build-node.ts"
