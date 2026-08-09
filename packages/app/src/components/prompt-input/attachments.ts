@@ -33,18 +33,12 @@ export function usePromptAttachments() {
   const platform = usePlatform();
 
   const add = useCallback(
-    async (file: File, showToast = true): Promise<boolean> => {
+    async (file: File): Promise<"added" | "unsupported" | "unreadable"> => {
       const mime = await attachmentMime(file);
-      if (!mime) {
-        if (showToast) warn();
-        return false;
-      }
+      if (!mime) return "unsupported";
 
       const url = await dataUrl(file, mime);
-      if (!url) {
-        if (showToast) warnRead();
-        return false;
-      }
+      if (!url) return "unreadable";
 
       const attachment: ImageAttachmentPart = {
         type: "image",
@@ -54,21 +48,33 @@ export function usePromptAttachments() {
         dataUrl: url,
       };
       update((prev) => [...prev, attachment]);
-      return true;
+      return "added";
     },
     [update],
   );
 
-  const addAttachment = useCallback((file: File) => add(file), [add]);
+  const addAttachment = useCallback(
+    async (file: File): Promise<boolean> => {
+      const result = await add(file);
+      if (result === "unsupported") warn();
+      if (result === "unreadable") warnRead();
+      return result === "added";
+    },
+    [add],
+  );
 
   const addAttachments = useCallback(
     async (files: File[], showToast = true): Promise<boolean> => {
       let found = false;
+      let unreadableOnly = files.length > 0;
       for (const file of files) {
-        const ok = await add(file, false);
-        if (ok) found = true;
+        const result = await add(file);
+        if (result === "added") found = true;
+        if (result === "unsupported") unreadableOnly = false;
       }
-      if (!found && files.length > 0 && showToast) warn();
+      if (!found && files.length > 0 && showToast) {
+        (unreadableOnly ? warnRead : warn)();
+      }
       return found;
     },
     [add],

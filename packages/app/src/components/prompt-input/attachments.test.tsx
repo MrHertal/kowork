@@ -174,6 +174,19 @@ describe("usePromptAttachments", () => {
     });
   });
 
+  test("warns with the read message when every file fails to read", async () => {
+    vi.stubGlobal("FileReader", BrokenFileReader);
+    await setup();
+
+    const added = await attachments.addAttachments([png(), png("b.png")]);
+
+    expect(added).toBe(false);
+    expect(toast.error).toHaveBeenCalledTimes(1);
+    expect(toast.error).toHaveBeenCalledWith("Can't attach file", {
+      description: "The file couldn't be read.",
+    });
+  });
+
   test("warns only when no attachment could be added", async () => {
     await setup();
 
