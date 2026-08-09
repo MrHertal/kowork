@@ -488,6 +488,8 @@
   "toast_pinnedSessions_capReached_description": "Sie können bis zu {max} Aufgaben anheften. Heben Sie eine Anheftung auf, um eine weitere hinzuzufügen.",
   "toast_pinnedSessions_capReached_title": "Anheftgrenze erreicht",
   "toast_project_reloadFailed_title": "Ordner „{project}“ konnte nicht neu geladen werden",
+  "toast_prompt_attachFailed_description": "Versuchen Sie es erneut oder wählen Sie eine andere Datei.",
+  "toast_prompt_attachFailed_title": "Datei kann nicht gelesen werden",
   "toast_prompt_attachUnsupported_description": "Dieser Dateityp wird als Anhang nicht unterstützt.",
   "toast_prompt_attachUnsupported_title": "Datei kann nicht angehängt werden",
   "toast_session_listAllFailed_title": "Aufgaben konnten nicht geladen werden",

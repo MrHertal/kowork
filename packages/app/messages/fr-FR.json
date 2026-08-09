@@ -488,6 +488,8 @@
   "toast_pinnedSessions_capReached_description": "Vous pouvez épingler jusqu’à {max} tâches. Désépinglez-en une pour en ajouter une autre.",
   "toast_pinnedSessions_capReached_title": "Limite d’épinglage atteinte",
   "toast_project_reloadFailed_title": "Dossier « {project} » non rechargé",
+  "toast_prompt_attachFailed_description": "Réessayez ou choisissez un autre fichier.",
+  "toast_prompt_attachFailed_title": "Impossible de lire le fichier",
   "toast_prompt_attachUnsupported_description": "Ce type de fichier n’est pas pris en charge comme pièce jointe.",
   "toast_prompt_attachUnsupported_title": "Impossible de joindre le fichier",
   "toast_session_listAllFailed_title": "Impossible de charger les tâches",

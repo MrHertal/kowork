@@ -488,6 +488,8 @@
   "toast_pinnedSessions_capReached_description": "Você pode fixar até {max} tarefas. Desafixe uma para adicionar outra.",
   "toast_pinnedSessions_capReached_title": "Limite de tarefas fixadas atingido",
   "toast_project_reloadFailed_title": "Não foi possível recarregar a pasta “{project}”",
+  "toast_prompt_attachFailed_description": "Tente novamente ou escolha outro arquivo.",
+  "toast_prompt_attachFailed_title": "Não foi possível ler o arquivo",
   "toast_prompt_attachUnsupported_description": "Este tipo de arquivo não pode ser anexado.",
   "toast_prompt_attachUnsupported_title": "Não foi possível anexar o arquivo",
   "toast_session_listAllFailed_title": "Não foi possível carregar as tarefas",
