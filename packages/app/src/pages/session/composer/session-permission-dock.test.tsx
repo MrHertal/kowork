@@ -18,20 +18,18 @@ const request = (input: { permission: string; patterns?: string[] }) =>
 
 type OnDecide = Parameters<typeof SessionPermissionDock>[0]["onDecide"];
 
-function setup(input: {
-  request?: PermissionRequest;
-  responding?: boolean;
-  onDecide?: OnDecide;
-}) {
-  const onDecide = input.onDecide ?? vi.fn<OnDecide>();
-  render(
+function setup(
+  input: { request?: PermissionRequest; responding?: boolean } = {},
+) {
+  const onDecide = vi.fn<OnDecide>();
+  const view = render(
     <SessionPermissionDock
       request={input.request ?? request({ permission: "bash" })}
       responding={input.responding ?? false}
       onDecide={onDecide}
     />,
   );
-  return onDecide;
+  return { onDecide, ...view };
 }
 
 describe("SessionPermissionDock", () => {
@@ -49,13 +47,9 @@ describe("SessionPermissionDock", () => {
   });
 
   test("renders no description for an unknown permission", () => {
-    const { container } = render(
-      <SessionPermissionDock
-        request={request({ permission: "mcp_custom" })}
-        responding={false}
-        onDecide={() => undefined}
-      />,
-    );
+    const { container } = setup({
+      request: request({ permission: "mcp_custom" }),
+    });
 
     expect(screen.getByText("Permission required")).toBeInTheDocument();
     expect(container.querySelector("p")).toBeNull();
@@ -63,7 +57,7 @@ describe("SessionPermissionDock", () => {
 
   test("calls onDecide with reject, always, and once", async () => {
     const user = userEvent.setup();
-    const onDecide = setup({});
+    const { onDecide } = setup();
 
     await user.click(screen.getByRole("button", { name: "Deny" }));
     expect(onDecide).toHaveBeenCalledWith("perm_1", "ses_1", "reject");
@@ -78,7 +72,7 @@ describe("SessionPermissionDock", () => {
 
   test("disables all buttons while responding", async () => {
     const user = userEvent.setup();
-    const onDecide = setup({ responding: true });
+    const { onDecide } = setup({ responding: true });
 
     for (const name of ["Deny", "Always allow", "Allow once"]) {
       expect(screen.getByRole("button", { name })).toBeDisabled();
@@ -90,7 +84,7 @@ describe("SessionPermissionDock", () => {
 
   test("activates buttons from the keyboard in tab order", async () => {
     const user = userEvent.setup();
-    const onDecide = setup({});
+    const { onDecide } = setup();
 
     await user.tab();
     expect(screen.getByRole("button", { name: "Deny" })).toHaveFocus();

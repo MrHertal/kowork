@@ -1,10 +1,10 @@
 // @opencode-ref: opencode/packages/app/src/pages/session/composer/session-composer-state.test.ts
+import { describe, expect, test } from "vitest";
 import type {
   PermissionRequest,
   QuestionRequest,
   Session,
 } from "@opencode-ai/sdk/v2/client";
-import { describe, expect, test } from "vitest";
 import {
   sessionPermissionRequest,
   sessionQuestionRequest,

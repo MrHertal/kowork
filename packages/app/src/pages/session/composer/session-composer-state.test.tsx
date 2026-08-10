@@ -2,6 +2,7 @@
 import type {
   OpencodeClient,
   PermissionRequest,
+  QuestionRequest,
   Session,
 } from "@opencode-ai/sdk/v2/client";
 import { Store } from "@tanstack/react-store";
@@ -31,6 +32,13 @@ const permissionRequest = (id: string, sessionID: string) =>
     metadata: {},
     always: [],
   }) as PermissionRequest;
+
+const questionRequest = (id: string, sessionID: string) =>
+  ({
+    id,
+    sessionID,
+    questions: [],
+  }) as QuestionRequest;
 
 type ChildState = Pick<State, "session" | "permission" | "question">;
 
@@ -163,6 +171,19 @@ describe("useSessionComposerState", () => {
 
     expect(result.current.permissionRequest).toBeUndefined();
     expect(result.current.blocked).toBe(false);
+  });
+
+  test("blocks the composer while a question is pending", () => {
+    seedChild(directory, {
+      session: [session({ id: "ses_1" })],
+      question: { ses_1: [questionRequest("q_1", "ses_1")] },
+    });
+
+    const { result } = setup();
+
+    expect(result.current.questionRequest?.id).toBe("q_1");
+    expect(result.current.permissionRequest).toBeUndefined();
+    expect(result.current.blocked).toBe(true);
   });
 
   test("stops showing the request once it leaves the store", () => {
