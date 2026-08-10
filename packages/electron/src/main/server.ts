@@ -11,7 +11,7 @@ import { getStore } from "./store";
 
 export type WslConfig = { enabled: boolean };
 
-export type HealthCheck = { wait: Promise<void> };
+export type HealthCheck = { wait: Promise<void>; cancel: () => void };
 
 type SidecarMessage =
   | { type: "ready" }
@@ -23,6 +23,7 @@ export type SidecarListener = { stop: () => Promise<void> };
 const SIDECAR_SERVICE_NAME = "kowork server";
 const SIDECAR_START_STALL_TIMEOUT = 60_000;
 const SIDECAR_STOP_TIMEOUT = 6_000;
+const SIDECAR_KILL_TIMEOUT = 2_000;
 const ISOLATED_ENV_KEYS = new Set([
   "OPENCODE_CONFIG",
   "OPENCODE_CONFIG_DIR",
@@ -181,24 +182,32 @@ export async function spawnLocalServer(
       port,
       password,
     });
-  }).catch((error) => {
-    if (!exited) child.kill();
+  }).catch(async (error) => {
+    if (!exited) {
+      child.kill();
+      // Wait for the killed sidecar to release the port.
+      await Promise.race([exit.promise, delay(SIDECAR_KILL_TIMEOUT)]);
+    }
     throw error;
   });
 
+  const healthAbort = new AbortController();
   const wait = (async () => {
     const url = `http://${hostname}:${port}`;
     let healthy = false;
     const gone = exit.promise.then((code) => {
-      if (healthy) return;
+      if (healthy || healthAbort.signal.aborted) return;
+      // Stop the poll loop before rejecting.
+      healthAbort.abort();
       throw new Error(
         `Sidecar exited before health check passed with code ${code}`,
       );
     });
 
     const ready = async () => {
-      while (true) {
+      while (!healthAbort.signal.aborted) {
         await new Promise((resolve) => setTimeout(resolve, 100));
+        if (healthAbort.signal.aborted) return;
         if (await checkHealth(url, password)) {
           healthy = true;
           return;
@@ -215,6 +224,7 @@ export async function spawnLocalServer(
     listener: {
       stop: () => {
         if (stopping) return stopping;
+        healthAbort.abort();
         if (exited) return Promise.resolve();
         child.postMessage({ type: "stop" });
         stopping = Promise.race([
@@ -226,7 +236,7 @@ export async function spawnLocalServer(
         return stopping;
       },
     } satisfies SidecarListener,
-    health: { wait },
+    health: { wait, cancel: () => healthAbort.abort() },
   };
 }
 

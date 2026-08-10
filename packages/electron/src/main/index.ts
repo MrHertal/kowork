@@ -244,6 +244,7 @@ async function initialize() {
     ]).catch((error) => {
       logger.error("sidecar health check failed", error);
     });
+    health.cancel();
 
     logger.log("loading task finished");
   })();
