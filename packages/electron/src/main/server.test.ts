@@ -3,6 +3,22 @@ import { delimiter } from "node:path";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { RuntimePack } from "./runtime-pack";
+import {
+  checkHealth,
+  getDefaultServerUrl,
+  getWslConfig,
+  preferAppEnv,
+  setDefaultServerUrl,
+  setWslConfig,
+  spawnLocalServer,
+} from "./server";
+
+type ForkOptions = {
+  cwd: string;
+  env: Record<string, string>;
+  serviceName: string;
+  stdio: string;
+};
 
 const doubles = vi.hoisted(() => {
   const appHandlers = new Map<string, (...args: unknown[]) => void>();
@@ -19,7 +35,9 @@ const doubles = vi.hoisted(() => {
         if (appHandlers.get(event) === handler) appHandlers.delete(event);
       }),
     },
-    fork: vi.fn(),
+    fork: vi.fn<
+      (path: string, args: string[], options: ForkOptions) => FakeChild
+    >(),
     resolveRuntimePack: vi.fn<() => RuntimePack | null>(() => null),
     getUserShell: vi.fn<() => string>(() => "/bin/zsh"),
     loadShellEnv: vi.fn<(shell: string) => Record<string, string>>(() => ({})),
@@ -94,18 +112,7 @@ const pack: RuntimePack = {
   nodeModules: "/pack/node_modules",
 };
 
-const fetchMock =
-  vi.fn<(input: unknown, init?: RequestInit) => Promise<Response>>();
-
-import {
-  checkHealth,
-  getDefaultServerUrl,
-  getWslConfig,
-  preferAppEnv,
-  setDefaultServerUrl,
-  setWslConfig,
-  spawnLocalServer,
-} from "./server";
+const fetchMock = vi.fn<(input: URL, init: RequestInit) => Promise<Response>>();
 
 let child: FakeChild;
 
@@ -163,11 +170,7 @@ describe("spawnLocalServer", () => {
     await spawned;
 
     expect(doubles.fork).toHaveBeenCalledTimes(1);
-    const [entry, args, opts] = doubles.fork.mock.calls[0] as [
-      string,
-      string[],
-      { env: Record<string, string>; serviceName: string; stdio: string },
-    ];
+    const [entry, args, opts] = doubles.fork.mock.calls[0]!;
     expect(entry).toMatch(/sidecar\.js$/);
     expect(args).toEqual([]);
     expect(opts.serviceName).toBe("kowork server");
@@ -196,11 +199,7 @@ describe("spawnLocalServer", () => {
     child.emit("message", { type: "ready" });
     await spawned;
 
-    const [, , opts] = doubles.fork.mock.calls[0] as [
-      string,
-      string[],
-      { env: Record<string, string> },
-    ];
+    const [, , opts] = doubles.fork.mock.calls[0]!;
     expect(opts.env.KOWORK_PYTHON).toBe("/pack/python/bin/python3");
     expect(opts.env.KOWORK_ELECTRON_BIN).toBe(process.execPath);
     expect(opts.env.PYTHONNOUSERSITE).toBe("1");
@@ -222,11 +221,7 @@ describe("spawnLocalServer", () => {
     child.emit("message", { type: "ready" });
     await spawned;
 
-    const [, , opts] = doubles.fork.mock.calls[0] as [
-      string,
-      string[],
-      { env: Record<string, string> },
-    ];
+    const [, , opts] = doubles.fork.mock.calls[0]!;
     expect(opts.env.Path).toBe(
       ["/pack/bin", "/pack/python/bin", "/odd"].join(delimiter),
     );
@@ -326,7 +321,7 @@ describe("spawnLocalServer", () => {
 
     await health.wait;
 
-    const [input, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+    const [input, init] = fetchMock.mock.calls[0]!;
     expect(input.toString()).toBe("http://127.0.0.1:4096/global/health");
     expect((init.headers as Headers).get("authorization")).toBe(
       `Basic ${Buffer.from("opencode:pw").toString("base64")}`,
@@ -433,7 +428,7 @@ describe("checkHealth", () => {
   test("omits the authorization header without a password", async () => {
     await checkHealth("http://127.0.0.1:4096");
 
-    const [, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+    const [, init] = fetchMock.mock.calls[0]!;
     expect((init.headers as Headers).get("authorization")).toBeNull();
   });
 });

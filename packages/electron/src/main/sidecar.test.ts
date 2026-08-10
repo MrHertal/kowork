@@ -1,5 +1,13 @@
 import { EventEmitter } from "node:events";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+  type Mock,
+} from "vitest";
 
 class FakePort extends EventEmitter {
   posted: unknown[] = [];
@@ -8,7 +16,7 @@ class FakePort extends EventEmitter {
   }
 }
 
-type Listener = { stop: ReturnType<typeof vi.fn<() => Promise<void>>> };
+type Listener = { stop: Mock<() => Promise<void>> };
 
 const listen = vi.fn<(input: unknown) => Promise<Listener>>();
 
@@ -32,6 +40,7 @@ const ENV_KEYS = [
 ];
 
 let port: FakePort;
+let listener: Listener;
 let savedEnv: Record<string, string | undefined>;
 
 const importSidecar = async () => {
@@ -53,11 +62,8 @@ const flushImmediate = () =>
 
 beforeEach(() => {
   vi.clearAllMocks();
-  listen.mockImplementation(() =>
-    Promise.resolve({
-      stop: vi.fn<() => Promise<void>>(() => Promise.resolve()),
-    }),
-  );
+  listener = { stop: vi.fn<() => Promise<void>>(() => Promise.resolve()) };
+  listen.mockImplementation(() => Promise.resolve(listener));
   port = new FakePort();
   Object.defineProperty(process, "parentPort", {
     value: port,
@@ -66,18 +72,18 @@ beforeEach(() => {
   });
   savedEnv = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
   for (const key of ENV_KEYS) delete process.env[key];
+});
 
-  return () => {
-    Object.defineProperty(process, "parentPort", {
-      value: undefined,
-      configurable: true,
-      writable: true,
-    });
-    for (const key of ENV_KEYS) {
-      if (savedEnv[key] === undefined) delete process.env[key];
-      else process.env[key] = savedEnv[key];
-    }
-  };
+afterEach(() => {
+  Object.defineProperty(process, "parentPort", {
+    value: undefined,
+    configurable: true,
+    writable: true,
+  });
+  for (const key of ENV_KEYS) {
+    if (savedEnv[key] === undefined) delete process.env[key];
+    else process.env[key] = savedEnv[key];
+  }
 });
 
 describe("sidecar", () => {
@@ -169,6 +175,7 @@ describe("sidecar", () => {
     await vi.waitFor(() =>
       expect(port.posted).toContainEqual({ type: "stopped" }),
     );
+    expect(listener.stop).toHaveBeenCalledTimes(1);
     await flushImmediate();
     expect(exit).toHaveBeenCalledWith(0);
   });
@@ -181,6 +188,8 @@ describe("sidecar", () => {
     await vi.waitFor(() =>
       expect(port.posted).toContainEqual({ type: "stopped" }),
     );
+    expect(listen).not.toHaveBeenCalled();
+    expect(listener.stop).not.toHaveBeenCalled();
     await flushImmediate();
     expect(exit).toHaveBeenCalledWith(0);
   });
