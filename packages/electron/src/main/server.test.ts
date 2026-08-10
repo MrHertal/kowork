@@ -328,18 +328,81 @@ describe("spawnLocalServer", () => {
     );
   });
 
-  test("health.wait rejects when the sidecar exits before becoming healthy", async () => {
-    fetchMock.mockImplementation(() =>
-      Promise.resolve(new Response(null, { status: 500 })),
-    );
-    const { health } = await spawnReady();
+  test("health.wait rejects on exit before healthy and stops polling", async () => {
+    vi.useFakeTimers();
+    try {
+      fetchMock.mockImplementation(() =>
+        Promise.resolve(new Response(null, { status: 500 })),
+      );
+      const promise = spawnLocalServer("127.0.0.1", 4096, "pw", spawnOptions());
+      child.emit("message", { type: "ready" });
+      const { health } = await promise;
 
-    const assertion = expect(health.wait).rejects.toThrow(
-      "Sidecar exited before health check passed with code 1",
-    );
-    child.emit("exit", 1);
+      await vi.advanceTimersByTimeAsync(100);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
 
-    await assertion;
+      const assertion = expect(health.wait).rejects.toThrow(
+        "Sidecar exited before health check passed with code 1",
+      );
+      child.emit("exit", 1);
+      await assertion;
+
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  test("health.cancel stops polling and resolves wait", async () => {
+    vi.useFakeTimers();
+    try {
+      fetchMock.mockImplementation(() =>
+        Promise.resolve(new Response(null, { status: 500 })),
+      );
+      const promise = spawnLocalServer("127.0.0.1", 4096, "pw", spawnOptions());
+      child.emit("message", { type: "ready" });
+      const { health } = await promise;
+
+      await vi.advanceTimersByTimeAsync(100);
+      await vi.advanceTimersByTimeAsync(300);
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+
+      health.cancel();
+      await vi.advanceTimersByTimeAsync(100);
+      await expect(health.wait).resolves.toBeUndefined();
+
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  test("stop cancels the health poller", async () => {
+    vi.useFakeTimers();
+    try {
+      fetchMock.mockImplementation(() =>
+        Promise.resolve(new Response(null, { status: 500 })),
+      );
+      const promise = spawnLocalServer("127.0.0.1", 4096, "pw", spawnOptions());
+      child.emit("message", { type: "ready" });
+      const { listener, health } = await promise;
+
+      await vi.advanceTimersByTimeAsync(100);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      const stopped = listener.stop();
+      child.emit("exit", 0);
+      await stopped;
+
+      await expect(health.wait).resolves.toBeUndefined();
+      await vi.advanceTimersByTimeAsync(1_000);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(child.kill).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   test("stop posts the stop command and resolves on exit", async () => {
