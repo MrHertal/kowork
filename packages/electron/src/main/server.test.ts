@@ -272,17 +272,50 @@ describe("spawnLocalServer", () => {
     await health.wait;
   });
 
-  test("rejects when the sidecar posts an error and kills it", async () => {
+  test("rejects only after the killed sidecar exits", async () => {
     const promise = spawnLocalServer("127.0.0.1", 4096, "pw", spawnOptions());
+    let settled = false;
+    void promise.then(
+      () => {
+        settled = true;
+      },
+      () => {
+        settled = true;
+      },
+    );
     const assertion = expect(promise).rejects.toThrow("listen failed");
 
     child.emit("message", {
       type: "error",
       error: { message: "listen failed" },
     });
+    await vi.waitFor(() => expect(child.kill).toHaveBeenCalledTimes(1));
 
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(settled).toBe(false);
+
+    child.emit("exit", 1);
     await assertion;
-    expect(child.kill).toHaveBeenCalledTimes(1);
+    expect(settled).toBe(true);
+  });
+
+  test("gives up waiting when the killed sidecar never exits", async () => {
+    vi.useFakeTimers();
+    try {
+      const promise = spawnLocalServer("127.0.0.1", 4096, "pw", spawnOptions());
+      const assertion = expect(promise).rejects.toThrow("listen failed");
+
+      child.emit("message", {
+        type: "error",
+        error: { message: "listen failed" },
+      });
+      await vi.advanceTimersByTimeAsync(2_000);
+
+      await assertion;
+      expect(child.kill).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   test("rejects when the sidecar exits before ready without killing it", async () => {
@@ -308,9 +341,10 @@ describe("spawnLocalServer", () => {
       );
 
       await vi.advanceTimersByTimeAsync(60_000);
-
-      await assertion;
       expect(child.kill).toHaveBeenCalledTimes(1);
+
+      child.emit("exit", 1);
+      await assertion;
     } finally {
       vi.useRealTimers();
     }

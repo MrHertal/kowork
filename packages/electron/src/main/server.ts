@@ -23,6 +23,7 @@ export type SidecarListener = { stop: () => Promise<void> };
 const SIDECAR_SERVICE_NAME = "kowork server";
 const SIDECAR_START_STALL_TIMEOUT = 60_000;
 const SIDECAR_STOP_TIMEOUT = 6_000;
+const SIDECAR_KILL_TIMEOUT = 2_000;
 const ISOLATED_ENV_KEYS = new Set([
   "OPENCODE_CONFIG",
   "OPENCODE_CONFIG_DIR",
@@ -181,8 +182,12 @@ export async function spawnLocalServer(
       port,
       password,
     });
-  }).catch((error) => {
-    if (!exited) child.kill();
+  }).catch(async (error) => {
+    if (!exited) {
+      child.kill();
+      // A dying sidecar can briefly hold the port; wait for it before failing.
+      await Promise.race([exit.promise, delay(SIDECAR_KILL_TIMEOUT)]);
+    }
     throw error;
   });
 
