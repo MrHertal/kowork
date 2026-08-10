@@ -397,6 +397,7 @@ describe("RecentSessionsProvider", () => {
     );
 
     expect(ids()).toEqual([]);
+    expect(queryClient.getQueryData(["session", "ses_9"])).toBeUndefined();
   });
 
   test("ignores global events and events without info", async () => {

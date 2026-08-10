@@ -130,6 +130,9 @@ function renderProvider() {
 
 const ids = () => search._store.state.results.map((s) => s.id);
 
+// Must exceed the provider's 250ms debounce, or a wrongly scheduled search would not have fired yet.
+const PAST_DEBOUNCE_MS = 300;
+
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("matchesQuery", () => {
@@ -198,12 +201,12 @@ describe("SearchSessionsProvider", () => {
     await waitFor(() => expect(list()).toHaveBeenCalledTimes(1));
 
     search.setQuery("alpha  ");
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, PAST_DEBOUNCE_MS));
 
     expect(list()).toHaveBeenCalledTimes(1);
   });
 
-  test("clears results when the query is emptied", async () => {
+  test("clears results and cancels the pending search when the query is emptied", async () => {
     list().mockImplementation(() =>
       Promise.resolve(
         result([session({ id: "ses_1", title: "alpha one", updated: 100 })]),
@@ -213,27 +216,29 @@ describe("SearchSessionsProvider", () => {
     search.setQuery("alpha");
     await waitFor(() => expect(ids()).toEqual(["ses_1"]));
 
+    search.setQuery("beta");
     search.setQuery("");
 
     expect(ids()).toEqual([]);
     expect(search._store.state.loading).toBe(false);
+    await new Promise((resolve) => setTimeout(resolve, PAST_DEBOUNCE_MS));
     expect(list()).toHaveBeenCalledTimes(1);
   });
 
   test("aborts an in-flight search when the query changes", async () => {
     let firstSignal: AbortSignal | undefined;
     let resolveSecond: (value: ListResult) => void = () => undefined;
-    let calls = 0;
-    list().mockImplementation((input, options) => {
-      calls++;
-      if (calls === 1) {
+    list()
+      .mockImplementationOnce((input, options) => {
         firstSignal = options?.signal;
         return new Promise<ListResult>(() => {});
-      }
-      return new Promise<ListResult>((resolve) => {
-        resolveSecond = resolve;
-      });
-    });
+      })
+      .mockImplementation(
+        () =>
+          new Promise<ListResult>((resolve) => {
+            resolveSecond = resolve;
+          }),
+      );
     renderProvider();
 
     search.setQuery("alpha");

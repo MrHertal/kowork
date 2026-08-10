@@ -239,6 +239,7 @@ describe("PinnedSessionsProvider", () => {
     pinned.pin(session({ id: "ses_1", parentID: "ses_0" }));
 
     expect(pinned._store.state.ids).toEqual([]);
+    expect(pinned._store.state.sessions).toEqual({});
   });
 
   test("pin dedupes already-pinned sessions", async () => {
@@ -262,7 +263,7 @@ describe("PinnedSessionsProvider", () => {
     expect(pinned._store.state.sessions.ses_overflow).toBeUndefined();
     expect(toast.error).toHaveBeenCalledTimes(1);
     expect(toast.error).toHaveBeenCalledWith("Pin limit reached", {
-      description: "You can pin up to 20 tasks. Unpin one to add another.",
+      description: `You can pin up to ${MAX_PINNED_SESSIONS} tasks. Unpin one to add another.`,
     });
   });
 
