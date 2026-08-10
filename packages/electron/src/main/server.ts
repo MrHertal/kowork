@@ -185,7 +185,7 @@ export async function spawnLocalServer(
   }).catch(async (error) => {
     if (!exited) {
       child.kill();
-      // A dying sidecar can briefly hold the port; wait for it before failing.
+      // Wait for the killed sidecar to release the port.
       await Promise.race([exit.promise, delay(SIDECAR_KILL_TIMEOUT)]);
     }
     throw error;
@@ -197,7 +197,7 @@ export async function spawnLocalServer(
     let healthy = false;
     const gone = exit.promise.then((code) => {
       if (healthy || healthAbort.signal.aborted) return;
-      // The process is gone; stop the orphaned poll loop before rejecting.
+      // Stop the poll loop before rejecting.
       healthAbort.abort();
       throw new Error(
         `Sidecar exited before health check passed with code ${code}`,

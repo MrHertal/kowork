@@ -25,8 +25,7 @@ vi.mock("virtual:opencode-server", () => ({
   Server: { listen: (input: unknown) => listen(input) },
 }));
 
-// process.exit stays stubbed for the whole file: stop/start schedule it via
-// setImmediate, and restoring mid-file could fire the real exit in the worker.
+// Never restored: stop/start schedule process.exit via setImmediate.
 const exit = vi
   .spyOn(process, "exit")
   .mockImplementation((() => undefined) as never);
