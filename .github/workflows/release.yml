@@ -94,10 +94,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - host: macos-14
+          - host: macos-15
             arch: arm64
-          - host: macos-13
-            arch: x64
     runs-on: ${{ matrix.host }}
     steps:
       - uses: actions/checkout@v7
