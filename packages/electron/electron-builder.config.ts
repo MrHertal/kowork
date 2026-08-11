@@ -166,9 +166,7 @@ const channel = (() => {
   return "dev";
 })();
 
-// Signing is opt-in via credentials: without them electron-builder only warns,
-// but notarize/dmg signing and the afterSign verification must be off for
-// unsigned builds to succeed at all.
+// Unsigned builds must skip notarization, dmg signing, and signature checks.
 const canSignMac = Boolean(process.env.CSC_LINK);
 const canNotarizeMac = Boolean(
   process.env.APPLE_API_KEY || process.env.APPLE_ID,

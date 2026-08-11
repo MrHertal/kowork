@@ -130,11 +130,9 @@ Before typechecking the app, regenerate affected artifacts:
 
 ## Releasing
 
-`check.yml` runs on PRs and pushes to `main`: typecheck, lint, tests.
+`check.yml` runs typecheck, lint, and tests on PRs and `main`. `release.yml` is manual (Actions → release → Run workflow, semver input): it bumps `packages/electron/package.json`, tags `v<version>`, builds macOS arm64 + x64, and uploads a **draft** GitHub Release to publish manually.
 
-`release.yml` is manual (Actions → release → Run workflow) and takes a semver version. It bumps `packages/electron/package.json`, tags `v<version>`, builds the macOS installers (`macos-14` for arm64, `macos-13` for x64), and uploads them to a **draft** GitHub Release to review and publish manually.
-
-Builds are unsigned for now. In `electron-builder.config.ts`, macOS signing, notarization, and the runtime-pack signature check stay off until `CSC_LINK`/`CSC_KEY_PASSWORD` (signing) and `APPLE_API_KEY`/`APPLE_ID` (notarization) secrets exist. Windows signing calls `script/sign-windows.ps1` (not yet implemented) and only runs under GitHub Actions.
+Builds are unsigned until `CSC_LINK`/`CSC_KEY_PASSWORD` and `APPLE_API_KEY`/`APPLE_ID` secrets exist; `electron-builder.config.ts` enables signing and notarization automatically once they do.
 
 Run repository-wide hygiene commands only when explicitly requested:
 
