@@ -100,9 +100,6 @@ jobs:
 
       - name: Build
         run: pnpm --filter @kowork/electron build
-        env:
-          OPENCODE_VERSION: ${{ needs.prepare.outputs.version }}
-          OPENCODE_CHANNEL: latest
 
       - name: Runtime pack
         run: pnpm --filter @kowork/electron run ensure:runtime
