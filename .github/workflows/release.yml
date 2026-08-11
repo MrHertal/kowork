@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: release
@@ -28,15 +29,17 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
 
       - id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           VERSION="${{ inputs.version }}"
@@ -49,20 +52,41 @@ jobs:
             echo "::error::tag $TAG already exists"
             exit 1
           fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::a release for $TAG already exists"
+            exit 1
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Bump version, commit, tag, push
+      # main requires PRs (repository ruleset), so the release is tag-only;
+      # build jobs apply the version to their own checkout.
+      - name: Tag the release
         run: |
           set -euo pipefail
-          npm pkg set version="${{ steps.version.outputs.version }}" --prefix packages/electron
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add packages/electron/package.json
-          git commit -m "release ${{ steps.version.outputs.tag }}"
           git tag -a "${{ steps.version.outputs.tag }}" -m "${{ steps.version.outputs.tag }}"
-          git push origin "HEAD:${{ github.ref_name }}"
-          git push origin "${{ steps.version.outputs.tag }}"
+          git push origin "refs/tags/${{ steps.version.outputs.tag }}"
+
+      - name: Open version bump PR
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          BRANCH="release-v$VERSION"
+          npm pkg set version="$VERSION" --prefix packages/electron
+          git checkout -b "$BRANCH"
+          git add packages/electron/package.json
+          git commit -m "release v$VERSION"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "release v$VERSION" \
+            --body "Bumps \`packages/electron/package.json\` to $VERSION, matching the v$VERSION tag." \
+            --base main \
+            --head "$BRANCH"
 
   build:
     needs: prepare
@@ -76,7 +100,7 @@ jobs:
             arch: x64
     runs-on: ${{ matrix.host }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
           submodules: recursive
@@ -85,12 +109,18 @@ jobs:
         with:
           bun-version-file: opencode/package.json
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/setup@v2
+        with:
+          install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
+
+      # electron-builder reads the version from package.json
+      - name: Set version
+        run: npm pkg set version="${{ needs.prepare.outputs.version }}" --prefix packages/electron
 
       - name: Install opencode sidecar dependencies
         working-directory: opencode
@@ -117,7 +147,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: kowork-electron-mac-${{ matrix.arch }}
           path: |

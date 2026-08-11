@@ -130,7 +130,7 @@ Before typechecking the app, regenerate affected artifacts:
 
 ## Releasing
 
-`check.yml` runs typecheck, lint, and tests on PRs and `main`. `release.yml` is manual (Actions → release → Run workflow, semver input): it bumps `packages/electron/package.json`, tags `v<version>`, builds macOS arm64 + x64, and uploads a **draft** GitHub Release to publish manually.
+`check.yml` runs typecheck, lint, and tests on PRs and `main`. `release.yml` is manual (Actions → release → Run workflow, semver input): it tags the current commit `v<version>`, builds macOS arm64 + x64, and uploads a **draft** GitHub Release to publish manually. The tag points at an existing commit because `main` requires PRs; the version is applied at build time, then a `release v<version>` PR bumping `packages/electron/package.json` opens to merge afterwards.
 
 Builds are unsigned until `CSC_LINK`/`CSC_KEY_PASSWORD` and `APPLE_API_KEY`/`APPLE_ID` secrets exist; `electron-builder.config.ts` enables signing and notarization automatically once they do.
 
