@@ -130,7 +130,7 @@ Before typechecking the app, regenerate affected artifacts:
 
 ## Releasing
 
-`check.yml` runs typecheck, lint, and tests on PRs and `main`. `release.yml` is manual (Actions → release → Run workflow, semver input): it tags the current commit `v<version>`, builds the macOS arm64 installer on `macos-15`, and uploads a **draft** GitHub Release to publish manually. The tag points at an existing commit because `main` requires PRs; the version is applied at build time, then a `release v<version>` PR bumping `packages/electron/package.json` opens to merge afterwards. No x64 build: free Intel runners are retired (`macos-15-intel` is paid); the runtime pack builds host-arch only, so x64 needs that runner or a cross-build mode in `build-runtime.ts`.
+`check.yml` runs typecheck, lint, and tests on PRs and `main`. `release.yml` is manual (Actions → release → Run workflow, semver input): it tags the current commit `v<version>`, builds the macOS arm64 installer on `macos-15`, and uploads a **draft** GitHub Release to publish manually. The tag points at an existing commit because `main` requires PRs; the version is applied at build time, then a `release v<version>` PR bumping `packages/electron/package.json` opens to merge afterwards. No x64 build: free Intel runners are retired (`macos-15-intel` is paid); the runtime pack builds host-arch only, so x64 needs that runner or a cross-build mode in `build-runtime.ts`. electron-builder may create a duplicate draft release carrying only `*.blockmap` files — fold its assets into the main draft and delete the empty one.
 
 Builds are unsigned until `CSC_LINK`/`CSC_KEY_PASSWORD` and `APPLE_API_KEY`/`APPLE_ID` secrets exist; `electron-builder.config.ts` enables signing and notarization automatically once they do.
 
