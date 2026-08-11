@@ -27,6 +27,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Generate i18n artifacts
+        run: pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
+
       - run: pnpm typecheck
 
       - run: pnpm lint
