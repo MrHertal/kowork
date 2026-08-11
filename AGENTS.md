@@ -17,6 +17,7 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 | `packages/electron/` | Electron main process, preload, and desktop renderer entry point                           |
 | `packages/web/`      | Placeholder for the future static landing page and documentation site; not yet implemented |
 | `opencode/`          | OpenCode fork submodule used for the sidecar and as a reference implementation             |
+| `.github/workflows/` | CI: PR checks (`check.yml`) and the manual release pipeline (`release.yml`)                |
 
 `packages/web/` is not the browser build of `packages/app/`.
 
@@ -126,6 +127,14 @@ Before typechecking the app, regenerate affected artifacts:
 
 - After route changes: `pnpm --filter @kowork/app exec npx @tanstack/router-cli generate`
 - After translation changes: `pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang`
+
+## Releasing
+
+`check.yml` runs on PRs and pushes to `main`: typecheck, lint, tests.
+
+`release.yml` is manual (Actions → release → Run workflow) and takes a semver version. It bumps `packages/electron/package.json`, tags `v<version>`, builds the macOS installers (`macos-14` for arm64, `macos-13` for x64), and uploads them to a **draft** GitHub Release to review and publish manually.
+
+Builds are unsigned for now. In `electron-builder.config.ts`, macOS signing, notarization, and the runtime-pack signature check stay off until `CSC_LINK`/`CSC_KEY_PASSWORD` (signing) and `APPLE_API_KEY`/`APPLE_ID` (notarization) secrets exist. Windows signing calls `script/sign-windows.ps1` (not yet implemented) and only runs under GitHub Actions.
 
 Run repository-wide hygiene commands only when explicitly requested:
 

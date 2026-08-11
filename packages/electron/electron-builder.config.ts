@@ -166,10 +166,18 @@ const channel = (() => {
   return "dev";
 })();
 
+// Signing is opt-in via credentials: without them electron-builder only warns,
+// but notarize/dmg signing and the afterSign verification must be off for
+// unsigned builds to succeed at all.
+const canSignMac = Boolean(process.env.CSC_LINK);
+const canNotarizeMac = Boolean(
+  process.env.APPLE_API_KEY || process.env.APPLE_ID,
+);
+
 const getBase = (): Configuration => ({
   artifactName: "kowork-electron-${os}-${arch}.${ext}",
   beforePack: ensureRuntimePackPresent,
-  afterSign: verifyMacRuntimeSigning,
+  afterSign: canSignMac ? verifyMacRuntimeSigning : undefined,
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -212,11 +220,11 @@ const getBase = (): Configuration => ({
     gatekeeperAssess: false,
     entitlements: "resources/entitlements.plist",
     entitlementsInherit: "resources/entitlements.plist",
-    notarize: true,
+    notarize: canNotarizeMac,
     target: ["dmg", "zip"],
   },
   dmg: {
-    sign: true,
+    sign: canSignMac,
   },
   protocols: {
     name: "Kowork",
@@ -269,6 +277,13 @@ function getConfig() {
         appId: "app.kowork.desktop",
         productName: "Kowork",
         protocols: { name: "Kowork", schemes: ["kowork"] },
+        publish: {
+          provider: "github",
+          owner: "MrHertal",
+          repo: "kowork",
+          channel: "latest",
+          releaseType: "draft",
+        },
         rpm: { packageName: "kowork" },
       };
     }

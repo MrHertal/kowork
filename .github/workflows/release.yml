@@ -1,0 +1,123 @@
+name: release
+
+run-name: "release v${{ inputs.version }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (semver, e.g. 0.2.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+
+env:
+  ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+  HUSKY: "0"
+  KOWORK_CHANNEL: prod
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - id: version
+        run: |
+          set -euo pipefail
+          VERSION="${{ inputs.version }}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::invalid semver: $VERSION"
+            exit 1
+          fi
+          TAG="v$VERSION"
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "::error::tag $TAG already exists"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Bump version, commit, tag, push
+        run: |
+          set -euo pipefail
+          npm pkg set version="${{ steps.version.outputs.version }}" --prefix packages/electron
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/electron/package.json
+          git commit -m "release ${{ steps.version.outputs.tag }}"
+          git tag -a "${{ steps.version.outputs.tag }}" -m "${{ steps.version.outputs.tag }}"
+          git push origin "HEAD:${{ github.ref_name }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: macos-14
+            arch: arm64
+          - host: macos-13
+            arch: x64
+    runs-on: ${{ matrix.host }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+          submodules: recursive
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: opencode/package.json
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install opencode sidecar dependencies
+        working-directory: opencode
+        run: bun install --frozen-lockfile
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm --filter @kowork/electron build
+        env:
+          OPENCODE_VERSION: ${{ needs.prepare.outputs.version }}
+          OPENCODE_CHANNEL: latest
+
+      - name: Runtime pack
+        run: pnpm --filter @kowork/electron run ensure:runtime
+
+      - name: Package and publish
+        working-directory: packages/electron
+        timeout-minutes: 60
+        run: pnpm exec electron-builder --mac --${{ matrix.arch }} --publish always --config electron-builder.config.ts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kowork-electron-mac-${{ matrix.arch }}
+          path: |
+            packages/electron/dist/*.dmg
+            packages/electron/dist/*.zip
+            packages/electron/dist/latest-mac.yml
