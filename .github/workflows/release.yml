@@ -97,12 +97,18 @@ jobs:
         run: bun install --frozen-lockfile
 
       - run: pnpm install --frozen-lockfile
+        env:
+          # smoke:runtime needs the real Electron binary for the node shim
+          ELECTRON_SKIP_BINARY_DOWNLOAD: ""
 
       - name: Build
         run: pnpm --filter @kowork/electron build
 
       - name: Runtime pack
         run: pnpm --filter @kowork/electron run ensure:runtime
+
+      - name: Smoke-test runtime pack
+        run: pnpm --filter @kowork/electron run smoke:runtime
 
       - name: Package and publish
         working-directory: packages/electron
