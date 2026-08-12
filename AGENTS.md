@@ -134,6 +134,8 @@ Before typechecking the app, regenerate affected artifacts:
 
 Builds are unsigned until `CSC_LINK`/`CSC_KEY_PASSWORD` and `APPLE_API_KEY`/`APPLE_ID` secrets exist; `electron-builder.config.ts` enables signing and notarization automatically once they do.
 
+macOS icons: `mac.icon` points at `resources/icons/icon.icon` (Icon Composer source under `icons/<channel>/`, copied by `copy-icons.ts`), compiled via `actool` — macOS packaging requires Xcode 26+ (`release.yml` selects it). `setDockIcon()` only affects dev; packaged builds use the bundle icon.
+
 Run repository-wide hygiene commands only when explicitly requested:
 
 - Format the tree: `pnpm prettier . --write`

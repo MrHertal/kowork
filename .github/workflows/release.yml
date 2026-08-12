@@ -103,6 +103,16 @@ jobs:
           ref: ${{ needs.prepare.outputs.tag }}
           submodules: recursive
 
+      # electron-builder compiles the app icon via actool, which requires Xcode 26+.
+      - name: Select Xcode 26
+        run: |
+          set -euo pipefail
+          XCODE="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -t. -k2,2nr | head -1 || true)"
+          if [ -n "$XCODE" ]; then
+            sudo xcode-select -s "$XCODE/Contents/Developer"
+          fi
+          xcodebuild -version
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: opencode/package.json
