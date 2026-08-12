@@ -213,7 +213,8 @@ const getBase = (): Configuration => ({
   ],
   mac: {
     category: "public.app-category.developer-tools",
-    icon: `resources/icons/icon.icns`,
+    // Icon Composer source; actool compilation requires Xcode 26+ at build time.
+    icon: `resources/icons/icon.icon`,
     hardenedRuntime: true,
     gatekeeperAssess: false,
     entitlements: "resources/entitlements.plist",
@@ -222,6 +223,8 @@ const getBase = (): Configuration => ({
     target: ["dmg", "zip"],
   },
   dmg: {
+    // actool's fallback icns tops out at 256px; use the full handcrafted icns.
+    icon: `resources/icons/icon.icns`,
     sign: canSignMac,
   },
   protocols: {
