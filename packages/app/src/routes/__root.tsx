@@ -31,6 +31,7 @@ import { SidebarRightProvider } from "@/components/sidebar-right/sidebar-right-c
 import { SidebarRightTrigger } from "@/components/sidebar-right/sidebar-right-trigger";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useMcpBrowserFailedToast } from "@/hooks/use-mcp-browser-failed-toast";
+import { UpdateCheck } from "@/hooks/use-update-check";
 
 type RouterContext = {
   queryClient: QueryClient;
@@ -99,14 +100,15 @@ function RootRoute() {
       disableHealthCheck={disableHealthCheck}
       servers={servers}
     >
-      <ConnectionGate disableHealthCheck={disableHealthCheck}>
-        <ServerKey>
-          <GlobalSDKProvider>
-            <GlobalSyncProvider>
-              <RecentSessionsProvider>
-                <PinnedSessionsProvider>
-                  <SearchSessionsProvider>
-                    <SettingsProvider>
+      <SettingsProvider>
+        <UpdateCheck />
+        <ConnectionGate disableHealthCheck={disableHealthCheck}>
+          <ServerKey>
+            <GlobalSDKProvider>
+              <GlobalSyncProvider>
+                <RecentSessionsProvider>
+                  <PinnedSessionsProvider>
+                    <SearchSessionsProvider>
                       <PermissionProvider>
                         <NotificationProvider>
                           <ModelsProvider>
@@ -131,14 +133,14 @@ function RootRoute() {
                           </ModelsProvider>
                         </NotificationProvider>
                       </PermissionProvider>
-                    </SettingsProvider>
-                  </SearchSessionsProvider>
-                </PinnedSessionsProvider>
-              </RecentSessionsProvider>
-            </GlobalSyncProvider>
-          </GlobalSDKProvider>
-        </ServerKey>
-      </ConnectionGate>
+                    </SearchSessionsProvider>
+                  </PinnedSessionsProvider>
+                </RecentSessionsProvider>
+              </GlobalSyncProvider>
+            </GlobalSDKProvider>
+          </ServerKey>
+        </ConnectionGate>
+      </SettingsProvider>
     </ServerProvider>
   );
 }

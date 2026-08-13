@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/error.tsx
 import {
   useCallback,
   useEffect,
@@ -6,7 +7,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Button } from "@/components/ui/button";
 import { useServer } from "@/contexts/server";
+import { usePlatform } from "@/contexts/platform";
+import { useUpdateCheck } from "@/hooks/use-update-check";
 import { useCheckServerHealth } from "@/utils/server-health";
 import { m } from "@/paraglide/messages";
 import { Logo } from "./logo";
@@ -123,7 +127,13 @@ function SplashLoadingScreen() {
 
 function ConnectionError({ onRetry }: { onRetry?: () => void }) {
   const server = useServer();
+  const platform = usePlatform();
+  const update = useUpdateCheck();
+  const [installing, setInstalling] = useState(false);
+  const [updateError, setUpdateError] = useState<string>();
   const name = server.name || server.key;
+  const updateAvailable =
+    update.data?.updateAvailable && update.data.version && platform.update;
 
   const parts = useMemo(() => {
     const text = m.server_unreachable({ server: SERVER_TOKEN });
@@ -153,6 +163,40 @@ function ConnectionError({ onRetry }: { onRetry?: () => void }) {
         <p className="mt-1 text-xs text-muted-foreground">
           {m.server_retrying()}
         </p>
+        {platform.checkUpdate && (
+          <Button
+            className="mt-6"
+            variant={updateAvailable ? "default" : "outline"}
+            disabled={update.isFetching || installing}
+            onClick={() => {
+              setUpdateError(undefined);
+              if (!updateAvailable) {
+                void update.refetch();
+                return;
+              }
+              setInstalling(true);
+              void platform
+                .update?.()
+                .catch((error: unknown) => {
+                  setUpdateError(
+                    error instanceof Error ? error.message : String(error),
+                  );
+                })
+                .finally(() => setInstalling(false));
+            }}
+          >
+            {updateAvailable
+              ? installing
+                ? "…"
+                : m.updates_installRestart()
+              : update.isFetching
+                ? "…"
+                : m.settings_updates_startup_title()}
+          </Button>
+        )}
+        {updateError && (
+          <p className="mt-2 text-xs text-destructive">{updateError}</p>
+        )}
       </div>
     </div>
   );

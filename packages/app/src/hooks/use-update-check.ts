@@ -1,3 +1,4 @@
+// @opencode-ref: opencode/packages/app/src/pages/layout.tsx
 import { useQuery } from "@tanstack/react-query";
 import { usePlatform } from "@/contexts/platform";
 import { useSettings } from "@/contexts/settings";
@@ -17,4 +18,9 @@ export function useUpdateCheck() {
       query.state.data?.updateAvailable ? false : 10 * 60 * 1000,
     staleTime: 10 * 60 * 1000,
   });
+}
+
+export function UpdateCheck() {
+  useUpdateCheck();
+  return null;
 }

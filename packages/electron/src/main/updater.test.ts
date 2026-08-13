@@ -201,6 +201,29 @@ describe("installUpdate", () => {
       doubles.autoUpdater.quitAndInstall.mock.invocationCallOrder[0]!,
     );
   });
+
+  test("shares an install that is already in progress", async () => {
+    let finishShutdown: (() => void) | undefined;
+    const killSidecar = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishShutdown = resolve;
+        }),
+    );
+    const { checkUpdate, installUpdate } = await load();
+    await checkUpdate();
+
+    const first = installUpdate(killSidecar);
+    const second = installUpdate(killSidecar);
+
+    expect(killSidecar).toHaveBeenCalledTimes(1);
+    expect(doubles.autoUpdater.quitAndInstall).not.toHaveBeenCalled();
+
+    finishShutdown?.();
+    await Promise.all([first, second]);
+
+    expect(doubles.autoUpdater.quitAndInstall).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("checkForUpdates", () => {

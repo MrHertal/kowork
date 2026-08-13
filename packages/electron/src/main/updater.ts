@@ -15,6 +15,7 @@ type UpdateCheckResult = {
 
 let downloadedVersion: string | undefined;
 let pendingCheck: Promise<UpdateCheckResult> | undefined;
+let pendingInstall: Promise<void> | undefined;
 
 export function setupAutoUpdater() {
   if (!UPDATER_ENABLED) return;
@@ -79,7 +80,16 @@ async function checkAndDownloadUpdate(): Promise<UpdateCheckResult> {
   }
 }
 
-export async function installUpdate(killSidecar: () => Promise<void>) {
+export function installUpdate(killSidecar: () => Promise<void>) {
+  if (pendingInstall) return pendingInstall;
+
+  pendingInstall = installDownloadedUpdate(killSidecar).finally(() => {
+    pendingInstall = undefined;
+  });
+  return pendingInstall;
+}
+
+async function installDownloadedUpdate(killSidecar: () => Promise<void>) {
   const result = downloadedVersion
     ? { updateAvailable: true, version: downloadedVersion }
     : await checkUpdate();
