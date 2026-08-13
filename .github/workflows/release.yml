@@ -79,9 +79,6 @@ jobs:
             --draft \
             --generate-notes
 
-      # The tag is the canonical version. The release workflow sets the
-      # version at build time; package.json on main does not need to match.
-
   build:
     needs: prepare
     strategy:
