@@ -283,7 +283,6 @@ function getConfig() {
           owner: "MrHertal",
           repo: "kowork",
           channel: "latest",
-          releaseType: "draft",
         },
         rpm: { packageName: "kowork" },
       };
