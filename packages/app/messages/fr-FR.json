@@ -469,6 +469,8 @@
   "settings_skills_save_failed_title": "Échec de l’enregistrement",
   "settings_skills_section_connected": "Ajoutées",
   "settings_skills_section_popular": "Populaires",
+  "settings_updates_startup_description": "Afficher une notification lorsqu’une nouvelle version de Kowork est disponible",
+  "settings_updates_startup_title": "Rechercher les mises à jour",
 
   "sidebar_action_more": "Plus",
   "sidebar_group_pinned": "Épinglées",
@@ -494,5 +496,9 @@
   "toast_prompt_attachUnsupported_description": "Ce type de fichier n’est pas pris en charge comme pièce jointe.",
   "toast_prompt_attachUnsupported_title": "Impossible de joindre le fichier",
   "toast_session_listAllFailed_title": "Impossible de charger les tâches",
-  "toast_session_listFailed_title": "Tâches de « {project} » non chargées"
+  "toast_session_listFailed_title": "Tâches de « {project} » non chargées",
+
+  "updates_available": "Mise à jour disponible",
+  "updates_description": "Profitez des dernières améliorations et corrections.",
+  "updates_installRestart": "Installer et redémarrer"
 }

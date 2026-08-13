@@ -469,6 +469,8 @@
   "settings_skills_save_failed_title": "无法保存",
   "settings_skills_section_connected": "已添加",
   "settings_skills_section_popular": "热门",
+  "settings_updates_startup_description": "当 Kowork 有新版本可用时显示通知",
+  "settings_updates_startup_title": "检查更新",
 
   "sidebar_action_more": "更多",
   "sidebar_group_pinned": "已置顶",
@@ -494,5 +496,9 @@
   "toast_prompt_attachUnsupported_description": "不支持将此文件类型作为附件。",
   "toast_prompt_attachUnsupported_title": "无法添加文件附件",
   "toast_session_listAllFailed_title": "无法加载任务",
-  "toast_session_listFailed_title": "无法加载文件夹“{project}”中的任务"
+  "toast_session_listFailed_title": "无法加载文件夹“{project}”中的任务",
+
+  "updates_available": "有可用更新",
+  "updates_description": "获取最新改进和问题修复。",
+  "updates_installRestart": "安装并重启"
 }

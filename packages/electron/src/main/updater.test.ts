@@ -84,7 +84,7 @@ describe("setupAutoUpdater", () => {
     expect(doubles.autoUpdater.allowPrerelease).toBe(false);
     expect(doubles.autoUpdater.allowDowngrade).toBe(true);
     expect(doubles.autoUpdater.autoDownload).toBe(false);
-    expect(doubles.autoUpdater.autoInstallOnAppQuit).toBe(true);
+    expect(doubles.autoUpdater.autoInstallOnAppQuit).toBe(false);
     expect(doubles.autoUpdater.logger).toBe(doubles.log);
   });
 });
@@ -96,6 +96,43 @@ describe("checkUpdate", () => {
     const result = await checkUpdate();
 
     expect(result).toEqual({ updateAvailable: true, version: "2.0.0" });
+    expect(doubles.autoUpdater.downloadUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  test("reuses an already downloaded update", async () => {
+    const { checkUpdate } = await load();
+
+    await checkUpdate();
+    const result = await checkUpdate();
+
+    expect(result).toEqual({ updateAvailable: true, version: "2.0.0" });
+    expect(doubles.autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
+    expect(doubles.autoUpdater.downloadUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  test("shares a check that is already in progress", async () => {
+    let resolveCheck: ((result: CheckResult) => void) | undefined;
+    doubles.autoUpdater.checkForUpdates.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveCheck = resolve;
+        }),
+    );
+    const { checkUpdate } = await load();
+
+    const first = checkUpdate();
+    const second = checkUpdate();
+    resolveCheck?.(available);
+
+    await expect(first).resolves.toEqual({
+      updateAvailable: true,
+      version: "2.0.0",
+    });
+    await expect(second).resolves.toEqual({
+      updateAvailable: true,
+      version: "2.0.0",
+    });
+    expect(doubles.autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
     expect(doubles.autoUpdater.downloadUpdate).toHaveBeenCalledTimes(1);
   });
 
@@ -140,14 +177,15 @@ describe("checkUpdate", () => {
 });
 
 describe("installUpdate", () => {
-  test("is a no-op before an update is ready", async () => {
+  test("checks for an update before installing when needed", async () => {
     const { installUpdate } = await load();
     const killSidecar = vi.fn<() => Promise<void>>(() => Promise.resolve());
 
     await installUpdate(killSidecar);
 
-    expect(killSidecar).not.toHaveBeenCalled();
-    expect(doubles.autoUpdater.quitAndInstall).not.toHaveBeenCalled();
+    expect(doubles.autoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
+    expect(killSidecar).toHaveBeenCalledTimes(1);
+    expect(doubles.autoUpdater.quitAndInstall).toHaveBeenCalledTimes(1);
   });
 
   test("kills the sidecar before quitting once an update is ready", async () => {

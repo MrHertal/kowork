@@ -8,7 +8,8 @@ export function useUpdateCheck() {
 
   return useQuery({
     queryKey: ["update-check"],
-    enabled: !!platform.checkUpdate && settings.updates.startup,
+    enabled:
+      settings.ready && !!platform.checkUpdate && settings.updates.startup,
     queryFn: () =>
       platform.checkUpdate?.() ??
       Promise.resolve({ updateAvailable: false, version: undefined }),

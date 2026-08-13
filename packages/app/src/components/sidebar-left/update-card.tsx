@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,9 +18,13 @@ export function UpdateCard() {
   const platform = usePlatform();
   const update = useUpdateCheck();
   const [installing, setInstalling] = useState(false);
+  const forceVisible = true;
 
-  // if (!update.data?.updateAvailable || !update.data.version) return null;
-  // if (!platform.update) return null;
+  if (
+    !forceVisible &&
+    (!update.data?.updateAvailable || !update.data.version || !platform.update)
+  )
+    return null;
 
   return (
     <Card className="gap-2 py-4 shadow-none">
@@ -37,6 +42,11 @@ export function UpdateCard() {
               setInstalling(true);
               try {
                 await platform.update?.();
+              } catch (error) {
+                toast.error(m.common_requestFailed(), {
+                  description:
+                    error instanceof Error ? error.message : String(error),
+                });
               } finally {
                 setInstalling(false);
               }
