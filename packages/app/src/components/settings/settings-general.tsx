@@ -74,7 +74,7 @@ export function SettingsGeneral() {
         toast.success(m.settings_updates_latest());
       }
     } catch {
-      toast.error("Could not check for updates");
+      toast.error(m.settings_updates_checkFailed());
     } finally {
       setChecking(false);
     }
@@ -168,7 +168,7 @@ export function SettingsGeneral() {
 
         <SettingsRow
           title={m.settings_updates_checkNow()}
-          description={m.settings_updates_latest()}
+          description={m.settings_updates_check_description()}
         >
           <Button
             size="xs"
