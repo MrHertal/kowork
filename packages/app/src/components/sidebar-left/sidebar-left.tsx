@@ -34,7 +34,9 @@ export function SidebarLeft({ ...props }: ComponentProps<typeof Sidebar>) {
         <SessionsEmpty />
       </SidebarContent>
       <SidebarFooter>
-        <UpdateCard />
+        <div className="p-1">
+          <UpdateCard />
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

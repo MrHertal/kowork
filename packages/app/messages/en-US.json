@@ -499,5 +499,6 @@
   "toast_session_listFailed_title": "Failed to load tasks for folder “{project}”",
 
   "updates_available": "Update available",
+  "updates_description": "Get the latest improvements and fixes.",
   "updates_installRestart": "Install & restart"
 }
