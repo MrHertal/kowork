@@ -1,8 +1,4 @@
 // @opencode-ref: opencode/packages/app/src/components/settings-general.tsx
-import { useState } from "react";
-import { toast } from "sonner";
-
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,7 +7,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { usePlatform } from "@/contexts/platform";
 import { useSettings } from "@/contexts/settings";
 import { m } from "@/paraglide/messages";
 import { locales } from "@/paraglide/runtime";
@@ -46,39 +41,12 @@ const sortedLocales = [...locales].sort((a, b) => {
 
 export function SettingsGeneral() {
   const settings = useSettings();
-  const platform = usePlatform();
-  const [checking, setChecking] = useState(false);
 
   const currentSize = DISPLAY_SIZES.find(
     (s) => s.value === settings.appearance.fontSize,
   )
     ? settings.appearance.fontSize
     : DEFAULT_DISPLAY_SIZE;
-
-  const handleCheckUpdate = async () => {
-    if (!platform.checkUpdate) return;
-    setChecking(true);
-    try {
-      const result = await platform.checkUpdate();
-      if (result.updateAvailable && result.version) {
-        toast(m.updates_available(), {
-          description: `v${result.version}`,
-          action: {
-            label: m.updates_installRestart(),
-            onClick: () => {
-              void platform.update?.();
-            },
-          },
-        });
-      } else {
-        toast.success(m.settings_updates_latest());
-      }
-    } catch {
-      toast.error(m.settings_updates_checkFailed());
-    } finally {
-      setChecking(false);
-    }
-  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -153,9 +121,7 @@ export function SettingsGeneral() {
             </SelectContent>
           </Select>
         </SettingsRow>
-      </SettingsSection>
 
-      <SettingsSection title={m.settings_updates_sectionTitle()}>
         <SettingsRow
           title={m.settings_updates_startup_title()}
           description={m.settings_updates_startup_description()}
@@ -164,23 +130,6 @@ export function SettingsGeneral() {
             checked={settings.updates.startup}
             onCheckedChange={settings.updates.setStartup}
           />
-        </SettingsRow>
-
-        <SettingsRow
-          title={m.settings_updates_checkNow()}
-          description={m.settings_updates_check_description()}
-        >
-          <Button
-            size="xs"
-            onClick={() => {
-              void handleCheckUpdate();
-            }}
-            disabled={checking || !platform.checkUpdate}
-          >
-            {checking
-              ? m.settings_updates_checking()
-              : m.settings_updates_checkNow()}
-          </Button>
         </SettingsRow>
       </SettingsSection>
     </div>
