@@ -18,13 +18,9 @@ export function UpdateCard() {
   const platform = usePlatform();
   const update = useUpdateCheck();
   const [installing, setInstalling] = useState(false);
-  const forceVisible = true;
 
-  if (
-    !forceVisible &&
-    (!update.data?.updateAvailable || !update.data.version || !platform.update)
-  )
-    return null;
+  if (!update.data?.updateAvailable || !update.data.version) return null;
+  if (!platform.update) return null;
 
   return (
     <Card className="gap-2 py-4 shadow-none">
