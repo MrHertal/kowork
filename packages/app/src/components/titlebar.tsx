@@ -60,6 +60,7 @@ export function Titlebar() {
       className="relative flex h-10 shrink-0 overflow-hidden bg-background shadow-[inset_0_-1px_0_0_var(--border)]"
       style={style}
     >
+      {/* Keep the drag region off the macOS traffic lights, or they disappear when unfocused. */}
       <div
         data-no-drag
         aria-hidden
