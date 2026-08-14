@@ -9,9 +9,8 @@ export function NativeThemeSync() {
   const { theme, resolvedTheme } = useTheme();
 
   useEffect(() => {
-    // themeSource aligns native chrome with the app theme — macOS derives the
-    // inactive traffic-light tint from it, and it flips prefers-color-scheme
-    // in every webContents to the app theme rather than the OS theme.
+    // themeSource makes native chrome (incl. inactive traffic-light tint) and
+    // prefers-color-scheme follow the app theme instead of the OS.
     if (theme === "light" || theme === "dark" || theme === "system")
       void window.api?.setThemeSource?.(theme);
     if (resolvedTheme !== "light" && resolvedTheme !== "dark") return;
