@@ -14,11 +14,8 @@ const RUNTIME_SOURCE_INPUTS = [
 export type RuntimePack = {
   dir: string;
   pythonExe: string;
-  /** Dir containing the interpreter (python/bin; python on Windows). */
-  pythonBinDir: string;
   /** Pack bin/ with the kowork-python/kowork-node shims. */
   binDir: string;
-  /** Resolved by the agent via NODE_PATH. */
   nodeModules: string;
 };
 
@@ -207,7 +204,6 @@ export function validateRuntimePack(
     pack: {
       dir,
       pythonExe,
-      pythonBinDir: path.dirname(pythonExe),
       binDir,
       nodeModules,
     },

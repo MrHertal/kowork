@@ -107,7 +107,6 @@ class FakeChild extends EventEmitter {
 const pack: RuntimePack = {
   dir: "/pack",
   pythonExe: "/pack/python/bin/python3",
-  pythonBinDir: "/pack/python/bin",
   binDir: "/pack/bin",
   nodeModules: "/pack/node_modules",
 };

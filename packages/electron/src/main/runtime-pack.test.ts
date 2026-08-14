@@ -148,7 +148,6 @@ describe("validateRuntimePack", () => {
     expect(result.pack).toEqual({
       dir,
       pythonExe: join(dir, "python", "bin", "python3"),
-      pythonBinDir: join(dir, "python", "bin"),
       binDir: join(dir, "bin"),
       nodeModules: join(dir, "node_modules"),
     });

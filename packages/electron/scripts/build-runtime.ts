@@ -336,7 +336,7 @@ exec "$pack/${pythonRel}" "$@"
   // unpinned code; bare `pip` resolves to the user's own pip, if any.
   const sitePackages = path.join(libDir, "site-packages");
   for (const name of listDirSafe(sitePackages)) {
-    if (/^pip($|[.-])/.test(name)) {
+    if (/^pip(-[\d.]+[.-].*)?$/.test(name)) {
       rmSync(path.join(sitePackages, name), { recursive: true, force: true });
     }
   }
