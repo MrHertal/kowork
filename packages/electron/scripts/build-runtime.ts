@@ -267,8 +267,9 @@ async function main() {
       [
         `@echo off`,
         `rem Kowork: Node via the Electron binary; libs resolve via the pack's NODE_PATH.`,
+        `if "%KOWORK_ELECTRON_BIN%"=="" (echo KOWORK_ELECTRON_BIN not set 1>&2 & exit /b 1)`,
         `set ELECTRON_RUN_AS_NODE=1`,
-        `set "NODE_PATH=%~dp0..\\${NODE_LIBS};%NODE_PATH%"`,
+        `if defined NODE_PATH (set "NODE_PATH=%~dp0..\\${NODE_LIBS};%NODE_PATH%") else set "NODE_PATH=%~dp0..\\${NODE_LIBS}"`,
         `"%KOWORK_ELECTRON_BIN%" %*`,
         ``,
       ].join("\r\n"),
@@ -279,6 +280,7 @@ async function main() {
         `@echo off`,
         `rem Kowork: embedded interpreter, isolated from the user's Python environment.`,
         `rem .pyc writes disabled: the pack lives in the signed app bundle.`,
+        `if "%KOWORK_PYTHON%"=="" (echo KOWORK_PYTHON not set 1>&2 & exit /b 1)`,
         `set PYTHONNOUSERSITE=1`,
         `set PYTHONDONTWRITEBYTECODE=1`,
         `set PYTHONPATH=`,
@@ -290,10 +292,11 @@ async function main() {
       ].join("\r\n"),
     );
   } else {
-    // Self-locating: NODE_PATH must work wherever the pack is installed.
+    // Self-locating without realpath: it only exists on macOS 13+, we support
+    // 12 — and $0 is already absolute after a PATH lookup.
     const node = `#!/bin/sh
 # Kowork: Node via the Electron binary; libs resolve via the pack's NODE_PATH.
-pack=$(CDPATH= cd -- "$(dirname -- "$(realpath -- "$0")")/.." && pwd)
+pack=$(CDPATH= cd -P "$(dirname "$0")/.." && pwd)
 export NODE_PATH="$pack/${NODE_LIBS}\${NODE_PATH:+:$NODE_PATH}"
 export ELECTRON_RUN_AS_NODE=1
 exec "\${KOWORK_ELECTRON_BIN:?KOWORK_ELECTRON_BIN not set}" "$@"
