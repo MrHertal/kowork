@@ -56,7 +56,7 @@ export function createMenu(deps: Deps) {
       submenu: [
         {
           label: "New",
-          accelerator: "Shift+Cmd+S",
+          accelerator: "Cmd+N",
           click: () => deps.trigger("session.new"),
         },
         {
