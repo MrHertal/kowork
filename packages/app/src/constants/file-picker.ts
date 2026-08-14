@@ -9,6 +9,11 @@ export const ACCEPTED_IMAGE_TYPES = [
 
 export const ACCEPTED_OFFICE_FILE_TYPES = [".docx", ".xlsx", ".pptx"];
 export type OfficeAttachmentFormat = "docx" | "xlsx" | "pptx";
+export const OFFICE_FILE_MIMES: Record<OfficeAttachmentFormat, string> = {
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+};
 
 export const ACCEPTED_FILE_TYPES = [
   ...ACCEPTED_IMAGE_TYPES,

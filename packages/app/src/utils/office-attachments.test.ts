@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import type { OfficeAttachmentPart } from "@/contexts/prompt";
 import {
   OFFICE_ATTACHMENTS_METADATA_KEY,
+  officeAttachmentsFromMetadata,
   officeAttachmentsPrompt,
 } from "./office-attachments";
 
@@ -75,5 +76,50 @@ describe("officeAttachmentsPrompt", () => {
     expect(result.text).toContain(
       "<path>/tmp/&lt;folder&gt;&amp;&quot;&apos;/terms.docx</path>",
     );
+  });
+});
+
+describe("officeAttachmentsFromMetadata", () => {
+  test("returns validated version 1 attachment metadata", () => {
+    const prompt = officeAttachmentsPrompt([attachment()]);
+
+    expect(officeAttachmentsFromMetadata(prompt.metadata)).toEqual([
+      {
+        filename: "contract.docx",
+        path: "/Users/example/contract.docx",
+        mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        format: "docx",
+      },
+    ]);
+  });
+
+  test.each([
+    undefined,
+    {},
+    { koworkAttachments: null },
+    { koworkAttachments: { version: 2, items: [] } },
+    { koworkAttachments: { version: 1, items: "invalid" } },
+  ])("ignores malformed metadata %#", (metadata) => {
+    expect(officeAttachmentsFromMetadata(metadata)).toEqual([]);
+  });
+
+  test("keeps valid items and ignores malformed entries", () => {
+    const valid = officeAttachmentsPrompt([attachment()]).metadata[
+      OFFICE_ATTACHMENTS_METADATA_KEY
+    ].items[0];
+
+    expect(
+      officeAttachmentsFromMetadata({
+        [OFFICE_ATTACHMENTS_METADATA_KEY]: {
+          version: 1,
+          items: [
+            valid,
+            { ...valid, format: "pdf" },
+            { ...valid, mime: "application/octet-stream" },
+            { ...valid, path: 42 },
+          ],
+        },
+      }),
+    ).toEqual([valid]);
   });
 });

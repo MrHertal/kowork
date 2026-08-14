@@ -7,7 +7,13 @@ import type {
   SessionStatus,
   TextPart as TextPartType,
 } from "@opencode-ai/sdk/v2/client";
-import { CheckIcon, CopyIcon } from "lucide-react";
+import {
+  CheckIcon,
+  CopyIcon,
+  FileSpreadsheetIcon,
+  FileTextIcon,
+  PresentationIcon,
+} from "lucide-react";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -36,6 +42,7 @@ import {
 import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useSDK } from "@/contexts/sdk";
 import { m } from "@/paraglide/messages";
+import { officeAttachmentsFromMetadata } from "@/utils/office-attachments";
 
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -167,7 +174,7 @@ function TurnDivider({ label }: { label: string }) {
   );
 }
 
-function UserMessage({ parts }: { parts: Part[] }) {
+export function UserMessage({ parts }: { parts: Part[] }) {
   const textParts = parts.filter(
     (p): p is TextPartType => p.type === "text" && !p.synthetic,
   );
@@ -175,6 +182,15 @@ function UserMessage({ parts }: { parts: Part[] }) {
   const attachments = parts.filter(
     (p): p is FilePartType => p.type === "file" && p.url.startsWith("data:"),
   );
+  const office = parts.flatMap((part) => {
+    if (part.type !== "text" || !part.synthetic) return [];
+    return officeAttachmentsFromMetadata(part.metadata).map(
+      (attachment, index) => ({
+        ...attachment,
+        id: `${part.id}-${index}`,
+      }),
+    );
+  });
   return (
     <Message from="user">
       <div>
@@ -195,6 +211,33 @@ function UserMessage({ parts }: { parts: Part[] }) {
                 <AttachmentPreview />
               </Attachment>
             ))}
+          </Attachments>
+        )}
+        {office.length > 0 && (
+          <Attachments className="mb-2" variant="grid">
+            {office.map((attachment) => {
+              const Icon =
+                attachment.format === "xlsx"
+                  ? FileSpreadsheetIcon
+                  : attachment.format === "pptx"
+                    ? PresentationIcon
+                    : FileTextIcon;
+              return (
+                <Attachment
+                  key={attachment.id}
+                  title={attachment.filename}
+                  data={{
+                    id: attachment.id,
+                    type: "file",
+                    filename: attachment.filename,
+                    mediaType: attachment.mime,
+                    url: "",
+                  }}
+                >
+                  <AttachmentPreview fallbackIcon={<Icon />} />
+                </Attachment>
+              );
+            })}
           </Attachments>
         )}
         <MessageContent className="gap-4">
