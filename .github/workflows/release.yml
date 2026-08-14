@@ -37,7 +37,6 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      # Prereleases may be dispatched from any branch for testing.
       - name: Guard stable releases to main
         run: |
           if [[ "${{ inputs.version }}" != *-* && "${{ github.ref_name }}" != "main" ]]; then
@@ -183,8 +182,6 @@ jobs:
             packages/electron/dist/*.zip
             packages/electron/dist/latest-mac.yml
 
-  # Runs only after every matrix leg succeeded: assets, smoke tests, and
-  # archived artifacts are all in place before the draft goes live.
   publish:
     needs: [prepare, build]
     runs-on: ubuntu-latest
