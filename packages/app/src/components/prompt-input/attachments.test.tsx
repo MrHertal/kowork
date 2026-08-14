@@ -263,9 +263,9 @@ describe("usePromptAttachments", () => {
 
     expect(added).toBe(false);
     expect(officeAttachments()).toHaveLength(0);
-    expect(toast.error).toHaveBeenCalledWith("Can't attach Office document", {
+    expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
       description:
-        "Office documents can only be attached in the desktop app when using Kowork's local server.",
+        "This type of document can only be attached in the Kowork desktop app.",
     });
   });
 
@@ -287,9 +287,9 @@ describe("usePromptAttachments", () => {
     expect(added).toBe(true);
     await waitFor(() => expect(images()).toHaveLength(1));
     expect(officeAttachments()).toHaveLength(0);
-    expect(toast.error).toHaveBeenCalledWith("Can't access Office document", {
+    expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
       description:
-        "Kowork couldn't access this document's local path. Try choosing it again.",
+        "Kowork couldn't open this document. Try choosing it again.",
     });
   });
 
@@ -376,9 +376,9 @@ describe("usePromptAttachments", () => {
 
     expect(officeAttachments()).toHaveLength(0);
     expect(platform.getPathForFile).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith("Can't access Office document", {
+    expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
       description:
-        "Kowork couldn't access this document's local path. Try choosing it again.",
+        "Kowork couldn't open this document. Try choosing it again.",
     });
   });
 
