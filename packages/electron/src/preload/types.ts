@@ -12,6 +12,7 @@ export type LinuxDisplayBackend = "wayland" | "auto";
 export type TitlebarTheme = {
   mode: "light" | "dark";
 };
+export type ThemeSource = "light" | "dark" | "system";
 
 export type ElectronAPI = {
   killSidecar: () => Promise<void>;
@@ -75,6 +76,7 @@ export type ElectronAPI = {
   getZoomFactor: () => Promise<number>;
   setZoomFactor: (factor: number) => Promise<void>;
   setTitlebar: (theme: TitlebarTheme) => Promise<void>;
+  setThemeSource: (source: ThemeSource) => Promise<void>;
   runUpdater: (alertOnFail: boolean) => Promise<void>;
   checkUpdate: () => Promise<{ updateAvailable: boolean; version?: string }>;
   installUpdate: () => Promise<void>;
