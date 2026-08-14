@@ -469,6 +469,8 @@
   "settings_skills_save_failed_title": "Não foi possível salvar",
   "settings_skills_section_connected": "Adicionadas",
   "settings_skills_section_popular": "Populares",
+  "settings_updates_startup_description": "Mostre uma notificação quando uma nova versão do Kowork estiver disponível",
+  "settings_updates_startup_title": "Buscar atualizações",
 
   "sidebar_action_more": "Mais",
   "sidebar_group_pinned": "Fixadas",
@@ -494,5 +496,9 @@
   "toast_prompt_attachUnsupported_description": "Este tipo de arquivo não pode ser anexado.",
   "toast_prompt_attachUnsupported_title": "Não foi possível anexar o arquivo",
   "toast_session_listAllFailed_title": "Não foi possível carregar as tarefas",
-  "toast_session_listFailed_title": "Não foi possível carregar as tarefas da pasta “{project}”"
+  "toast_session_listFailed_title": "Não foi possível carregar as tarefas da pasta “{project}”",
+
+  "updates_available": "Atualização disponível",
+  "updates_description": "Obtenha as melhorias e correções mais recentes.",
+  "updates_installRestart": "Instalar e reiniciar"
 }

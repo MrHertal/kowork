@@ -55,10 +55,7 @@
           "name": "logo",
           "position": {
             "scale": 1.23,
-            "translation-in-points": [
-              0,
-              0
-            ]
+            "translation-in-points": [0, 0]
           }
         }
       ],
@@ -75,8 +72,6 @@
     }
   ],
   "supported-platforms": {
-    "squares": [
-      "macOS"
-    ]
+    "squares": ["macOS"]
   }
 }

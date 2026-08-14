@@ -7,7 +7,15 @@ import { UPDATER_ENABLED } from "./constants";
 
 const { autoUpdater } = pkg;
 
-let updateReady = false;
+type UpdateCheckResult = {
+  updateAvailable: boolean;
+  version?: string;
+  failed?: boolean;
+};
+
+let downloadedVersion: string | undefined;
+let pendingCheck: Promise<UpdateCheckResult> | undefined;
+let pendingInstall: Promise<void> | undefined;
 
 export function setupAutoUpdater() {
   if (!UPDATER_ENABLED) return;
@@ -16,7 +24,7 @@ export function setupAutoUpdater() {
   autoUpdater.allowPrerelease = false;
   autoUpdater.allowDowngrade = true;
   autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.autoInstallOnAppQuit = false;
   log.log("auto updater configured", {
     channel: autoUpdater.channel,
     allowPrerelease: autoUpdater.allowPrerelease,
@@ -25,9 +33,20 @@ export function setupAutoUpdater() {
   });
 }
 
-export async function checkUpdate() {
+export async function checkUpdate(): Promise<UpdateCheckResult> {
   if (!UPDATER_ENABLED) return { updateAvailable: false };
-  updateReady = false;
+  if (downloadedVersion) {
+    return { updateAvailable: true, version: downloadedVersion };
+  }
+  if (pendingCheck) return pendingCheck;
+
+  pendingCheck = checkAndDownloadUpdate().finally(() => {
+    pendingCheck = undefined;
+  });
+  return pendingCheck;
+}
+
+async function checkAndDownloadUpdate(): Promise<UpdateCheckResult> {
   log.log("checking for updates", {
     currentVersion: app.getVersion(),
     channel: autoUpdater.channel,
@@ -52,8 +71,8 @@ export async function checkUpdate() {
     }
     log.log("update available", { version });
     await autoUpdater.downloadUpdate();
+    downloadedVersion = version;
     log.log("update download completed", { version });
-    updateReady = true;
     return { updateAvailable: true, version };
   } catch (error) {
     log.error("update check failed", error);
@@ -61,8 +80,28 @@ export async function checkUpdate() {
   }
 }
 
-export async function installUpdate(killSidecar: () => Promise<void>) {
-  if (!updateReady) return;
+export function installUpdate(killSidecar: () => Promise<void>) {
+  if (pendingInstall) return pendingInstall;
+
+  pendingInstall = installDownloadedUpdate(killSidecar).finally(() => {
+    pendingInstall = undefined;
+  });
+  return pendingInstall;
+}
+
+async function installDownloadedUpdate(killSidecar: () => Promise<void>) {
+  const result = downloadedVersion
+    ? { updateAvailable: true, version: downloadedVersion }
+    : await checkUpdate();
+  if (!result.updateAvailable || !downloadedVersion) {
+    log.log("install update skipped", {
+      reason: result.failed ? "update check failed" : "no update available",
+    });
+    return;
+  }
+  log.log("installing downloaded update", {
+    version: result.version ?? null,
+  });
   await killSidecar();
   autoUpdater.quitAndInstall();
 }

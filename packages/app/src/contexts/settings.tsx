@@ -39,6 +39,9 @@ export interface Settings {
   };
   notifications: NotificationSettings;
   sounds: SoundSettings;
+  updates: {
+    startup: boolean;
+  };
 }
 
 const PERSIST_TARGET = Persist.global("settings.v3");
@@ -63,6 +66,9 @@ const createDefaultSettings = (): Settings => ({
     permissions: "staplebops-02",
     errorsEnabled: true,
     errors: "nope-03",
+  },
+  updates: {
+    startup: true,
   },
 });
 
@@ -105,6 +111,10 @@ export interface SettingsContextValue {
     setErrorsEnabled: (value: boolean) => void;
     errors: string;
     setErrors: (value: string) => void;
+  };
+  updates: {
+    startup: boolean;
+    setStartup: (value: boolean) => void;
   };
 }
 
@@ -197,6 +207,10 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     (value: string) => update("sounds", { errors: value }),
     [update],
   );
+  const setUpdatesStartup = useCallback(
+    (value: boolean) => update("updates", { startup: value }),
+    [update],
+  );
 
   useEffect(() => {
     if (!ready || typeof document === "undefined") return;
@@ -254,6 +268,10 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
         errors: settings.sounds.errors,
         setErrors: setSoundErrors,
       },
+      updates: {
+        startup: settings.updates.startup,
+        setStartup: setUpdatesStartup,
+      },
     }),
     [
       ready,
@@ -270,6 +288,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       setSoundPermissions,
       setSoundErrorsEnabled,
       setSoundErrors,
+      setUpdatesStartup,
     ],
   );
 

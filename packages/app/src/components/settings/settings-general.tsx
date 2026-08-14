@@ -6,6 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { usePlatform } from "@/contexts/platform";
 import { useSettings } from "@/contexts/settings";
 import { m } from "@/paraglide/messages";
 import { locales } from "@/paraglide/runtime";
@@ -39,6 +41,7 @@ const sortedLocales = [...locales].sort((a, b) => {
 });
 
 export function SettingsGeneral() {
+  const platform = usePlatform();
   const settings = useSettings();
 
   const currentSize = DISPLAY_SIZES.find(
@@ -119,6 +122,17 @@ export function SettingsGeneral() {
               ))}
             </SelectContent>
           </Select>
+        </SettingsRow>
+
+        <SettingsRow
+          title={m.settings_updates_startup_title()}
+          description={m.settings_updates_startup_description()}
+        >
+          <Switch
+            checked={settings.updates.startup}
+            disabled={!platform.checkUpdate}
+            onCheckedChange={settings.updates.setStartup}
+          />
         </SettingsRow>
       </SettingsSection>
     </div>

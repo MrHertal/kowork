@@ -469,6 +469,8 @@
   "settings_skills_save_failed_title": "Speichern fehlgeschlagen",
   "settings_skills_section_connected": "Hinzugefügt",
   "settings_skills_section_popular": "Beliebt",
+  "settings_updates_startup_description": "Eine Benachrichtigung anzeigen, wenn eine neue Version von Kowork verfügbar ist",
+  "settings_updates_startup_title": "Nach Updates suchen",
 
   "sidebar_action_more": "Mehr",
   "sidebar_group_pinned": "Angeheftet",
@@ -494,5 +496,9 @@
   "toast_prompt_attachUnsupported_description": "Dieser Dateityp wird als Anhang nicht unterstützt.",
   "toast_prompt_attachUnsupported_title": "Datei kann nicht angehängt werden",
   "toast_session_listAllFailed_title": "Aufgaben konnten nicht geladen werden",
-  "toast_session_listFailed_title": "Aufgaben im Ordner „{project}“ konnten nicht geladen werden"
+  "toast_session_listFailed_title": "Aufgaben im Ordner „{project}“ konnten nicht geladen werden",
+
+  "updates_available": "Update verfügbar",
+  "updates_description": "Holen Sie sich die neuesten Verbesserungen und Fehlerbehebungen.",
+  "updates_installRestart": "Installieren und neu starten"
 }

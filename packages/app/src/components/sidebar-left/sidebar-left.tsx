@@ -15,6 +15,7 @@ import { NavPrimary } from "./nav-primary";
 import { NavSessions } from "./nav-sessions";
 import { SearchForm } from "./search-form";
 import { SessionsEmpty } from "./sessions-empty";
+import { UpdateCard } from "./update-card";
 
 export function SidebarLeft({ ...props }: ComponentProps<typeof Sidebar>) {
   const dialog = useDialog();
@@ -32,7 +33,11 @@ export function SidebarLeft({ ...props }: ComponentProps<typeof Sidebar>) {
         <NavSessions />
         <SessionsEmpty />
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter>
+        <div className="p-1">
+          <UpdateCard />
+        </div>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

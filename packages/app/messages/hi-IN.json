@@ -469,6 +469,8 @@
   "settings_skills_save_failed_title": "सेव नहीं हो सका",
   "settings_skills_section_connected": "जोड़ी गईं",
   "settings_skills_section_popular": "लोकप्रिय",
+  "settings_updates_startup_description": "Kowork का नया वर्ज़न उपलब्ध होने पर सूचना दिखाएँ",
+  "settings_updates_startup_title": "अपडेट जाँचें",
 
   "sidebar_action_more": "और",
   "sidebar_group_pinned": "पिन किए गए",
@@ -494,5 +496,9 @@
   "toast_prompt_attachUnsupported_description": "इस प्रकार की फ़ाइल अटैच नहीं की जा सकती।",
   "toast_prompt_attachUnsupported_title": "फ़ाइल अटैच नहीं हो सकी",
   "toast_session_listAllFailed_title": "कार्य लोड नहीं हो सके",
-  "toast_session_listFailed_title": "फ़ोल्डर “{project}” के कार्य लोड नहीं हो सके"
+  "toast_session_listFailed_title": "फ़ोल्डर “{project}” के कार्य लोड नहीं हो सके",
+
+  "updates_available": "अपडेट उपलब्ध है",
+  "updates_description": "नवीनतम सुधार और समस्याओं के समाधान पाएँ।",
+  "updates_installRestart": "इंस्टॉल करके रीस्टार्ट करें"
 }
