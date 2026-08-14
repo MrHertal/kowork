@@ -50,6 +50,7 @@ export type ElectronAPI = {
     accept?: string[];
     extensions?: string[];
   }) => Promise<string | string[] | null>;
+  getPathForFile: (file: File) => string;
   saveFilePicker: (opts?: {
     title?: string;
     defaultPath?: string;

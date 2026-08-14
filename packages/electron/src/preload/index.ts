@@ -1,6 +1,6 @@
 // @opencode-ref: opencode/packages/desktop/src/preload/index.ts
 
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 import type { ElectronAPI } from "./types";
 
 const api: ElectronAPI = {
@@ -43,6 +43,7 @@ const api: ElectronAPI = {
   openDirectoryPicker: (opts) =>
     ipcRenderer.invoke("open-directory-picker", opts),
   openFilePicker: (opts) => ipcRenderer.invoke("open-file-picker", opts),
+  getPathForFile: (file) => webUtils.getPathForFile(file),
   saveFilePicker: (opts) => ipcRenderer.invoke("save-file-picker", opts),
   openLink: (url) => ipcRenderer.send("open-link", url),
   openPath: (path, app) => ipcRenderer.invoke("open-path", path, app),

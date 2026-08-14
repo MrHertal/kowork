@@ -20,6 +20,7 @@ export type Platform = {
     accept?: string[];
     extensions?: string[];
   }) => Promise<string | string[] | null>;
+  getPathForFile?: (file: File) => Promise<string | null>;
   saveFilePickerDialog?: (opts?: {
     title?: string;
     defaultPath?: string;

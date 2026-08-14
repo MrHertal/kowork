@@ -144,6 +144,13 @@ function createPlatform(): Platform {
       return handleWslPicker(result);
     },
 
+    async getPathForFile(file) {
+      const result = window.api.getPathForFile(file);
+      if (!result) return null;
+      if (!(await isWslEnabled())) return result;
+      return window.api.wslPath(result, "linux").catch(() => null);
+    },
+
     async saveFilePickerDialog(opts) {
       const result = await window.api.saveFilePicker({
         title: opts?.title ?? "Save file",

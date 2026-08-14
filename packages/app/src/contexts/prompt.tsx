@@ -35,7 +35,22 @@ export interface ImageAttachmentPart {
   dataUrl: string;
 }
 
-export type ContentPart = TextPart | FileAttachmentPart | ImageAttachmentPart;
+export type OfficeAttachmentFormat = "docx" | "xlsx" | "pptx";
+
+export interface OfficeAttachmentPart {
+  type: "office";
+  id: string;
+  filename: string;
+  mime: string;
+  path: string;
+  format: OfficeAttachmentFormat;
+}
+
+export type ContentPart =
+  | TextPart
+  | FileAttachmentPart
+  | ImageAttachmentPart
+  | OfficeAttachmentPart;
 export type Prompt = ContentPart[];
 
 export const DEFAULT_PROMPT: Prompt = [
@@ -65,6 +80,8 @@ function isPartEqual(a: ContentPart, b: ContentPart): boolean {
       );
     case "image":
       return b.type === "image" && a.id === b.id;
+    case "office":
+      return b.type === "office" && a.id === b.id;
   }
 }
 
