@@ -288,34 +288,19 @@ function createSidecarEnv(
   return env;
 }
 
-// A `python`/`node` on the user's PATH can shadow ours, so these vars are
-// authoritative and the PATH prepend below is only a fallback.
+// Only the kowork-* shims go on PATH; the embedded python/bin stays off so bare
+// python/pip/node/npm belong to the user's own toolchain. The shims carry the
+// embedded runtime's isolation env, so nothing PYTHON*/NODE_PATH is set here.
 function applyRuntimeEnv(env: Record<string, string>): void {
   const pack = resolveRuntimePack();
   if (!pack) return;
 
   env.KOWORK_PYTHON = pack.pythonExe;
-  env.KOWORK_ELECTRON_BIN = process.execPath; // node/npm shims run this as Node
-  env.PYTHONNOUSERSITE = "1";
-  // The pack ships in the signed bundle; emitting .pyc would mutate sealed
-  // Resources (breaking codesign --verify) or hit a read-only install.
-  env.PYTHONDONTWRITEBYTECODE = "1";
-  env.NODE_PATH = [pack.nodeModules, env.NODE_PATH]
-    .filter(Boolean)
-    .join(delimiter);
-
-  // An absolute python still honors inherited PYTHONPATH/PYTHONHOME, which
-  // PYTHONNOUSERSITE doesn't cover.
-  delete env.PYTHONPATH;
-  delete env.PYTHONHOME;
-  delete env.VIRTUAL_ENV;
-  delete env.CONDA_PREFIX;
+  env.KOWORK_ELECTRON_BIN = process.execPath; // kowork-node runs this as Node
 
   const pathKey =
     Object.keys(env).find((k) => k.toLowerCase() === "path") ?? "PATH";
-  env[pathKey] = [pack.binDir, pack.pythonBinDir, env[pathKey]]
-    .filter(Boolean)
-    .join(delimiter);
+  env[pathKey] = [pack.binDir, env[pathKey]].filter(Boolean).join(delimiter);
 }
 
 function delay(ms: number) {
