@@ -37,6 +37,13 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      - name: Guard stable releases to main
+        run: |
+          if [[ "${{ inputs.version }}" != *-* && "${{ github.ref_name }}" != "main" ]]; then
+            echo "::error::stable releases must be dispatched from main (on ${{ github.ref_name }})"
+            exit 1
+          fi
+
       - id: version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,10 +80,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          ARGS=(--draft --generate-notes)
+          if [[ "${{ steps.version.outputs.version }}" == *-* ]]; then
+            ARGS+=(--prerelease)
+          fi
           gh release create "${{ steps.version.outputs.tag }}" \
             --title "${{ steps.version.outputs.tag }}" \
-            --draft \
-            --generate-notes
+            "${ARGS[@]}"
 
   build:
     needs: prepare
@@ -164,11 +174,6 @@ jobs:
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
 
-      - name: Publish release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ needs.prepare.outputs.tag }}" --draft=false
-
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: kowork-electron-mac-${{ matrix.arch }}
@@ -176,3 +181,12 @@ jobs:
             packages/electron/dist/*.dmg
             packages/electron/dist/*.zip
             packages/electron/dist/latest-mac.yml
+
+  publish:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ needs.prepare.outputs.tag }}" --draft=false
