@@ -22,14 +22,18 @@ export const Conversation = ({ className, ...props }: ConversationProps) => (
 
 export type ConversationContentProps = ComponentProps<
   typeof StickToBottom.Content
->;
+> & {
+  scrollClassName?: string;
+};
 
 export const ConversationContent = ({
   className,
+  scrollClassName,
   ...props
 }: ConversationContentProps) => (
   <StickToBottom.Content
     className={cn("flex flex-col gap-8 p-4", className)}
+    scrollClassName={scrollClassName}
     {...props}
   />
 );

@@ -148,7 +148,10 @@ export function MessageTimeline({
       initial="instant"
       resize="smooth"
     >
-      <ConversationContent className="mx-auto w-full max-w-4xl px-8">
+      <ConversationContent
+        className="mx-auto w-full max-w-4xl px-8"
+        scrollClassName="scrollbar-thin"
+      >
         {userMessageIDs.map((messageID) => {
           const active = messageID === activeMessageID;
           return (

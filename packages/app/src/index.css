@@ -162,6 +162,23 @@
   -webkit-app-region: no-drag;
 }
 
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
 /* Suppress enter and exit animations when swapping between dialogs */
 body[data-swapping] [data-slot="dialog-overlay"],
 body[data-swapping] [data-slot="dialog-content"] {
