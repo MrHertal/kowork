@@ -61,6 +61,12 @@ export function Titlebar() {
       style={style}
     >
       <div
+        data-no-drag
+        aria-hidden
+        className="absolute inset-y-0 left-0"
+        style={{ width: mac ? `${MAC_TRAFFIC_LIGHT_INSET / zoom}px` : "0px" }}
+      />
+      <div
         className="flex h-full w-full items-center"
         style={{ zoom: counterZoom }}
       >
