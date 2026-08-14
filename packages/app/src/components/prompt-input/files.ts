@@ -3,6 +3,7 @@
 import {
   ACCEPTED_FILE_TYPES,
   ACCEPTED_IMAGE_TYPES,
+  type OfficeAttachmentFormat,
 } from "@/constants/file-picker";
 
 export { ACCEPTED_FILE_TYPES };
@@ -24,6 +25,11 @@ const TEXT_MIMES = new Set([
   "application/xml",
   "application/yaml",
 ]);
+const OFFICE_MIMES: Record<OfficeAttachmentFormat, string> = {
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+};
 
 const SAMPLE = 4096;
 
@@ -35,6 +41,17 @@ function ext(name: string) {
   const idx = name.lastIndexOf(".");
   if (idx === -1) return "";
   return name.slice(idx + 1).toLowerCase();
+}
+
+export function officeAttachmentInfo(
+  file: Pick<File, "name">,
+): { format: OfficeAttachmentFormat; mime: string } | undefined {
+  const format = ext(file.name);
+  if (!(format in OFFICE_MIMES)) return;
+  return {
+    format: format as OfficeAttachmentFormat,
+    mime: OFFICE_MIMES[format as OfficeAttachmentFormat],
+  };
 }
 
 function textMime(type: string) {

@@ -4,10 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import { toast } from "sonner";
 import { usePlatform } from "@/contexts/platform";
-import { usePrompt, type ImageAttachmentPart } from "@/contexts/prompt";
+import {
+  usePrompt,
+  type ImageAttachmentPart,
+  type OfficeAttachmentPart,
+} from "@/contexts/prompt";
+import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
 import { dataUrl } from "./data-url";
-import { attachmentMime } from "./files";
+import { attachmentMime, officeAttachmentInfo } from "./files";
 
 const OVERLAY_SELECTOR =
   '[data-slot="dialog-overlay"],[data-slot="alert-dialog-overlay"]';
@@ -28,12 +33,56 @@ function warnRead() {
   });
 }
 
+function warnOfficeLocal() {
+  toast.error(m.toast_prompt_attachOfficeUnavailable_title(), {
+    description: m.toast_prompt_attachOfficeUnavailable_description(),
+  });
+}
+
+function warnOfficePath() {
+  toast.error(m.toast_prompt_attachOfficePathFailed_title(), {
+    description: m.toast_prompt_attachOfficePathFailed_description(),
+  });
+}
+
 export function usePromptAttachments() {
   const { update } = usePrompt();
   const platform = usePlatform();
+  const server = useServer();
+  const sidecar =
+    server.current?.type === "sidecar" ? server.current : undefined;
+  const canAttachOffice = !!platform.getPathForFile && !!sidecar;
 
   const add = useCallback(
-    async (file: File): Promise<"added" | "unsupported" | "unreadable"> => {
+    async (
+      file: File,
+      allowOffice: boolean,
+    ): Promise<
+      | "added"
+      | "unsupported"
+      | "unreadable"
+      | "office-unavailable"
+      | "office-path"
+    > => {
+      const office = officeAttachmentInfo(file);
+      if (office) {
+        if (!allowOffice) return "office-path";
+        if (!platform.getPathForFile || !sidecar) return "office-unavailable";
+        const path = await platform.getPathForFile(file, {
+          target: sidecar.variant === "wsl" ? "wsl" : "native",
+        });
+        if (!path) return "office-path";
+        const attachment: OfficeAttachmentPart = {
+          type: "office",
+          id: nanoid(),
+          filename: file.name,
+          path,
+          ...office,
+        };
+        update((prev) => [...prev, attachment]);
+        return "added";
+      }
+
       const mime = await attachmentMime(file);
       if (!mime) return "unsupported";
 
@@ -50,29 +99,41 @@ export function usePromptAttachments() {
       update((prev) => [...prev, attachment]);
       return "added";
     },
-    [update],
+    [platform, sidecar, update],
   );
 
   const addAttachment = useCallback(
     async (file: File): Promise<boolean> => {
-      const result = await add(file);
+      const result = await add(file, false);
       if (result === "unsupported") warn();
       if (result === "unreadable") warnRead();
+      if (result === "office-unavailable") warnOfficeLocal();
+      if (result === "office-path") warnOfficePath();
       return result === "added";
     },
     [add],
   );
 
   const addAttachments = useCallback(
-    async (files: File[], showToast = true): Promise<boolean> => {
+    async (
+      files: File[],
+      showToast = true,
+      allowOffice = true,
+    ): Promise<boolean> => {
       let found = false;
       let unreadableOnly = files.length > 0;
+      let officeUnavailable = false;
+      let officePath = false;
       for (const file of files) {
-        const result = await add(file);
+        const result = await add(file, allowOffice);
         if (result === "added") found = true;
         if (result === "unsupported") unreadableOnly = false;
+        if (result === "office-unavailable") officeUnavailable = true;
+        if (result === "office-path") officePath = true;
       }
-      if (!found && files.length > 0 && showToast) {
+      if (showToast && officePath) warnOfficePath();
+      else if (showToast && officeUnavailable) warnOfficeLocal();
+      else if (!found && files.length > 0 && showToast) {
         (unreadableOnly ? warnRead : warn)();
       }
       return found;
@@ -83,7 +144,10 @@ export function usePromptAttachments() {
   const removeAttachment = useCallback(
     (id: string) => {
       update((prev) =>
-        prev.filter((part) => part.type !== "image" || part.id !== id),
+        prev.filter(
+          (part) =>
+            (part.type !== "image" && part.type !== "office") || part.id !== id,
+        ),
       );
     },
     [update],
@@ -102,7 +166,7 @@ export function usePromptAttachments() {
 
       if (files.length > 0) {
         event.preventDefault();
-        await addAttachments(files);
+        await addAttachments(files, true, false);
         return;
       }
 
@@ -116,7 +180,13 @@ export function usePromptAttachments() {
     [addAttachment, addAttachments, platform],
   );
 
-  return { addAttachment, addAttachments, removeAttachment, handlePaste };
+  return {
+    addAttachment,
+    addAttachments,
+    canAttachOffice,
+    removeAttachment,
+    handlePaste,
+  };
 }
 
 export function useGlobalAttachmentDrop() {

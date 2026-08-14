@@ -7,6 +7,7 @@ import {
   useMemo,
 } from "react";
 import type { FileSelection } from "@/contexts/file";
+import type { OfficeAttachmentFormat } from "@/constants/file-picker";
 import { useSDK } from "@/contexts/sdk";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { Persist } from "@/utils/persist";
@@ -34,8 +35,6 @@ export interface ImageAttachmentPart {
   mime: string;
   dataUrl: string;
 }
-
-export type OfficeAttachmentFormat = "docx" | "xlsx" | "pptx";
 
 export interface OfficeAttachmentPart {
   type: "office";

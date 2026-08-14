@@ -25,7 +25,7 @@ import {
 } from "@/components/prompt-input/attachments";
 import { buildRequestParts } from "@/components/prompt-input/build-request-parts";
 import { PromptDragOverlay } from "@/components/prompt-input/drag-overlay";
-import { PromptImageAttachments } from "@/components/prompt-input/image-attachments";
+import { PromptAttachments } from "@/components/prompt-input/prompt-attachments";
 import { ComposerTray } from "@/components/session/composer-tray";
 import { MessageTimeline } from "@/components/session/message-timeline";
 import { ModelPicker } from "@/components/session/model-picker";
@@ -349,7 +349,7 @@ export function Page({
           )}
         >
           <PromptInputBody>
-            <PromptImageAttachments />
+            <PromptAttachments />
             <PromptInputTextarea
               onChange={handleTextChange}
               onPaste={(event) => void handlePromptPaste(event)}

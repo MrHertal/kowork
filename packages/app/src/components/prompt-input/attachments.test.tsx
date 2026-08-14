@@ -12,6 +12,7 @@ import {
 } from "@/contexts/platform";
 import { PromptProvider, usePrompt } from "@/contexts/prompt";
 import { SDKProvider } from "@/contexts/sdk";
+import type { ServerConnection } from "@/contexts/server";
 import { createEmitter } from "@/utils/emitter";
 import { useGlobalAttachmentDrop, usePromptAttachments } from "./attachments";
 
@@ -33,6 +34,15 @@ vi.mock("@/contexts/global-sdk", () => ({
 
 vi.mock("sonner", () => ({
   toast: { error: vi.fn() },
+}));
+
+let currentServer: ServerConnection.Any = {
+  type: "http",
+  http: { url: "https://example.com" },
+};
+
+vi.mock("@/contexts/server", () => ({
+  useServer: () => ({ current: currentServer }),
 }));
 
 function createStorage(memory: Map<string, string>): AsyncStorage {
@@ -59,6 +69,11 @@ const png = (name = "a.png") => new File(["abc"], name, { type: "image/png" });
 
 const binary = () =>
   new File([Uint8Array.of(0, 255, 1, 2)], "blob.bin", {
+    type: "application/octet-stream",
+  });
+
+const office = (name: string) =>
+  new File([Uint8Array.of(80, 75, 3, 4)], name, {
     type: "application/octet-stream",
   });
 
@@ -102,6 +117,8 @@ function Capture() {
 }
 
 const images = () => prompt.current.filter((part) => part.type === "image");
+const officeAttachments = () =>
+  prompt.current.filter((part) => part.type === "office");
 
 async function setup() {
   render(
@@ -128,6 +145,10 @@ beforeEach(() => {
     notify: () => Promise.resolve(),
     storage: () => createStorage(memory),
     readClipboardImage: () => Promise.resolve(null),
+  };
+  currentServer = {
+    type: "http",
+    http: { url: "https://example.com" },
   };
 });
 
@@ -164,6 +185,111 @@ describe("usePromptAttachments", () => {
     expect(images()).toHaveLength(0);
     expect(toast.error).toHaveBeenCalledWith("Can't attach file", {
       description: "This file type isn't supported as an attachment.",
+    });
+  });
+
+  test.each([
+    [
+      "contract.docx",
+      "docx",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    [
+      "budget.xlsx",
+      "xlsx",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ],
+    [
+      "slides.pptx",
+      "pptx",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ],
+  ])(
+    "adds a local %s attachment without reading its bytes",
+    async (name, format, mime) => {
+      const getPathForFile = vi.fn(() => Promise.resolve(`/tmp/${name}`));
+      platform.platform = "desktop";
+      platform.getPathForFile = getPathForFile;
+      currentServer = {
+        type: "sidecar",
+        variant: "base",
+        http: { url: "http://localhost:4096" },
+      };
+      vi.stubGlobal("FileReader", BrokenFileReader);
+      await setup();
+
+      const added = await attachments.addAttachments([office(name)]);
+
+      expect(added).toBe(true);
+      await waitFor(() => expect(officeAttachments()).toHaveLength(1));
+      expect(officeAttachments()[0]).toMatchObject({
+        type: "office",
+        filename: name,
+        format,
+        mime,
+        path: `/tmp/${name}`,
+      });
+      expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
+        target: "native",
+      });
+    },
+  );
+
+  test("requests a WSL path for Office attachments on a WSL sidecar", async () => {
+    const getPathForFile = vi.fn(() => Promise.resolve("/mnt/c/report.docx"));
+    platform.platform = "desktop";
+    platform.getPathForFile = getPathForFile;
+    currentServer = {
+      type: "sidecar",
+      variant: "wsl",
+      distro: "Ubuntu",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    await attachments.addAttachments([office("report.docx")]);
+
+    expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
+      target: "wsl",
+    });
+  });
+
+  test("rejects Office attachments outside a local sidecar", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() => Promise.resolve("/tmp/report.docx"));
+    await setup();
+
+    const added = await attachments.addAttachments([office("report.docx")]);
+
+    expect(added).toBe(false);
+    expect(officeAttachments()).toHaveLength(0);
+    expect(toast.error).toHaveBeenCalledWith("Can't attach Office document", {
+      description:
+        "Office documents can only be attached in the desktop app when using Kowork's local server.",
+    });
+  });
+
+  test("keeps valid files and warns when an Office path is unavailable", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() => Promise.resolve(null));
+    currentServer = {
+      type: "sidecar",
+      variant: "base",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    const added = await attachments.addAttachments([
+      office("report.docx"),
+      png(),
+    ]);
+
+    expect(added).toBe(true);
+    await waitFor(() => expect(images()).toHaveLength(1));
+    expect(officeAttachments()).toHaveLength(0);
+    expect(toast.error).toHaveBeenCalledWith("Can't access Office document", {
+      description:
+        "Kowork couldn't access this document's local path. Try choosing it again.",
     });
   });
 
@@ -231,6 +357,29 @@ describe("usePromptAttachments", () => {
 
     expect(preventDefault).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(images()).toHaveLength(1));
+  });
+
+  test("does not accept path-based Office attachments from paste", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() => Promise.resolve("/tmp/report.docx"));
+    currentServer = {
+      type: "sidecar",
+      variant: "base",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+    const { event } = pasteEvent({
+      items: [{ kind: "file", getAsFile: () => office("report.docx") }],
+    });
+
+    await attachments.handlePaste(event);
+
+    expect(officeAttachments()).toHaveLength(0);
+    expect(platform.getPathForFile).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith("Can't access Office document", {
+      description:
+        "Kowork couldn't access this document's local path. Try choosing it again.",
+    });
   });
 
   test("falls back to the native clipboard image when the browser paste is empty", async () => {
@@ -337,6 +486,25 @@ describe("useGlobalAttachmentDrop", () => {
     expect(event.defaultPrevented).toBe(true);
     expect(drop.isDragging).toBe(false);
     await waitFor(() => expect(images()).toHaveLength(1));
+  });
+
+  test("drops disk-backed Office files as attachments", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() => Promise.resolve("/tmp/report.docx"));
+    currentServer = {
+      type: "sidecar",
+      variant: "base",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    const event = dragEvent("drop", {
+      types: ["Files"],
+      files: [office("report.docx")],
+    });
+    dispatch(document, event);
+
+    await waitFor(() => expect(officeAttachments()).toHaveLength(1));
   });
 
   test("clears dragging on a drop without files", async () => {

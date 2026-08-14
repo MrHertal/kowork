@@ -144,10 +144,10 @@ function createPlatform(): Platform {
       return handleWslPicker(result);
     },
 
-    async getPathForFile(file) {
+    async getPathForFile(file, opts) {
       const result = window.api.getPathForFile(file);
       if (!result) return null;
-      if (!(await isWslEnabled())) return result;
+      if (opts?.target !== "wsl") return result;
       return window.api.wslPath(result, "linux").catch(() => null);
     },
 
