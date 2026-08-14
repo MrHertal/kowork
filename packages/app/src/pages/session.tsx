@@ -39,7 +39,11 @@ import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useLocal } from "@/contexts/local";
 import { usePermission, usePermissionData } from "@/contexts/permission";
 import { autoRespondsPermission } from "@/contexts/permission/auto-respond";
-import { usePrompt, type ImageAttachmentPart } from "@/contexts/prompt";
+import {
+  usePrompt,
+  type ImageAttachmentPart,
+  type OfficeAttachmentPart,
+} from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useSync } from "@/contexts/sync";
 import { cn } from "@/lib/utils";
@@ -182,8 +186,11 @@ export function Page({
       const images = promptSnapshot.filter(
         (part): part is ImageAttachmentPart => part.type === "image",
       );
+      const office = promptSnapshot.filter(
+        (part): part is OfficeAttachmentPart => part.type === "office",
+      );
       if (
-        (!input && images.length === 0) ||
+        (!input && images.length === 0 && office.length === 0) ||
         sendingRef.current ||
         blockedRef.current ||
         isChildSession
@@ -237,6 +244,7 @@ export function Page({
         const { requestParts, optimisticParts } = buildRequestParts({
           text: input ?? "",
           images,
+          office,
           messageID,
           sessionID: sid,
         });
@@ -321,10 +329,19 @@ export function Page({
 
   const hasText = !!text.trim();
   const hasImages = prompt.current.some((part) => part.type === "image");
+  const hasOffice = prompt.current.some((part) => part.type === "office");
   const canSubmit =
-    (hasText || hasImages) && !sending && !blocked && !isChildSession;
+    (hasText || hasImages || hasOffice) &&
+    !sending &&
+    !blocked &&
+    !isChildSession;
   const canStop =
-    isBusy && !hasText && !hasImages && !blocked && !isChildSession;
+    isBusy &&
+    !hasText &&
+    !hasImages &&
+    !hasOffice &&
+    !blocked &&
+    !isChildSession;
   const status = canStop ? "streaming" : "ready";
   const isSubmitDisabled = !canSubmit && !canStop;
 

@@ -5,14 +5,19 @@ import type {
   Part,
   TextPartInput,
 } from "@opencode-ai/sdk/v2/client";
-import type { ImageAttachmentPart } from "@/contexts/prompt";
+import type {
+  ImageAttachmentPart,
+  OfficeAttachmentPart,
+} from "@/contexts/prompt";
 import { ascending } from "@/utils/id";
+import { officeAttachmentsPrompt } from "@/utils/office-attachments";
 
 type PromptRequestPart = (TextPartInput | FilePartInput) & { id: string };
 
 type BuildRequestPartsInput = {
   text: string;
   images: ImageAttachmentPart[];
+  office: OfficeAttachmentPart[];
   messageID: string;
   sessionID: string;
 };
@@ -68,6 +73,17 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
         filename: attachment.filename,
       }) satisfies PromptRequestPart,
   );
+
+  if (input.office.length > 0) {
+    const attachmentContext = officeAttachmentsPrompt(input.office);
+    requestParts.push({
+      id: ascending("part"),
+      type: "text",
+      text: attachmentContext.text,
+      synthetic: true,
+      metadata: attachmentContext.metadata,
+    });
+  }
 
   requestParts.push(...images);
 

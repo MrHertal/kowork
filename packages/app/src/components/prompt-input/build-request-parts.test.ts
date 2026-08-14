@@ -1,6 +1,9 @@
 // @opencode-ref: opencode/packages/app/src/components/prompt-input/build-request-parts.test.ts
 import { describe, expect, test } from "vitest";
-import type { ImageAttachmentPart } from "@/contexts/prompt";
+import type {
+  ImageAttachmentPart,
+  OfficeAttachmentPart,
+} from "@/contexts/prompt";
 import { buildRequestParts } from "./build-request-parts";
 
 const image = (input: {
@@ -16,11 +19,29 @@ const image = (input: {
   dataUrl: input.dataUrl ?? "data:image/png;base64,AAA",
 });
 
+const office = (input: {
+  id: string;
+  filename: string;
+  path: string;
+  format?: OfficeAttachmentPart["format"];
+  mime?: string;
+}): OfficeAttachmentPart => ({
+  type: "office",
+  id: input.id,
+  filename: input.filename,
+  path: input.path,
+  format: input.format ?? "docx",
+  mime:
+    input.mime ??
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+});
+
 describe("buildRequestParts", () => {
   test("builds typed request and optimistic parts", () => {
     const result = buildRequestParts({
       text: "hello",
       images: [image({ id: "img_1", filename: "a.png" })],
+      office: [],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
@@ -54,6 +75,7 @@ describe("buildRequestParts", () => {
         image({ id: "img_1", filename: "a.png" }),
         image({ id: "img_2", filename: "b.png" }),
       ],
+      office: [],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
@@ -76,6 +98,7 @@ describe("buildRequestParts", () => {
           dataUrl: "data:application/pdf;base64,BBB",
         }),
       ],
+      office: [],
       messageID: "msg_multi",
       sessionID: "ses_multi",
     });
@@ -94,6 +117,7 @@ describe("buildRequestParts", () => {
     const result = buildRequestParts({
       text: "hello",
       images: [image({ id: "img_1", filename: "a.png" })],
+      office: [],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
@@ -112,6 +136,7 @@ describe("buildRequestParts", () => {
     const result = buildRequestParts({
       text: "",
       images: [image({ id: "img_1", filename: "a.png" })],
+      office: [],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
@@ -124,10 +149,105 @@ describe("buildRequestParts", () => {
     expect(result.optimisticParts).toHaveLength(1);
   });
 
-  test("returns no parts when text and images are both empty", () => {
+  test("builds a synthetic text part for Office attachments", () => {
+    const result = buildRequestParts({
+      text: "summarize this",
+      images: [],
+      office: [
+        office({
+          id: "office_1",
+          filename: "contract.docx",
+          path: "/Users/example/contract.docx",
+        }),
+      ],
+      messageID: "msg_office",
+      sessionID: "ses_office",
+    });
+
+    expect(result.requestParts).toHaveLength(2);
+    const attachmentContext = result.requestParts[1];
+    expect(attachmentContext?.type).toBe("text");
+    if (attachmentContext?.type !== "text")
+      throw new Error("Expected synthetic attachment context");
+    expect(attachmentContext).toMatchObject({
+      type: "text",
+      synthetic: true,
+      metadata: {
+        koworkAttachments: {
+          version: 1,
+          items: [
+            {
+              filename: "contract.docx",
+              path: "/Users/example/contract.docx",
+              format: "docx",
+            },
+          ],
+        },
+      },
+    });
+    expect(attachmentContext.text).toContain("<name>contract.docx</name>");
+    expect(result.requestParts.some((part) => part.type === "file")).toBe(
+      false,
+    );
+    expect(result.optimisticParts[1]).toMatchObject({
+      type: "text",
+      synthetic: true,
+      metadata: attachmentContext.metadata,
+    });
+  });
+
+  test("supports an Office-only prompt", () => {
     const result = buildRequestParts({
       text: "",
       images: [],
+      office: [
+        office({
+          id: "office_1",
+          filename: "budget.xlsx",
+          path: "/Users/example/budget.xlsx",
+          format: "xlsx",
+          mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }),
+      ],
+      messageID: "msg_office",
+      sessionID: "ses_office",
+    });
+
+    expect(result.requestParts).toHaveLength(1);
+    expect(result.requestParts[0]).toMatchObject({
+      type: "text",
+      synthetic: true,
+    });
+  });
+
+  test("places Office context before uploaded model attachments", () => {
+    const result = buildRequestParts({
+      text: "check these",
+      images: [image({ id: "img_1", filename: "a.png" })],
+      office: [
+        office({
+          id: "office_1",
+          filename: "contract.docx",
+          path: "/Users/example/contract.docx",
+        }),
+      ],
+      messageID: "msg_mixed",
+      sessionID: "ses_mixed",
+    });
+
+    expect(result.requestParts.map((part) => part.type)).toEqual([
+      "text",
+      "text",
+      "file",
+    ]);
+    expect(result.requestParts[1]).toMatchObject({ synthetic: true });
+  });
+
+  test("returns no parts when text and attachments are empty", () => {
+    const result = buildRequestParts({
+      text: "",
+      images: [],
+      office: [],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
