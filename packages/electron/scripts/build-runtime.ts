@@ -257,12 +257,8 @@ async function main() {
   renameSync(path.join(outDir, "node_modules"), path.join(outDir, NODE_LIBS));
 
   // 4. Shims (Node = Electron via ELECTRON_RUN_AS_NODE) -------------------------
-  // Two lanes, by name. `kowork-python`/`kowork-node` are the sealed lane: they
-  // run the embedded runtime and carry its isolation env themselves, so the
-  // sidecar never touches the user's PYTHON*/NODE_PATH. Bare python/pip/node/npm
-  // are deliberately NOT provided: they belong to the user's own toolchain — the
-  // pack's python/bin stays off PATH, and unique shim names mean nothing on the
-  // user's machine can shadow our runtimes (nor we theirs).
+  // Only kowork-* names: bare python/pip/node/npm belong to the user's own
+  // toolchain. Isolation env lives in the shims so the sidecar env stays clean.
   log(`writing bin/ shims`);
   const binDir = path.join(outDir, "bin");
   if (isWin) {
@@ -270,7 +266,7 @@ async function main() {
       path.join(binDir, "kowork-node.cmd"),
       [
         `@echo off`,
-        `rem Kowork: run Node via the Electron binary, with the pack's pre-bundled JS libs resolvable.`,
+        `rem Kowork: Node via the Electron binary; libs resolve via the pack's NODE_PATH.`,
         `set ELECTRON_RUN_AS_NODE=1`,
         `set "NODE_PATH=%~dp0..\\${NODE_LIBS};%NODE_PATH%"`,
         `"%KOWORK_ELECTRON_BIN%" %*`,
@@ -281,8 +277,8 @@ async function main() {
       path.join(binDir, "kowork-python.cmd"),
       [
         `@echo off`,
-        `rem Kowork: launch the embedded interpreter, sealed from the user's Python environment.`,
-        `rem .pyc writes are disabled: the pack lives in the signed app bundle.`,
+        `rem Kowork: embedded interpreter, isolated from the user's Python environment.`,
+        `rem .pyc writes disabled: the pack lives in the signed app bundle.`,
         `set PYTHONNOUSERSITE=1`,
         `set PYTHONDONTWRITEBYTECODE=1`,
         `set PYTHONPATH=`,
@@ -294,21 +290,17 @@ async function main() {
       ].join("\r\n"),
     );
   } else {
-    // The node shim self-locates the pack so NODE_PATH works wherever the pack
-    // is installed, without leaking our libs into the user's own Node.
+    // Self-locating: NODE_PATH must work wherever the pack is installed.
     const node = `#!/bin/sh
-# Kowork: run Node via the Electron binary (no separate Node bundled), with the
-# pack's pre-bundled JS libs resolvable via NODE_PATH (scoped to this shim).
+# Kowork: Node via the Electron binary; libs resolve via the pack's NODE_PATH.
 pack=$(CDPATH= cd -- "$(dirname -- "$(realpath -- "$0")")/.." && pwd)
 export NODE_PATH="$pack/${NODE_LIBS}\${NODE_PATH:+:$NODE_PATH}"
 export ELECTRON_RUN_AS_NODE=1
 exec "\${KOWORK_ELECTRON_BIN:?KOWORK_ELECTRON_BIN not set}" "$@"
 `;
     const python = `#!/bin/sh
-# Kowork: launch the embedded interpreter ($KOWORK_PYTHON), sealed from the
-# user's Python environment: no user site-packages, no inherited
-# PYTHONPATH/venv/conda, and no .pyc writes (the pack lives in the signed app
-# bundle).
+# Kowork: embedded interpreter, isolated from the user's Python environment.
+# .pyc writes disabled: the pack lives in the signed app bundle.
 unset PYTHONPATH PYTHONHOME VIRTUAL_ENV CONDA_PREFIX
 export PYTHONNOUSERSITE=1
 export PYTHONDONTWRITEBYTECODE=1
@@ -336,9 +328,8 @@ exec "\${KOWORK_PYTHON:?KOWORK_PYTHON not set}" "$@"
     }
   }
 
-  // Remove pip itself: nothing at runtime may install into the sealed bundle
-  // (signed Resources) or fetch unpinned code. Bare `pip` is intentionally
-  // absent from the pack so it resolves to the user's own pip, if they have one.
+  // Remove pip itself: nothing may install into the signed bundle or fetch
+  // unpinned code; bare `pip` resolves to the user's own pip, if any.
   const sitePackages = path.join(libDir, "site-packages");
   for (const name of listDirSafe(sitePackages)) {
     if (/^pip($|[.-])/.test(name)) {
