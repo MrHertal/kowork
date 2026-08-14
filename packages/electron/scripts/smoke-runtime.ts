@@ -30,7 +30,6 @@ const pack = assertRuntimePack({
 // PATH; isolation env is the shims' job, which the probes below exercise.
 const env: NodeJS.ProcessEnv = {
   ...process.env,
-  KOWORK_PYTHON: pack.pythonExe,
   KOWORK_ELECTRON_BIN: electronBin,
 };
 

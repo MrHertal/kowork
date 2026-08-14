@@ -295,7 +295,6 @@ function applyRuntimeEnv(env: Record<string, string>): void {
   const pack = resolveRuntimePack();
   if (!pack) return;
 
-  env.KOWORK_PYTHON = pack.pythonExe;
   env.KOWORK_ELECTRON_BIN = process.execPath; // kowork-node runs this as Node
 
   const pathKey =

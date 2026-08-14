@@ -16,7 +16,7 @@ export type RuntimePack = {
   pythonExe: string;
   /** Dir containing the interpreter (python/bin; python on Windows). */
   pythonBinDir: string;
-  /** Pack bin/ with the node + npm shims. */
+  /** Pack bin/ with the kowork-python/kowork-node shims. */
   binDir: string;
   /** Resolved by the agent via NODE_PATH. */
   nodeModules: string;

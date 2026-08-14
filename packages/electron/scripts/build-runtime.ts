@@ -261,6 +261,7 @@ async function main() {
   // toolchain. Isolation env lives in the shims so the sidecar env stays clean.
   log(`writing bin/ shims`);
   const binDir = path.join(outDir, "bin");
+  const pythonRel = path.relative(outDir, pyExe);
   if (isWin) {
     writeFileSync(
       path.join(binDir, "kowork-node.cmd"),
@@ -280,14 +281,13 @@ async function main() {
         `@echo off`,
         `rem Kowork: embedded interpreter, isolated from the user's Python environment.`,
         `rem .pyc writes disabled: the pack lives in the signed app bundle.`,
-        `if "%KOWORK_PYTHON%"=="" (echo KOWORK_PYTHON not set 1>&2 & exit /b 1)`,
         `set PYTHONNOUSERSITE=1`,
         `set PYTHONDONTWRITEBYTECODE=1`,
         `set PYTHONPATH=`,
         `set PYTHONHOME=`,
         `set VIRTUAL_ENV=`,
         `set CONDA_PREFIX=`,
-        `"%KOWORK_PYTHON%" %*`,
+        `"%~dp0..\\${pythonRel}" %*`,
         ``,
       ].join("\r\n"),
     );
@@ -304,10 +304,11 @@ exec "\${KOWORK_ELECTRON_BIN:?KOWORK_ELECTRON_BIN not set}" "$@"
     const python = `#!/bin/sh
 # Kowork: embedded interpreter, isolated from the user's Python environment.
 # .pyc writes disabled: the pack lives in the signed app bundle.
+pack=$(CDPATH= cd -P "$(dirname "$0")/.." && pwd)
 unset PYTHONPATH PYTHONHOME VIRTUAL_ENV CONDA_PREFIX
 export PYTHONNOUSERSITE=1
 export PYTHONDONTWRITEBYTECODE=1
-exec "\${KOWORK_PYTHON:?KOWORK_PYTHON not set}" "$@"
+exec "$pack/${pythonRel}" "$@"
 `;
     writeFileSync(path.join(binDir, "kowork-node"), node);
     writeFileSync(path.join(binDir, "kowork-python"), python);

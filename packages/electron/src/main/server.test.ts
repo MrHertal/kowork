@@ -200,7 +200,6 @@ describe("spawnLocalServer", () => {
     await spawned;
 
     const [, , opts] = doubles.fork.mock.calls[0]!;
-    expect(opts.env.KOWORK_PYTHON).toBe("/pack/python/bin/python3");
     expect(opts.env.KOWORK_ELECTRON_BIN).toBe(process.execPath);
     expect(opts.env.PATH).toBe(["/pack/bin", "/usr/bin"].join(delimiter));
     // Isolation for the embedded runtime lives in the kowork-* shims, not here.
