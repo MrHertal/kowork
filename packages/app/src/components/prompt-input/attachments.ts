@@ -70,6 +70,7 @@ export function usePromptAttachments() {
         if (!platform.getPathForFile || !sidecar) return "office-unavailable";
         const path = await platform.getPathForFile(file, {
           target: sidecar.variant === "wsl" ? "wsl" : "native",
+          wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
         });
         if (!path) return "office-path";
         const attachment: OfficeAttachmentPart = {
@@ -77,6 +78,7 @@ export function usePromptAttachments() {
           id: nanoid(),
           filename: file.name,
           path,
+          serverKey: server.key,
           ...office,
         };
         update((prev) => [...prev, attachment]);
@@ -99,7 +101,7 @@ export function usePromptAttachments() {
       update((prev) => [...prev, attachment]);
       return "added";
     },
-    [platform, sidecar, update],
+    [platform, server.key, sidecar, update],
   );
 
   const addAttachment = useCallback(

@@ -493,6 +493,8 @@
   "toast_project_reloadFailed_title": "无法重新加载文件夹“{project}”",
   "toast_prompt_attachFailed_description": "请重试或选择其他文件。",
   "toast_prompt_attachFailed_title": "无法读取文件",
+  "toast_prompt_attachDocumentMoved_description": "请移除此文档，然后重新附加。",
+  "toast_prompt_attachDocumentMoved_title": "文档已不可用",
   "toast_prompt_attachOfficePathFailed_description": "Kowork 无法打开此文档。请重新选择。",
   "toast_prompt_attachOfficePathFailed_title": "无法附加文档",
   "toast_prompt_attachOfficeUnavailable_description": "此类文档只能在 Kowork 桌面应用中附加。",

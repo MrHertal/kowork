@@ -191,31 +191,48 @@ export function UserMessage({ parts }: { parts: Part[] }) {
       }),
     );
   });
+  const occupiedPositions = new Set(
+    office.map((attachment) => attachment.position),
+  );
+  const modelPositions = Array.from(
+    { length: attachments.length + office.length },
+    (_, index) => index + 1,
+  ).filter((position) => !occupiedPositions.has(position));
+  const orderedAttachments = [
+    ...attachments.map((part, index) => ({
+      type: "model" as const,
+      part,
+      position: modelPositions[index] ?? Number.MAX_SAFE_INTEGER,
+    })),
+    ...office.map((attachment) => ({
+      type: "office" as const,
+      attachment,
+      position: attachment.position,
+    })),
+  ].sort((a, b) => a.position - b.position);
   return (
     <Message from="user">
       <div>
-        {attachments.length > 0 && (
+        {orderedAttachments.length > 0 && (
           <Attachments className="mb-2" variant="grid">
-            {attachments.map((part) => (
-              <Attachment
-                key={part.id}
-                title={part.filename}
-                data={{
-                  id: part.id,
-                  type: "file",
-                  filename: part.filename,
-                  mediaType: part.mime,
-                  url: part.url,
-                }}
-              >
-                <AttachmentPreview />
-              </Attachment>
-            ))}
-          </Attachments>
-        )}
-        {office.length > 0 && (
-          <Attachments className="mb-2" variant="grid">
-            {office.map((attachment) => {
+            {orderedAttachments.map((item) => {
+              if (item.type === "model")
+                return (
+                  <Attachment
+                    key={item.part.id}
+                    title={item.part.filename}
+                    data={{
+                      id: item.part.id,
+                      type: "file",
+                      filename: item.part.filename,
+                      mediaType: item.part.mime,
+                      url: item.part.url,
+                    }}
+                  >
+                    <AttachmentPreview />
+                  </Attachment>
+                );
+              const attachment = item.attachment;
               const Icon =
                 attachment.format === "xlsx"
                   ? FileSpreadsheetIcon
@@ -243,9 +260,9 @@ export function UserMessage({ parts }: { parts: Part[] }) {
         <MessageContent className="gap-4">
           {textParts.length > 0 ? (
             textParts.map((part) => <span key={part.id}>{part.text}</span>)
-          ) : (
+          ) : attachments.length === 0 && office.length === 0 ? (
             <span className="text-muted-foreground italic">...</span>
-          )}
+          ) : null}
         </MessageContent>
       </div>
     </Message>

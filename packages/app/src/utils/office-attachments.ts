@@ -12,11 +12,19 @@ export type OfficeAttachmentsMetadata = {
     path: string;
     mime: string;
     format: OfficeAttachmentFormat;
+    position: number;
   }>;
 };
 
 export type OfficeAttachmentMetadataItem =
   OfficeAttachmentsMetadata["items"][number];
+
+export function officeAttachmentMatchesServer(
+  attachment: { serverKey: string },
+  serverKey: string,
+) {
+  return attachment.serverKey === serverKey;
+}
 
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -40,6 +48,9 @@ export function officeAttachmentsFromMetadata(
       typeof item.path !== "string" ||
       typeof item.mime !== "string" ||
       !format(item.format) ||
+      typeof item.position !== "number" ||
+      !Number.isSafeInteger(item.position) ||
+      item.position < 1 ||
       item.mime !== OFFICE_FILE_MIMES[item.format]
     )
       return [];
@@ -49,6 +60,7 @@ export function officeAttachmentsFromMetadata(
         path: item.path,
         mime: item.mime,
         format: item.format,
+        position: item.position,
       },
     ];
   });
@@ -69,10 +81,17 @@ export function officeAttachmentsPrompt(
     path: string;
     mime: string;
     format: OfficeAttachmentFormat;
+    position: number;
   }>,
 ) {
   const items: OfficeAttachmentsMetadata["items"] = attachments.map(
-    ({ filename, path, mime, format }) => ({ filename, path, mime, format }),
+    ({ filename, path, mime, format, position }) => ({
+      filename,
+      path,
+      mime,
+      format,
+      position,
+    }),
   );
   const text = [
     "<kowork_attachments>",
@@ -81,6 +100,7 @@ export function officeAttachmentsPrompt(
       `    <name>${escapeXml(attachment.filename)}</name>`,
       `    <path>${escapeXml(attachment.path)}</path>`,
       `    <format>${attachment.format}</format>`,
+      `    <position>${attachment.position}</position>`,
       "  </attachment>",
     ]),
     "</kowork_attachments>",

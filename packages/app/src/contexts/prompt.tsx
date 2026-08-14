@@ -43,6 +43,7 @@ export interface OfficeAttachmentPart {
   mime: string;
   path: string;
   format: OfficeAttachmentFormat;
+  serverKey: string;
 }
 
 export type ContentPart =

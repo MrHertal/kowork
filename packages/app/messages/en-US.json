@@ -493,6 +493,8 @@
   "toast_project_reloadFailed_title": "Failed to reload folder “{project}”",
   "toast_prompt_attachFailed_description": "Try again or choose a different file.",
   "toast_prompt_attachFailed_title": "Can't read file",
+  "toast_prompt_attachDocumentMoved_description": "Remove this document and attach it again.",
+  "toast_prompt_attachDocumentMoved_title": "Document is no longer available",
   "toast_prompt_attachOfficePathFailed_description": "Kowork couldn't open this document. Try choosing it again.",
   "toast_prompt_attachOfficePathFailed_title": "Can't attach document",
   "toast_prompt_attachOfficeUnavailable_description": "This type of document can only be attached in the Kowork desktop app.",

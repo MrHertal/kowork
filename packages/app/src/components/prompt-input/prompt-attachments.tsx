@@ -145,39 +145,34 @@ export function PromptAttachments() {
   const { current } = usePrompt();
   const { removeAttachment } = usePromptAttachments();
 
-  const images = useMemo(
+  const attachments = useMemo(
     () =>
       current.filter(
-        (part): part is ImageAttachmentPart => part.type === "image",
-      ),
-    [current],
-  );
-  const office = useMemo(
-    () =>
-      current.filter(
-        (part): part is OfficeAttachmentPart => part.type === "office",
+        (part): part is ImageAttachmentPart | OfficeAttachmentPart =>
+          part.type === "image" || part.type === "office",
       ),
     [current],
   );
 
-  if (images.length === 0 && office.length === 0) return null;
+  if (attachments.length === 0) return null;
 
   return (
     <Attachments variant="inline" className="w-full px-3 pt-3">
-      {images.map((attachment) => (
-        <ImageAttachmentItem
-          key={attachment.id}
-          attachment={attachment}
-          onRemove={removeAttachment}
-        />
-      ))}
-      {office.map((attachment) => (
-        <OfficeAttachmentItem
-          key={attachment.id}
-          attachment={attachment}
-          onRemove={removeAttachment}
-        />
-      ))}
+      {attachments.map((attachment) =>
+        attachment.type === "image" ? (
+          <ImageAttachmentItem
+            key={attachment.id}
+            attachment={attachment}
+            onRemove={removeAttachment}
+          />
+        ) : (
+          <OfficeAttachmentItem
+            key={attachment.id}
+            attachment={attachment}
+            onRemove={removeAttachment}
+          />
+        ),
+      )}
     </Attachments>
   );
 }

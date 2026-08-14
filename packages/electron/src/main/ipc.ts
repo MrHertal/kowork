@@ -39,7 +39,11 @@ type Deps = {
   setDisplayBackend: (backend: string | null) => Promise<void> | void;
   parseMarkdown: (markdown: string) => Promise<string> | string;
   checkAppExists: (appName: string) => Promise<boolean> | boolean;
-  wslPath: (path: string, mode: "windows" | "linux" | null) => Promise<string>;
+  wslPath: (
+    path: string,
+    mode: "windows" | "linux" | null,
+    distro?: string,
+  ) => Promise<string>;
   resolveAppPath: (appName: string) => Promise<string | null>;
   runUpdater: (alertOnFail: boolean) => Promise<void> | void;
   checkUpdate: () => Promise<{ updateAvailable: boolean; version?: string }>;
@@ -92,7 +96,8 @@ export function registerIpcHandlers(deps: Deps) {
       _event: IpcMainInvokeEvent,
       path: string,
       mode: "windows" | "linux" | null,
-    ) => deps.wslPath(path, mode),
+      distro?: string,
+    ) => deps.wslPath(path, mode, distro),
   );
   ipcMain.handle(
     "resolve-app-path",

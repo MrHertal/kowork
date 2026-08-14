@@ -24,6 +24,7 @@ const metadata = {
         path: "/secret/contract.docx",
         mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         format: "docx",
+        position: 1,
       },
     ],
   },
@@ -52,6 +53,7 @@ describe("UserMessage", () => {
     expect(
       screen.queryByText(/\/secret\/contract\.docx/),
     ).not.toBeInTheDocument();
+    expect(screen.queryByText("...")).not.toBeInTheDocument();
   });
 
   test("ignores malformed and unrelated synthetic metadata", () => {
@@ -69,5 +71,35 @@ describe("UserMessage", () => {
 
     expect(screen.queryByTitle("contract.docx")).not.toBeInTheDocument();
     expect(screen.queryByText(/kowork_attachments/)).not.toBeInTheDocument();
+  });
+
+  test("preserves mixed attachment order", () => {
+    render(
+      <UserMessage
+        parts={[
+          synthetic({
+            koworkAttachments: {
+              version: 1,
+              items: [{ ...metadata.koworkAttachments.items[0], position: 2 }],
+            },
+          }),
+          {
+            id: "prt_image",
+            type: "file",
+            filename: "photo.png",
+            mime: "image/png",
+            url: "data:image/png;base64,AAA",
+            sessionID: "ses_1",
+            messageID: "msg_1",
+          },
+        ]}
+      />,
+    );
+
+    expect(
+      screen
+        .getAllByTitle(/photo\.png|contract\.docx/)
+        .map((item) => item.title),
+    ).toEqual(["photo.png", "contract.docx"]);
   });
 });

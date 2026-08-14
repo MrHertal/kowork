@@ -2,9 +2,24 @@ import { describe, expect, test } from "vitest";
 import type { OfficeAttachmentPart } from "@/contexts/prompt";
 import {
   OFFICE_ATTACHMENTS_METADATA_KEY,
+  officeAttachmentMatchesServer,
   officeAttachmentsFromMetadata,
   officeAttachmentsPrompt,
 } from "./office-attachments";
+
+describe("officeAttachmentMatchesServer", () => {
+  test("matches only the sidecar where the document was attached", () => {
+    expect(
+      officeAttachmentMatchesServer({ serverKey: "sidecar" }, "sidecar"),
+    ).toBe(true);
+    expect(
+      officeAttachmentMatchesServer({ serverKey: "sidecar" }, "wsl:Ubuntu"),
+    ).toBe(false);
+    expect(
+      officeAttachmentMatchesServer({ serverKey: "wsl:Ubuntu" }, "wsl:Debian"),
+    ).toBe(false);
+  });
+});
 
 const attachment = (
   input: Partial<OfficeAttachmentPart> = {},
@@ -15,20 +30,24 @@ const attachment = (
   path: "/Users/example/contract.docx",
   mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   format: "docx",
+  serverKey: "sidecar",
   ...input,
 });
 
 describe("officeAttachmentsPrompt", () => {
   test("builds model context and versioned metadata", () => {
     const result = officeAttachmentsPrompt([
-      attachment(),
-      attachment({
-        id: "office_2",
-        filename: "budget.xlsx",
-        path: "/Users/example/budget.xlsx",
-        mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        format: "xlsx",
-      }),
+      { ...attachment(), position: 1 },
+      {
+        ...attachment({
+          id: "office_2",
+          filename: "budget.xlsx",
+          path: "/Users/example/budget.xlsx",
+          mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          format: "xlsx",
+        }),
+        position: 2,
+      },
     ]);
 
     expect(result.text).toBe(`<kowork_attachments>
@@ -36,11 +55,13 @@ describe("officeAttachmentsPrompt", () => {
     <name>contract.docx</name>
     <path>/Users/example/contract.docx</path>
     <format>docx</format>
+    <position>1</position>
   </attachment>
   <attachment>
     <name>budget.xlsx</name>
     <path>/Users/example/budget.xlsx</path>
     <format>xlsx</format>
+    <position>2</position>
   </attachment>
 </kowork_attachments>`);
     expect(result.metadata[OFFICE_ATTACHMENTS_METADATA_KEY]).toEqual({
@@ -51,12 +72,14 @@ describe("officeAttachmentsPrompt", () => {
           path: "/Users/example/contract.docx",
           mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           format: "docx",
+          position: 1,
         },
         {
           filename: "budget.xlsx",
           path: "/Users/example/budget.xlsx",
           mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           format: "xlsx",
+          position: 2,
         },
       ],
     });
@@ -64,10 +87,13 @@ describe("officeAttachmentsPrompt", () => {
 
   test("escapes filenames and paths as untrusted XML values", () => {
     const result = officeAttachmentsPrompt([
-      attachment({
-        filename: `terms<&>"'.docx`,
-        path: `/tmp/<folder>&"'/terms.docx`,
-      }),
+      {
+        ...attachment({
+          filename: `terms<&>"'.docx`,
+          path: `/tmp/<folder>&"'/terms.docx`,
+        }),
+        position: 1,
+      },
     ]);
 
     expect(result.text).toContain(
@@ -81,7 +107,7 @@ describe("officeAttachmentsPrompt", () => {
 
 describe("officeAttachmentsFromMetadata", () => {
   test("returns validated version 1 attachment metadata", () => {
-    const prompt = officeAttachmentsPrompt([attachment()]);
+    const prompt = officeAttachmentsPrompt([{ ...attachment(), position: 1 }]);
 
     expect(officeAttachmentsFromMetadata(prompt.metadata)).toEqual([
       {
@@ -89,6 +115,7 @@ describe("officeAttachmentsFromMetadata", () => {
         path: "/Users/example/contract.docx",
         mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         format: "docx",
+        position: 1,
       },
     ]);
   });
@@ -104,9 +131,8 @@ describe("officeAttachmentsFromMetadata", () => {
   });
 
   test("keeps valid items and ignores malformed entries", () => {
-    const valid = officeAttachmentsPrompt([attachment()]).metadata[
-      OFFICE_ATTACHMENTS_METADATA_KEY
-    ].items[0];
+    const valid = officeAttachmentsPrompt([{ ...attachment(), position: 1 }])
+      .metadata[OFFICE_ATTACHMENTS_METADATA_KEY].items[0];
 
     expect(
       officeAttachmentsFromMetadata({
@@ -120,6 +146,6 @@ describe("officeAttachmentsFromMetadata", () => {
           ],
         },
       }),
-    ).toEqual([valid]);
+    ).toEqual([{ ...valid, position: 1 }]);
   });
 });

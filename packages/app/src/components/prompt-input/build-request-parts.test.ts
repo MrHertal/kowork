@@ -34,14 +34,14 @@ const office = (input: {
   mime:
     input.mime ??
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  serverKey: "sidecar",
 });
 
 describe("buildRequestParts", () => {
   test("builds typed request and optimistic parts", () => {
     const result = buildRequestParts({
       text: "hello",
-      images: [image({ id: "img_1", filename: "a.png" })],
-      office: [],
+      attachments: [image({ id: "img_1", filename: "a.png" })],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
@@ -71,11 +71,10 @@ describe("buildRequestParts", () => {
   test("assigns ascending part ids", () => {
     const result = buildRequestParts({
       text: "hi",
-      images: [
+      attachments: [
         image({ id: "img_1", filename: "a.png" }),
         image({ id: "img_2", filename: "b.png" }),
       ],
-      office: [],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
@@ -89,7 +88,7 @@ describe("buildRequestParts", () => {
   test("keeps multiple uploaded attachments in order", () => {
     const result = buildRequestParts({
       text: "check these",
-      images: [
+      attachments: [
         image({ id: "img_1", filename: "a.png" }),
         image({
           id: "img_2",
@@ -98,7 +97,6 @@ describe("buildRequestParts", () => {
           dataUrl: "data:application/pdf;base64,BBB",
         }),
       ],
-      office: [],
       messageID: "msg_multi",
       sessionID: "ses_multi",
     });
@@ -116,8 +114,7 @@ describe("buildRequestParts", () => {
   test("mirrors text and file fields into the optimistic parts", () => {
     const result = buildRequestParts({
       text: "hello",
-      images: [image({ id: "img_1", filename: "a.png" })],
-      office: [],
+      attachments: [image({ id: "img_1", filename: "a.png" })],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
@@ -135,8 +132,7 @@ describe("buildRequestParts", () => {
   test("omits the text part when only images are sent", () => {
     const result = buildRequestParts({
       text: "",
-      images: [image({ id: "img_1", filename: "a.png" })],
-      office: [],
+      attachments: [image({ id: "img_1", filename: "a.png" })],
       messageID: "msg_1",
       sessionID: "ses_1",
     });
@@ -152,8 +148,7 @@ describe("buildRequestParts", () => {
   test("builds a synthetic text part for Office attachments", () => {
     const result = buildRequestParts({
       text: "summarize this",
-      images: [],
-      office: [
+      attachments: [
         office({
           id: "office_1",
           filename: "contract.docx",
@@ -199,8 +194,7 @@ describe("buildRequestParts", () => {
   test("supports an Office-only prompt", () => {
     const result = buildRequestParts({
       text: "",
-      images: [],
-      office: [
+      attachments: [
         office({
           id: "office_1",
           filename: "budget.xlsx",
@@ -223,8 +217,8 @@ describe("buildRequestParts", () => {
   test("places Office context before uploaded model attachments", () => {
     const result = buildRequestParts({
       text: "check these",
-      images: [image({ id: "img_1", filename: "a.png" })],
-      office: [
+      attachments: [
+        image({ id: "img_1", filename: "a.png" }),
         office({
           id: "office_1",
           filename: "contract.docx",
@@ -241,13 +235,17 @@ describe("buildRequestParts", () => {
       "file",
     ]);
     expect(result.requestParts[1]).toMatchObject({ synthetic: true });
+    expect(result.requestParts[1]).toMatchObject({
+      metadata: {
+        koworkAttachments: { items: [{ position: 2 }] },
+      },
+    });
   });
 
   test("returns no parts when text and attachments are empty", () => {
     const result = buildRequestParts({
       text: "",
-      images: [],
-      office: [],
+      attachments: [],
       messageID: "msg_1",
       sessionID: "ses_1",
     });

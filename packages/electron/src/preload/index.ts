@@ -18,7 +18,8 @@ const api: ElectronAPI = {
   parseMarkdownCommand: (markdown) =>
     ipcRenderer.invoke("parse-markdown", markdown),
   checkAppExists: (appName) => ipcRenderer.invoke("check-app-exists", appName),
-  wslPath: (path, mode) => ipcRenderer.invoke("wsl-path", path, mode),
+  wslPath: (path, mode, distro) =>
+    ipcRenderer.invoke("wsl-path", path, mode, distro),
   resolveAppPath: (appName) => ipcRenderer.invoke("resolve-app-path", appName),
   storeGet: (name, key) => ipcRenderer.invoke("store-get", name, key),
   storeSet: (name, key, value) =>

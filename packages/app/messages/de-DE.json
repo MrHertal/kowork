@@ -493,6 +493,8 @@
   "toast_project_reloadFailed_title": "Ordner „{project}“ konnte nicht neu geladen werden",
   "toast_prompt_attachFailed_description": "Versuchen Sie es erneut oder wählen Sie eine andere Datei.",
   "toast_prompt_attachFailed_title": "Datei kann nicht gelesen werden",
+  "toast_prompt_attachDocumentMoved_description": "Entfernen Sie dieses Dokument und hängen Sie es erneut an.",
+  "toast_prompt_attachDocumentMoved_title": "Dokument ist nicht mehr verfügbar",
   "toast_prompt_attachOfficePathFailed_description": "Kowork konnte dieses Dokument nicht öffnen. Wählen Sie es erneut aus.",
   "toast_prompt_attachOfficePathFailed_title": "Dokument kann nicht angehängt werden",
   "toast_prompt_attachOfficeUnavailable_description": "Dieser Dokumenttyp kann nur in der Kowork-Desktop-App angehängt werden.",

@@ -231,6 +231,7 @@ describe("usePromptAttachments", () => {
       });
       expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
         target: "native",
+        wslDistro: undefined,
       });
     },
   );
@@ -251,6 +252,7 @@ describe("usePromptAttachments", () => {
 
     expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
       target: "wsl",
+      wslDistro: "Ubuntu",
     });
   });
 
@@ -288,8 +290,7 @@ describe("usePromptAttachments", () => {
     await waitFor(() => expect(images()).toHaveLength(1));
     expect(officeAttachments()).toHaveLength(0);
     expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
-      description:
-        "Kowork couldn't open this document. Try choosing it again.",
+      description: "Kowork couldn't open this document. Try choosing it again.",
     });
   });
 
@@ -377,8 +378,7 @@ describe("usePromptAttachments", () => {
     expect(officeAttachments()).toHaveLength(0);
     expect(platform.getPathForFile).not.toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
-      description:
-        "Kowork couldn't open this document. Try choosing it again.",
+      description: "Kowork couldn't open this document. Try choosing it again.",
     });
   });
 

@@ -16,8 +16,7 @@ type PromptRequestPart = (TextPartInput | FilePartInput) & { id: string };
 
 type BuildRequestPartsInput = {
   text: string;
-  images: ImageAttachmentPart[];
-  office: OfficeAttachmentPart[];
+  attachments: Array<ImageAttachmentPart | OfficeAttachmentPart>;
   messageID: string;
   sessionID: string;
 };
@@ -63,19 +62,27 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
       ]
     : [];
 
-  const images = input.images.map(
-    (attachment) =>
-      ({
-        id: ascending("part"),
-        type: "file",
-        mime: attachment.mime,
-        url: attachment.dataUrl,
-        filename: attachment.filename,
-      }) satisfies PromptRequestPart,
+  const images = input.attachments.flatMap((attachment) =>
+    attachment.type === "image"
+      ? [
+          {
+            id: ascending("part"),
+            type: "file" as const,
+            mime: attachment.mime,
+            url: attachment.dataUrl,
+            filename: attachment.filename,
+          } satisfies PromptRequestPart,
+        ]
+      : [],
   );
 
-  if (input.office.length > 0) {
-    const attachmentContext = officeAttachmentsPrompt(input.office);
+  const office = input.attachments.flatMap((attachment, index) =>
+    attachment.type === "office"
+      ? [{ ...attachment, position: index + 1 }]
+      : [],
+  );
+  if (office.length > 0) {
+    const attachmentContext = officeAttachmentsPrompt(office);
     requestParts.push({
       id: ascending("part"),
       type: "text",

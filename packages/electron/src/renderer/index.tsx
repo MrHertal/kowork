@@ -148,7 +148,9 @@ function createPlatform(): Platform {
       const result = window.api.getPathForFile(file);
       if (!result) return null;
       if (opts?.target !== "wsl") return result;
-      return window.api.wslPath(result, "linux").catch(() => null);
+      return window.api
+        .wslPath(result, "linux", opts.wslDistro)
+        .catch(() => null);
     },
 
     async saveFilePickerDialog(opts) {

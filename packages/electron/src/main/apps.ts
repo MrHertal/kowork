@@ -17,19 +17,27 @@ export function resolveAppPath(appName: string): string | null {
 export function wslPath(
   path: string,
   mode: "windows" | "linux" | null,
+  distro?: string,
 ): string {
   if (process.platform !== "win32") return path;
 
   const flag = mode === "windows" ? "-w" : "-u";
+  const prefix = distro ? ["-d", distro] : [];
   try {
     if (path.startsWith("~")) {
       const suffix = path.slice(1);
       const cmd = `wslpath ${flag} "$HOME${suffix.replace(/"/g, '\\"')}"`;
-      const output = execFileSync("wsl", ["-e", "sh", "-lc", cmd]);
+      const output = execFileSync("wsl", [...prefix, "-e", "sh", "-lc", cmd]);
       return output.toString().trim();
     }
 
-    const output = execFileSync("wsl", ["-e", "wslpath", flag, path]);
+    const output = execFileSync("wsl", [
+      ...prefix,
+      "-e",
+      "wslpath",
+      flag,
+      path,
+    ]);
     return output.toString().trim();
   } catch (error) {
     throw new Error(`Failed to run wslpath: ${String(error)}`, {

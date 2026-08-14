@@ -45,6 +45,7 @@ import {
   type OfficeAttachmentPart,
 } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
+import { useServer } from "@/contexts/server";
 import { useSync } from "@/contexts/sync";
 import { cn } from "@/lib/utils";
 import { m } from "@/paraglide/messages";
@@ -57,6 +58,7 @@ import {
   syncSessionModel,
 } from "@/pages/session/session-model-helpers";
 import { ascending } from "@/utils/id";
+import { officeAttachmentMatchesServer } from "@/utils/office-attachments";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
 import {
@@ -81,6 +83,7 @@ export function Page({
   onDirectoryDetach?: () => void;
 }) {
   const sdk = useSDK();
+  const server = useServer();
   const sync = useSync();
   const local = useLocal();
   const permission = usePermission();
@@ -183,14 +186,25 @@ export function Page({
     async (message: PromptInputMessage) => {
       const input = message.text?.trim();
       const promptSnapshot = prompt.current;
-      const images = promptSnapshot.filter(
-        (part): part is ImageAttachmentPart => part.type === "image",
+      const attachments = promptSnapshot.filter(
+        (part): part is ImageAttachmentPart | OfficeAttachmentPart =>
+          part.type === "image" ||
+          (part.type === "office" &&
+            officeAttachmentMatchesServer(part, server.key)),
       );
-      const office = promptSnapshot.filter(
-        (part): part is OfficeAttachmentPart => part.type === "office",
+      const unavailableOffice = promptSnapshot.some(
+        (part) =>
+          part.type === "office" &&
+          !officeAttachmentMatchesServer(part, server.key),
       );
+      if (unavailableOffice) {
+        toast.error(m.toast_prompt_attachDocumentMoved_title(), {
+          description: m.toast_prompt_attachDocumentMoved_description(),
+        });
+        return;
+      }
       if (
-        (!input && images.length === 0 && office.length === 0) ||
+        (!input && attachments.length === 0) ||
         sendingRef.current ||
         blockedRef.current ||
         isChildSession
@@ -243,8 +257,7 @@ export function Page({
         messageID = ascending("message");
         const { requestParts, optimisticParts } = buildRequestParts({
           text: input ?? "",
-          images,
-          office,
+          attachments,
           messageID,
           sessionID: sid,
         });
@@ -312,6 +325,7 @@ export function Page({
       directory,
       newSessionPermissionMode,
       permission,
+      server.key,
     ],
   );
 
@@ -330,8 +344,15 @@ export function Page({
   const hasText = !!text.trim();
   const hasImages = prompt.current.some((part) => part.type === "image");
   const hasOffice = prompt.current.some((part) => part.type === "office");
+  const hasUnavailableOffice = prompt.current.some(
+    (part) =>
+      part.type === "office" &&
+      !officeAttachmentMatchesServer(part, server.key),
+  );
   const canSubmit =
     (hasText || hasImages || hasOffice) &&
+    !hasUnavailableOffice &&
+    prompt.ready &&
     !sending &&
     !blocked &&
     !isChildSession;
