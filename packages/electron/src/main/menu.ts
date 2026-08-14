@@ -19,8 +19,7 @@ export function createMenu(deps: Deps) {
     return;
   }
 
-  // Dev tools stay out of production builds; the app-menu "Reload" remains as
-  // the user-facing recovery hatch.
+  // Dev tools stay out of packaged builds.
   const devItems: Electron.MenuItemConstructorOptions[] = app.isPackaged
     ? []
     : [{ role: "reload" }, { role: "toggleDevTools" }, { type: "separator" }];
