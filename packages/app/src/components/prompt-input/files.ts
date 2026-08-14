@@ -3,6 +3,8 @@
 import {
   ACCEPTED_FILE_TYPES,
   ACCEPTED_IMAGE_TYPES,
+  OFFICE_FILE_MIMES,
+  type OfficeAttachmentFormat,
 } from "@/constants/file-picker";
 
 export { ACCEPTED_FILE_TYPES };
@@ -24,7 +26,6 @@ const TEXT_MIMES = new Set([
   "application/xml",
   "application/yaml",
 ]);
-
 const SAMPLE = 4096;
 
 function kind(type: string) {
@@ -35,6 +36,17 @@ function ext(name: string) {
   const idx = name.lastIndexOf(".");
   if (idx === -1) return "";
   return name.slice(idx + 1).toLowerCase();
+}
+
+export function officeAttachmentInfo(
+  file: Pick<File, "name">,
+): { format: OfficeAttachmentFormat; mime: string } | undefined {
+  const format = ext(file.name);
+  if (!(format in OFFICE_FILE_MIMES)) return;
+  return {
+    format: format as OfficeAttachmentFormat,
+    mime: OFFICE_FILE_MIMES[format as OfficeAttachmentFormat],
+  };
 }
 
 function textMime(type: string) {

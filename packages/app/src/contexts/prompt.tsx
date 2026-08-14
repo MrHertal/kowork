@@ -7,6 +7,7 @@ import {
   useMemo,
 } from "react";
 import type { FileSelection } from "@/contexts/file";
+import type { OfficeAttachmentFormat } from "@/constants/file-picker";
 import { useSDK } from "@/contexts/sdk";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { Persist } from "@/utils/persist";
@@ -35,7 +36,21 @@ export interface ImageAttachmentPart {
   dataUrl: string;
 }
 
-export type ContentPart = TextPart | FileAttachmentPart | ImageAttachmentPart;
+export interface OfficeAttachmentPart {
+  type: "office";
+  id: string;
+  filename: string;
+  mime: string;
+  path: string;
+  format: OfficeAttachmentFormat;
+  serverKey: string;
+}
+
+export type ContentPart =
+  | TextPart
+  | FileAttachmentPart
+  | ImageAttachmentPart
+  | OfficeAttachmentPart;
 export type Prompt = ContentPart[];
 
 export const DEFAULT_PROMPT: Prompt = [
@@ -65,6 +80,8 @@ function isPartEqual(a: ContentPart, b: ContentPart): boolean {
       );
     case "image":
       return b.type === "image" && a.id === b.id;
+    case "office":
+      return b.type === "office" && a.id === b.id;
   }
 }
 

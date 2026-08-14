@@ -12,14 +12,14 @@ import {
 import { DialogSettings } from "@/components/settings/dialog-settings";
 import type { SettingsSection } from "@/components/settings/settings-shell";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { ACCEPTED_FILE_TYPES } from "@/constants/file-picker";
+import { acceptedFileTypes } from "@/constants/file-picker";
 import { useDialog } from "@/contexts/dialog";
 import { m } from "@/paraglide/messages";
 
 import { usePromptAttachments } from "./attachments";
 
 export function PromptAttachButton() {
-  const { addAttachments } = usePromptAttachments();
+  const { addAttachments, canAttachOffice } = usePromptAttachments();
   const dialog = useDialog();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +71,7 @@ export function PromptAttachButton() {
         ref={inputRef}
         type="file"
         multiple
-        accept={ACCEPTED_FILE_TYPES.join(",")}
+        accept={acceptedFileTypes(canAttachOffice).join(",")}
         className="hidden"
         onChange={handleChange}
       />

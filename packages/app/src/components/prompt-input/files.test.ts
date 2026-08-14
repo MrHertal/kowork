@@ -1,6 +1,47 @@
 // @opencode-ref: opencode/packages/app/src/components/prompt-input/attachments.test.ts
 import { describe, expect, test } from "vitest";
-import { attachmentMime } from "./files";
+import {
+  ACCEPTED_FILE_TYPES,
+  acceptedFileTypes,
+} from "@/constants/file-picker";
+import { attachmentMime, officeAttachmentInfo } from "./files";
+
+describe("officeAttachmentInfo", () => {
+  test.each([
+    [
+      "contract.docx",
+      "docx",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
+    [
+      "BUDGET.XLSX",
+      "xlsx",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ],
+    [
+      "slides.pptx",
+      "pptx",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ],
+  ])("classifies %s by extension", (name, format, mime) => {
+    expect(officeAttachmentInfo({ name })).toEqual({ format, mime });
+  });
+
+  test("ignores unsupported and misleading extensions", () => {
+    expect(officeAttachmentInfo({ name: "legacy.doc" })).toBeUndefined();
+    expect(officeAttachmentInfo({ name: "report.docx.exe" })).toBeUndefined();
+  });
+
+  test("adds Office extensions only when path attachments are available", () => {
+    expect(acceptedFileTypes(false)).toBe(ACCEPTED_FILE_TYPES);
+    expect(acceptedFileTypes(true)).toEqual([
+      ...ACCEPTED_FILE_TYPES,
+      ".docx",
+      ".xlsx",
+      ".pptx",
+    ]);
+  });
+});
 
 describe("attachmentMime", () => {
   test("keeps PDFs when the browser reports the mime", async () => {

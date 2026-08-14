@@ -2,6 +2,11 @@
 
 import { memo, useCallback, useMemo } from "react";
 import {
+  FileSpreadsheetIcon,
+  FileTextIcon,
+  PresentationIcon,
+} from "lucide-react";
+import {
   Attachment,
   type AttachmentData,
   AttachmentHoverCard,
@@ -14,7 +19,11 @@ import {
   getAttachmentLabel,
   getMediaCategory,
 } from "@/components/ai-elements/attachments";
-import { type ImageAttachmentPart, usePrompt } from "@/contexts/prompt";
+import {
+  type ImageAttachmentPart,
+  type OfficeAttachmentPart,
+  usePrompt,
+} from "@/contexts/prompt";
 import { usePromptAttachments } from "./attachments";
 
 interface ImageAttachmentItemProps {
@@ -86,29 +95,84 @@ const ImageAttachmentItem = memo(
 );
 ImageAttachmentItem.displayName = "ImageAttachmentItem";
 
-export function PromptImageAttachments() {
+interface OfficeAttachmentItemProps {
+  attachment: OfficeAttachmentPart;
+  onRemove: (id: string) => void;
+}
+
+const OfficeAttachmentItem = memo(
+  ({ attachment, onRemove }: OfficeAttachmentItemProps) => {
+    const data = useMemo<AttachmentData>(
+      () => ({
+        id: attachment.id,
+        type: "file",
+        filename: attachment.filename,
+        mediaType: attachment.mime,
+        url: "",
+      }),
+      [attachment.id, attachment.filename, attachment.mime],
+    );
+    const handleRemove = useCallback(
+      () => onRemove(attachment.id),
+      [onRemove, attachment.id],
+    );
+    const Icon =
+      attachment.format === "xlsx"
+        ? FileSpreadsheetIcon
+        : attachment.format === "pptx"
+          ? PresentationIcon
+          : FileTextIcon;
+    return (
+      <Attachment
+        data={data}
+        onRemove={handleRemove}
+        className="cursor-default"
+      >
+        <div className="relative size-5 shrink-0">
+          <div className="absolute inset-0 transition-opacity group-hover:opacity-0">
+            <AttachmentPreview fallbackIcon={<Icon className="size-3" />} />
+          </div>
+          <AttachmentRemove className="absolute inset-0" />
+        </div>
+        <AttachmentInfo />
+      </Attachment>
+    );
+  },
+);
+OfficeAttachmentItem.displayName = "OfficeAttachmentItem";
+
+export function PromptAttachments() {
   const { current } = usePrompt();
   const { removeAttachment } = usePromptAttachments();
 
-  const images = useMemo(
+  const attachments = useMemo(
     () =>
       current.filter(
-        (part): part is ImageAttachmentPart => part.type === "image",
+        (part): part is ImageAttachmentPart | OfficeAttachmentPart =>
+          part.type === "image" || part.type === "office",
       ),
     [current],
   );
 
-  if (images.length === 0) return null;
+  if (attachments.length === 0) return null;
 
   return (
     <Attachments variant="inline" className="w-full px-3 pt-3">
-      {images.map((attachment) => (
-        <ImageAttachmentItem
-          key={attachment.id}
-          attachment={attachment}
-          onRemove={removeAttachment}
-        />
-      ))}
+      {attachments.map((attachment) =>
+        attachment.type === "image" ? (
+          <ImageAttachmentItem
+            key={attachment.id}
+            attachment={attachment}
+            onRemove={removeAttachment}
+          />
+        ) : (
+          <OfficeAttachmentItem
+            key={attachment.id}
+            attachment={attachment}
+            onRemove={removeAttachment}
+          />
+        ),
+      )}
     </Attachments>
   );
 }

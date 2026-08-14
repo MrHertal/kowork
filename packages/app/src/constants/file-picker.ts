@@ -7,6 +7,14 @@ export const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
+export const ACCEPTED_OFFICE_FILE_TYPES = [".docx", ".xlsx", ".pptx"];
+export type OfficeAttachmentFormat = "docx" | "xlsx" | "pptx";
+export const OFFICE_FILE_MIMES: Record<OfficeAttachmentFormat, string> = {
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+};
+
 export const ACCEPTED_FILE_TYPES = [
   ...ACCEPTED_IMAGE_TYPES,
   "application/pdf",
@@ -89,6 +97,12 @@ export const ACCEPTED_FILE_EXTENSIONS = Array.from(
     }),
   ),
 ).sort();
+
+export function acceptedFileTypes(office: boolean) {
+  return office
+    ? [...ACCEPTED_FILE_TYPES, ...ACCEPTED_OFFICE_FILE_TYPES]
+    : ACCEPTED_FILE_TYPES;
+}
 
 export function filePickerFilters(ext?: string[]) {
   if (!ext || ext.length === 0) return undefined;

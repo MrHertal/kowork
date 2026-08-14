@@ -289,7 +289,7 @@ registerIpcHandlers({
   setDisplayBackend: async () => undefined,
   parseMarkdown: async (markdown) => parseMarkdown(markdown),
   checkAppExists: async (appName) => checkAppExists(appName),
-  wslPath: async (path, mode) => wslPath(path, mode),
+  wslPath: async (path, mode, distro) => wslPath(path, mode, distro),
   resolveAppPath: async (appName) => resolveAppPath(appName),
   runUpdater: async (alertOnFail) => checkForUpdates(alertOnFail, killSidecar),
   checkUpdate: async () => checkUpdate(),

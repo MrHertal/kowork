@@ -1,6 +1,6 @@
 // @opencode-ref: opencode/packages/desktop/src/preload/index.ts
 
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 import type { ElectronAPI } from "./types";
 
 const api: ElectronAPI = {
@@ -18,7 +18,8 @@ const api: ElectronAPI = {
   parseMarkdownCommand: (markdown) =>
     ipcRenderer.invoke("parse-markdown", markdown),
   checkAppExists: (appName) => ipcRenderer.invoke("check-app-exists", appName),
-  wslPath: (path, mode) => ipcRenderer.invoke("wsl-path", path, mode),
+  wslPath: (path, mode, distro) =>
+    ipcRenderer.invoke("wsl-path", path, mode, distro),
   resolveAppPath: (appName) => ipcRenderer.invoke("resolve-app-path", appName),
   storeGet: (name, key) => ipcRenderer.invoke("store-get", name, key),
   storeSet: (name, key, value) =>
@@ -43,6 +44,7 @@ const api: ElectronAPI = {
   openDirectoryPicker: (opts) =>
     ipcRenderer.invoke("open-directory-picker", opts),
   openFilePicker: (opts) => ipcRenderer.invoke("open-file-picker", opts),
+  getPathForFile: (file) => webUtils.getPathForFile(file),
   saveFilePicker: (opts) => ipcRenderer.invoke("save-file-picker", opts),
   openLink: (url) => ipcRenderer.send("open-link", url),
   openPath: (path, app) => ipcRenderer.invoke("open-path", path, app),

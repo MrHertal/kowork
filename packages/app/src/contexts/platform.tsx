@@ -20,6 +20,10 @@ export type Platform = {
     accept?: string[];
     extensions?: string[];
   }) => Promise<string | string[] | null>;
+  getPathForFile?: (
+    file: File,
+    opts?: { target?: "native" | "wsl"; wslDistro?: string },
+  ) => Promise<string | null>;
   saveFilePickerDialog?: (opts?: {
     title?: string;
     defaultPath?: string;
