@@ -148,7 +148,11 @@
 
 /* Draggable titlebar; disabled while a modal marks #root aria-hidden. */
 #root:not([aria-hidden]) [data-drag-region] {
-  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+[data-no-drag] {
+  app-region: no-drag;
 }
 
 [data-drag-region] button,
@@ -159,7 +163,7 @@
 [data-drag-region] [role="button"],
 [data-drag-region] [role="menuitem"],
 [data-drag-region] [contenteditable] {
-  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .scrollbar-thin {
