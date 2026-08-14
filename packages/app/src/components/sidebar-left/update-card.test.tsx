@@ -6,6 +6,9 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 const doubles = vi.hoisted(() => ({
   toastError: vi.fn(),
   update: vi.fn<() => Promise<void>>(),
+  updateData: vi.fn<
+    () => { updateAvailable: boolean; version?: string } | undefined
+  >(() => ({ updateAvailable: true, version: "2.0.0" })),
 }));
 
 vi.mock("sonner", () => ({
@@ -18,7 +21,7 @@ vi.mock("@/contexts/platform", () => ({
 
 vi.mock("@/hooks/use-update-check", () => ({
   useUpdateCheck: () => ({
-    data: { updateAvailable: true, version: "2.0.0" },
+    data: doubles.updateData(),
   }),
 }));
 
@@ -28,6 +31,18 @@ describe("UpdateCard", () => {
   beforeEach(() => {
     doubles.toastError.mockClear();
     doubles.update.mockReset();
+    doubles.updateData.mockReturnValue({
+      updateAvailable: true,
+      version: "2.0.0",
+    });
+  });
+
+  test("stays hidden until an update is ready", () => {
+    doubles.updateData.mockReturnValue({ updateAvailable: true });
+
+    render(<UpdateCard />);
+
+    expect(screen.queryByText("Update available")).not.toBeInTheDocument();
   });
 
   test("reports installation failures", async () => {
@@ -35,9 +50,7 @@ describe("UpdateCard", () => {
     const user = userEvent.setup();
     render(<UpdateCard />);
 
-    await user.click(
-      screen.getByRole("button", { name: "Install & restart" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Install & restart" }));
 
     await waitFor(() =>
       expect(doubles.toastError).toHaveBeenCalledWith("Request failed", {

@@ -188,6 +188,20 @@ describe("installUpdate", () => {
     expect(doubles.autoUpdater.quitAndInstall).toHaveBeenCalledTimes(1);
   });
 
+  test("does not stop the sidecar when no update is available", async () => {
+    doubles.autoUpdater.checkForUpdates.mockResolvedValue({
+      isUpdateAvailable: false,
+      updateInfo: undefined,
+    });
+    const { installUpdate } = await load();
+    const killSidecar = vi.fn<() => Promise<void>>(() => Promise.resolve());
+
+    await installUpdate(killSidecar);
+
+    expect(killSidecar).not.toHaveBeenCalled();
+    expect(doubles.autoUpdater.quitAndInstall).not.toHaveBeenCalled();
+  });
+
   test("kills the sidecar before quitting once an update is ready", async () => {
     const { checkUpdate, installUpdate } = await load();
     const killSidecar = vi.fn<() => Promise<void>>(() => Promise.resolve());

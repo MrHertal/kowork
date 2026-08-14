@@ -61,8 +61,25 @@ describe("ConnectionGate", () => {
 
     await user.click(install);
 
-    await waitFor(() =>
-      expect(doubles.installUpdate).toHaveBeenCalledTimes(1),
+    await waitFor(() => expect(doubles.installUpdate).toHaveBeenCalledTimes(1));
+  });
+
+  test("reports installation failures", async () => {
+    doubles.installUpdate.mockRejectedValueOnce(new Error("install failed"));
+    const user = userEvent.setup();
+    render(
+      <ConnectionGate>
+        <div>Connected</div>
+      </ConnectionGate>,
     );
+
+    await user.click(
+      await screen.findByRole("button", { name: "Install & restart" }),
+    );
+
+    expect(await screen.findByText("install failed")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Install & restart" }),
+    ).toBeEnabled();
   });
 });
