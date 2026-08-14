@@ -1,5 +1,5 @@
 // @opencode-ref: opencode/packages/desktop/src/main/menu.ts
-import { Menu, shell } from "electron";
+import { Menu, app, shell } from "electron";
 
 import { UPDATER_ENABLED } from "./constants";
 import { createMainWindow } from "./windows";
@@ -19,6 +19,11 @@ export function createMenu(deps: Deps) {
     return;
   }
 
+  // Dev tools stay out of packaged builds.
+  const devItems: Electron.MenuItemConstructorOptions[] = app.isPackaged
+    ? []
+    : [{ role: "reload" }, { role: "toggleDevTools" }, { type: "separator" }];
+
   const template: Electron.MenuItemConstructorOptions[] = [
     {
       label: "Kowork",
@@ -30,7 +35,7 @@ export function createMenu(deps: Deps) {
           click: () => deps.checkForUpdates(),
         },
         {
-          label: "Reload Webview",
+          label: "Reload",
           click: () => deps.reload(),
         },
         {
@@ -50,7 +55,7 @@ export function createMenu(deps: Deps) {
       submenu: [
         {
           label: "New",
-          accelerator: "Shift+Cmd+S",
+          accelerator: "Cmd+N",
           click: () => deps.trigger("session.new"),
         },
         {
@@ -84,9 +89,7 @@ export function createMenu(deps: Deps) {
           click: () => deps.trigger("sidebar.toggle"),
         },
         { type: "separator" },
-        { role: "reload" },
-        { role: "toggleDevTools" },
-        { type: "separator" },
+        ...devItems,
         {
           label: "Actual Size",
           accelerator: "CmdOrCtrl+0",

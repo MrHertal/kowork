@@ -267,7 +267,8 @@ function wireMenu() {
     checkForUpdates: () => {
       void checkForUpdates(true, killSidecar);
     },
-    reload: () => mainWindow?.reload(),
+    reload: () =>
+      BrowserWindow.getFocusedWindow()?.reload() ?? mainWindow?.reload(),
     relaunch: () => relaunchApp(),
   });
 }
