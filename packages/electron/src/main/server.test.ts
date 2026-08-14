@@ -107,7 +107,6 @@ class FakeChild extends EventEmitter {
 const pack: RuntimePack = {
   dir: "/pack",
   pythonExe: "/pack/python/bin/python3",
-  pythonBinDir: "/pack/python/bin",
   binDir: "/pack/bin",
   nodeModules: "/pack/node_modules",
 };
@@ -188,28 +187,26 @@ describe("spawnLocalServer", () => {
     });
   });
 
-  test("strips inherited toolchain variables when a runtime pack is present", async () => {
+  test("prepends only the shim dir and leaves the user toolchain env untouched", async () => {
     doubles.resolveRuntimePack.mockImplementation(() => pack);
     vi.stubEnv("PATH", "/usr/bin");
     vi.stubEnv("PYTHONPATH", "/foreign");
     vi.stubEnv("VIRTUAL_ENV", "/venv");
-    vi.stubEnv("NODE_PATH", undefined);
+    vi.stubEnv("NODE_PATH", "/user/node_modules");
 
     const spawned = spawnLocalServer("127.0.0.1", 4096, "pw", spawnOptions());
     child.emit("message", { type: "ready" });
     await spawned;
 
     const [, , opts] = doubles.fork.mock.calls[0]!;
-    expect(opts.env.KOWORK_PYTHON).toBe("/pack/python/bin/python3");
     expect(opts.env.KOWORK_ELECTRON_BIN).toBe(process.execPath);
-    expect(opts.env.PYTHONNOUSERSITE).toBe("1");
-    expect(opts.env.PYTHONDONTWRITEBYTECODE).toBe("1");
-    expect(opts.env.PYTHONPATH).toBeUndefined();
-    expect(opts.env.VIRTUAL_ENV).toBeUndefined();
-    expect(opts.env.PATH).toBe(
-      ["/pack/bin", "/pack/python/bin", "/usr/bin"].join(delimiter),
-    );
-    expect(opts.env.NODE_PATH).toBe("/pack/node_modules");
+    expect(opts.env.PATH).toBe(["/pack/bin", "/usr/bin"].join(delimiter));
+    // Isolation for the embedded runtime lives in the kowork-* shims, not here.
+    expect(opts.env.PYTHONNOUSERSITE).toBeUndefined();
+    expect(opts.env.PYTHONDONTWRITEBYTECODE).toBeUndefined();
+    expect(opts.env.PYTHONPATH).toBe("/foreign");
+    expect(opts.env.VIRTUAL_ENV).toBe("/venv");
+    expect(opts.env.NODE_PATH).toBe("/user/node_modules");
   });
 
   test("prepends to a differently-cased PATH key without adding a new one", async () => {
@@ -222,9 +219,7 @@ describe("spawnLocalServer", () => {
     await spawned;
 
     const [, , opts] = doubles.fork.mock.calls[0]!;
-    expect(opts.env.Path).toBe(
-      ["/pack/bin", "/pack/python/bin", "/odd"].join(delimiter),
-    );
+    expect(opts.env.Path).toBe(["/pack/bin", "/odd"].join(delimiter));
     expect(opts.env.PATH).toBeUndefined();
   });
 

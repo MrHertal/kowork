@@ -26,26 +26,16 @@ const pack = assertRuntimePack({
   platform: process.platform,
   arch: process.arch,
 });
+// Mirror applyRuntimeEnv in src/main/server.ts: only the kowork-* shims go on
+// PATH; isolation env is the shims' job, which the probes below exercise.
 const env: NodeJS.ProcessEnv = {
   ...process.env,
-  KOWORK_PYTHON: pack.pythonExe,
   KOWORK_ELECTRON_BIN: electronBin,
-  NODE_PATH: [pack.nodeModules, process.env.NODE_PATH]
-    .filter(Boolean)
-    .join(delimiter),
-  PYTHONNOUSERSITE: "1",
-  PYTHONDONTWRITEBYTECODE: "1",
 };
-delete env.PYTHONPATH;
-delete env.PYTHONHOME;
-delete env.VIRTUAL_ENV;
-delete env.CONDA_PREFIX;
 
 const pathKey =
   Object.keys(env).find((key) => key.toLowerCase() === "path") ?? "PATH";
-env[pathKey] = [pack.binDir, pack.pythonBinDir, env[pathKey]]
-  .filter(Boolean)
-  .join(delimiter);
+env[pathKey] = [pack.binDir, env[pathKey]].filter(Boolean).join(delimiter);
 
 const suffix = process.platform === "win32" ? ".cmd" : "";
 const probeDir = mkdtempSync(path.join(tmpdir(), "kowork-runtime-smoke-"));
@@ -68,7 +58,17 @@ try {
     ].join("\n") + "\n",
   );
 
+  writeFileSync(
+    path.join(probeDir, "python-no-pip.py"),
+    [
+      "import importlib.util",
+      "assert importlib.util.find_spec('pip') is None, 'pip must not be bundled'",
+      'print("[smoke-runtime] pip absent from embedded runtime OK")',
+    ].join("\n") + "\n",
+  );
+
   run(`kowork-python${suffix}`, ["python-smoke.py"], probeDir);
+  run(`kowork-python${suffix}`, ["python-no-pip.py"], probeDir);
   run(`kowork-node${suffix}`, ["node-smoke.cjs"], probeDir);
 } finally {
   rmSync(probeDir, { recursive: true, force: true });
