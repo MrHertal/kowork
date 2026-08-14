@@ -130,7 +130,9 @@ export function ComposerFolderPicker({
           onSelect={handleChooseDifferent}
         >
           <FolderOpen />
-          {m.session_composer_directory_choose_different()}
+          {folderOptions.length > 0
+            ? m.session_composer_directory_choose_different()
+            : m.session_directory_choose_directory()}
         </PromptInputActionMenuItem>
         {attachedDirectory && (
           <>
