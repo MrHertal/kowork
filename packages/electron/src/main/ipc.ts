@@ -8,12 +8,14 @@ import {
   clipboard,
   dialog,
   ipcMain,
+  nativeTheme,
   shell,
 } from "electron";
 import type { IpcMainEvent, IpcMainInvokeEvent } from "electron";
 
 import type {
   ServerReadyData,
+  ThemeSource,
   TitlebarTheme,
   WslConfig,
 } from "../preload/types";
@@ -306,6 +308,14 @@ export function registerIpcHandlers(deps: Deps) {
       const win = BrowserWindow.fromWebContents(event.sender);
       if (!win) return;
       setTitlebar(win, theme);
+    },
+  );
+  ipcMain.handle(
+    "set-theme-source",
+    (_event: IpcMainInvokeEvent, source: ThemeSource) => {
+      if (source !== "light" && source !== "dark" && source !== "system")
+        return;
+      nativeTheme.themeSource = source;
     },
   );
 }

@@ -46,6 +46,7 @@ declare global {
     api?: {
       setTitlebar?: (theme: { mode: "light" | "dark" }) => Promise<void>;
       setBackgroundColor?: (color: string) => Promise<void>;
+      setThemeSource?: (source: "light" | "dark" | "system") => Promise<void>;
     };
   }
 }
