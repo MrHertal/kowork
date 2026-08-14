@@ -73,10 +73,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          ARGS=(--draft --generate-notes)
+          if [[ "${{ steps.version.outputs.version }}" == *-* ]]; then
+            ARGS+=(--prerelease)
+          fi
           gh release create "${{ steps.version.outputs.tag }}" \
             --title "${{ steps.version.outputs.tag }}" \
-            --draft \
-            --generate-notes
+            "${ARGS[@]}"
 
   build:
     needs: prepare
