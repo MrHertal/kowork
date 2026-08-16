@@ -237,6 +237,9 @@ const getBase = (): Configuration => ({
       sign: signWindows,
     },
     target: ["nsis"],
+    // Unsigned-first: publisherName is absent, so electron-updater must not
+    // reject a later signed update over an unsigned install (mirrors upstream).
+    verifyUpdateCodeSignature: false,
   },
   nsis: {
     oneClick: false,
