@@ -190,7 +190,9 @@ async function main() {
     );
   }
   log(`extracting python runtime`);
-  execFileSync("tar", ["-xzf", tarPath, "-C", outDir], { stdio: "inherit" });
+  // Bare filename + cwd: Git Bash's GNU tar reads a drive-letter colon in the
+  // archive path as a remote host ("Cannot connect to D: resolve failed").
+  execFileSync("tar", ["-xzf", tarball], { cwd: outDir, stdio: "inherit" });
   rmSync(tarPath, { force: true });
 
   const pyExe = isWin
