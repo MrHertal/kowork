@@ -237,11 +237,13 @@ async function main() {
     path.join(inputsDir, "package-lock.json"),
     path.join(outDir, "package-lock.json"),
   );
-  // npm ships as npm.cmd on Windows; execFile (no shell) won't find bare "npm".
+  // npm ships as npm.cmd on Windows, and since Node's CVE-2024-27980 fix a
+  // .cmd cannot be spawned without a shell (EINVAL).
   const npmBin = isWin ? "npm.cmd" : "npm";
   execFileSync(npmBin, ["ci", "--omit=dev", "--no-audit", "--no-fund"], {
     cwd: outDir,
     stdio: "inherit",
+    shell: isWin,
   });
   rmSync(path.join(outDir, "package.json"), { force: true });
   rmSync(path.join(outDir, "package-lock.json"), { force: true });
