@@ -237,8 +237,7 @@ const getBase = (): Configuration => ({
       sign: signWindows,
     },
     target: ["nsis"],
-    // Unsigned-first: never bake publisherName into app-update.yml, so enabling
-    // signing later can't make electron-updater reject updates (mirrors upstream).
+    // Never bake publisherName into app-update.yml: signing later must not break updates from unsigned installs.
     verifyUpdateCodeSignature: false,
   },
   nsis: {
