@@ -1,0 +1,19 @@
+name: Feature request
+description: Suggest an enhancement or new capability for Kowork
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem would this feature solve for you?
+      placeholder: I want to ... but Kowork doesn't ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Optional — how do you imagine this working?
+    validations:
+      required: false

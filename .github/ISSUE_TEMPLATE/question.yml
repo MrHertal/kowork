@@ -1,0 +1,10 @@
+name: Question
+description: Ask a question about Kowork
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+    validations:
+      required: true
