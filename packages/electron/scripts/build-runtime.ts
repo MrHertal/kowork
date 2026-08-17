@@ -190,7 +190,8 @@ async function main() {
     );
   }
   log(`extracting python runtime`);
-  execFileSync("tar", ["-xzf", tarPath, "-C", outDir], { stdio: "inherit" });
+  // Bare filename + cwd: GNU tar (Git Bash) reads a drive-letter colon in the archive path as a remote host.
+  execFileSync("tar", ["-xzf", tarball], { cwd: outDir, stdio: "inherit" });
   rmSync(tarPath, { force: true });
 
   const pyExe = isWin
@@ -235,11 +236,12 @@ async function main() {
     path.join(inputsDir, "package-lock.json"),
     path.join(outDir, "package-lock.json"),
   );
-  // npm ships as npm.cmd on Windows; execFile (no shell) won't find bare "npm".
+  // Windows: npm is npm.cmd, and since Node's CVE-2024-27980 fix a .cmd only spawns via a shell.
   const npmBin = isWin ? "npm.cmd" : "npm";
   execFileSync(npmBin, ["ci", "--omit=dev", "--no-audit", "--no-fund"], {
     cwd: outDir,
     stdio: "inherit",
+    shell: isWin,
   });
   rmSync(path.join(outDir, "package.json"), { force: true });
   rmSync(path.join(outDir, "package-lock.json"), { force: true });
