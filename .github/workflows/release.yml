@@ -90,6 +90,9 @@ jobs:
 
   build:
     needs: prepare
+    permissions:
+      contents: write # electron-builder --publish uploads release assets
+      id-token: write # azure/login OIDC federation (Windows leg)
     strategy:
       fail-fast: false
       matrix:
