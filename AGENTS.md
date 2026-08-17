@@ -18,6 +18,8 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 | `packages/web/`      | Placeholder for the future static landing page and documentation site; not yet implemented |
 | `opencode/`          | OpenCode fork submodule used for the sidecar and as a reference implementation             |
 | `.github/workflows/` | CI: PR checks (`check.yml`) and the manual release pipeline (`release.yml`)                |
+| `CONTRIBUTING.md`    | Contributor guide: setup, checks, conventions, translations, PR expectations               |
+| `SECURITY.md`        | Threat model and vulnerability reporting                                                   |
 
 `packages/web/` is not the browser build of `packages/app/`.
 
