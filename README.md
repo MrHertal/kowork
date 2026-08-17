@@ -1,86 +1,76 @@
-# Kowork
+<p align="center">
+  <img src="packages/app/public/favicon.svg" alt="Kowork logo" width="128" />
+</p>
+<h1 align="center">Kowork</h1>
+<p align="center">An open-source desktop app for delegating work to AI agents.</p>
+<p align="center">
+  <a href="https://github.com/MrHertal/kowork/actions/workflows/check.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/MrHertal/kowork/check.yml?style=flat-square&branch=main" /></a>
+  <a href="https://github.com/MrHertal/kowork/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrHertal/kowork?style=flat-square" /></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" /></a>
+</p>
 
-> **Work in progress** — Kowork is under active development and not yet ready for use. Features are incomplete and may change or break.
+<!-- Add a screenshot at .github/assets/screenshot.png and uncomment:
+<p align="center">
+  <img src=".github/assets/screenshot.png" alt="Kowork" width="800" />
+</p>
+-->
 
-Open-source collaborative AI application. Delegate tasks to AI agents, review results, and manage parallel workflows.
+Kowork lets you hand off work to AI agents operating in folders on your computer. Describe the outcome in plain language, let the agent do the work, and review the result — no terminal required. Tasks run in parallel, so you can keep several pieces of work moving at once.
 
-## Structure
+Kowork is built on top of [OpenCode](https://github.com/anomalyco/opencode), which runs as a local sidecar server.
 
-- `packages/app` — React web application (Kowork UI)
-- `packages/electron` — Electron desktop shell
-- `packages/web` — Documentation site
-- `opencode/` — Git submodule, OpenCode fork used as AI sidecar server
+## Download
 
-## Prerequisites
+Get the latest build from the [releases page](https://github.com/MrHertal/kowork/releases/latest):
+
+| Platform              | Download                        |
+| --------------------- | ------------------------------- |
+| macOS (Apple Silicon) | `kowork-electron-mac-arm64.dmg` |
+| Windows (x64)         | `kowork-electron-win-x64.exe`   |
+
+## Features
+
+- **Tasks, not terminals** — describe what you want done; the agent plans and executes it in a folder you choose.
+- **Subtasks and parallel work** — split work into subtasks and run several tasks at the same time.
+- **Connectors** — give agents access to external tools and data through MCP servers.
+- **Skills** — built-in skills for Office documents (docx, pdf, xlsx, pptx), extensible with your own.
+- **Eight languages** — English, French, German, Spanish (Latin America and Spain), Simplified Chinese, Hindi, and Brazilian Portuguese.
+
+## Development
+
+Prerequisites:
 
 - **Node 24** — see `.nvmrc` (e.g. via `nvm`)
 - **pnpm** — pinned in `package.json`; `corepack enable` provides the right version
 - **Bun** — required by the OpenCode sidecar (`curl -fsSL https://bun.sh/install | bash`)
 
-## Setup
-
-Clone with the `opencode/` submodule:
+Clone with the `opencode/` submodule and install dependencies:
 
 ```bash
-git clone --recurse-submodules <repo-url>
+git clone --recurse-submodules https://github.com/MrHertal/kowork.git
 cd kowork
-# if you already cloned without --recurse-submodules:
-git submodule update --init --recursive
+nvm use          # Node 24
+corepack enable  # pinned pnpm
+pnpm install     # JS workspaces
+bun install --cwd opencode  # OpenCode sidecar deps
 ```
 
-Install dependencies:
-
-```bash
-nvm use            # Node 24
-corepack enable    # pinned pnpm
-pnpm install       # JS workspaces
-
-cd opencode        # OpenCode sidecar deps (needs Bun)
-bun install
-cd ..
-```
-
-## Running
+Run the app:
 
 ```bash
 pnpm dev
 ```
 
-`pnpm dev` builds the OpenCode sidecar automatically before launching Electron.
-Build it on its own with `pnpm build:sidecar`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full setup, checks, and project conventions.
 
-## Checks
+## Contributing
 
-```bash
-pnpm lint       # ESLint (React app)
-pnpm typecheck  # TypeScript (Electron + React app)
-```
+Contributions are welcome — please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
-### Office document skills
+## Security
 
-The built-in document skills (docx, pdf, xlsx, pptx) and their embedded
-Python/Node runtime are a required Kowork feature. `pnpm dev`, the Electron
-preview script, and the local package scripts validate the runtime before
-starting. A missing, incomplete, wrong-platform, or stale development runtime is
-rebuilt automatically; packaging and packaged startup reject an invalid runtime.
+To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
-The first runtime build downloads standalone Python and the document libraries
-for the current platform. You can prepare or validate it explicitly with:
+## License
 
-```bash
-pnpm --filter @kowork/electron ensure:runtime
-```
-
-Run the executable smoke check against the development runtime with:
-
-```bash
-pnpm --filter @kowork/electron smoke:runtime
-```
-
-The same script checks an unpacked packaged app when given its runtime directory
-and Electron executable:
-
-```bash
-cd packages/electron
-pnpm run smoke:runtime -- "<app-runtime-dir>" "<app-electron-executable>"
-```
+[MIT](LICENSE)
