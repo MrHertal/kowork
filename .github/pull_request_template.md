@@ -26,4 +26,4 @@ _Required for UI changes — please show before and after._
 
 - [ ] I have tested my changes locally (`pnpm lint`, `pnpm typecheck`, `pnpm test`)
 - [ ] I have not included unrelated changes in this PR
-- [ ] I have read [CONTRIBUTING.md](../CONTRIBUTING.md)
+- [ ] I have read [CONTRIBUTING.md](CONTRIBUTING.md)

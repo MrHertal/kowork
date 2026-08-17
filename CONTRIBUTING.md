@@ -11,12 +11,12 @@ UI and core product changes need a design conversation first: open an issue desc
 
 ## Repository layout
 
-| Path                 | Purpose                                                                 |
-| -------------------- | ----------------------------------------------------------------------- |
-| `packages/app/`      | Shared React application, including the standalone browser build        |
-| `packages/electron/` | Electron main process, preload, and desktop renderer entry point        |
-| `packages/web/`      | Placeholder for the future landing page and documentation site          |
-| `opencode/`          | OpenCode fork submodule used for the sidecar and as a reference         |
+| Path                 | Purpose                                                                     |
+| -------------------- | --------------------------------------------------------------------------- |
+| `packages/app/`      | Shared React application, including the standalone browser build            |
+| `packages/electron/` | Electron main process, preload, and desktop renderer entry point            |
+| `packages/web/`      | Placeholder for the future landing page and documentation site              |
+| `opencode/`          | OpenCode fork submodule used for the sidecar and as a reference             |
 | `.github/workflows/` | CI: PR checks (`check.yml`) and the manual release pipeline (`release.yml`) |
 
 ## Development setup
