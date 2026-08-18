@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a problem with Kowork that should be fixed
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the bug you encountered
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Kowork version and operating system
+      placeholder: e.g., Kowork 1.0.0 on macOS 26
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: Attach a screenshot if it helps explain the problem
+      placeholder: Drag and drop a screenshot here
+    validations:
+      required: false
