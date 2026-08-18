@@ -91,8 +91,8 @@ jobs:
   build:
     needs: prepare
     permissions:
-      contents: write # electron-builder --publish uploads release assets
-      id-token: write # azure/login OIDC federation (Windows leg)
+      contents: write
+      id-token: write # azure/login OIDC federation
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -148,8 +148,7 @@ jobs:
           APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY }}
         run: echo "$APPLE_API_KEY_CONTENT" > "$RUNNER_TEMP/apple-api-key.p8"
 
-      # Establishes the Azure CLI session that sign-windows.ps1 authenticates
-      # against. Skipped unless the OIDC federation secrets are configured.
+      # sign-windows.ps1 signs through the Azure CLI session this creates
       - name: Azure login
         if: runner.os == 'Windows' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
@@ -205,8 +204,6 @@ jobs:
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
 
-      # Ported from opencode's publish.yml. Runs only when signing is
-      # configured; an unsigned or invalid exe here means signing regressed.
       - name: Verify signed Windows Electron artifacts
         if: runner.os == 'Windows' && env.AZURE_TRUSTED_SIGNING_ENDPOINT != '' && env.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME != '' && env.AZURE_TRUSTED_SIGNING_CERTIFICATE_PROFILE != ''
         shell: pwsh
@@ -214,8 +211,7 @@ jobs:
           $files = @()
           $files += Get-ChildItem "${{ github.workspace }}\packages\electron\dist\*.exe" | Select-Object -ExpandProperty FullName
           $files += Get-ChildItem "${{ github.workspace }}\packages\electron\dist\*unpacked\*.exe" | Select-Object -ExpandProperty FullName
-          # @() keeps an empty match from appending $null to $files (Kowork
-          # ships no exe under resources/, unlike upstream's opencode-cli.exe).
+          # @() prevents an empty match from appending $null (no exe ships under resources/, unlike upstream)
           $files += @(Get-ChildItem "${{ github.workspace }}\packages\electron\dist\*unpacked\resources\*.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName)
 
           foreach ($file in $files | Select-Object -Unique) {
