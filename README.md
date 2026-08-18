@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="packages/app/public/favicon.svg" alt="Kowork logo" width="128" />
+  <img src="packages/app/public/favicon.svg" alt="Kowork logo" width="64" />
 </p>
 <h1 align="center">Kowork</h1>
-<p align="center">An open-source desktop app for delegating work to AI agents.</p>
+<p align="center">An open-source alternative to <a href="https://claude.com/product/cowork">Claude Cowork</a> — a desktop app where AI agents turn your goals into finished work.</p>
 <p align="center">
   <a href="https://github.com/MrHertal/kowork/actions/workflows/check.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/MrHertal/kowork/check.yml?style=flat-square&branch=main" /></a>
   <a href="https://github.com/MrHertal/kowork/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrHertal/kowork?style=flat-square" /></a>
@@ -11,9 +11,9 @@
 
 <!-- TODO: add a screenshot at .github/assets/screenshot.png -->
 
-Kowork lets you hand off work to AI agents operating in folders on your computer. Describe the outcome in plain language, let the agent do the work, and review the result — no terminal required.
+Kowork is where you hand real work to AI agents. Describe the outcome in plain language — an agent works in a folder you choose, plans the steps, and does the job. You come back to finished work, ready for review. No terminal required.
 
-Kowork is built on top of [OpenCode](https://github.com/anomalyco/opencode), which runs as a local sidecar server.
+Kowork is built on top of [OpenCode](https://github.com/anomalyco/opencode).
 
 ## Download
 
@@ -24,12 +24,15 @@ Get the latest build from the [releases page](https://github.com/MrHertal/kowork
 | macOS (Apple Silicon) | `kowork-electron-mac-arm64.dmg` |
 | Windows (x64)         | `kowork-electron-win-x64.exe`   |
 
+> [!NOTE]
+> **Windows users:** the Kowork installer is not code-signed yet, so Windows will likely show a blue "Windows protected your PC" (Microsoft Defender SmartScreen) warning when you run it. This is expected for new, unsigned apps — it is a reputation warning, not a virus detection. Click **More info**, then **Run anyway** to install. Only download Kowork from the official releases page linked above.
+
 ## Features
 
-- **Tasks, not terminals** — describe what you want done; the agent plans and executes it in a folder you choose.
-- **Parallel work** — run several tasks at once, split into subtasks.
+- **Works where your files are** — agents read, create, and organize files directly in a folder on your computer. No uploading documents into a chat; the work happens in place.
+- **Real Office documents** — built-in skills create and edit genuine Word documents, Excel spreadsheets (formulas and charts included), PowerPoint decks, and PDFs. Polished files, not plain text.
+- **Parallel work** — run several tasks at once, split big jobs into subtasks.
 - **Connectors** — plug agents into external tools and data (MCP servers).
-- **Skills** — built-in skills for Office documents (docx, pdf, xlsx, pptx).
 - **Eight languages** — English, French, German, Spanish (Latin America and Spain), Simplified Chinese, Hindi, Brazilian Portuguese.
 
 ## Development
@@ -44,6 +47,12 @@ bun install --cwd opencode
 pnpm dev
 ```
 
+`pnpm dev` builds the OpenCode sidecar and launches the desktop app. The first run also builds the document-skill runtime, so it can take a few minutes.
+
 ---
 
 **[Contributing](CONTRIBUTING.md)** · **[Security](SECURITY.md)** · **[MIT License](LICENSE)**
+
+<sub>Claude and Claude Cowork are trademarks of Anthropic, PBC. Kowork is not affiliated with, sponsored, or endorsed by Anthropic.</sub>
+
+<sub>Kowork is built on [OpenCode](https://github.com/anomalyco/opencode), but it is not built by the OpenCode team and is not affiliated with OpenCode in any way.</sub>
