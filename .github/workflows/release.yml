@@ -214,7 +214,9 @@ jobs:
           $files = @()
           $files += Get-ChildItem "${{ github.workspace }}\packages\electron\dist\*.exe" | Select-Object -ExpandProperty FullName
           $files += Get-ChildItem "${{ github.workspace }}\packages\electron\dist\*unpacked\*.exe" | Select-Object -ExpandProperty FullName
-          $files += Get-ChildItem "${{ github.workspace }}\packages\electron\dist\*unpacked\resources\*.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+          # @() keeps an empty match from appending $null to $files (Kowork
+          # ships no exe under resources/, unlike upstream's opencode-cli.exe).
+          $files += @(Get-ChildItem "${{ github.workspace }}\packages\electron\dist\*unpacked\resources\*.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName)
 
           foreach ($file in $files | Select-Object -Unique) {
             $sig = Get-AuthenticodeSignature $file
