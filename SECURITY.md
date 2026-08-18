@@ -1,7 +1,5 @@
 # Security
 
-## Threat model
-
 Kowork runs AI agents locally with access to powerful tools: shell execution, file operations, and external services through connectors.
 
 - **No sandbox.** Permission prompts keep you aware of what an agent is doing; they are a UX feature, not a security boundary. For isolation, run agents in a container or VM.

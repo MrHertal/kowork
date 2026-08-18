@@ -9,11 +9,7 @@
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" /></a>
 </p>
 
-<!-- Add a screenshot at .github/assets/screenshot.png and uncomment:
-<p align="center">
-  <img src=".github/assets/screenshot.png" alt="Kowork" width="800" />
-</p>
--->
+<!-- TODO: add a screenshot at .github/assets/screenshot.png -->
 
 Kowork lets you hand off work to AI agents operating in folders on your computer. Describe the outcome in plain language, let the agent do the work, and review the result — no terminal required.
 
@@ -32,7 +28,7 @@ Get the latest build from the [releases page](https://github.com/MrHertal/kowork
 
 - **Tasks, not terminals** — describe what you want done; the agent plans and executes it in a folder you choose.
 - **Parallel work** — run several tasks at once, split into subtasks.
-- **Connectors** — give agents access to external tools and data through MCP servers.
+- **Connectors** — plug agents into external tools and data (MCP servers).
 - **Skills** — built-in skills for Office documents (docx, pdf, xlsx, pptx).
 - **Eight languages** — English, French, German, Spanish (Latin America and Spain), Simplified Chinese, Hindi, Brazilian Portuguese.
 
@@ -48,14 +44,6 @@ bun install --cwd opencode
 pnpm dev
 ```
 
-## Contributing
+---
 
-Contributions are welcome — read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
-
-## Security
-
-To report a vulnerability, see [SECURITY.md](SECURITY.md).
-
-## License
-
-[MIT](LICENSE)
+**[Contributing](CONTRIBUTING.md)** · **[Security](SECURITY.md)** · **[MIT License](LICENSE)**
