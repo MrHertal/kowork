@@ -1,5 +1,6 @@
 name: Question
 description: Ask a question about Kowork
+labels: ["question"]
 body:
   - type: textarea
     id: question

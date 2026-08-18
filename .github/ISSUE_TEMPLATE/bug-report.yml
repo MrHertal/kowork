@@ -1,5 +1,6 @@
 name: Bug report
 description: Report a problem with Kowork that should be fixed
+labels: ["bug"]
 body:
   - type: textarea
     id: description
