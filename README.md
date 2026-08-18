@@ -15,7 +15,7 @@
 </p>
 -->
 
-Kowork lets you hand off work to AI agents operating in folders on your computer. Describe the outcome in plain language, let the agent do the work, and review the result — no terminal required. Tasks run in parallel, so you can keep several pieces of work moving at once.
+Kowork lets you hand off work to AI agents operating in folders on your computer. Describe the outcome in plain language, let the agent do the work, and review the result — no terminal required.
 
 Kowork is built on top of [OpenCode](https://github.com/anomalyco/opencode), which runs as a local sidecar server.
 
@@ -31,41 +31,26 @@ Get the latest build from the [releases page](https://github.com/MrHertal/kowork
 ## Features
 
 - **Tasks, not terminals** — describe what you want done; the agent plans and executes it in a folder you choose.
-- **Subtasks and parallel work** — split work into subtasks and run several tasks at the same time.
+- **Parallel work** — run several tasks at once, split into subtasks.
 - **Connectors** — give agents access to external tools and data through MCP servers.
-- **Skills** — built-in skills for Office documents (docx, pdf, xlsx, pptx), extensible with your own.
-- **Eight languages** — English, French, German, Spanish (Latin America and Spain), Simplified Chinese, Hindi, and Brazilian Portuguese.
+- **Skills** — built-in skills for Office documents (docx, pdf, xlsx, pptx).
+- **Eight languages** — English, French, German, Spanish (Latin America and Spain), Simplified Chinese, Hindi, Brazilian Portuguese.
 
 ## Development
 
-Prerequisites:
-
-- **Node 24** — see `.nvmrc` (e.g. via `nvm`)
-- **pnpm** — pinned in `package.json`; `corepack enable` provides the right version
-- **Bun** — required by the OpenCode sidecar (`curl -fsSL https://bun.sh/install | bash`)
-
-Clone with the `opencode/` submodule and install dependencies:
+Requires Node 24 (see `.nvmrc`), pnpm (via `corepack enable`), and Bun (for the sidecar).
 
 ```bash
 git clone --recurse-submodules https://github.com/MrHertal/kowork.git
 cd kowork
-nvm use          # Node 24
-corepack enable  # pinned pnpm
-pnpm install     # JS workspaces
-bun install --cwd opencode  # OpenCode sidecar deps
-```
-
-Run the app:
-
-```bash
+corepack enable && pnpm install
+bun install --cwd opencode
 pnpm dev
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full setup, checks, and project conventions.
-
 ## Contributing
 
-Contributions are welcome — please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Contributions are welcome — read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## Security
 

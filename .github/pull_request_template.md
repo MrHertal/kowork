@@ -2,28 +2,17 @@
 
 Closes #
 
-### Type of change
-
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Refactor / code improvement
-- [ ] Documentation
-- [ ] Translation
-
 ### What does this PR do?
 
-Describe the issue, the changes you made, and why they work.
+Describe the problem, the change, and why it works.
 
-### How did you verify your code works?
-
-What did you test? How can a reviewer confirm it?
+### How did you verify it works?
 
 ### Screenshots / recordings
 
-_Required for UI changes — please show before and after._
+_Required for UI changes._
 
 ### Checklist
 
 - [ ] I have tested my changes locally (`pnpm lint`, `pnpm typecheck`, `pnpm test`)
-- [ ] I have not included unrelated changes in this PR
-- [ ] I have read [CONTRIBUTING.md](CONTRIBUTING.md)
+- [ ] I have not included unrelated changes

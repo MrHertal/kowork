@@ -40,14 +40,6 @@ body:
     validations:
       required: false
 
-  - type: input
-    id: connectors
-    attributes:
-      label: Connectors
-      description: Which connectors (MCP servers) are you using, if any?
-    validations:
-      required: false
-
   - type: textarea
     id: screenshot
     attributes:
