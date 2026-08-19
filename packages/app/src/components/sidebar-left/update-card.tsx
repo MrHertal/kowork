@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { usePlatform } from "@/contexts/platform";
 import { m } from "@/paraglide/messages";
 
@@ -33,6 +34,7 @@ export function UpdateCard() {
           size="sm"
           className="w-full bg-sidebar-primary text-sidebar-primary-foreground shadow-none"
           disabled={installing}
+          aria-busy={installing}
           onClick={() => {
             void (async () => {
               setInstalling(true);
@@ -49,7 +51,10 @@ export function UpdateCard() {
             })();
           }}
         >
-          {installing ? "…" : m.updates_installRestart()}
+          {installing && (
+            <Spinner data-icon="inline-start" aria-label={m.common_loading()} />
+          )}
+          {m.updates_installRestart()}
         </Button>
       </CardContent>
     </Card>
