@@ -89,7 +89,9 @@ The template covers a styled header row (bold, filled, centred), data rows,
 number formats (currency and percent), live formulas (a per-row `=B*C` and a
 `=SUM(...)` total), frozen panes, column widths, a second sheet with a cross-sheet
 formula, a bar chart, and an embedded image — each editable in one obvious place.
-The default font is **Calibri 11** (change `DEFAULT_FONT_*`). It refuses to write
+The default font is **Calibri 11** (change `DEFAULT_FONT_*`). The workbook is
+saved with the current Office theme, so charts and theme-colored elements render
+in the same colors a new Excel file uses. It refuses to write
 `.xlsm`/`.xltm`. **Prefer real formulas over Python-computed constants** so the
 workbook recalculates in Excel; only write a fixed number when the user explicitly
 needs one (see Formulas & computed values).

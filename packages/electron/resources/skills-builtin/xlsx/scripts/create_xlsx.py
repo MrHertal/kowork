@@ -17,6 +17,8 @@ percent); live formulas (a per-row ``=B*C`` and a ``=SUM(...)`` total); frozen
 panes; column widths; a second sheet (with a cross-sheet formula); a bar chart
 built from the data; and an embedded image. The default font is Calibri 11
 (Excel's own default); change DEFAULT_FONT_NAME / DEFAULT_FONT_SIZE to switch.
+The workbook is saved with the current Office theme, so charts use the same
+colors as a new Excel file.
 
 Prefer real Excel formulas over Python-computed constants so the workbook stays
 live and recalculates in Excel; only compute a value in Python and write the
@@ -158,9 +160,39 @@ def build_workbook(wb: Workbook) -> None:
     summary.column_dimensions["B"].width = 12
 
 
+def modern_office_theme() -> str:
+    """openpyxl's built-in theme with the current Office palette and heading font.
+
+    The bundled ``theme_xml`` predates the current Office colors, so charts
+    (which take their series colors from the theme) would render in the old
+    palette. Swap in the current values; every replaced string occurs exactly
+    once in ``theme_xml``.
+    """
+    from openpyxl.writer.theme import theme_xml
+
+    theme = theme_xml
+    for old, new in {
+        'typeface="Cambria"': 'typeface="Calibri Light"',  # majorFont (minorFont is already Calibri)
+        "4F81BD": "4472C4",  # accent1
+        "C0504D": "ED7D31",  # accent2
+        "9BBB59": "A5A5A5",  # accent3
+        "8064A2": "FFC000",  # accent4
+        "4BACC6": "5B9BD5",  # accent5
+        "F79646": "70AD47",  # accent6
+        "1F497D": "44546A",  # dk2
+        "EEECE1": "E7E6E6",  # lt2
+        "0000FF": "0563C1",  # hyperlink
+        "800080": "954F72",  # followed hyperlink
+    }.items():
+        assert old in theme, f"expected {old} in openpyxl's theme_xml"
+        theme = theme.replace(old, new)
+    return theme
+
+
 def build_xlsx(out_path: str) -> None:
     wb = Workbook()
     build_workbook(wb)
+    wb.loaded_theme = modern_office_theme()
     wb.save(out_path)
 
 
