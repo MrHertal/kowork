@@ -184,7 +184,7 @@ def modern_office_theme() -> str:
         "0000FF": "0563C1",  # hyperlink
         "800080": "954F72",  # followed hyperlink
     }.items():
-        assert old in theme, f"expected {old} in openpyxl's theme_xml"
+        assert theme.count(old) == 1, f"expected exactly one {old} in openpyxl's theme_xml"
         theme = theme.replace(old, new)
     return theme
 

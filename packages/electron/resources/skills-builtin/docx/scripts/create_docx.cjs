@@ -47,6 +47,10 @@ const {
 
 const FONT = { head: "Calibri Light", body: "Calibri" };
 
+// Pin only the Latin font attributes: leaving eastAsia/cs unset lets Word pick
+// the script-appropriate font for CJK and complex-script text.
+const latin = (name) => ({ ascii: name, hAnsi: name });
+
 const PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAFklEQVR42mNQTX5NEmIY1TCqYfhqAAB2SXMQ7LkbdQAAAABJRU5ErkJggg==";
 
@@ -67,23 +71,23 @@ const doc = new Document({
   styles: {
     default: {
       document: {
-        run: { font: FONT.body, size: 22 }, // 11pt body
+        run: { font: latin(FONT.body), size: 22 }, // 11pt body
         paragraph: { spacing: { after: 160, line: 259, lineRule: LineRuleType.AUTO } }, // 8pt after, 1.08 lines
       },
       title: {
-        run: { font: FONT.head, size: 56 }, // 28pt, black (no color)
+        run: { font: latin(FONT.head), size: 56 }, // 28pt, black (no color)
         paragraph: { spacing: { after: 0 } },
       },
       heading1: {
-        run: { font: FONT.head, size: 32, color: "2E74B5" }, // 16pt
+        run: { font: latin(FONT.head), size: 32, color: "2E74B5" }, // 16pt
         paragraph: { keepNext: true, keepLines: true, spacing: { before: 240, after: 0 }, outlineLevel: 0 },
       },
       heading2: {
-        run: { font: FONT.head, size: 26, color: "2E74B5" }, // 13pt
+        run: { font: latin(FONT.head), size: 26, color: "2E74B5" }, // 13pt
         paragraph: { keepNext: true, keepLines: true, spacing: { before: 40, after: 0 }, outlineLevel: 1 },
       },
       heading3: {
-        run: { font: FONT.head, size: 24, color: "1F4D78" }, // 12pt
+        run: { font: latin(FONT.head), size: 24, color: "1F4D78" }, // 12pt
         paragraph: { keepNext: true, keepLines: true, spacing: { before: 40, after: 0 }, outlineLevel: 2 },
       },
     },
