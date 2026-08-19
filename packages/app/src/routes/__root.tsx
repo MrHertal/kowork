@@ -26,10 +26,11 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorScreen } from "@/components/error-screen";
 import { SidebarLeft } from "@/components/sidebar-left/sidebar-left";
+import { SidebarLeftProvider } from "@/components/sidebar-left/sidebar-left-provider";
 import { SidebarRight } from "@/components/sidebar-right/sidebar-right";
 import { SidebarRightProvider } from "@/components/sidebar-right/sidebar-right-context";
 import { SidebarRightTrigger } from "@/components/sidebar-right/sidebar-right-trigger";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset } from "@/components/ui/sidebar";
 import { useMcpBrowserFailedToast } from "@/hooks/use-mcp-browser-failed-toast";
 import { UpdateCheck } from "@/hooks/use-update-check";
 
@@ -70,7 +71,7 @@ function RootLayout() {
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <Titlebar />
-      <SidebarProvider className="min-h-0 flex-1">
+      <SidebarLeftProvider className="min-h-0 flex-1">
         <TitlebarSidebarToggle />
         <SidebarRightTrigger />
         <MenuCommands />
@@ -81,7 +82,7 @@ function RootLayout() {
           </div>
         </SidebarInset>
         <SidebarRight />
-      </SidebarProvider>
+      </SidebarLeftProvider>
     </div>
   );
 }
