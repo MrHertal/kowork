@@ -508,6 +508,6 @@
   "toast_session_listFailed_title": "无法加载文件夹“{project}”中的任务",
 
   "updates_available": "有可用更新",
-  "updates_description": "获取最新改进和问题修复。应用将会重启。",
+  "updates_description": "获取最新改进和问题修复。Kowork 将重启。",
   "updates_installRestart": "立即更新"
 }

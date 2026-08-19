@@ -508,6 +508,6 @@
   "toast_session_listFailed_title": "Tâches de « {project} » non chargées",
 
   "updates_available": "Mise à jour disponible",
-  "updates_description": "Profitez des dernières améliorations et corrections. L'application redémarrera.",
+  "updates_description": "Profitez des dernières améliorations et corrections. Kowork redémarrera.",
   "updates_installRestart": "Mettre à jour"
 }

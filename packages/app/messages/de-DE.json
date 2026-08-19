@@ -508,6 +508,6 @@
   "toast_session_listFailed_title": "Aufgaben im Ordner „{project}“ konnten nicht geladen werden",
 
   "updates_available": "Update verfügbar",
-  "updates_description": "Holen Sie sich die neuesten Verbesserungen und Fehlerbehebungen. Die App wird dabei neu gestartet.",
+  "updates_description": "Holen Sie sich die neuesten Verbesserungen und Fehlerbehebungen. Kowork wird dabei neu gestartet.",
   "updates_installRestart": "Jetzt aktualisieren"
 }

@@ -508,6 +508,6 @@
   "toast_session_listFailed_title": "फ़ोल्डर “{project}” के कार्य लोड नहीं हो सके",
 
   "updates_available": "अपडेट उपलब्ध है",
-  "updates_description": "नवीनतम सुधार और समस्याओं के समाधान पाएँ। ऐप पुनरारंभ होगा।",
+  "updates_description": "नवीनतम सुधार और समस्याओं के समाधान पाएँ। Kowork रीस्टार्ट होगा।",
   "updates_installRestart": "अभी अपडेट करें"
 }
