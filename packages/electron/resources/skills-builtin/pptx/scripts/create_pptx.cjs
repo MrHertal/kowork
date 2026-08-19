@@ -418,7 +418,7 @@ tableSlide.addTable(rows, {
   x: MARGIN,
   y: 1.9,
   w: CONTENT_W,
-  colW: [5.333, 2.2, 2.2, 2.2],
+  colW: [5.533, 2.2, 2.2, 2.2], // sums to CONTENT_W
   rowH: [0.6, 0.55, 0.55, 0.55],
   border: { type: "solid", pt: 1, color: COLOR.white },
   valign: "middle",
