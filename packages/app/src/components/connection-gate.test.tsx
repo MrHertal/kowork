@@ -55,7 +55,7 @@ describe("ConnectionGate", () => {
     );
 
     const install = await screen.findByRole("button", {
-      name: "Install & restart",
+      name: "Update now",
     });
     expect(screen.getByText("Kowork can't connect right now.")).toBeVisible();
 
@@ -73,13 +73,9 @@ describe("ConnectionGate", () => {
       </ConnectionGate>,
     );
 
-    await user.click(
-      await screen.findByRole("button", { name: "Install & restart" }),
-    );
+    await user.click(await screen.findByRole("button", { name: "Update now" }));
 
     expect(await screen.findByText("install failed")).toBeVisible();
-    expect(
-      screen.getByRole("button", { name: "Install & restart" }),
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Update now" })).toBeEnabled();
   });
 });

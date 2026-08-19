@@ -50,15 +50,13 @@ describe("UpdateCard", () => {
     const user = userEvent.setup();
     render(<UpdateCard />);
 
-    await user.click(screen.getByRole("button", { name: "Install & restart" }));
+    await user.click(screen.getByRole("button", { name: "Update now" }));
 
     await waitFor(() =>
       expect(doubles.toastError).toHaveBeenCalledWith("Request failed", {
         description: "install failed",
       }),
     );
-    expect(
-      screen.getByRole("button", { name: "Install & restart" }),
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Update now" })).toBeEnabled();
   });
 });

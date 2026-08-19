@@ -508,6 +508,6 @@
   "toast_session_listFailed_title": "No se pudieron cargar las tareas de la carpeta “{project}”",
 
   "updates_available": "Actualización disponible",
-  "updates_description": "Obtén las últimas mejoras y correcciones.",
-  "updates_installRestart": "Instalar y reiniciar"
+  "updates_description": "Obtén las últimas mejoras y correcciones. Kowork se reiniciará.",
+  "updates_installRestart": "Actualizar ahora"
 }

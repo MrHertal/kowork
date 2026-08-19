@@ -72,7 +72,9 @@ const doc = new Document({
     default: {
       document: {
         run: { font: latin(FONT.body), size: 22 }, // 11pt body
-        paragraph: { spacing: { after: 160, line: 259, lineRule: LineRuleType.AUTO } }, // 8pt after, 1.08 lines
+        paragraph: {
+          spacing: { after: 160, line: 259, lineRule: LineRuleType.AUTO },
+        }, // 8pt after, 1.08 lines
       },
       title: {
         run: { font: latin(FONT.head), size: 56 }, // 28pt, black (no color)
@@ -80,15 +82,30 @@ const doc = new Document({
       },
       heading1: {
         run: { font: latin(FONT.head), size: 32, color: "2E74B5" }, // 16pt
-        paragraph: { keepNext: true, keepLines: true, spacing: { before: 240, after: 0 }, outlineLevel: 0 },
+        paragraph: {
+          keepNext: true,
+          keepLines: true,
+          spacing: { before: 240, after: 0 },
+          outlineLevel: 0,
+        },
       },
       heading2: {
         run: { font: latin(FONT.head), size: 26, color: "2E74B5" }, // 13pt
-        paragraph: { keepNext: true, keepLines: true, spacing: { before: 40, after: 0 }, outlineLevel: 1 },
+        paragraph: {
+          keepNext: true,
+          keepLines: true,
+          spacing: { before: 40, after: 0 },
+          outlineLevel: 1,
+        },
       },
       heading3: {
         run: { font: latin(FONT.head), size: 24, color: "1F4D78" }, // 12pt
-        paragraph: { keepNext: true, keepLines: true, spacing: { before: 40, after: 0 }, outlineLevel: 2 },
+        paragraph: {
+          keepNext: true,
+          keepLines: true,
+          spacing: { before: 40, after: 0 },
+          outlineLevel: 2,
+        },
       },
     },
   },
