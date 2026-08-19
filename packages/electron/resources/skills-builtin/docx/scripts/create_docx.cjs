@@ -14,7 +14,9 @@
 // It demonstrates every "create" building block: heading levels, paragraphs, a
 // bulleted list, a numbered list (needs a `numbering` config), a table, an
 // inline image, a running header, a footer with page numbers, and an explicit
-// US Letter page size (docx-js otherwise defaults to A4).
+// US Letter page size (docx-js otherwise defaults to A4). The `styles` block
+// replicates Word's default typography (Calibri body, Calibri Light headings);
+// adjust it through the FONT constant.
 //
 // Image note: docx-js needs explicit width/height in `transformation` (EMUs are
 // derived for you from these pixel values); it does not auto-size. Read a real
@@ -40,7 +42,10 @@ const {
   Header,
   Footer,
   PageNumber,
+  LineRuleType,
 } = require("docx");
+
+const FONT = { head: "Calibri Light", body: "Calibri" };
 
 const PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAFklEQVR42mNQTX5NEmIY1TCqYfhqAAB2SXMQ7LkbdQAAAABJRU5ErkJggg==";
@@ -59,6 +64,30 @@ if (outExt === ".docm" || outExt === ".dotm") {
 const doc = new Document({
   creator: "Kowork",
   title: "Kowork docx skill demo",
+  styles: {
+    default: {
+      document: {
+        run: { font: FONT.body, size: 22 }, // 11pt body
+        paragraph: { spacing: { after: 160, line: 259, lineRule: LineRuleType.AUTO } }, // 8pt after, 1.08 lines
+      },
+      title: {
+        run: { font: FONT.head, size: 56 }, // 28pt, black (no color)
+        paragraph: { spacing: { after: 0 } },
+      },
+      heading1: {
+        run: { font: FONT.head, size: 32, color: "2E74B5" }, // 16pt
+        paragraph: { keepNext: true, keepLines: true, spacing: { before: 240, after: 0 }, outlineLevel: 0 },
+      },
+      heading2: {
+        run: { font: FONT.head, size: 26, color: "2E74B5" }, // 13pt
+        paragraph: { keepNext: true, keepLines: true, spacing: { before: 40, after: 0 }, outlineLevel: 1 },
+      },
+      heading3: {
+        run: { font: FONT.head, size: 24, color: "1F4D78" }, // 12pt
+        paragraph: { keepNext: true, keepLines: true, spacing: { before: 40, after: 0 }, outlineLevel: 2 },
+      },
+    },
+  },
   numbering: {
     config: [
       {
@@ -135,11 +164,14 @@ const doc = new Document({
 
         new Paragraph({ heading: HeadingLevel.HEADING_1, text: "Data" }),
         new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
+          width: { size: 9360, type: WidthType.DXA },
+          columnWidths: [4680, 4680],
           rows: [
             new TableRow({
               children: [
                 new TableCell({
+                  width: { size: 4680, type: WidthType.DXA },
+                  margins: { top: 80, bottom: 80, left: 120, right: 120 },
                   children: [
                     new Paragraph({
                       children: [new TextRun({ text: "Metric", bold: true })],
@@ -147,6 +179,8 @@ const doc = new Document({
                   ],
                 }),
                 new TableCell({
+                  width: { size: 4680, type: WidthType.DXA },
+                  margins: { top: 80, bottom: 80, left: 120, right: 120 },
                   children: [
                     new Paragraph({
                       children: [new TextRun({ text: "Value", bold: true })],
@@ -157,8 +191,16 @@ const doc = new Document({
             }),
             new TableRow({
               children: [
-                new TableCell({ children: [new Paragraph("Revenue")] }),
-                new TableCell({ children: [new Paragraph("$1.2M")] }),
+                new TableCell({
+                  width: { size: 4680, type: WidthType.DXA },
+                  margins: { top: 80, bottom: 80, left: 120, right: 120 },
+                  children: [new Paragraph("Revenue")],
+                }),
+                new TableCell({
+                  width: { size: 4680, type: WidthType.DXA },
+                  margins: { top: 80, bottom: 80, left: 120, right: 120 },
+                  children: [new Paragraph("$1.2M")],
+                }),
               ],
             }),
           ],

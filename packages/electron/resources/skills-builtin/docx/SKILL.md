@@ -93,7 +93,13 @@ another path from environment variables, or create a sibling directory.
 The template covers headings, paragraphs, bulleted and numbered lists, a table,
 an inline image, a header, and a footer with page numbers, and sets the page to
 **US Letter** (docx-js otherwise defaults to A4 — change `properties.page.size`
-to `11906 × 16838` for A4). It omits a table of contents by default (docx-js
+to `11906 × 16838` for A4). It also ships Word's default typography out of the
+box — Calibri 11pt body with Word's usual paragraph spacing, Calibri Light
+headings in Word's blue accent, and a black 28pt title — driven by the `styles`
+block and the `FONT` constant at the top of the script; edit the constant to
+restyle a document. Tables use fixed DXA widths, set on both the table and each
+cell, because percentage widths render unreliably in some viewers. It omits a
+table of contents by default (docx-js
 can't populate one without Word prompting to update fields on open); add one
 only when the user asks. Keep the `.cjs` extension so `require` works in any
 project. For numbered lists you must declare a `numbering` config (the template
