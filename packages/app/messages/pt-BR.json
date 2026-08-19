@@ -508,6 +508,6 @@
   "toast_session_listFailed_title": "Não foi possível carregar as tarefas da pasta “{project}”",
 
   "updates_available": "Atualização disponível",
-  "updates_description": "Obtenha as melhorias e correções mais recentes.",
-  "updates_installRestart": "Instalar e reiniciar"
+  "updates_description": "Obtenha as melhorias e correções mais recentes. O aplicativo será reiniciado.",
+  "updates_installRestart": "Atualizar agora"
 }
