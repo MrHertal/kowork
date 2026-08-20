@@ -9,7 +9,7 @@
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" /></a>
 </p>
 
-<!-- TODO: add a screenshot at .github/assets/screenshot.png -->
+![A finished Kowork task: an Excel sales report with live formulas and a revenue chart, created from a plain-language request](.github/assets/screenshot.png)
 
 Kowork is where you hand real work to AI agents. Describe the outcome in plain language — an agent works in a folder you choose, plans the steps, and does the job. You come back to finished work, ready for review. No terminal required.
 
