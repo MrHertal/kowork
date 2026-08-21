@@ -2,7 +2,7 @@
   <img src="packages/app/public/favicon.svg" alt="Kowork logo" width="64" />
 </p>
 <h1 align="center">Kowork</h1>
-<p align="center">An open-source <a href="https://claude.com/product/cowork">Claude Cowork</a> alternative that get things done on your desktop.</p>
+<p align="center">An open-source <a href="https://claude.com/product/cowork">Claude Cowork</a> alternative that gets things done on your desktop.</p>
 <p align="center">
   <a href="https://github.com/MrHertal/kowork/actions/workflows/check.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/MrHertal/kowork/check.yml?style=flat-square&branch=main" /></a>
   <a href="https://github.com/MrHertal/kowork/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrHertal/kowork?style=flat-square" /></a>
