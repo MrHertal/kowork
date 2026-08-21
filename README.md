@@ -2,7 +2,7 @@
   <img src="packages/app/public/favicon.svg" alt="Kowork logo" width="64" />
 </p>
 <h1 align="center">Kowork</h1>
-<p align="center">An open-source alternative to <a href="https://claude.com/product/cowork">Claude Cowork</a> — a desktop app where AI agents turn your goals into finished work.</p>
+<p align="center">An open-source <a href="https://claude.com/product/cowork">Claude Cowork</a> alternative that get things done on your desktop.</p>
 <p align="center">
   <a href="https://github.com/MrHertal/kowork/actions/workflows/check.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/MrHertal/kowork/check.yml?style=flat-square&branch=main" /></a>
   <a href="https://github.com/MrHertal/kowork/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrHertal/kowork?style=flat-square" /></a>
@@ -11,7 +11,7 @@
 
 ![A finished Kowork task: an Excel sales report with live formulas and a revenue chart, created from a plain-language request](.github/assets/screenshot.png)
 
-Kowork is where you hand real work to AI agents. Describe the outcome in plain language — an agent works in a folder you choose, plans the steps, and does the job. You come back to finished work, ready for review. No terminal required.
+Kowork is where you hand real work to AI agents. Describe the outcome in plain language — an agent works in a folder you choose, plans the steps, and does the job. You come back to finished work, ready for review.
 
 Kowork is built on top of [OpenCode](https://github.com/anomalyco/opencode).
 
@@ -31,6 +31,7 @@ Get the latest build from the [releases page](https://github.com/MrHertal/kowork
 
 - **Works where your files are** — agents read, create, and organize files directly in a folder on your computer. No uploading documents into a chat; the work happens in place.
 - **Real Office documents** — built-in skills create and edit genuine Word documents, Excel spreadsheets (formulas and charts included), PowerPoint decks, and PDFs. Polished files, not plain text.
+- **Your choice of AI provider** — sign in or paste an API key for Anthropic, OpenAI, Google, GitHub Copilot, OpenRouter, and more. Switch models anytime; no lock-in.
 - **Parallel work** — run several tasks at once, split big jobs into subtasks.
 - **Connectors** — plug agents into external tools and data (MCP servers).
 - **Eight languages** — English, French, German, Spanish (Latin America and Spain), Simplified Chinese, Hindi, Brazilian Portuguese.
