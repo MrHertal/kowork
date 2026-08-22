@@ -3,10 +3,17 @@ import Layout from "../layouts/Layout.astro";
 import { DownloadButton } from "../components/DownloadButton";
 ---
 
-<Layout title="Kowork" description="Kowork is an open-source AI coworker for your desktop.">
-  <main class="mx-auto flex min-h-svh max-w-3xl flex-col items-center justify-center gap-6 px-6 text-center">
+<Layout
+  title="Kowork"
+  description="Kowork is an open-source AI coworker for your desktop."
+>
+  <main
+    class="mx-auto flex min-h-svh max-w-3xl flex-col items-center justify-center gap-6 px-6 text-center"
+  >
     <h1 class="text-4xl font-semibold tracking-tight">Kowork</h1>
-    <p class="text-lg text-muted-foreground">The open-source AI coworker for your desktop.</p>
+    <p class="text-lg text-muted-foreground">
+      The open-source AI coworker for your desktop.
+    </p>
     <DownloadButton client:load />
   </main>
 </Layout>
