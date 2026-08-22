@@ -15,6 +15,10 @@ concurrency:
 
 jobs:
   deploy:
+    # Gated on a repository variable (not a secret) so merging before the
+    # Cloudflare secrets exist doesn't produce failed runs. Set the
+    # CLOUDFLARE_DEPLOY variable to "true" when adding the secrets.
+    if: ${{ vars.CLOUDFLARE_DEPLOY == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
