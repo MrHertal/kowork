@@ -1,3 +1,26 @@
 # @kowork/web
 
-Documentation and marketing site for Kowork.
+Landing page (official website) for Kowork, built with [Astro](https://astro.build), React islands, and Tailwind CSS 4. Deployed to Cloudflare Workers static assets.
+
+## Commands
+
+| Command     | Action                                       |
+| ----------- | -------------------------------------------- |
+| `pnpm dev`  | Start the dev server at `localhost:4321`     |
+| `pnpm build`| Build the static site to `./dist/`           |
+| `pnpm preview` | Preview the production build locally      |
+| `pnpm typecheck` | Run `astro check`                        |
+| `pnpm deploy`  | Build and deploy with Wrangler             |
+
+Run them from this directory or from the repo root with `pnpm --filter @kowork/web <command>`.
+
+## Deployment
+
+The site is a fully static Astro build (`dist/`) served as [Cloudflare Workers static assets](https://developers.cloudflare.com/workers/static-assets/), configured in `wrangler.jsonc`. No SSR adapter is used.
+
+- **CI**: `.github/workflows/web.yml` deploys on every push to `main` that touches `packages/web/**` (or manually via workflow dispatch). It requires two repository secrets:
+  - `CLOUDFLARE_API_TOKEN` — an API token with the _Workers Scripts: Edit_ permission
+  - `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account ID
+- **Manual**: `pnpm --filter @kowork/web deploy` after `pnpm exec wrangler login`.
+
+The Worker responds at `kowork-web.<account>.workers.dev`. To attach the production domain (planned: `getkowork.ai`), add a custom domain in the Cloudflare dashboard and update `site` in `astro.config.mjs`.
