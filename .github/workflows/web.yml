@@ -1,19 +1,20 @@
-name: check
+name: web
 
 on:
-  pull_request:
   push:
     branches: [main]
+    paths: ["packages/web/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
-  group: check-${{ github.ref }}
+  group: web-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
-
 jobs:
-  check:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -29,13 +30,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Generate i18n artifacts
-        run: pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
-
-      - run: pnpm typecheck
-
-      - run: pnpm lint
-
-      - run: pnpm test
-
       - run: pnpm --filter @kowork/web build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: "packages/web"
