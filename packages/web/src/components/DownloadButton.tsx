@@ -11,10 +11,12 @@ const labels: Record<Os, string> = {
 };
 
 function detectOs(): Os | null {
-  const platform = navigator.platform.toLowerCase();
-  if (platform.includes("mac")) return "macos";
-  if (platform.includes("win")) return "windows";
-  if (platform.includes("linux")) return "linux";
+  const ua = navigator.userAgent;
+  // iPadOS reports as Macintosh; only touch-capable Macs are actually iPads
+  if (ua.includes("Macintosh") && navigator.maxTouchPoints > 0) return null;
+  if (ua.includes("Mac OS X") || ua.includes("Macintosh")) return "macos";
+  if (ua.includes("Windows")) return "windows";
+  if (ua.includes("Linux")) return "linux";
   return null;
 }
 

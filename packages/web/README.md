@@ -24,4 +24,4 @@ The site is a fully static Astro build (`dist/`) served as [Cloudflare Workers s
   - `CLOUDFLARE_DEPLOY` variable — set to `true` (Settings → Secrets and variables → Actions → Variables)
 - **Manual**: `pnpm --filter @kowork/web deploy` after `pnpm exec wrangler login`.
 
-The Worker responds at `kowork-web.<account>.workers.dev`. To attach the production domain (planned: `getkowork.ai`), add a custom domain in the Cloudflare dashboard and update `site` in `astro.config.mjs`.
+The Worker responds at `kowork-web.<account>.workers.dev`. The production domain (planned: `getkowork.ai`) is already set as `site` in `astro.config.mjs`, so canonical/OG URLs assume it — attach the custom domain in the Cloudflare dashboard when ready (if the plan changes, update `site` too).

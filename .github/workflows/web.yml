@@ -3,11 +3,14 @@ name: web
 on:
   push:
     branches: [main]
-    paths: ["packages/web/**"]
+    paths: ["packages/web/**", ".github/workflows/web.yml"]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
 
 concurrency:
   group: web-${{ github.ref }}
@@ -42,3 +45,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: "packages/web"
+          packageManager: pnpm

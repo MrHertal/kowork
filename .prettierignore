@@ -16,3 +16,7 @@ packages/app/src/components/ai-elements
 packages/app/src/paraglide
 packages/app/project.inlang/*
 !packages/app/project.inlang/settings.json
+
+# Web build output and generated types
+packages/web/.astro
+packages/web/dist
