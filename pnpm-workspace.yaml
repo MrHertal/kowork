@@ -5,6 +5,7 @@ allowBuilds:
   electron-winstaller: true
   esbuild: true
   msw: false
+  workerd: true
 overrides:
   "@types/react": "^19"
   "@types/react-dom": "^19"

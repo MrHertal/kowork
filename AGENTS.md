@@ -11,15 +11,15 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 
 ## Repository Map
 
-| Path                 | Purpose                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| `packages/app/`      | Shared React application, including the standalone browser build                           |
-| `packages/electron/` | Electron main process, preload, and desktop renderer entry point                           |
-| `packages/web/`      | Placeholder for the future static landing page and documentation site; not yet implemented |
-| `opencode/`          | OpenCode fork submodule used for the sidecar and as a reference implementation             |
-| `.github/workflows/` | CI: PR checks (`check.yml`) and the manual release pipeline (`release.yml`)                |
-| `CONTRIBUTING.md`    | Contributor guide: setup, checks, conventions, translations, PR expectations               |
-| `SECURITY.md`        | Threat model and vulnerability reporting                                                   |
+| Path                 | Purpose                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| `packages/app/`      | Shared React application, including the standalone browser build                                      |
+| `packages/electron/` | Electron main process, preload, and desktop renderer entry point                                      |
+| `packages/web/`      | Landing page (Astro + React islands + Tailwind 4), deployed to Cloudflare Workers static assets       |
+| `opencode/`          | OpenCode fork submodule used for the sidecar and as a reference implementation                        |
+| `.github/workflows/` | CI: PR checks (`check.yml`), the manual release pipeline (`release.yml`), and web deploys (`web.yml`) |
+| `CONTRIBUTING.md`    | Contributor guide: setup, checks, conventions, translations, PR expectations                          |
+| `SECURITY.md`        | Threat model and vulnerability reporting                                                              |
 
 `packages/web/` is not the browser build of `packages/app/`.
 
@@ -122,6 +122,7 @@ Run the narrowest check that covers the change:
 
 - Electron and its referenced React app: `pnpm typecheck`
 - React app only: `pnpm --filter @kowork/app typecheck`
+- Web site: `pnpm --filter @kowork/web typecheck` and `pnpm --filter @kowork/web build`
 - Tests: `pnpm test`, or scoped to one package: `pnpm --filter @kowork/app test`
 - Lint the React app: `pnpm lint` (auto-fix: `pnpm lint:fix`)
 
