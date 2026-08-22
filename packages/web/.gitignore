@@ -1,0 +1,5 @@
+# generated types
+.astro/
+
+# wrangler local state
+.wrangler/
