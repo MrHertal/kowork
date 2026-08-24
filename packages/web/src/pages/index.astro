@@ -1,19 +1,23 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { DownloadButton } from "../components/DownloadButton";
+import Features from "../components/landing/Features.astro";
+import Footer from "../components/landing/Footer.astro";
+import Header from "../components/landing/Header.astro";
+import Hero from "../components/landing/Hero.astro";
+import OpenSource from "../components/landing/OpenSource.astro";
+import Workflow from "../components/landing/Workflow.astro";
 ---
 
 <Layout
-  title="Kowork"
-  description="Kowork is an open-source AI coworker for your desktop."
+  title="Kowork — Your open-source AI coworker"
+  description="Hand real work to AI agents. Kowork works directly with your files to create documents, spreadsheets, presentations, and more."
 >
-  <main
-    class="mx-auto flex min-h-svh max-w-3xl flex-col items-center justify-center gap-6 px-6 text-center"
-  >
-    <h1 class="text-4xl font-semibold tracking-tight">Kowork</h1>
-    <p class="text-lg text-muted-foreground">
-      The open-source AI coworker for your desktop.
-    </p>
-    <DownloadButton client:load />
+  <Header />
+  <main>
+    <Hero />
+    <Workflow />
+    <Features />
+    <OpenSource />
   </main>
+  <Footer />
 </Layout>

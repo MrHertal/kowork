@@ -1,0 +1,49 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border bg-card px-5 py-10 sm:px-6">
+  <div class="mx-auto max-w-6xl">
+    <div
+      class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <a
+        href="/"
+        class="flex items-center gap-2.5 font-semibold tracking-tight"
+      >
+        <img src="/favicon.svg" alt="" class="size-8" />
+        <span>Kowork</span>
+      </a>
+      <nav
+        class="flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted-foreground"
+        aria-label="Footer navigation"
+      >
+        <a
+          href="https://github.com/MrHertal/kowork/releases/latest"
+          class="hover:text-foreground">Download</a
+        >
+        <a
+          href="https://github.com/MrHertal/kowork"
+          class="hover:text-foreground">GitHub</a
+        >
+        <a
+          href="https://github.com/MrHertal/kowork/blob/main/CONTRIBUTING.md"
+          class="hover:text-foreground">Contributing</a
+        >
+        <a
+          href="https://github.com/MrHertal/kowork/blob/main/SECURITY.md"
+          class="hover:text-foreground">Security</a
+        >
+      </nav>
+    </div>
+    <div
+      class="mt-8 border-t border-border pt-6 text-xs leading-5 text-muted-foreground"
+    >
+      <p>© {year} Kowork. Released under the MIT License.</p>
+      <p class="mt-2">
+        Claude and Claude Cowork are trademarks of Anthropic, PBC. Kowork is not
+        affiliated with Anthropic or the OpenCode team.
+      </p>
+    </div>
+  </div>
+</footer>

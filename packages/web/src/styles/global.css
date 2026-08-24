@@ -7,6 +7,9 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
@@ -15,11 +18,14 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.985 0.003 255);
   --foreground: oklch(0.145 0 0);
   --primary: oklch(0.546 0.245 262.881);
   --primary-foreground: oklch(0.97 0.014 254.604);
-  --muted: oklch(0.97 0 0);
+  --primary-muted: oklch(0.94 0.03 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.96 0.005 255);
   --muted-foreground: oklch(0.556 0 0);
   --border: oklch(0.922 0 0);
   --radius: 0.625rem;
@@ -29,6 +35,9 @@
   :root {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
+    --primary-muted: oklch(0.24 0.05 260);
+    --card: oklch(0.19 0.005 255);
+    --card-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
     --muted-foreground: oklch(0.708 0 0);
     --border: oklch(1 0 0 / 10%);
@@ -37,6 +46,11 @@
 
 @layer base {
   body {
-    @apply bg-background font-sans text-foreground;
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  a,
+  button {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary;
   }
 }
