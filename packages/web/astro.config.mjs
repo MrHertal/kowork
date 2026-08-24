@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://getkowork.ai",
+  site: "https://getkowork.com",
   devToolbar: {
     enabled: false,
   },

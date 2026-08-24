@@ -24,4 +24,4 @@ The site is a fully static Astro build (`dist/`) served as [Cloudflare Workers s
   - `CLOUDFLARE_DEPLOY` variable — set to `true` (Settings → Secrets and variables → Actions → Variables)
 - **Manual**: `pnpm --filter @kowork/web deploy` after `pnpm exec wrangler login`.
 
-The Worker responds at `kowork-web.<account>.workers.dev`. The production domain (planned: `getkowork.ai`) is already set as `site` in `astro.config.mjs`, so canonical/OG URLs assume it — attach the custom domain in the Cloudflare dashboard when ready (if the plan changes, update `site` too).
+The Worker responds at `kowork-web.<account>.workers.dev` and in production at <https://getkowork.com>. The apex is attached as a [Workers custom domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) declared in `wrangler.jsonc` (`routes` with `custom_domain: true`), so `wrangler deploy` manages DNS and certificates automatically — do not attach it manually in the dashboard. `www.getkowork.com` 301-redirects to the apex via a placeholder DNS record plus a Redirect Rule in the zone (also set as `site` in `astro.config.mjs`, so canonical/OG URLs assume it).
