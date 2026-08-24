@@ -33,7 +33,7 @@ import { DownloadButton } from "../DownloadButton";
     <div
       class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
     >
-      <DownloadButton client:load />
+      <DownloadButton />
       <a
         href="https://github.com/MrHertal/kowork"
         class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 text-base font-semibold shadow-sm transition hover:-translate-y-0.5 hover:border-foreground/25"
@@ -53,15 +53,8 @@ import { DownloadButton } from "../DownloadButton";
       >
       </div>
       <div
-        class="overflow-hidden rounded-xl border border-border bg-card p-1.5 shadow-2xl shadow-foreground/10 sm:rounded-2xl sm:p-2"
+        class="overflow-hidden rounded-xl border border-border bg-card shadow-2xl shadow-foreground/10 sm:rounded-2xl"
       >
-        <div
-          class="flex h-8 items-center gap-1.5 border-b border-border px-3 sm:h-10"
-        >
-          <span class="size-2 rounded-full bg-red-400 sm:size-2.5"></span>
-          <span class="size-2 rounded-full bg-amber-400 sm:size-2.5"></span>
-          <span class="size-2 rounded-full bg-emerald-400 sm:size-2.5"></span>
-        </div>
         <img
           src={productScreenshot.src}
           alt="Kowork completing an Excel sales report with formulas and a revenue chart"
