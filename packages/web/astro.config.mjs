@@ -13,8 +13,27 @@ export default defineConfig({
   integrations: [
     react(),
     starlight({
-      title: "Kowork Documentation",
+      title: "Kowork",
       description: "Learn how to use Kowork.",
+      logo: {
+        src: "./public/favicon-96x96.png",
+        alt: "Kowork",
+      },
+      customCss: ["./src/styles/docs.css"],
+      head: [
+        {
+          tag: "meta",
+          attrs: { name: "theme-color", content: "#F8F7F7" },
+        },
+        {
+          tag: "meta",
+          attrs: {
+            name: "theme-color",
+            content: "#131010",
+            media: "(prefers-color-scheme: dark)",
+          },
+        },
+      ],
       disable404Route: true,
       sidebar: [
         {

@@ -1,0 +1,68 @@
+@import "@fontsource-variable/inter";
+
+:root,
+::backdrop {
+  --sl-font: "Inter Variable", sans-serif;
+  --sl-color-white: oklch(0.985 0 0);
+  --sl-color-gray-1: oklch(0.94 0.004 255);
+  --sl-color-gray-2: oklch(0.708 0 0);
+  --sl-color-gray-3: oklch(0.556 0 0);
+  --sl-color-gray-4: oklch(0.4 0 0);
+  --sl-color-gray-5: oklch(0.269 0 0);
+  --sl-color-gray-6: oklch(0.19 0.005 255);
+  --sl-color-black: oklch(0.145 0 0);
+  --sl-color-accent-low: oklch(0.24 0.05 260);
+  --sl-color-accent: oklch(0.64 0.2 262.881);
+  --sl-color-accent-high: oklch(0.85 0.08 255);
+  --sl-color-bg-nav: oklch(0.145 0 0 / 85%);
+  --sl-color-bg-sidebar: oklch(0.16 0.003 255);
+  --sl-color-hairline: oklch(1 0 0 / 10%);
+  --sl-color-hairline-light: oklch(1 0 0 / 10%);
+  --sl-content-width: 48rem;
+  --sl-nav-height: 4rem;
+  --sl-nav-pad-y: 1rem;
+  --kowork-link-color: oklch(0.78 0.12 260);
+  --kowork-active-background: oklch(0.205 0.012 260);
+}
+
+:root[data-theme="light"],
+[data-theme="light"] ::backdrop {
+  --sl-color-white: oklch(0.145 0 0);
+  --sl-color-gray-1: oklch(0.19 0.005 255);
+  --sl-color-gray-2: oklch(0.3 0 0);
+  --sl-color-gray-3: oklch(0.48 0 0);
+  --sl-color-gray-4: oklch(0.62 0 0);
+  --sl-color-gray-5: oklch(0.82 0 0);
+  --sl-color-gray-6: oklch(0.922 0 0);
+  --sl-color-gray-7: oklch(0.96 0.005 255);
+  --sl-color-black: oklch(0.985 0.003 255);
+  --sl-color-accent-high: oklch(0.42 0.2 262.881);
+  --sl-color-accent: oklch(0.546 0.245 262.881);
+  --sl-color-accent-low: oklch(0.94 0.03 255);
+  --sl-color-bg-nav: oklch(0.985 0.003 255 / 85%);
+  --sl-color-bg-sidebar: oklch(0.975 0.003 255);
+  --sl-color-bg-inline-code: oklch(0.96 0.005 255);
+  --sl-color-hairline: oklch(0.922 0 0);
+  --sl-color-hairline-light: oklch(0.922 0 0);
+  --kowork-link-color: oklch(0.48 0.19 262.881);
+  --kowork-active-background: oklch(0.94 0.008 260);
+}
+
+.site-title {
+  --sl-color-text-accent: var(--sl-color-white);
+  --sl-nav-gap: 0.625rem;
+  --sl-text-h4: 1rem;
+}
+
+.social-icons {
+  --sl-color-text-accent: var(--sl-color-gray-2);
+}
+
+.sidebar-content a[aria-current="page"] {
+  --sl-color-text-accent: var(--kowork-active-background);
+  --sl-color-text-invert: var(--sl-color-white);
+}
+
+.sl-markdown-content {
+  --sl-color-text-accent: var(--kowork-link-color);
+}
