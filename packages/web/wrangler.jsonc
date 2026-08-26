@@ -1,9 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kowork-web",
+  "main": "./src/worker.ts",
   "compatibility_date": "2026-08-20",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
   },
   "routes": [{ "pattern": "getkowork.com", "custom_domain": true }],
