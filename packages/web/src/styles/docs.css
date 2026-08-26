@@ -21,15 +21,8 @@
   --sl-content-width: 48rem;
   --sl-nav-height: 4rem;
   --sl-nav-pad-y: 1rem;
-  --sl-text-h1: 2rem;
   --kowork-link-color: oklch(0.78 0.12 260);
   --kowork-active-background: oklch(0.205 0.012 260);
-}
-
-@media (min-width: 50em) {
-  :root {
-    --sl-text-h1: 2.25rem;
-  }
 }
 
 :root[data-theme="light"],
@@ -72,8 +65,4 @@
 
 .sl-markdown-content {
   --sl-color-text-accent: var(--kowork-link-color);
-}
-
-.pagination-links .link-title {
-  font-size: var(--sl-text-xl);
 }
