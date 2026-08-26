@@ -6,6 +6,11 @@ allowBuilds:
   esbuild: true
   msw: false
   workerd: true
+minimumReleaseAgeExclude:
+  - "@astrojs/starlight@0.41.9"
+  - astro@7.2.7
+  - miniflare@5.20260825.0-alpha
+  - wrangler@4.126.0
 overrides:
   "@types/react": "^19"
   "@types/react-dom": "^19"
