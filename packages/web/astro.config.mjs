@@ -36,9 +36,65 @@ export default defineConfig({
       ],
       disable404Route: true,
       sidebar: [
+        { label: "Welcome", link: "/docs/" },
         {
-          label: "Documentation",
-          items: [{ autogenerate: { directory: "docs" } }],
+          label: "Getting Started",
+          items: [
+            {
+              label: "Install Kowork",
+              link: "/docs/getting-started/install/",
+            },
+            {
+              label: "Connect an AI Provider",
+              link: "/docs/getting-started/connect-provider/",
+            },
+            {
+              label: "Create Your First Task",
+              link: "/docs/getting-started/first-task/",
+            },
+          ],
+        },
+        {
+          label: "Using Kowork",
+          items: [
+            {
+              label: "Folders and Files",
+              link: "/docs/using-kowork/folders-and-files/",
+            },
+            {
+              label: "Tasks and Subtasks",
+              link: "/docs/using-kowork/tasks-and-subtasks/",
+            },
+            {
+              label: "Create Office Documents",
+              link: "/docs/using-kowork/office-documents/",
+            },
+            {
+              label: "Permissions and Safety",
+              link: "/docs/using-kowork/permissions/",
+            },
+          ],
+        },
+        {
+          label: "Customize Kowork",
+          items: [
+            {
+              label: "Providers and Models",
+              link: "/docs/customize/providers-and-models/",
+            },
+            { label: "Connectors", link: "/docs/customize/connectors/" },
+            { label: "Skills", link: "/docs/customize/skills/" },
+            { label: "Settings", link: "/docs/customize/settings/" },
+          ],
+        },
+        {
+          label: "Help",
+          items: [
+            {
+              label: "Troubleshooting",
+              link: "/docs/help/troubleshooting/",
+            },
+          ],
         },
       ],
       social: [
