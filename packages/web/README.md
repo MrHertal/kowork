@@ -1,6 +1,6 @@
 # @kowork/web
 
-Landing page (official website) for Kowork, built with [Astro](https://astro.build), React islands, and Tailwind CSS 4. Deployed to Cloudflare Workers static assets with a Worker route for platform downloads.
+Official website and documentation for Kowork, built with [Astro](https://astro.build), [Starlight](https://starlight.astro.build/), React islands, and Tailwind CSS 4. Deployed to Cloudflare Workers static assets with a Worker route for platform downloads.
 
 ## Commands
 
@@ -13,6 +13,10 @@ Landing page (official website) for Kowork, built with [Astro](https://astro.bui
 | `pnpm run deploy` | Build and deploy with Wrangler           |
 
 Run them from this directory or from the repo root with `pnpm --filter @kowork/web <command>`. The `run` in `pnpm run deploy` is required: plain `pnpm deploy` resolves to pnpm's built-in deploy command, not the script.
+
+## Documentation
+
+Starlight documentation is served from <https://getkowork.com/docs/> as part of the same Astro site and Cloudflare deployment as the landing page. Add documentation pages under `src/content/docs/docs/`; the second `docs` directory provides the `/docs/` URL prefix.
 
 ## Deployment
 
