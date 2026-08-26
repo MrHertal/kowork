@@ -5,18 +5,18 @@ description: Download and install Kowork on macOS or Windows.
 
 Kowork is currently available for Apple Silicon Macs and 64-bit Windows computers.
 
-| Platform | Supported computer | Installer |
-| --- | --- | --- |
-| macOS | Mac with Apple silicon (M1 or newer) | `.dmg` |
-| Windows | 64-bit Windows computer | `.exe` |
+| Platform | Supported computer                   | Download                        |
+| -------- | ------------------------------------ | ------------------------------- |
+| macOS    | Mac with Apple silicon (M1 or newer) | `kowork-electron-mac-arm64.dmg` |
+| Windows  | 64-bit Windows computer              | `kowork-electron-win-x64.exe`   |
 
 Intel Macs and Linux are not supported yet.
 
 ## Download Kowork
 
-[Download Kowork](/download) from the official website. The download page selects the right installer for your computer.
+[Download Kowork](/download) from the official website. Kowork selects the installer for your computer.
 
-If the download does not start, open the [latest Kowork release on GitHub](https://github.com/MrHertal/kowork/releases/latest) and choose the installer for your platform.
+If the download does not start, open the [latest Kowork release on GitHub](https://github.com/MrHertal/kowork/releases/latest) and select the file listed for your platform above.
 
 :::caution
 Only download Kowork from `getkowork.com` or the official `MrHertal/kowork` GitHub repository.
@@ -32,11 +32,13 @@ Only download Kowork from `getkowork.com` or the official `MrHertal/kowork` GitH
 ## Install on Windows
 
 1. Open the downloaded `.exe` file.
-2. Follow the installer and choose where to install Kowork.
+2. Follow the installer. You can choose where Kowork is installed.
 3. Open Kowork when installation is complete.
 
-Windows may show a Microsoft Defender SmartScreen message. If it does, confirm that you downloaded Kowork from an official source, then select **More info** and **Run anyway**.
+:::note
+If Microsoft Defender SmartScreen shows **Windows protected your PC**, confirm that the installer came from an official source. Select **More info**, then **Run anyway** to continue.
+:::
 
 ## Next step
 
-Kowork needs an AI provider before it can begin a task. Continue with [Connect an AI Provider](/docs/getting-started/connect-provider/).
+Kowork needs an AI provider to do work. Continue with [Connect an AI Provider](/docs/getting-started/connect-provider/).
