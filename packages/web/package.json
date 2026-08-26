@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "generate:og-image": "node scripts/generate-og-image.mjs",
     "preview": "astro preview",
     "typecheck": "astro check",
     "deploy": "astro build && wrangler deploy"
@@ -25,6 +26,7 @@
     "@astrojs/check": "^0.9.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "sharp": "^0.35.3",
     "typescript": "~6.0.3",
     "wrangler": "^4.126.0"
   }
