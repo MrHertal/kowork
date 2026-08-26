@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
+import sitemap from "@astrojs/sitemap";
 import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -21,6 +22,10 @@ export default defineConfig({
       },
       customCss: ["./src/styles/docs.css"],
       head: [
+        {
+          tag: "link",
+          attrs: { rel: "sitemap", href: "/sitemap-index.xml" },
+        },
         {
           tag: "meta",
           attrs: { name: "theme-color", content: "#F8F7F7" },
@@ -146,6 +151,9 @@ export default defineConfig({
           href: "https://github.com/MrHertal/kowork",
         },
       ],
+    }),
+    sitemap({
+      filter: (page) => page !== "https://getkowork.com/404/",
     }),
   ],
   vite: {
