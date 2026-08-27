@@ -280,6 +280,57 @@ function CustomMcpForm({ directory }: { directory: string }) {
                     </FieldSet>
                   )}
                 </form.Field>
+                <FieldSet>
+                  <FieldLegend variant="label">
+                    {m.settings_mcp_custom_oauth_label()}
+                  </FieldLegend>
+                  <FieldDescription>
+                    {m.settings_mcp_custom_oauth_description()}
+                  </FieldDescription>
+                  <form.Field name="oauthClientId">
+                    {(field) => (
+                      <TextField
+                        id={field.name}
+                        label={m.settings_mcp_custom_oauth_client_id_label()}
+                        placeholder={m.settings_mcp_custom_oauth_client_id_placeholder()}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        onBlur={field.handleBlur}
+                        invalid={isFieldInvalid(field, submitAttempted)}
+                        errors={field.state.meta.errors}
+                      />
+                    )}
+                  </form.Field>
+                  <form.Field name="oauthClientSecret">
+                    {(field) => (
+                      <TextField
+                        id={field.name}
+                        label={m.settings_mcp_custom_oauth_client_secret_label()}
+                        placeholder={m.settings_mcp_custom_oauth_client_secret_placeholder()}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        onBlur={field.handleBlur}
+                        invalid={isFieldInvalid(field, submitAttempted)}
+                        errors={field.state.meta.errors}
+                        type="password"
+                      />
+                    )}
+                  </form.Field>
+                  <form.Field name="oauthScope">
+                    {(field) => (
+                      <TextField
+                        id={field.name}
+                        label={m.settings_mcp_custom_oauth_scope_label()}
+                        placeholder={m.settings_mcp_custom_oauth_scope_placeholder()}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        onBlur={field.handleBlur}
+                        invalid={isFieldInvalid(field, submitAttempted)}
+                        errors={field.state.meta.errors}
+                      />
+                    )}
+                  </form.Field>
+                </FieldSet>
               </>
             ) : (
               <>

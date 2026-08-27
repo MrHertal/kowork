@@ -23,6 +23,9 @@ export const formSchema = z
     command: z.string(),
     headers: z.array(entrySchema),
     environment: z.array(entrySchema),
+    oauthClientId: z.string(),
+    oauthClientSecret: z.string(),
+    oauthScope: z.string(),
   })
   .superRefine((value, ctx) => {
     const name = value.name.trim();
@@ -77,6 +80,9 @@ export const initialValues: FormValues = {
   command: "",
   headers: [{ key: "", value: "" }],
   environment: [{ key: "", value: "" }],
+  oauthClientId: "",
+  oauthClientSecret: "",
+  oauthScope: "",
 };
 
 function addEntryIssues(
@@ -141,6 +147,9 @@ export function buildResult(value: FormValues): ValidatedResult {
   const name = value.name.trim();
   if (value.type === "remote") {
     const headers = collectEntries(value.headers);
+    const clientId = value.oauthClientId.trim();
+    const clientSecret = value.oauthClientSecret.trim();
+    const scope = value.oauthScope.trim();
     return {
       name,
       config: {
@@ -148,6 +157,15 @@ export function buildResult(value: FormValues): ValidatedResult {
         url: value.url.trim(),
         enabled: true,
         ...(Object.keys(headers).length ? { headers } : {}),
+        ...(clientId
+          ? {
+              oauth: {
+                clientId,
+                ...(clientSecret ? { clientSecret } : {}),
+                ...(scope ? { scope } : {}),
+              },
+            }
+          : {}),
       },
     };
   }
