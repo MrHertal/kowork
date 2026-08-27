@@ -13,6 +13,7 @@ export interface ToolErrorCardProps {
   defaultOpen?: boolean;
   subtitle?: string;
   href?: string;
+  title?: string;
 }
 
 export function ToolErrorCard({
@@ -21,6 +22,7 @@ export function ToolErrorCard({
   defaultOpen = false,
   subtitle: subtitleProp,
   href,
+  title: titleProp,
 }: ToolErrorCardProps) {
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -31,7 +33,7 @@ export function ToolErrorCard({
     };
   }, []);
 
-  const title = getToolTitle(tool);
+  const title = titleProp ?? getToolTitle(tool);
   const cleaned = error.replace(/^Error:\s*/, "").trim();
 
   const tail = cleaned.startsWith(`${tool} `)
@@ -44,8 +46,12 @@ export function ToolErrorCard({
     : parts.length > 1 && parts[0]?.trim()
       ? parts[0].trim().charAt(0).toUpperCase() + parts[0].trim().slice(1)
       : m.session_tool_error_failed();
+  // When the subtitle comes from the caller rather than the error's first
+  // segment, nothing was previewed in the row — keep the error whole.
   const body =
-    parts.length > 1 ? parts.slice(1).join(": ").trim() || cleaned : cleaned;
+    subtitleProp || parts.length === 1
+      ? cleaned
+      : parts.slice(1).join(": ").trim() || cleaned;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(cleaned);

@@ -10,6 +10,7 @@ export interface PopularMcp {
   name: string;
   description: () => string;
   logo?: string;
+  logoClassName?: string;
   url: string;
   oauth?: { clientId: string; clientSecret?: string; scope?: string };
 }
@@ -39,6 +40,7 @@ export const POPULAR_MCP: PopularMcp[] = [
     name: "Linear",
     description: m.settings_mcp_popular_linear_description,
     logo: linearLogo,
+    logoClassName: "dark:invert",
     url: "https://mcp.linear.app/mcp",
   },
   {

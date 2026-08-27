@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
+import { mcpServerTitle } from "@/components/session/tools/mcp-tool";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -201,7 +202,13 @@ function PopularSection({ items, onConnect }: PopularSectionProps) {
       {items.map((server) => (
         <SettingsListItem
           key={server.id}
-          icon={<McpLogo src={server.logo} alt={`${server.name} logo`} />}
+          icon={
+            <McpLogo
+              src={server.logo}
+              alt={`${server.name} logo`}
+              className={server.logoClassName}
+            />
+          }
           title={server.name}
           description={server.description()}
           action={
@@ -306,11 +313,18 @@ function McpRow({
   const busy = actionPending || removePending || addPending || authPending;
   const badgeVariant = isError && !connecting ? "destructive" : "secondary";
   const popular = POPULAR_MCP.find((p) => p.id === name);
+  const displayName = mcpServerTitle(name);
 
   return (
     <SettingsListItem
-      icon={<McpLogo src={popular?.logo} alt={`${name} logo`} />}
-      title={name}
+      icon={
+        <McpLogo
+          src={popular?.logo}
+          alt={`${displayName} logo`}
+          className={popular?.logoClassName}
+        />
+      }
+      title={displayName}
       badge={<Badge variant={badgeVariant}>{label}</Badge>}
       description={error}
       action={

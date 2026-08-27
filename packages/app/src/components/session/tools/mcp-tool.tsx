@@ -1,6 +1,7 @@
 import { WrenchIcon } from "lucide-react";
 
 import { POPULAR_MCP } from "@/data/popular-mcp";
+import { cn } from "@/lib/utils";
 
 import { BasicTool, type ToolProps } from "./basic-tool";
 
@@ -22,7 +23,7 @@ export function parseMcpToolName(
   return undefined;
 }
 
-function humanize(value: string): string {
+export function humanize(value: string): string {
   const words = value
     .replace(/[_-]+/g, " ")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
@@ -36,6 +37,11 @@ function humanize(value: string): string {
   );
 }
 
+export function mcpServerTitle(server: string): string {
+  const popular = POPULAR_MCP.find((p) => p.id === server);
+  return popular?.name ?? humanize(server);
+}
+
 interface McpToolProps extends ToolProps {
   server: string;
   mcpTool: string;
@@ -45,12 +51,16 @@ export function McpTool({ server, mcpTool, ...props }: McpToolProps) {
   const popular = POPULAR_MCP.find((p) => p.id === server);
 
   const icon = popular?.logo ? (
-    <img src={popular.logo} alt="" className="size-4" />
+    <img
+      src={popular.logo}
+      alt=""
+      className={cn("size-4", popular.logoClassName)}
+    />
   ) : (
     <WrenchIcon />
   );
 
-  const title = popular?.name ?? humanize(server);
+  const title = mcpServerTitle(server);
   const subtitle = mcpTool ? humanize(mcpTool) : undefined;
 
   return (
