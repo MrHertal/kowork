@@ -109,7 +109,12 @@ function SettingsMcpContent({ directory }: { directory: string }) {
           mcpMutation.mutate({
             type: "add",
             name: server.id,
-            config: { type: "remote", url: server.url, enabled: true },
+            config: {
+              type: "remote",
+              url: server.url,
+              enabled: true,
+              ...(server.oauth ? { oauth: server.oauth } : {}),
+            },
           })
         }
       />
