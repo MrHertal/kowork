@@ -30,8 +30,16 @@ import {
 } from "./tools/context-tool-group";
 import type { ToolProps } from "./tools/basic-tool";
 import { GenericTool } from "./tools/generic-tool";
-import { McpTool, parseMcpToolName } from "./tools/mcp-tool";
-import { ToolErrorCard } from "./tools/tool-error-card";
+import {
+  McpTool,
+  humanize,
+  mcpServerTitle,
+  parseMcpToolName,
+} from "./tools/mcp-tool";
+import {
+  ToolErrorCard,
+  type ToolErrorCardProps,
+} from "./tools/tool-error-card";
 import { ToolRegistry } from "./tool-registry";
 import "./tool-registrations";
 
@@ -100,7 +108,7 @@ function ToolPartDisplay({
       );
     }
     return (
-      <ToolErrorCard
+      <ToolError
         tool={part.tool}
         error={error}
         defaultOpen={defaultOpen}
@@ -149,6 +157,25 @@ function McpOrGenericTool(props: ToolProps) {
     return <McpTool {...props} server={parsed.server} mcpTool={parsed.tool} />;
   }
   return <GenericTool {...props} />;
+}
+
+function ToolError(props: ToolErrorCardProps) {
+  const sdk = useSDK();
+  const mcpNames = useChildData(
+    sdk.directory,
+    (s) => Object.keys(s.mcp),
+    shallowArrayEqual,
+  );
+  const parsed = parseMcpToolName(props.tool, mcpNames);
+
+  if (!parsed) return <ToolErrorCard {...props} />;
+  return (
+    <ToolErrorCard
+      {...props}
+      title={mcpServerTitle(parsed.server)}
+      subtitle={props.subtitle ?? humanize(parsed.tool)}
+    />
+  );
 }
 
 export function Part({
