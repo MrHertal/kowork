@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { Event, OpencodeClient } from "@opencode-ai/sdk/v2/client";
+import type { Event } from "@opencode-ai/sdk/v2/client";
 import { render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
@@ -16,7 +16,7 @@ import { createEmitter } from "@/utils/emitter";
 
 const directory = "/tmp/project";
 
-const client = {} as unknown as OpencodeClient;
+const client = {};
 const emitter = createEmitter<{ [key: string]: Event }>();
 
 vi.mock("@/contexts/global-sdk", () => ({

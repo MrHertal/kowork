@@ -27,8 +27,14 @@ export async function createBlobReference(
   return { id, url: blobUrl(id, blob) };
 }
 
-export function hasBlobReference(id: string) {
-  return urls.has(id);
+function isBlobReference(value: unknown): value is BlobReference {
+  if (typeof value !== "object" || value === null) return false;
+  if (!("id" in value) || typeof value.id !== "string") return false;
+  return "url" in value && typeof value.url === "string";
+}
+
+export function isLiveBlobReference(value: unknown): value is BlobReference {
+  return isBlobReference(value) && urls.has(value.id);
 }
 
 export async function blobDataUrl(blob: BlobReference, mime: string) {
