@@ -21,6 +21,77 @@ const abortError = z.object({
 
 type EventMap = { [key: string]: Event };
 
+type QueuedServerEvent = { directory: string; payload: Event };
+
+const coalescedKey = (event: QueuedServerEvent) => {
+  if (event.payload.type === "lsp.updated")
+    return `lsp.updated:${event.directory}`;
+  if (event.payload.type === "message.part.updated") {
+    const part = event.payload.properties.part;
+    return `message.part.updated:${event.directory}:${part.messageID}:${part.id}`;
+  }
+  return undefined;
+};
+
+export function enqueueServerEvent(
+  queue: QueuedServerEvent[],
+  event: QueuedServerEvent,
+) {
+  const key = coalescedKey(event);
+  const previous = queue[queue.length - 1];
+  if (key && previous && coalescedKey(previous) === key) {
+    queue[queue.length - 1] = event;
+    return false;
+  }
+  queue.push(event);
+  return true;
+}
+
+export function coalesceServerEvents(events: QueuedServerEvent[]) {
+  const output: QueuedServerEvent[] = [];
+  events.forEach((event) => {
+    if (event.payload.type !== "message.part.delta") {
+      output.push(event);
+      return;
+    }
+    const props = event.payload.properties;
+    const previous = output[output.length - 1];
+    if (
+      !previous ||
+      previous.payload.type !== "message.part.delta" ||
+      previous.directory !== event.directory ||
+      previous.payload.properties.messageID !== props.messageID ||
+      previous.payload.properties.partID !== props.partID ||
+      previous.payload.properties.field !== props.field
+    ) {
+      output.push({
+        directory: event.directory,
+        payload: { ...event.payload, properties: { ...props } },
+      });
+      return;
+    }
+    output[output.length - 1] = {
+      directory: event.directory,
+      payload: {
+        ...event.payload,
+        properties: {
+          ...props,
+          delta: previous.payload.properties.delta + props.delta,
+        },
+      },
+    };
+  });
+  return output;
+}
+
+export function resumeStreamAfterPageShow(
+  event: PageTransitionEvent,
+  start: () => unknown,
+) {
+  if (!event.persisted) return;
+  start();
+}
+
 export interface GlobalSDKContextValue {
   url: string;
   client: OpencodeClient;
@@ -49,7 +120,8 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
     stop: () => void;
     abort: AbortController;
     flush: () => void;
-    onVisibilityChange: () => void;
+    onPageHide: () => void;
+    onPageShow: (event: PageTransitionEvent) => void;
   }>(() => {
     const abort = new AbortController();
 
@@ -79,30 +151,14 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
 
     const emitter = createEmitter<EventMap>();
 
-    type Queued = { directory: string; payload: Event };
     const FLUSH_FRAME_MS = 16;
     const STREAM_YIELD_MS = 8;
     const RECONNECT_DELAY_MS = 250;
 
-    let queue: Queued[] = [];
-    let buffer: Queued[] = [];
-    const coalesced = new Map<string, number>();
-    const staleDeltas = new Set<string>();
+    let queue: QueuedServerEvent[] = [];
+    let buffer: QueuedServerEvent[] = [];
     let timer: ReturnType<typeof setTimeout> | undefined;
     let last = 0;
-
-    const deltaKey = (directory: string, messageID: string, partID: string) =>
-      `${directory}:${messageID}:${partID}`;
-
-    const key = (directory: string, payload: Event) => {
-      if (payload.type === "session.status")
-        return `session.status:${directory}:${payload.properties.sessionID}`;
-      if (payload.type === "lsp.updated") return `lsp.updated:${directory}`;
-      if (payload.type === "message.part.updated") {
-        const part = payload.properties.part;
-        return `message.part.updated:${directory}:${part.messageID}:${part.id}`;
-      }
-    };
 
     const flush = () => {
       if (timer) clearTimeout(timer);
@@ -111,22 +167,12 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
       if (queue.length === 0) return;
 
       const events = queue;
-      const skip = staleDeltas.size > 0 ? new Set(staleDeltas) : undefined;
       queue = buffer;
       buffer = events;
       queue.length = 0;
-      coalesced.clear();
-      staleDeltas.clear();
 
       last = Date.now();
-      for (const event of events) {
-        if (skip && event.payload.type === "message.part.delta") {
-          const props = event.payload.properties;
-          if (
-            skip.has(deltaKey(event.directory, props.messageID, props.partID))
-          )
-            continue;
-        }
+      for (const event of coalesceServerEvents(events)) {
         emitter.emit(event.directory, event.payload);
       }
 
@@ -143,35 +189,23 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
     const wait = (ms: number) =>
       new Promise<void>((resolve) => setTimeout(resolve, ms));
     const aborted = (error: unknown) => abortError.safeParse(error).success;
+    const closed = (error: unknown, signal?: AbortSignal) =>
+      aborted(error) || signal?.aborted === true;
 
     let attempt: AbortController | undefined;
     let run: Promise<void> | undefined;
     let started = false;
-    const HEARTBEAT_TIMEOUT_MS = 15_000;
-    let lastEventAt = 0;
-    let heartbeat: ReturnType<typeof setTimeout> | undefined;
-
-    const resetHeartbeat = () => {
-      lastEventAt = Date.now();
-      if (heartbeat) clearTimeout(heartbeat);
-      heartbeat = setTimeout(() => {
-        attempt?.abort();
-      }, HEARTBEAT_TIMEOUT_MS);
-    };
-
-    const clearHeartbeat = () => {
-      if (!heartbeat) return;
-      clearTimeout(heartbeat);
-      heartbeat = undefined;
-    };
+    let generation = 0;
 
     const start = () => {
       if (started) return run;
       started = true;
-      run = (async () => {
-        while (!abort.signal.aborted && started) {
+      const active = ++generation;
+      const previous = run;
+      const current = (async () => {
+        if (previous) await previous;
+        while (!abort.signal.aborted && started && generation === active) {
           attempt = new AbortController();
-          lastEventAt = Date.now();
           const onAbort = () => {
             attempt?.abort();
           };
@@ -179,21 +213,9 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
           try {
             const events = await eventSdk.global.event({
               signal: attempt.signal,
-              onSseError: (error) => {
-                if (aborted(error)) return;
-                if (streamErrorLogged) return;
-                streamErrorLogged = true;
-                console.error("[global-sdk] event stream error", {
-                  url: currentServer.http.url,
-                  fetch: eventFetch ? "platform" : "webview",
-                  error,
-                });
-              },
             });
             let yielded = Date.now();
-            resetHeartbeat();
             for await (const event of events.stream) {
-              resetHeartbeat();
               streamErrorLogged = false;
               const directory = event.directory ?? "global";
 
@@ -203,30 +225,16 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
 
               const payload = event.payload;
 
-              const k = key(directory, payload);
-              if (k) {
-                const i = coalesced.get(k);
-                if (i !== undefined) {
-                  queue[i] = { directory, payload };
-                  if (payload.type === "message.part.updated") {
-                    const part = payload.properties.part;
-                    staleDeltas.add(
-                      deltaKey(directory, part.messageID, part.id),
-                    );
-                  }
-                  continue;
-                }
-                coalesced.set(k, queue.length);
+              if (enqueueServerEvent(queue, { directory, payload })) {
+                schedule();
               }
-              queue.push({ directory, payload });
-              schedule();
 
               if (Date.now() - yielded < STREAM_YIELD_MS) continue;
               yielded = Date.now();
               await wait(0);
             }
           } catch (error) {
-            if (!aborted(error) && !streamErrorLogged) {
+            if (!closed(error, attempt?.signal) && !streamErrorLogged) {
               streamErrorLogged = true;
               console.error("[global-sdk] event stream failed", {
                 url: currentServer.http.url,
@@ -237,10 +245,10 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
           } finally {
             abort.signal.removeEventListener("abort", onAbort);
             attempt = undefined;
-            clearHeartbeat();
           }
 
-          if (abort.signal.aborted || !started) return;
+          if (abort.signal.aborted || !started || generation !== active)
+            return;
           await wait(RECONNECT_DELAY_MS);
         }
       })()
@@ -248,24 +256,23 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
           if (!aborted(error)) console.error("[global-sdk] run failed", error);
         })
         .finally(() => {
+          if (run !== current) return;
           run = undefined;
           flush();
         });
+      run = current;
       return run;
     };
 
     const stop = () => {
       started = false;
+      generation++;
       attempt?.abort();
-      clearHeartbeat();
     };
 
-    const onVisibilityChange = () => {
-      if (document.visibilityState !== "visible") return;
-      if (!started) return;
-      if (Date.now() - lastEventAt < HEARTBEAT_TIMEOUT_MS) return;
-      attempt?.abort();
-    };
+    const onPageHide = () => stop();
+    const onPageShow = (event: PageTransitionEvent) =>
+      resumeStreamAfterPageShow(event, start);
 
     const sdk = createSdkForServer({
       server: currentServer.http,
@@ -295,20 +302,20 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
       stop,
       abort,
       flush,
-      onVisibilityChange,
+      onPageHide,
+      onPageShow,
     };
   });
 
   useEffect(() => {
-    document.addEventListener("visibilitychange", stable.onVisibilityChange);
+    window.addEventListener("pagehide", stable.onPageHide);
+    window.addEventListener("pageshow", stable.onPageShow);
     return () => {
       stable.stop();
       stable.abort.abort();
       stable.flush();
-      document.removeEventListener(
-        "visibilitychange",
-        stable.onVisibilityChange,
-      );
+      window.removeEventListener("pagehide", stable.onPageHide);
+      window.removeEventListener("pageshow", stable.onPageShow);
     };
   }, [stable]);
 
