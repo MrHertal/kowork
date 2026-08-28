@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
-    "@opencode-ai/sdk": "^1.15.13",
+    "@opencode-ai/sdk": "^1.18.23",
     "@pierre/diffs": "^1.2.7",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@rive-app/react-webgl2": "^4.28.6",
