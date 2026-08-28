@@ -28,11 +28,7 @@ const toolDescriptions: Record<string, () => string> = {
 interface SessionPermissionDockProps {
   request: PermissionRequest;
   responding: boolean;
-  onDecide: (
-    requestID: string,
-    sessionID: string,
-    response: "once" | "always" | "reject",
-  ) => void;
+  onDecide: (response: "once" | "always" | "reject") => void;
 }
 
 export function SessionPermissionDock({
@@ -61,7 +57,7 @@ export function SessionPermissionDock({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onDecide(request.id, request.sessionID, "reject")}
+              onClick={() => onDecide("reject")}
               disabled={responding}
             >
               {m.common_deny()}
@@ -69,7 +65,7 @@ export function SessionPermissionDock({
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => onDecide(request.id, request.sessionID, "always")}
+              onClick={() => onDecide("always")}
               disabled={responding}
             >
               {m.common_allow_always()}
@@ -77,7 +73,7 @@ export function SessionPermissionDock({
             <Button
               variant="default"
               size="sm"
-              onClick={() => onDecide(request.id, request.sessionID, "once")}
+              onClick={() => onDecide("once")}
               disabled={responding}
             >
               {m.common_allow_once()}
