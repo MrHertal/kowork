@@ -28,6 +28,33 @@ describe("checkServerHealth", () => {
     expect(result).toEqual({ healthy: true, version: "1.2.3" });
   });
 
+  test("allows slow servers thirty seconds by default", async () => {
+    const timeout = Object.getOwnPropertyDescriptor(AbortSignal, "timeout");
+    let timeoutMs = 0;
+    Object.defineProperty(AbortSignal, "timeout", {
+      configurable: true,
+      value: (ms: number) => {
+        timeoutMs = ms;
+        return new AbortController().signal;
+      },
+    });
+
+    const fetch = () =>
+      Promise.resolve(
+        new Response(JSON.stringify({ healthy: true, version: "1.2.3" }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      );
+
+    await checkServerHealth(server, fetch).finally(() => {
+      if (timeout) Object.defineProperty(AbortSignal, "timeout", timeout);
+      if (!timeout) Reflect.deleteProperty(AbortSignal, "timeout");
+    });
+
+    expect(timeoutMs).toBe(30_000);
+  });
+
   test("returns unhealthy when request fails", async () => {
     const fetch = () => Promise.reject(new Error("network"));
 
