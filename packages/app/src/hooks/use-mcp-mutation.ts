@@ -121,9 +121,16 @@ export function useMcpMutation(directory: string) {
               } finally {
                 clearAuth(directory, name, ac);
               }
-              const refreshed = await client.mcp.status().catch(() => null);
-              if (refreshed?.data?.[name]) status = refreshed.data[name];
             }
+
+            // MCP clients are directory-scoped while desktop connector config
+            // and credentials are global. Reload every active directory after
+            // authentication finishes so chats see the persisted connector.
+            if (platform.opencodeConfigPatch) {
+              await globalSDK.client.global.dispose();
+            }
+            const refreshed = await client.mcp.status().catch(() => null);
+            if (refreshed?.data?.[name]) status = refreshed.data[name];
 
             return { type: "add", name, status };
           } catch (err) {
@@ -201,6 +208,7 @@ export function useMcpMutation(directory: string) {
               }
               throw err;
             }
+            await globalSDK.client.global.dispose();
           }
 
           const refreshed = await client.mcp.status().catch(() => null);
