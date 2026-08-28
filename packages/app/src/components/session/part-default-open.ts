@@ -10,7 +10,10 @@ function deletionOnly(part: ToolPart) {
   if (Array.isArray(files) && files.length > 0) {
     return files.every(
       (file) =>
-        !!file && typeof file === "object" && "type" in file && file.type === "delete",
+        !!file &&
+        typeof file === "object" &&
+        "type" in file &&
+        file.type === "delete",
     );
   }
 
