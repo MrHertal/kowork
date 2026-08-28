@@ -4,7 +4,6 @@ import { execFile } from "node:child_process";
 import { lstat } from "node:fs/promises";
 import {
   BrowserWindow,
-  Notification,
   clipboard,
   dialog,
   ipcMain,
@@ -264,18 +263,6 @@ export function registerIpcHandlers(deps: Deps) {
     const size = image.getSize();
     return { buffer, width: size.width, height: size.height };
   });
-
-  ipcMain.on(
-    "show-notification",
-    (_event: IpcMainEvent, title: string, body?: string) => {
-      new Notification({ title, body }).show();
-    },
-  );
-
-  ipcMain.handle(
-    "get-window-count",
-    () => BrowserWindow.getAllWindows().length,
-  );
 
   ipcMain.handle("get-window-focused", (event: IpcMainInvokeEvent) => {
     const win = BrowserWindow.fromWebContents(event.sender);

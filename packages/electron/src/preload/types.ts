@@ -39,7 +39,6 @@ export type ElectronAPI = {
   storeKeys: (name: string) => Promise<string[]>;
   storeLength: (name: string) => Promise<number>;
 
-  getWindowCount: () => Promise<number>;
   onMenuCommand: (cb: (id: string) => void) => () => void;
   onDeepLink: (cb: (urls: string[]) => void) => () => void;
 
@@ -68,7 +67,6 @@ export type ElectronAPI = {
     width: number;
     height: number;
   } | null>;
-  showNotification: (title: string, body?: string) => void;
   getWindowFocused: () => Promise<boolean>;
   setWindowFocus: () => Promise<void>;
   showWindow: () => Promise<void>;

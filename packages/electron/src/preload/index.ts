@@ -29,7 +29,6 @@ const api: ElectronAPI = {
   storeKeys: (name) => ipcRenderer.invoke("store-keys", name),
   storeLength: (name) => ipcRenderer.invoke("store-length", name),
 
-  getWindowCount: () => ipcRenderer.invoke("get-window-count"),
   onMenuCommand: (cb) => {
     const handler = (_: unknown, id: string) => cb(id);
     ipcRenderer.on("menu-command", handler);
@@ -50,8 +49,6 @@ const api: ElectronAPI = {
   openPath: (path, app) => ipcRenderer.invoke("open-path", path, app),
   showItemInFolder: (path) => ipcRenderer.invoke("show-item-in-folder", path),
   readClipboardImage: () => ipcRenderer.invoke("read-clipboard-image"),
-  showNotification: (title, body) =>
-    ipcRenderer.send("show-notification", title, body),
   getWindowFocused: () => ipcRenderer.invoke("get-window-focused"),
   setWindowFocus: () => ipcRenderer.invoke("set-window-focus"),
   showWindow: () => ipcRenderer.invoke("show-window"),
