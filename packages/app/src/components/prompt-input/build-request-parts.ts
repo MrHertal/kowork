@@ -52,7 +52,7 @@ function toOptimisticPart(
 }
 
 export function buildRequestParts(input: BuildRequestPartsInput) {
-  const requestParts: PromptRequestPart[] = input.text
+  const requestParts: PromptRequestPart[] = input.text.trim()
     ? [
         {
           id: ascending("part"),

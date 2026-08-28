@@ -242,6 +242,21 @@ describe("buildRequestParts", () => {
     });
   });
 
+  test("omits the text part when the text is only whitespace", () => {
+    const result = buildRequestParts({
+      text: "   \n",
+      attachments: [image({ id: "img_1", filename: "a.png" })],
+      messageID: "msg_1",
+      sessionID: "ses_1",
+    });
+
+    expect(result.requestParts).toHaveLength(1);
+    expect(result.requestParts[0]).toMatchObject({
+      type: "file",
+      filename: "a.png",
+    });
+  });
+
   test("returns no parts when text and attachments are empty", () => {
     const result = buildRequestParts({
       text: "",
