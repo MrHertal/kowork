@@ -21,7 +21,6 @@ type Listener = { stop: Mock<() => Promise<void>> };
 const listen = vi.fn<(input: unknown) => Promise<Listener>>();
 
 vi.mock("virtual:opencode-server", () => ({
-  Log: { init: () => Promise.resolve() },
   Server: { listen: (input: unknown) => listen(input) },
 }));
 
