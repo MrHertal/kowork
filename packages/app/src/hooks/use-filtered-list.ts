@@ -13,6 +13,7 @@ export interface FilteredListProps<T> {
   groupBy?: (item: T) => string;
   sortBy?: (a: T, b: T) => number;
   sortGroupsBy?: (a: FilteredGroup<T>, b: FilteredGroup<T>) => number;
+  skipFilter?: (item: T) => boolean;
 }
 
 function readPath(item: unknown, path: string): string {
@@ -47,13 +48,21 @@ export function useFilteredList<T>({
   groupBy: groupByFn,
   sortBy,
   sortGroupsBy,
+  skipFilter,
 }: FilteredListProps<T>) {
   const [filter, setFilter] = useState("");
 
   const groups = useMemo<FilteredGroup<T>[]>(() => {
     const needle = filter.trim().toLowerCase();
+    const skipped = needle && skipFilter ? items.filter(skipFilter) : [];
+    const filterable = skipFilter
+      ? items.filter((item) => !skipFilter(item))
+      : items;
     const filtered = needle
-      ? items.filter((item) => matches(item, needle, filterKeys))
+      ? [
+          ...filterable.filter((item) => matches(item, needle, filterKeys)),
+          ...skipped,
+        ]
       : items;
     return pipe(
       filtered,
@@ -65,7 +74,7 @@ export function useFilteredList<T>({
       })),
       (result) => (sortGroupsBy ? [...result].sort(sortGroupsBy) : result),
     );
-  }, [filter, items, filterKeys, groupByFn, sortBy, sortGroupsBy]);
+  }, [filter, items, filterKeys, groupByFn, sortBy, sortGroupsBy, skipFilter]);
 
   const flat = useMemo(() => groups.flatMap((g) => g.items), [groups]);
 

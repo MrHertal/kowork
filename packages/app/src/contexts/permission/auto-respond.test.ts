@@ -4,6 +4,7 @@ import { base64Encode } from "@/utils/encode";
 import {
   autoRespondsPermission,
   isDirectoryAutoAccepting,
+  sessionAutoAccept,
 } from "./auto-respond";
 
 const session = (input: { id: string; parentID?: string }) => ({
@@ -126,6 +127,9 @@ describe("autoRespondsPermission", () => {
         directory,
       ),
     ).toBe(true);
+    expect(
+      sessionAutoAccept(autoAccept, sessions, permission("root"), directory),
+    ).toBeUndefined();
   });
 
   test("session-level override takes precedence over directory-level", () => {
@@ -144,6 +148,48 @@ describe("autoRespondsPermission", () => {
         directory,
       ),
     ).toBe(false);
+  });
+
+  test("parent false override takes precedence over directory-level auto-accept", () => {
+    const directory = "/tmp/project";
+    const sessions = [
+      session({ id: "root" }),
+      session({ id: "child", parentID: "root" }),
+    ];
+    const autoAccept = {
+      [`${base64Encode(directory)}/*`]: true,
+      [`${base64Encode(directory)}/root`]: false,
+    };
+
+    expect(
+      autoRespondsPermission(
+        autoAccept,
+        sessions,
+        permission("child"),
+        directory,
+      ),
+    ).toBe(false);
+  });
+
+  test("parent true override takes precedence over disabled directory fallback", () => {
+    const directory = "/tmp/project";
+    const sessions = [
+      session({ id: "root" }),
+      session({ id: "child", parentID: "root" }),
+    ];
+    const autoAccept = {
+      [`${base64Encode(directory)}/*`]: false,
+      [`${base64Encode(directory)}/root`]: true,
+    };
+
+    expect(
+      autoRespondsPermission(
+        autoAccept,
+        sessions,
+        permission("child"),
+        directory,
+      ),
+    ).toBe(true);
   });
 });
 

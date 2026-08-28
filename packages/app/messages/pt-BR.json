@@ -505,8 +505,6 @@
   "toast_project_reloadFailed_title": "Não foi possível recarregar a pasta “{project}”",
   "toast_prompt_attachDocumentMoved_description": "Remova este documento e anexe-o novamente.",
   "toast_prompt_attachDocumentMoved_title": "O documento não está mais disponível",
-  "toast_prompt_attachFailed_description": "Tente novamente ou escolha outro arquivo.",
-  "toast_prompt_attachFailed_title": "Não foi possível ler o arquivo",
   "toast_prompt_attachOfficePathFailed_description": "O Kowork não conseguiu abrir este documento. Tente selecioná-lo novamente.",
   "toast_prompt_attachOfficePathFailed_title": "Não foi possível anexar o documento",
   "toast_prompt_attachOfficeUnavailable_description": "Este tipo de documento só pode ser anexado no aplicativo do Kowork para desktop.",

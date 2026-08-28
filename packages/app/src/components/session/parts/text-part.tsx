@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/ui/src/components/message-part.tsx
+// @opencode-ref: opencode/packages/session-ui/src/components/message-part.tsx
 import type { TextPart as TextPartType } from "@opencode-ai/sdk/v2/client";
 
 import { MessageResponse } from "@/components/ai-elements/message";

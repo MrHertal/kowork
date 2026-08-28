@@ -39,9 +39,9 @@ const ImageAttachmentItem = memo(
         type: "file",
         filename: attachment.filename,
         mediaType: attachment.mime,
-        url: attachment.dataUrl,
+        url: attachment.blob.url,
       }),
-      [attachment.id, attachment.filename, attachment.mime, attachment.dataUrl],
+      [attachment.id, attachment.filename, attachment.mime, attachment.blob],
     );
     const handleRemove = useCallback(
       () => onRemove(attachment.id),

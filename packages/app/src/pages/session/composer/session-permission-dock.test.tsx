@@ -60,13 +60,13 @@ describe("SessionPermissionDock", () => {
     const { onDecide } = setup();
 
     await user.click(screen.getByRole("button", { name: "Deny" }));
-    expect(onDecide).toHaveBeenCalledWith("perm_1", "ses_1", "reject");
+    expect(onDecide).toHaveBeenCalledWith("reject");
 
     await user.click(screen.getByRole("button", { name: "Always allow" }));
-    expect(onDecide).toHaveBeenCalledWith("perm_1", "ses_1", "always");
+    expect(onDecide).toHaveBeenCalledWith("always");
 
     await user.click(screen.getByRole("button", { name: "Allow once" }));
-    expect(onDecide).toHaveBeenCalledWith("perm_1", "ses_1", "once");
+    expect(onDecide).toHaveBeenCalledWith("once");
     expect(onDecide).toHaveBeenCalledTimes(3);
   });
 
@@ -94,6 +94,6 @@ describe("SessionPermissionDock", () => {
     expect(screen.getByRole("button", { name: "Allow once" })).toHaveFocus();
 
     await user.keyboard("{Enter}");
-    expect(onDecide).toHaveBeenCalledWith("perm_1", "ses_1", "once");
+    expect(onDecide).toHaveBeenCalledWith("once");
   });
 });

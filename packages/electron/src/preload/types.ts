@@ -16,7 +16,6 @@ export type ThemeSource = "light" | "dark" | "system";
 
 export type ElectronAPI = {
   killSidecar: () => Promise<void>;
-  installCli: () => Promise<string>;
   awaitInitialization: () => Promise<ServerReadyData>;
   getDefaultServerUrl: () => Promise<string | null>;
   setDefaultServerUrl: (url: string | null) => Promise<void>;
@@ -39,7 +38,6 @@ export type ElectronAPI = {
   storeKeys: (name: string) => Promise<string[]>;
   storeLength: (name: string) => Promise<number>;
 
-  getWindowCount: () => Promise<number>;
   onMenuCommand: (cb: (id: string) => void) => () => void;
   onDeepLink: (cb: (urls: string[]) => void) => () => void;
 
@@ -68,7 +66,6 @@ export type ElectronAPI = {
     width: number;
     height: number;
   } | null>;
-  showNotification: (title: string, body?: string) => void;
   getWindowFocused: () => Promise<boolean>;
   setWindowFocus: () => Promise<void>;
   showWindow: () => Promise<void>;
@@ -77,7 +74,6 @@ export type ElectronAPI = {
   setZoomFactor: (factor: number) => Promise<void>;
   setTitlebar: (theme: TitlebarTheme) => Promise<void>;
   setThemeSource: (source: ThemeSource) => Promise<void>;
-  runUpdater: (alertOnFail: boolean) => Promise<void>;
   checkUpdate: () => Promise<{ updateAvailable: boolean; version?: string }>;
   installUpdate: () => Promise<void>;
   setBackgroundColor: (color: string) => Promise<void>;

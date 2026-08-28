@@ -1,17 +1,17 @@
 // @opencode-ref: opencode/packages/app/src/components/prompt-input/build-request-parts.test.ts
 import { describe, expect, test } from "vitest";
-import type {
-  ImageAttachmentPart,
-  OfficeAttachmentPart,
-} from "@/contexts/prompt";
-import { buildRequestParts } from "./build-request-parts";
+import type { OfficeAttachmentPart } from "@/contexts/prompt";
+import {
+  buildRequestParts,
+  type EncodedImageAttachmentPart,
+} from "./build-request-parts";
 
 const image = (input: {
   id: string;
   filename: string;
   mime?: string;
   dataUrl?: string;
-}): ImageAttachmentPart => ({
+}): EncodedImageAttachmentPart => ({
   type: "image",
   id: input.id,
   filename: input.filename,
@@ -239,6 +239,21 @@ describe("buildRequestParts", () => {
       metadata: {
         koworkAttachments: { items: [{ position: 2 }] },
       },
+    });
+  });
+
+  test("omits the text part when the text is only whitespace", () => {
+    const result = buildRequestParts({
+      text: "   \n",
+      attachments: [image({ id: "img_1", filename: "a.png" })],
+      messageID: "msg_1",
+      sessionID: "ses_1",
+    });
+
+    expect(result.requestParts).toHaveLength(1);
+    expect(result.requestParts[0]).toMatchObject({
+      type: "file",
+      filename: "a.png",
     });
   });
 

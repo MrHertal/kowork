@@ -11,6 +11,7 @@ export type UsePersistedStateOptions<T> = {
   target: PersistTarget;
   createDefault: () => T;
   loadDefault?: () => T;
+  sanitize?: (value: T) => T;
   logName: string;
 };
 
@@ -23,7 +24,7 @@ export type UsePersistedStateResult<T> = {
 export function usePersistedState<T>(
   opts: UsePersistedStateOptions<T>,
 ): UsePersistedStateResult<T> {
-  const { target, createDefault, loadDefault, logName } = opts;
+  const { target, createDefault, loadDefault, sanitize, logName } = opts;
   const platform = usePlatform();
 
   const storage = useMemo(
@@ -37,9 +38,11 @@ export function usePersistedState<T>(
 
   const createDefaultRef = useRef(createDefault);
   const loadDefaultRef = useRef(loadDefault);
+  const sanitizeRef = useRef(sanitize);
   useEffect(() => {
     createDefaultRef.current = createDefault;
     loadDefaultRef.current = loadDefault;
+    sanitizeRef.current = sanitize;
   });
 
   useEffect(() => {
@@ -52,7 +55,7 @@ export function usePersistedState<T>(
       .then((value) => {
         if (cancelled) return;
         if (!dirty.current) {
-          setRawState(value);
+          setRawState(sanitizeRef.current?.(value) ?? value);
         }
         setReady(true);
       })

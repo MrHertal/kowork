@@ -56,21 +56,18 @@ export function useSessionComposerState(input: SessionComposerStateInput) {
   }, [input.sessionID]);
 
   const decide = useCallback(
-    (
-      requestID: string,
-      sessionID: string,
-      response: "once" | "always" | "reject",
-    ) => {
-      if (respondingRef.current === requestID) return;
+    (response: "once" | "always" | "reject") => {
+      const request = permissionRequest;
+      if (!request) return;
+      if (respondingRef.current === request.id) return;
 
-      respondingRef.current = requestID;
-      setResponding(requestID);
+      respondingRef.current = request.id;
+      setResponding(request.id);
 
       sdk.client.permission
-        .respond({
-          sessionID,
-          permissionID: requestID,
-          response,
+        .reply({
+          requestID: request.id,
+          reply: response,
         })
         .catch((err: unknown) => {
           const description = err instanceof Error ? err.message : String(err);
@@ -78,14 +75,14 @@ export function useSessionComposerState(input: SessionComposerStateInput) {
         })
         .finally(() => {
           setResponding((current) =>
-            current === requestID ? undefined : current,
+            current === request.id ? undefined : current,
           );
-          if (respondingRef.current === requestID) {
+          if (respondingRef.current === request.id) {
             respondingRef.current = undefined;
           }
         });
     },
-    [sdk.client.permission],
+    [sdk.client.permission, permissionRequest],
   );
 
   return useMemo(

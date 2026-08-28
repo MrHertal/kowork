@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/app/src/components/dialog-select-directory.tsx
+// @opencode-ref: opencode/packages/core/src/util/path.ts
 
 export function getFilename(path: string | undefined) {
   if (!path) return "";

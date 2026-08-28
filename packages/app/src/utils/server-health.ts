@@ -12,7 +12,7 @@ interface CheckServerHealthOptions {
   retryDelayMs?: number;
 }
 
-const defaultTimeoutMs = 3000;
+const defaultTimeoutMs = 30_000;
 const defaultRetryCount = 2;
 const defaultRetryDelayMs = 100;
 const cacheMs = 750;

@@ -1,16 +1,12 @@
 // @opencode-ref: opencode/packages/desktop/src/main/shell-env.test.ts
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 
 import {
-  getUserShell,
   isNushell,
   mergeShellEnv,
   parseShellEnv,
+  resolveUserShell,
 } from "./shell-env";
-
-afterEach(() => {
-  vi.unstubAllEnvs();
-});
 
 describe("shell env", () => {
   test("parseShellEnv supports null-delimited pairs", () => {
@@ -46,16 +42,13 @@ describe("shell env", () => {
     expect(env.OPENCODE_CLIENT).toBe("desktop");
   });
 
-  test("getUserShell returns the SHELL env var", () => {
-    vi.stubEnv("SHELL", "/custom/env-shell");
-
-    expect(getUserShell()).toBe("/custom/env-shell");
-  });
-
-  test("getUserShell falls back to /bin/sh when SHELL is unset", () => {
-    vi.stubEnv("SHELL", undefined);
-
-    expect(getUserShell()).toBe("/bin/sh");
+  test("resolveUserShell falls back to the login shell before /bin/sh", () => {
+    expect(resolveUserShell("/custom/env-shell", "/bin/zsh")).toBe(
+      "/custom/env-shell",
+    );
+    expect(resolveUserShell(undefined, "/bin/zsh")).toBe("/bin/zsh");
+    expect(resolveUserShell(undefined, "unknown")).toBe("/bin/sh");
+    expect(resolveUserShell(undefined, undefined)).toBe("/bin/sh");
   });
 
   test("isNushell handles path and binary name", () => {

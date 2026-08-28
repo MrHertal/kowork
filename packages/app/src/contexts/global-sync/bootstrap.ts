@@ -9,7 +9,6 @@ import type {
   ProviderListResponse,
   QuestionRequest,
   Session,
-  Todo,
 } from "@opencode-ai/sdk/v2/client";
 import {
   queryOptions,
@@ -28,9 +27,6 @@ type GlobalStore = {
   ready: boolean;
   path: Path;
   project: Project[];
-  session_todo: {
-    [sessionID: string]: Todo[];
-  };
   provider: ProviderListResponse;
   provider_auth: ProviderAuthResponse;
   config: Config;

@@ -70,12 +70,12 @@ vi.mock("@/contexts/global-sync", async () => {
   };
 });
 
-type RespondInput = Parameters<OpencodeClient["permission"]["respond"]>[0];
+type ReplyInput = Parameters<OpencodeClient["permission"]["reply"]>[0];
 
 const sdk = {
   client: {
     permission: {
-      respond: vi.fn<(input: RespondInput) => Promise<void>>(() =>
+      reply: vi.fn<(input: ReplyInput) => Promise<void>>(() =>
         Promise.resolve(),
       ),
     },
@@ -101,7 +101,7 @@ vi.mock("sonner", () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   children.clear();
-  sdk.client.permission.respond.mockImplementation(() => Promise.resolve());
+  sdk.client.permission.reply.mockImplementation(() => Promise.resolve());
   permission.autoResponds.mockImplementation(() => false);
 });
 
@@ -206,38 +206,43 @@ describe("useSessionComposerState", () => {
     expect(result.current.blocked).toBe(false);
   });
 
-  test("decide responds with the request identity", () => {
-    seedChild(directory, { session: [session({ id: "ses_1" })] });
+  test("decide responds with the request identity", async () => {
+    seedChild(directory, {
+      session: [session({ id: "ses_1" })],
+      permission: { ses_1: [permissionRequest("perm_1", "ses_1")] },
+    });
     const { result } = setup();
 
-    act(() => result.current.decide("perm_1", "ses_1", "once"));
-    act(() => result.current.decide("perm_2", "ses_1", "always"));
-    act(() => result.current.decide("perm_3", "ses_1", "reject"));
+    // Flush the reply promise's `finally` between decides so the in-flight
+    // guard clears before the next response on the same request.
+    for (const response of ["once", "always", "reject"] as const) {
+      await act(async () => {
+        result.current.decide(response);
+        await Promise.resolve();
+      });
+    }
 
-    expect(sdk.client.permission.respond).toHaveBeenCalledTimes(3);
-    expect(sdk.client.permission.respond).toHaveBeenCalledWith({
-      sessionID: "ses_1",
-      permissionID: "perm_1",
-      response: "once",
+    expect(sdk.client.permission.reply).toHaveBeenCalledTimes(3);
+    expect(sdk.client.permission.reply).toHaveBeenCalledWith({
+      requestID: "perm_1",
+      reply: "once",
     });
-    expect(sdk.client.permission.respond).toHaveBeenCalledWith({
-      sessionID: "ses_1",
-      permissionID: "perm_2",
-      response: "always",
+    expect(sdk.client.permission.reply).toHaveBeenCalledWith({
+      requestID: "perm_1",
+      reply: "always",
     });
-    expect(sdk.client.permission.respond).toHaveBeenCalledWith({
-      sessionID: "ses_1",
-      permissionID: "perm_3",
-      response: "reject",
+    expect(sdk.client.permission.reply).toHaveBeenCalledWith({
+      requestID: "perm_1",
+      reply: "reject",
     });
   });
 
   test("dedupes repeated decides while a response is in flight", async () => {
-    let resolveRespond: () => void = () => undefined;
-    sdk.client.permission.respond.mockImplementation(
+    let resolveReply: () => void = () => undefined;
+    sdk.client.permission.reply.mockImplementation(
       () =>
         new Promise<void>((resolve) => {
-          resolveRespond = resolve;
+          resolveReply = resolve;
         }),
     );
     seedChild(directory, {
@@ -246,20 +251,20 @@ describe("useSessionComposerState", () => {
     });
     const { result } = setup();
 
-    act(() => result.current.decide("perm_1", "ses_1", "once"));
-    act(() => result.current.decide("perm_1", "ses_1", "once"));
+    act(() => result.current.decide("once"));
+    act(() => result.current.decide("once"));
 
-    expect(sdk.client.permission.respond).toHaveBeenCalledTimes(1);
+    expect(sdk.client.permission.reply).toHaveBeenCalledTimes(1);
     expect(result.current.permissionResponding).toBe(true);
 
-    resolveRespond();
+    resolveReply();
     await waitFor(() =>
       expect(result.current.permissionResponding).toBe(false),
     );
   });
 
-  test("toasts when respond fails and clears responding", async () => {
-    sdk.client.permission.respond.mockImplementation(() =>
+  test("toasts when reply fails and clears responding", async () => {
+    sdk.client.permission.reply.mockImplementation(() =>
       Promise.reject(new Error("offline")),
     );
     seedChild(directory, {
@@ -268,7 +273,7 @@ describe("useSessionComposerState", () => {
     });
     const { result } = setup();
 
-    act(() => result.current.decide("perm_1", "ses_1", "once"));
+    act(() => result.current.decide("once"));
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("Request failed", {
@@ -279,11 +284,11 @@ describe("useSessionComposerState", () => {
   });
 
   test("does not leak responding across sessions", async () => {
-    let resolveRespond: () => void = () => undefined;
-    sdk.client.permission.respond.mockImplementation(
+    let resolveReply: () => void = () => undefined;
+    sdk.client.permission.reply.mockImplementation(
       () =>
         new Promise<void>((resolve) => {
-          resolveRespond = resolve;
+          resolveReply = resolve;
         }),
     );
     seedChild(directory, {
@@ -295,7 +300,7 @@ describe("useSessionComposerState", () => {
     });
     const { result, rerender } = setup("ses_1");
 
-    act(() => result.current.decide("perm_1", "ses_1", "once"));
+    act(() => result.current.decide("once"));
     expect(result.current.permissionResponding).toBe(true);
 
     rerender({ sessionID: "ses_2" });
@@ -303,7 +308,7 @@ describe("useSessionComposerState", () => {
     expect(result.current.permissionRequest?.id).toBe("perm_2");
     expect(result.current.permissionResponding).toBe(false);
 
-    resolveRespond();
+    resolveReply();
     await waitFor(() =>
       expect(result.current.permissionResponding).toBe(false),
     );

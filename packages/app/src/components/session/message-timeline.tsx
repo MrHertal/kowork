@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/app/src/pages/session/message-timeline.tsx
+// @opencode-ref: opencode/packages/app/src/pages/session/timeline/message-timeline.tsx
 import type {
   Message as OpenCodeMessage,
   SessionStatus,

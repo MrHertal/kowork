@@ -505,8 +505,6 @@
   "toast_project_reloadFailed_title": "No se ha podido volver a cargar la carpeta “{project}”",
   "toast_prompt_attachDocumentMoved_description": "Elimina este documento y vuelve a adjuntarlo.",
   "toast_prompt_attachDocumentMoved_title": "El documento ya no está disponible",
-  "toast_prompt_attachFailed_description": "Inténtalo de nuevo o elige otro archivo.",
-  "toast_prompt_attachFailed_title": "No se puede leer el archivo",
   "toast_prompt_attachOfficePathFailed_description": "Kowork no pudo abrir este documento. Intenta seleccionarlo de nuevo.",
   "toast_prompt_attachOfficePathFailed_title": "No se puede adjuntar el documento",
   "toast_prompt_attachOfficeUnavailable_description": "Este tipo de documento solo se puede adjuntar en la aplicación de escritorio de Kowork.",

@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/ui/src/components/session-retry.tsx
+// @opencode-ref: opencode/packages/session-ui/src/components/session-retry.tsx
 import type { SessionStatus } from "@opencode-ai/sdk/v2/client";
 import { useEffect, useState } from "react";
 

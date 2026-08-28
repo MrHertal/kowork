@@ -1,4 +1,3 @@
-// @opencode-ref: opencode/packages/desktop/src/main/markdown.ts
 import { marked, type Tokens } from "marked";
 
 const renderer = new marked.Renderer();

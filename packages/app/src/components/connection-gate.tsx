@@ -146,7 +146,10 @@ function ConnectionError({ onRetry }: { onRetry?: () => void }) {
   }, [onRetry]);
 
   return (
-    <div className="flex h-dvh w-screen flex-col items-center justify-center gap-6 bg-background p-6">
+    <div
+      data-drag-region
+      className="flex h-dvh w-screen flex-col items-center justify-center gap-6 bg-background p-6"
+    >
       <div className="flex max-w-md flex-col items-center text-center">
         <Logo className="mb-4 w-15 text-foreground" />
         <p className="text-sm text-foreground">

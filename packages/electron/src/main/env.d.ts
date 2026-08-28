@@ -20,9 +20,6 @@ declare module "virtual:opencode-server" {
     type Info = { version: string };
     function get(): Promise<Info>;
   }
-  export namespace Log {
-    function init(opts: { level: string }): Promise<void>;
-  }
   export namespace Database {
     function Path(): string;
     function Client(): { $client: any };

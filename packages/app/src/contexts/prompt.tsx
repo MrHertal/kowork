@@ -10,6 +10,7 @@ import type { FileSelection } from "@/contexts/file";
 import type { OfficeAttachmentFormat } from "@/constants/file-picker";
 import { useSDK } from "@/contexts/sdk";
 import { usePersistedState } from "@/hooks/use-persisted-state";
+import { type BlobReference, isLiveBlobReference } from "@/utils/blob";
 import { Persist } from "@/utils/persist";
 
 interface PartBase {
@@ -33,7 +34,7 @@ export interface ImageAttachmentPart {
   id: string;
   filename: string;
   mime: string;
-  dataUrl: string;
+  blob: BlobReference;
 }
 
 export interface OfficeAttachmentPart {
@@ -119,6 +120,16 @@ const createDefaultSnapshot = (): PromptSnapshot => ({
   cursor: undefined,
 });
 
+// Blob object URLs die with the document: restored image attachments are
+// only kept while their blob is still live (in-app navigation). Legacy
+// snapshots predate blob references and are always dropped.
+const sanitizeSnapshot = (value: PromptSnapshot): PromptSnapshot => ({
+  ...value,
+  prompt: value.prompt.filter(
+    (part) => part.type !== "image" || isLiveBlobReference(part.blob),
+  ),
+});
+
 interface PromptContextValue {
   ready: boolean;
   current: Prompt;
@@ -151,6 +162,7 @@ export function PromptProvider({ sessionId, children }: PromptProviderProps) {
   } = usePersistedState<PromptSnapshot>({
     target: persistTarget,
     createDefault: createDefaultSnapshot,
+    sanitize: sanitizeSnapshot,
     logName: "prompt",
   });
 

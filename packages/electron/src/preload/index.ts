@@ -5,7 +5,6 @@ import type { ElectronAPI } from "./types";
 
 const api: ElectronAPI = {
   killSidecar: () => ipcRenderer.invoke("kill-sidecar"),
-  installCli: () => ipcRenderer.invoke("install-cli"),
   awaitInitialization: () => ipcRenderer.invoke("await-initialization"),
   getDefaultServerUrl: () => ipcRenderer.invoke("get-default-server-url"),
   setDefaultServerUrl: (url) =>
@@ -29,7 +28,6 @@ const api: ElectronAPI = {
   storeKeys: (name) => ipcRenderer.invoke("store-keys", name),
   storeLength: (name) => ipcRenderer.invoke("store-length", name),
 
-  getWindowCount: () => ipcRenderer.invoke("get-window-count"),
   onMenuCommand: (cb) => {
     const handler = (_: unknown, id: string) => cb(id);
     ipcRenderer.on("menu-command", handler);
@@ -50,8 +48,6 @@ const api: ElectronAPI = {
   openPath: (path, app) => ipcRenderer.invoke("open-path", path, app),
   showItemInFolder: (path) => ipcRenderer.invoke("show-item-in-folder", path),
   readClipboardImage: () => ipcRenderer.invoke("read-clipboard-image"),
-  showNotification: (title, body) =>
-    ipcRenderer.send("show-notification", title, body),
   getWindowFocused: () => ipcRenderer.invoke("get-window-focused"),
   setWindowFocus: () => ipcRenderer.invoke("set-window-focus"),
   showWindow: () => ipcRenderer.invoke("show-window"),
@@ -60,7 +56,6 @@ const api: ElectronAPI = {
   setZoomFactor: (factor) => ipcRenderer.invoke("set-zoom-factor", factor),
   setTitlebar: (theme) => ipcRenderer.invoke("set-titlebar", theme),
   setThemeSource: (source) => ipcRenderer.invoke("set-theme-source", source),
-  runUpdater: (alertOnFail) => ipcRenderer.invoke("run-updater", alertOnFail),
   checkUpdate: () => ipcRenderer.invoke("check-update"),
   installUpdate: () => ipcRenderer.invoke("install-update"),
   setBackgroundColor: (color: string) =>

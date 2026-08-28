@@ -4,7 +4,6 @@ import { execFile } from "node:child_process";
 import { lstat } from "node:fs/promises";
 import {
   BrowserWindow,
-  Notification,
   clipboard,
   dialog,
   ipcMain,
@@ -47,7 +46,6 @@ type Deps = {
     distro?: string,
   ) => Promise<string>;
   resolveAppPath: (appName: string) => Promise<string | null>;
-  runUpdater: (alertOnFail: boolean) => Promise<void> | void;
   checkUpdate: () => Promise<{ updateAvailable: boolean; version?: string }>;
   installUpdate: () => Promise<void> | void;
   setBackgroundColor: (color: string) => void;
@@ -105,11 +103,6 @@ export function registerIpcHandlers(deps: Deps) {
     "resolve-app-path",
     (_event: IpcMainInvokeEvent, appName: string) =>
       deps.resolveAppPath(appName),
-  );
-  ipcMain.handle(
-    "run-updater",
-    (_event: IpcMainInvokeEvent, alertOnFail: boolean) =>
-      deps.runUpdater(alertOnFail),
   );
   ipcMain.handle("check-update", () => deps.checkUpdate());
   ipcMain.handle("install-update", () => deps.installUpdate());
@@ -264,18 +257,6 @@ export function registerIpcHandlers(deps: Deps) {
     const size = image.getSize();
     return { buffer, width: size.width, height: size.height };
   });
-
-  ipcMain.on(
-    "show-notification",
-    (_event: IpcMainEvent, title: string, body?: string) => {
-      new Notification({ title, body }).show();
-    },
-  );
-
-  ipcMain.handle(
-    "get-window-count",
-    () => BrowserWindow.getAllWindows().length,
-  );
 
   ipcMain.handle("get-window-focused", (event: IpcMainInvokeEvent) => {
     const win = BrowserWindow.fromWebContents(event.sender);
