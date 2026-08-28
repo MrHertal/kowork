@@ -9,7 +9,7 @@ function deletionOnly(part: ToolPart) {
   const files = metadata.files;
   if (Array.isArray(files) && files.length > 0) {
     return files.every(
-      (file) =>
+      (file: unknown) =>
         !!file &&
         typeof file === "object" &&
         "type" in file &&
