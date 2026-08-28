@@ -1,4 +1,4 @@
-// @opencode-ref: opencode/packages/ui/src/components/message-part.tsx
+// @opencode-ref: opencode/packages/session-ui/src/components/message-part.tsx
 import type {
   AssistantMessage,
   Part,
@@ -21,6 +21,7 @@ import { useSDK } from "@/contexts/sdk";
 
 import { m } from "@/paraglide/messages";
 
+import { partDefaultOpen } from "./part-default-open";
 import { CompactionPart } from "./parts/compaction-part";
 import { ReasoningPart } from "./parts/reasoning-part";
 import { TextPart } from "./parts/text-part";
@@ -46,17 +47,6 @@ import "./tool-registrations";
 const emptyInput: Record<string, unknown> = {};
 const emptyMetadata: Record<string, unknown> = {};
 const emptyParts: Part[] = [];
-
-function toolDefaultOpen(tool: string, shell = false, edit = false) {
-  if (tool === "bash") return shell;
-  if (tool === "edit" || tool === "write" || tool === "apply_patch")
-    return edit;
-}
-
-function partDefaultOpen(part: Part, shell = false, edit = false) {
-  if (part.type !== "tool") return undefined;
-  return toolDefaultOpen(part.tool, shell, edit);
-}
 
 function ToolPartDisplay({
   part,
