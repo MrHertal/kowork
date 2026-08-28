@@ -1,14 +1,15 @@
-// @opencode-ref: opencode/packages/ui/src/components/message-part.tsx
+// @opencode-ref: opencode/packages/session-ui/src/components/message-part.tsx
 import { useEffect, useRef, useState } from "react";
 
 const TEXT_RENDER_PACE_MS = 24;
+const TEXT_RENDER_IMMEDIATE = 512;
 const TEXT_RENDER_SNAP = /[\s.,!?;:)\]]/;
 
 function step(size: number) {
   if (size <= 12) return 2;
   if (size <= 48) return 4;
   if (size <= 96) return 8;
-  return Math.min(24, Math.ceil(size / 8));
+  return Math.min(256, Math.ceil(size / 4));
 }
 
 function next(text: string, start: number) {
@@ -58,6 +59,10 @@ export function usePacedText(text: string, live: boolean): string {
         sync(target);
         return;
       }
+      if (target.length - shownRef.current.length <= TEXT_RENDER_IMMEDIATE) {
+        sync(target);
+        return;
+      }
       const end = next(target, shownRef.current.length);
       sync(target.slice(0, end));
       if (end < target.length) {
@@ -74,6 +79,11 @@ export function usePacedText(text: string, live: boolean): string {
       !text.startsWith(shownRef.current) ||
       text.length < shownRef.current.length
     ) {
+      clear();
+      sync(text);
+      return;
+    }
+    if (text.length - shownRef.current.length <= TEXT_RENDER_IMMEDIATE) {
       clear();
       sync(text);
       return;
