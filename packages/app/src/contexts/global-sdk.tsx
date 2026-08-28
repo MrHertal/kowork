@@ -247,8 +247,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
             attempt = undefined;
           }
 
-          if (abort.signal.aborted || !started || generation !== active)
-            return;
+          if (abort.signal.aborted || !started || generation !== active) return;
           await wait(RECONNECT_DELAY_MS);
         }
       })()
