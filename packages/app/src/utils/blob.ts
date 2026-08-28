@@ -20,9 +20,7 @@ async function blobID(blob: Blob) {
     .join("");
 }
 
-export async function createBlobReference(
-  blob: Blob,
-): Promise<BlobReference> {
+export async function createBlobReference(blob: Blob): Promise<BlobReference> {
   const id = await blobID(blob);
   return { id, url: blobUrl(id, blob) };
 }

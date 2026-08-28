@@ -51,7 +51,9 @@ export function usePromptAttachments() {
     async (
       file: File,
       allowOffice: boolean,
-    ): Promise<"added" | "unsupported" | "office-unavailable" | "office-path"> => {
+    ): Promise<
+      "added" | "unsupported" | "office-unavailable" | "office-path"
+    > => {
       const office = officeAttachmentInfo(file);
       if (office) {
         if (!allowOffice) return "office-path";
