@@ -292,7 +292,6 @@ registerIpcHandlers({
   checkAppExists: async (appName) => checkAppExists(appName),
   wslPath: async (path, mode, distro) => wslPath(path, mode, distro),
   resolveAppPath: async (appName) => resolveAppPath(appName),
-  runUpdater: async (alertOnFail) => checkForUpdates(alertOnFail, killSidecar),
   checkUpdate: async () => checkUpdate(),
   installUpdate: async () => installUpdate(killSidecar),
   setBackgroundColor: (color) => setBackgroundColor(color),

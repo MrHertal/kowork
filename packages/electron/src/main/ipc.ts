@@ -46,7 +46,6 @@ type Deps = {
     distro?: string,
   ) => Promise<string>;
   resolveAppPath: (appName: string) => Promise<string | null>;
-  runUpdater: (alertOnFail: boolean) => Promise<void> | void;
   checkUpdate: () => Promise<{ updateAvailable: boolean; version?: string }>;
   installUpdate: () => Promise<void> | void;
   setBackgroundColor: (color: string) => void;
@@ -104,11 +103,6 @@ export function registerIpcHandlers(deps: Deps) {
     "resolve-app-path",
     (_event: IpcMainInvokeEvent, appName: string) =>
       deps.resolveAppPath(appName),
-  );
-  ipcMain.handle(
-    "run-updater",
-    (_event: IpcMainInvokeEvent, alertOnFail: boolean) =>
-      deps.runUpdater(alertOnFail),
   );
   ipcMain.handle("check-update", () => deps.checkUpdate());
   ipcMain.handle("install-update", () => deps.installUpdate());
