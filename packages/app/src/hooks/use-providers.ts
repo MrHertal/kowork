@@ -24,6 +24,12 @@ export const popularProviders = [
 ];
 const popularProviderSet = new Set(popularProviders);
 
+const emptyProviders: ProviderListResponse = {
+  all: [],
+  connected: [],
+  default: {},
+};
+
 const providerListEqual = (a: ProviderListResponse, b: ProviderListResponse) =>
   shallowArrayEqual(a.all, b.all) &&
   shallowArrayEqual(a.connected, b.connected) &&
@@ -50,13 +56,11 @@ export function useProviders(directory?: string) {
     optionalProviderListEqual,
   );
 
-  const providers: ProviderListResponse =
-    childStore &&
-    childProviderReady &&
-    childProvider &&
-    (childProvider.all.length > 0 || globalProvider.all.length === 0)
-      ? childProvider
-      : globalProvider;
+  const providers: ProviderListResponse = (() => {
+    if (!childStore) return globalProvider;
+    if (childProviderReady && childProvider) return childProvider;
+    return emptyProviders;
+  })();
 
   return useMemo(() => {
     const all = providers.all;
