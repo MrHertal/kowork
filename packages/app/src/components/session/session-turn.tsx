@@ -1,4 +1,5 @@
-// @opencode-ref: opencode/packages/ui/src/components/session-turn.tsx
+// @opencode-ref: opencode/packages/session-ui/src/components/session-turn.tsx
+// @opencode-ref: opencode/packages/app/src/pages/session/timeline/rows.ts
 import type {
   AssistantMessage,
   FilePart as FilePartType,
@@ -343,13 +344,10 @@ function SessionTurnImpl({
   const working = status.type !== "idle" && active;
   const retrying = status.type === "retry" && active;
 
-  const error = useMemo(
-    () =>
-      assistantMessages.find(
-        (m) => m.error && m.error.name !== "MessageAbortedError",
-      )?.error,
-    [assistantMessages],
-  );
+  const error = useMemo(() => {
+    const latest = assistantMessages.at(-1)?.error;
+    return latest?.name === "MessageAbortedError" ? undefined : latest;
+  }, [assistantMessages]);
 
   const errorText = useMemo(() => {
     const msg: unknown = error?.data?.message;
