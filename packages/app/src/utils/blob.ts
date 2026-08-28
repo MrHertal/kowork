@@ -27,6 +27,10 @@ export async function createBlobReference(
   return { id, url: blobUrl(id, blob) };
 }
 
+export function hasBlobReference(id: string) {
+  return urls.has(id);
+}
+
 export async function blobDataUrl(blob: BlobReference, mime: string) {
   const data = await fetch(blob.url).then((response) => response.blob());
   return new Promise<string>((resolve, reject) => {

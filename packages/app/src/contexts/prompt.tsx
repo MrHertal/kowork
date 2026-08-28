@@ -10,7 +10,7 @@ import type { FileSelection } from "@/contexts/file";
 import type { OfficeAttachmentFormat } from "@/constants/file-picker";
 import { useSDK } from "@/contexts/sdk";
 import { usePersistedState } from "@/hooks/use-persisted-state";
-import type { BlobReference } from "@/utils/blob";
+import { type BlobReference, hasBlobReference } from "@/utils/blob";
 import { Persist } from "@/utils/persist";
 
 interface PartBase {
@@ -120,11 +120,16 @@ const createDefaultSnapshot = (): PromptSnapshot => ({
   cursor: undefined,
 });
 
-// Blob object URLs die with the document, so persisted image attachments
-// cannot be restored after a reload (no persistent blob store yet).
+// Blob object URLs die with the document: restored image attachments are
+// only kept while their blob is still live (in-app navigation), and legacy
+// snapshots without a blob reference are always dropped.
 const sanitizeSnapshot = (value: PromptSnapshot): PromptSnapshot => ({
   ...value,
-  prompt: value.prompt.filter((part) => part.type !== "image"),
+  prompt: value.prompt.filter((part) => {
+    if (part.type !== "image") return true;
+    const blob = part.blob as BlobReference | undefined;
+    return !!blob && hasBlobReference(blob.id);
+  }),
 });
 
 interface PromptContextValue {
