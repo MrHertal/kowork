@@ -77,13 +77,6 @@ const office = (name: string) =>
     type: "application/octet-stream",
   });
 
-class BrokenFileReader {
-  addEventListener(event: string, cb: () => void) {
-    if (event === "error") queueMicrotask(cb);
-  }
-  readAsDataURL() {}
-}
-
 const pasteEvent = (input: {
   items: Array<{ kind: string; getAsFile: () => File | null }>;
   text?: string;
@@ -167,12 +160,11 @@ describe("usePromptAttachments", () => {
 
     expect(added).toBe(true);
     await waitFor(() => expect(images()).toHaveLength(1));
-    expect(images()[0]).toMatchObject({
-      type: "image",
-      filename: "a.png",
-      mime: "image/png",
-      dataUrl: "data:image/png;base64,YWJj",
-    });
+    const added0 = images()[0];
+    if (added0?.type !== "image") throw new Error("Expected image attachment");
+    expect(added0).toMatchObject({ filename: "a.png", mime: "image/png" });
+    expect(added0.blob.id).toHaveLength(64);
+    expect(added0.blob.url.startsWith("blob:")).toBe(true);
     expect(toast.error).not.toHaveBeenCalled();
   });
 
@@ -215,7 +207,6 @@ describe("usePromptAttachments", () => {
         variant: "base",
         http: { url: "http://localhost:4096" },
       };
-      vi.stubGlobal("FileReader", BrokenFileReader);
       await setup();
 
       const added = await attachments.addAttachments([office(name)]);
@@ -291,32 +282,6 @@ describe("usePromptAttachments", () => {
     expect(officeAttachments()).toHaveLength(0);
     expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
       description: "Kowork couldn't open this document. Try choosing it again.",
-    });
-  });
-
-  test("warns when the file cannot be read", async () => {
-    vi.stubGlobal("FileReader", BrokenFileReader);
-    await setup();
-
-    const added = await attachments.addAttachment(png());
-
-    expect(added).toBe(false);
-    expect(images()).toHaveLength(0);
-    expect(toast.error).toHaveBeenCalledWith("Can't read file", {
-      description: "Try again or choose a different file.",
-    });
-  });
-
-  test("warns with the read message when every file fails to read", async () => {
-    vi.stubGlobal("FileReader", BrokenFileReader);
-    await setup();
-
-    const added = await attachments.addAttachments([png(), png("b.png")]);
-
-    expect(added).toBe(false);
-    expect(toast.error).toHaveBeenCalledTimes(1);
-    expect(toast.error).toHaveBeenCalledWith("Can't read file", {
-      description: "Try again or choose a different file.",
     });
   });
 

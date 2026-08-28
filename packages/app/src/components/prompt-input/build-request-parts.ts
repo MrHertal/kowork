@@ -14,9 +14,13 @@ import { officeAttachmentsPrompt } from "@/utils/office-attachments";
 
 type PromptRequestPart = (TextPartInput | FilePartInput) & { id: string };
 
+export type EncodedImageAttachmentPart = Omit<ImageAttachmentPart, "blob"> & {
+  dataUrl: string;
+};
+
 type BuildRequestPartsInput = {
   text: string;
-  attachments: Array<ImageAttachmentPart | OfficeAttachmentPart>;
+  attachments: Array<EncodedImageAttachmentPart | OfficeAttachmentPart>;
   messageID: string;
   sessionID: string;
 };

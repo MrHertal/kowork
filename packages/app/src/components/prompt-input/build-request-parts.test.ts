@@ -1,17 +1,17 @@
 // @opencode-ref: opencode/packages/app/src/components/prompt-input/build-request-parts.test.ts
 import { describe, expect, test } from "vitest";
-import type {
-  ImageAttachmentPart,
-  OfficeAttachmentPart,
-} from "@/contexts/prompt";
-import { buildRequestParts } from "./build-request-parts";
+import type { OfficeAttachmentPart } from "@/contexts/prompt";
+import {
+  buildRequestParts,
+  type EncodedImageAttachmentPart,
+} from "./build-request-parts";
 
 const image = (input: {
   id: string;
   filename: string;
   mime?: string;
   dataUrl?: string;
-}): ImageAttachmentPart => ({
+}): EncodedImageAttachmentPart => ({
   type: "image",
   id: input.id,
   filename: input.filename,

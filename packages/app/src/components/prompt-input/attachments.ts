@@ -11,7 +11,7 @@ import {
 } from "@/contexts/prompt";
 import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
-import { dataUrl } from "./data-url";
+import { createBlobReference } from "@/utils/blob";
 import { attachmentMime, officeAttachmentInfo } from "./files";
 
 const OVERLAY_SELECTOR =
@@ -24,12 +24,6 @@ function hasOpenOverlay() {
 function warn() {
   toast.error(m.toast_prompt_attachUnsupported_title(), {
     description: m.toast_prompt_attachUnsupported_description(),
-  });
-}
-
-function warnRead() {
-  toast.error(m.toast_prompt_attachFailed_title(), {
-    description: m.toast_prompt_attachFailed_description(),
   });
 }
 
@@ -57,13 +51,7 @@ export function usePromptAttachments() {
     async (
       file: File,
       allowOffice: boolean,
-    ): Promise<
-      | "added"
-      | "unsupported"
-      | "unreadable"
-      | "office-unavailable"
-      | "office-path"
-    > => {
+    ): Promise<"added" | "unsupported" | "office-unavailable" | "office-path"> => {
       const office = officeAttachmentInfo(file);
       if (office) {
         if (!allowOffice) return "office-path";
@@ -88,15 +76,12 @@ export function usePromptAttachments() {
       const mime = await attachmentMime(file);
       if (!mime) return "unsupported";
 
-      const url = await dataUrl(file, mime);
-      if (!url) return "unreadable";
-
       const attachment: ImageAttachmentPart = {
         type: "image",
         id: nanoid(),
         filename: file.name,
         mime,
-        dataUrl: url,
+        blob: await createBlobReference(file),
       };
       update((prev) => [...prev, attachment]);
       return "added";
@@ -108,7 +93,6 @@ export function usePromptAttachments() {
     async (file: File): Promise<boolean> => {
       const result = await add(file, false);
       if (result === "unsupported") warn();
-      if (result === "unreadable") warnRead();
       if (result === "office-unavailable") warnOfficeLocal();
       if (result === "office-path") warnOfficePath();
       return result === "added";
@@ -123,21 +107,17 @@ export function usePromptAttachments() {
       allowOffice = true,
     ): Promise<boolean> => {
       let found = false;
-      let unreadableOnly = files.length > 0;
       let officeUnavailable = false;
       let officePath = false;
       for (const file of files) {
         const result = await add(file, allowOffice);
         if (result === "added") found = true;
-        if (result === "unsupported") unreadableOnly = false;
         if (result === "office-unavailable") officeUnavailable = true;
         if (result === "office-path") officePath = true;
       }
       if (showToast && officePath) warnOfficePath();
       else if (showToast && officeUnavailable) warnOfficeLocal();
-      else if (!found && files.length > 0 && showToast) {
-        (unreadableOnly ? warnRead : warn)();
-      }
+      else if (!found && files.length > 0 && showToast) warn();
       return found;
     },
     [add],

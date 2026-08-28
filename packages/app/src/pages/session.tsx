@@ -57,6 +57,7 @@ import {
   resetSessionModel,
   syncSessionModel,
 } from "@/pages/session/session-model-helpers";
+import { blobDataUrl } from "@/utils/blob";
 import { ascending } from "@/utils/id";
 import { officeAttachmentMatchesServer } from "@/utils/office-attachments";
 import { formatServerError, translate } from "@/utils/server-errors";
@@ -255,9 +256,16 @@ export function Page({
         }
 
         messageID = ascending("message");
+        const encodedAttachments = await Promise.all(
+          attachments.map(async (part) =>
+            part.type === "image"
+              ? { ...part, dataUrl: await blobDataUrl(part.blob, part.mime) }
+              : part,
+          ),
+        );
         const { requestParts, optimisticParts } = buildRequestParts({
           text: input ?? "",
-          attachments,
+          attachments: encodedAttachments,
           messageID,
           sessionID: sid,
         });
