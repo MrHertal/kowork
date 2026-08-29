@@ -136,7 +136,7 @@ jobs:
           xcodebuild -version
 
       # Mirrors upstream; electron-builder imports CSC_LINK on its own too.
-      - uses: apple-actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7.0.0
+      - uses: apple-actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7
         if: runner.os == 'macOS'
         with:
           keychain: build
