@@ -1,6 +1,6 @@
 # @kowork/web Agent Guidelines
 
-Official website and documentation for Kowork: Astro + Starlight + React islands + Tailwind CSS 4, deployed to Cloudflare Workers static assets. Commands, deployment, and CI details live in [README.md](README.md); repository-wide rules live in the root `AGENTS.md`.
+Official website and documentation for Kowork — Astro + Starlight + React islands + Tailwind CSS 4, deployed to Cloudflare Workers static assets. Commands, deployment, and CI details live in [README.md](README.md); repository-wide rules live in the root `AGENTS.md`.
 
 ## Rules
 

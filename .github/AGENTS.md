@@ -1,6 +1,8 @@
 # GitHub Workflow Conventions
 
-Workflows in `.github/workflows/` follow shared conventions:
+Conventions for the workflows in `.github/workflows/`. Repository-wide rules live in the root `AGENTS.md`.
+
+Workflows follow these shared conventions:
 
 - Top-level key order: `name`, `run-name`, `on`, `permissions`, `env`, `concurrency`, `jobs`.
 - Every workflow declares explicit least-privilege `permissions` (`contents: read` unless more is needed).

@@ -1,6 +1,6 @@
 # @kowork/electron Agent Guidelines
 
-Electron desktop shell: spawns the OpenCode sidecar and hosts the `@kowork/app` UI. Commands and packaging live in [README.md](README.md); repository-wide rules live in the root `AGENTS.md`.
+Electron desktop shell — spawns the OpenCode sidecar and hosts the `@kowork/app` UI. Commands and packaging live in [README.md](README.md); repository-wide rules live in the root `AGENTS.md`.
 
 ## Process Model
 

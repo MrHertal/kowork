@@ -18,7 +18,7 @@ Never edit generated files by hand:
 - `src/paraglide/` — inlang Paraglide compile
 - `src/components/ui/`, `src/components/ai-elements/` — shadcn/ui and AI Elements
 
-Regeneration commands live in the root `AGENTS.md` under Workflow → Verification.
+Regeneration commands live in the root `AGENTS.md` → Workflow → Verification.
 
 ## Terminology and Translations
 
