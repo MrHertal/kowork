@@ -391,6 +391,7 @@
   "settings_mcp_custom_type_remote_description": "通过 HTTP 连接到 MCP 服务器。",
   "settings_mcp_navItem": "连接器",
   "settings_mcp_popular_atlassian_description": "访问 Jira、Confluence 和 Compass。",
+  "settings_mcp_popular_canva_description": "创建、编辑并导出你的 Canva 设计。",
   "settings_mcp_popular_google_calendar_description": "查看和管理你的 Google 日历日程。",
   "settings_mcp_popular_linear_description": "创建、跟踪和更新 Linear 事务和项目。",
   "settings_mcp_popular_monday_description": "在 monday.com 上管理看板、条目和项目。",

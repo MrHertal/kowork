@@ -391,6 +391,7 @@
   "settings_mcp_custom_type_remote_description": "Connect to an MCP server over HTTP.",
   "settings_mcp_navItem": "Connectors",
   "settings_mcp_popular_atlassian_description": "Access Jira, Confluence, and Compass.",
+  "settings_mcp_popular_canva_description": "Create, edit, and export your Canva designs.",
   "settings_mcp_popular_google_calendar_description": "View and manage your Google Calendar events.",
   "settings_mcp_popular_linear_description": "Create, track, and update Linear issues and projects.",
   "settings_mcp_popular_monday_description": "Manage boards, items, and projects on monday.com.",
