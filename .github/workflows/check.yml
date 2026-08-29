@@ -5,12 +5,15 @@ on:
   push:
     branches: [main]
 
-concurrency:
-  group: check-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
@@ -27,15 +30,20 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Generate i18n artifacts
         run: pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
 
-      - run: pnpm typecheck
+      - name: Typecheck
+        run: pnpm typecheck
 
-      - run: pnpm lint
+      - name: Lint
+        run: pnpm lint
 
-      - run: pnpm test
+      - name: Test
+        run: pnpm test
 
-      - run: pnpm --filter @kowork/web build
+      - name: Build web
+        run: pnpm --filter @kowork/web build

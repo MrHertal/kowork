@@ -117,6 +117,16 @@ Never expose a context getter that returns `store.state`. A read such as `ctx.da
 - If a helper would make sense in a Node script without React, it belongs in `utils/`.
 - Default to no comments. Add one only to explain a non-obvious constraint, invariant, workaround, or surprising behavior.
 
+## CI
+
+Workflows in `.github/workflows/` follow shared conventions:
+
+- Top-level key order: `name`, `run-name`, `on`, `permissions`, `env`, `concurrency`, `jobs`.
+- Every workflow declares explicit least-privilege `permissions` (`contents: read` unless more is needed).
+- Concurrency groups use `${{ github.workflow }}-${{ github.ref }}`; `release.yml` keeps the global group `release` to serialize releases.
+- Pin actions by SHA with a `# vX` version comment (Dependabot updates them weekly).
+- Name every `run` step with a short imperative sentence-case name; leave standard setup `uses:` steps (checkout, pnpm, node) anonymous.
+
 ## Verification
 
 Run the narrowest check that covers the change:
