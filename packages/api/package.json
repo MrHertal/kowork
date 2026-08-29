@@ -1,0 +1,20 @@
+{
+  "name": "@kowork/api",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260829.1",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.126.0"
+  }
+}
