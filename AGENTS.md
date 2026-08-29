@@ -25,7 +25,7 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 
 - `packages/web/` is not the browser build of `packages/app/`.
 - Each package under `packages/` has its own README with commands and structure notes — consult it before working in that package.
-- CI workflow conventions live in `.github/AGENTS.md` and load when working on workflows.
+- CI workflow conventions live in `.github/AGENTS.md`.
 
 ### App Build Targets
 
@@ -87,7 +87,7 @@ Apply these rules in `packages/app/messages/*.json`:
 
 ### React and UI
 
-- Do not edit generated files in `packages/app/src/components/ui/` or `packages/app/src/components/ai-elements/`.
+- Do not edit generated files in `packages/app/src/components/ui/` or `packages/app/src/components/ai-elements/`; adapt them through composition, `className`, or CSS.
 - Use named imports; do not use wildcard imports.
 - Use the `@/` alias for imports within `packages/app/src/` instead of relative paths.
 - Use `cn()` from `@/lib/utils` for conditional class names instead of template literals or ternaries.
