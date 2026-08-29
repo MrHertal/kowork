@@ -28,7 +28,7 @@ Regenerate artifacts before typechecking after route or translation changes:
 
 Style and architecture rules live in [AGENTS.md](AGENTS.md) — read it before contributing. In short:
 
-- User-facing text uses Kowork's terminology (task, subtask, folder, connector, skill) — see the terminology table in AGENTS.md.
+- User-facing text uses Kowork's terminology (task, subtask, folder, connector, skill) — see the terminology table in [packages/app/AGENTS.md](packages/app/AGENTS.md).
 - Translations live in `packages/app/messages/*.json`. Keys stay technical (`session`, `directory`, `mcp`); values are localized using that same terminology. Recompile after editing (command above).
 - Commit messages and PR titles are short lowercase imperative (`add portuguese language`); branch names are short lowercase kebab-case. PRs are squash-merged, so the PR title becomes the commit message.
 
