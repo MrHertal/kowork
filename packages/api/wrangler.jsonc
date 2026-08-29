@@ -3,7 +3,13 @@
   "name": "kowork-api",
   "main": "./src/api/index.ts",
   "compatibility_date": "2026-08-20",
+  // Auth codes transit in the callback URL — disable invocation logs, which
+  // record request URLs.
   "observability": {
     "enabled": true,
+    "logs": {
+      "invocation_logs": false,
+    },
   },
+  "routes": [{ "pattern": "api.kowork.dev", "custom_domain": true }],
 }
