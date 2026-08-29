@@ -1,6 +1,6 @@
 # @kowork/api
 
-Backend infrastructure for Kowork: hosted API routes that support the app but are not part of the user-facing website (the first planned use case is an OAuth callback relay for connectors like Canva). Built as plain Cloudflare Workers with Wrangler — no framework. Runs on the `kowork.dev` side of Kowork's domains, keeping technical infra separate from the marketing site on `getkowork.com`.
+Backend infrastructure for Kowork: hosted API routes that support the app but are not part of the user-facing website (the first use case is an OAuth callback relay for connectors like Canva). Built as plain Cloudflare Workers with Wrangler — no framework. Runs on the `kowork.dev` side of Kowork's domains, keeping technical infra separate from the marketing site on `getkowork.com`.
 
 ## Commands
 
@@ -47,9 +47,18 @@ If several endpoints ever only differ by hostname and share all their code and s
 
 ## Deployment
 
-The default worker currently declares no `routes`: it answers only at its `workers.dev` URL (`https://kowork-api.<account-subdomain>.workers.dev`). When the first real route lands, pick its domain (e.g. `api.kowork.dev`) and declare it in the worker's `wrangler.<name>.jsonc` as a [Workers custom domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) (`routes` with `custom_domain: true`), so `wrangler deploy` manages DNS and certificates automatically — do not attach it manually in the dashboard.
+The default worker `kowork-api` serves `api.kowork.dev`, declared as a [Workers custom domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) (`routes` with `custom_domain: true` in `wrangler.jsonc`), so `wrangler deploy` manages DNS and certificates automatically — do not attach it manually in the dashboard. It also stays reachable at its `workers.dev` URL (`https://kowork-api.<account-subdomain>.workers.dev`).
+
+Current routes:
+
+| Route               | Behavior                                                                                                                                                                            |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/health`           | `200 ok`                                                                                                                                                                            |
+| `/mcp/oauth/callback` | `302` to `http://127.0.0.1:19876/mcp/oauth/callback` with the query string preserved — OAuth callback relay for connectors whose provider requires an HTTPS redirect URI (e.g. Canva) |
+
+The relay mirrors `OAUTH_CALLBACK_PORT`/`OAUTH_CALLBACK_PATH` from `opencode/packages/opencode/src/mcp/oauth-provider.ts`. Authorization codes transit in the callback URL, so invocation logs (which record request URLs) are disabled in `wrangler.jsonc` and the worker never logs request URLs.
 
 - **CI**: `.github/workflows/api.yml` deploys on every push to `main` that touches `packages/api/**` or the workflow file itself (or manually via workflow dispatch). It requires two repository secrets (Settings → Secrets and variables → Actions):
-  - `CLOUDFLARE_API_TOKEN` — an API token with account _Workers Scripts: Edit_ plus, on the `kowork.dev` zone, _Workers Routes: Edit_ and _DNS: Edit_ once a custom domain is declared there (so deploys can manage the domain record)
+  - `CLOUDFLARE_API_TOKEN` — an API token with account _Workers Scripts: Edit_ plus, on the `kowork.dev` zone, _Workers Routes: Edit_ and _DNS: Edit_ (so deploys can manage the custom domain record)
   - `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account ID
 - **Manual**: `pnpm --filter @kowork/api run deploy` after `pnpm --filter @kowork/api exec wrangler login`.
