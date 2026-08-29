@@ -121,9 +121,10 @@ Never expose a context getter that returns `store.state`. A read such as `ctx.da
 
 Run the narrowest check that covers the change:
 
-- Electron and its referenced React app: `pnpm typecheck`
+- All workspaces (electron, app, web, api): `pnpm typecheck`
+- Electron and its referenced React app: `pnpm --filter @kowork/electron typecheck`
 - React app only: `pnpm --filter @kowork/app typecheck`
-- Web site: `pnpm --filter @kowork/web typecheck` and `pnpm --filter @kowork/web build`
+- Web site: `pnpm --filter @kowork/web build`
 - Tests: `pnpm test`, or scoped to one package: `pnpm --filter @kowork/app test`
 - Lint the React app: `pnpm lint` (auto-fix: `pnpm lint:fix`)
 
@@ -134,7 +135,7 @@ Before typechecking the app, regenerate affected artifacts:
 
 Run repository-wide hygiene commands only when explicitly requested:
 
-- Format the tree: `pnpm prettier . --write`
+- Format the tree: `pnpm format`
 - Sort message catalogs: `pnpm --filter @kowork/app messages:sort`
 
 ## Testing

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "Node deps bundled into the Kowork office runtime pack — one shared runtime for the document skills, installed into <pack>/node_modules and exposed to the agent via NODE_PATH.",
+  "license": "MIT",
   "dependencies": {
     "docx": "9.7.1",
     "pptxgenjs": "4.0.1"
