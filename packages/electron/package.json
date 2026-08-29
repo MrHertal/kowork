@@ -25,27 +25,27 @@
     "electron-context-menu": "^4.1.2",
     "electron-log": "^5.4.4",
     "electron-store": "^11.0.2",
-    "electron-updater": "^6.8.8",
+    "electron-updater": "^6.8.9",
     "electron-window-state": "^5.0.3",
     "jsonc-parser": "^3.3.1",
-    "marked": "^18.0.4"
+    "marked": "^18.0.11"
   },
   "devDependencies": {
     "@kowork/app": "workspace:*",
     "@lydell/node-pty": "1.2.0-beta.10",
     "@types/node": "^24.13.3",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
     "@vitejs/plugin-react": "^5.2.0",
     "electron": "41.2.1",
-    "electron-builder": "^26.14.0",
+    "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tsx": "^4.23.12",
     "typescript": "~6.0.3",
     "vite": "^7.3.6",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "optionalDependencies": {
     "@lydell/node-pty-darwin-arm64": "1.2.0-beta.10",
