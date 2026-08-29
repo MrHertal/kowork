@@ -36,17 +36,18 @@ jobs:
       - name: Generate i18n artifacts
         run: pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
 
-      - name: Typecheck
-        run: pnpm typecheck
+      - parallel:
+          - name: Typecheck
+            run: pnpm typecheck
 
-      - name: Lint
-        run: pnpm lint
+          - name: Lint
+            run: pnpm lint
 
-      - name: Test
-        run: pnpm test
+          - name: Test
+            run: pnpm test
 
-      - name: Build app
-        run: pnpm --filter @kowork/app build
+          - name: Build app
+            run: pnpm --filter @kowork/app build
 
-      - name: Build web
-        run: pnpm --filter @kowork/web build
+          - name: Build web
+            run: pnpm --filter @kowork/web build
