@@ -24,6 +24,8 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 
 `packages/web/` is not the browser build of `packages/app/`.
 
+Each package under `packages/` has its own README with commands and structure notes — consult it before working in that package.
+
 ## OpenCode Integration
 
 Before changing any interaction with the OpenCode client, sidecar, or protocol, **first inspect the corresponding implementation in OpenCode's Electron app**. This includes prompts, events, sessions, permissions, IPC, and sidecar lifecycle behavior.
