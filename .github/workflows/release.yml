@@ -14,13 +14,13 @@ permissions:
   contents: write
   pull-requests: write
 
-concurrency:
-  group: release
-
 env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
   HUSKY: "0"
   KOWORK_CHANNEL: prod
+
+concurrency:
+  group: release
 
 jobs:
   prepare:
@@ -44,7 +44,8 @@ jobs:
             exit 1
           fi
 
-      - id: version
+      - name: Validate version
+        id: version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -135,21 +136,21 @@ jobs:
           xcodebuild -version
 
       # Mirrors upstream; electron-builder imports CSC_LINK on its own too.
-      - uses: apple-actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7.0.0
+      - uses: apple-actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7
         if: runner.os == 'macOS'
         with:
           keychain: build
           p12-file-base64: ${{ secrets.CSC_LINK }}
           p12-password: ${{ secrets.CSC_KEY_PASSWORD }}
 
-      - name: Setup Apple API key
+      - name: Set up Apple API key
         if: runner.os == 'macOS'
         env:
           APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY }}
         run: echo "$APPLE_API_KEY_CONTENT" > "$RUNNER_TEMP/apple-api-key.p8"
 
       # sign-windows.ps1 signs through the Azure CLI session this creates
-      - name: Azure login
+      - name: Log in to Azure
         if: runner.os == 'Windows' && env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_SUBSCRIPTION_ID != ''
         uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
         with:
@@ -178,7 +179,8 @@ jobs:
         working-directory: opencode
         run: bun install --frozen-lockfile
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
         env:
           # smoke:runtime needs the real Electron binary for the node shim
           ELECTRON_SKIP_BINARY_DOWNLOAD: ""
