@@ -22,7 +22,6 @@
     "package:linux": "pnpm run ensure:runtime && electron-builder --linux --config electron-builder.config.ts"
   },
   "dependencies": {
-    "drizzle-orm": "1.0.0-beta.19-d95b7a4",
     "electron-context-menu": "^4.1.2",
     "electron-log": "^5.4.4",
     "electron-store": "^11.0.2",
