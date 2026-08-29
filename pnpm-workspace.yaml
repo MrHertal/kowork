@@ -12,3 +12,7 @@ minimumReleaseAgeExcludePrune: true
 overrides:
   "@types/react": "^19"
   "@types/react-dom": "^19"
+update:
+  # Held until the next opencode submodule sync (sidecar is on 1.18.23)
+  ignoreDeps:
+    - "@opencode-ai/sdk"
