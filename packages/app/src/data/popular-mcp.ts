@@ -1,4 +1,7 @@
+import type { McpOAuthConfig } from "@opencode-ai/sdk/v2/client";
+
 import atlassianLogo from "@/assets/icons/mcp/atlassian.svg";
+import canvaLogo from "@/assets/icons/mcp/canva.svg";
 import googleCalendarLogo from "@/assets/icons/mcp/google-calendar.svg";
 import linearLogo from "@/assets/icons/mcp/linear.svg";
 import mondayLogo from "@/assets/icons/mcp/monday.svg";
@@ -12,7 +15,7 @@ export interface PopularMcp {
   logo?: string;
   logoClassName?: string;
   url: string;
-  oauth?: { clientId: string; clientSecret?: string; scope?: string };
+  oauth?: McpOAuthConfig;
 }
 
 const GOOGLE_CALENDAR_OAUTH_CLIENT_ID =
@@ -65,6 +68,22 @@ export const POPULAR_MCP: PopularMcp[] = [
             clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET,
             scope:
               "https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.events.freebusy https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.events",
+          },
+        },
+      ]
+    : []),
+  // Canva allowlists HTTPS redirect URIs per OAuth client — dev-only until
+  // the relay URI is approved (waitlist in progress).
+  ...(import.meta.env.DEV
+    ? [
+        {
+          id: "canva",
+          name: "Canva",
+          description: m.settings_mcp_popular_canva_description,
+          logo: canvaLogo,
+          url: "https://mcp.canva.com/mcp",
+          oauth: {
+            redirectUri: "https://api.kowork.dev/mcp/oauth/callback",
           },
         },
       ]
