@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kowork-api",
+  "main": "./src/api/index.ts",
+  "compatibility_date": "2026-08-20",
+  "observability": {
+    "enabled": true,
+  },
+}

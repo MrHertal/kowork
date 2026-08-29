@@ -104,26 +104,29 @@ describe("useMcpMutation", () => {
   test.each([
     ["enable", true],
     ["disable", false],
-  ] as const)("reloads all directory runtimes after %s", async (type, enabled) => {
-    doubles.status.mockResolvedValue({
-      data: { linear: { status: enabled ? "connected" : "disabled" } },
-    });
-    const hook = renderHook(() => useMcpMutation("/settings-project"), {
-      wrapper,
-    });
+  ] as const)(
+    "reloads all directory runtimes after %s",
+    async (type, enabled) => {
+      doubles.status.mockResolvedValue({
+        data: { linear: { status: enabled ? "connected" : "disabled" } },
+      });
+      const hook = renderHook(() => useMcpMutation("/settings-project"), {
+        wrapper,
+      });
 
-    await hook.result.current.mutateAsync({ type, name: "linear" });
+      await hook.result.current.mutateAsync({ type, name: "linear" });
 
-    expect(doubles.patch).toHaveBeenCalledWith(
-      ["mcp", "linear", "enabled"],
-      enabled,
-    );
-    expect(doubles.dispose).toHaveBeenCalledTimes(1);
-    expect(doubles.patch.mock.invocationCallOrder[0]).toBeLessThan(
-      doubles.dispose.mock.invocationCallOrder[0]!,
-    );
-    expect(doubles.dispose.mock.invocationCallOrder[0]).toBeLessThan(
-      doubles.status.mock.invocationCallOrder[0]!,
-    );
-  });
+      expect(doubles.patch).toHaveBeenCalledWith(
+        ["mcp", "linear", "enabled"],
+        enabled,
+      );
+      expect(doubles.dispose).toHaveBeenCalledTimes(1);
+      expect(doubles.patch.mock.invocationCallOrder[0]).toBeLessThan(
+        doubles.dispose.mock.invocationCallOrder[0]!,
+      );
+      expect(doubles.dispose.mock.invocationCallOrder[0]).toBeLessThan(
+        doubles.status.mock.invocationCallOrder[0]!,
+      );
+    },
+  );
 });

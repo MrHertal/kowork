@@ -41,3 +41,5 @@ jobs:
       - run: pnpm --filter @kowork/web typecheck
 
       - run: pnpm --filter @kowork/web build
+
+      - run: pnpm --filter @kowork/api typecheck
