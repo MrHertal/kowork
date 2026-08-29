@@ -7,7 +7,6 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 1. Preserve Kowork's non-technical user experience and terminology.
 2. Treat OpenCode as the source of truth for client/server behavior and protocol details.
 3. Keep the Electron and browser builds working when changing shared app code.
-4. Do not edit generated UI components; adapt them through composition, `className`, or CSS.
 
 ## Orientation
 
@@ -26,6 +25,7 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 
 - `packages/web/` is not the browser build of `packages/app/`.
 - Each package under `packages/` has its own README with commands and structure notes — consult it before working in that package.
+- CI workflow conventions live in `.github/AGENTS.md` and load when working on workflows.
 
 ### App Build Targets
 
@@ -92,16 +92,6 @@ Apply these rules in `packages/app/messages/*.json`:
 - Use the `@/` alias for imports within `packages/app/src/` instead of relative paths.
 - Use `cn()` from `@/lib/utils` for conditional class names instead of template literals or ternaries.
 
-```tsx
-// Bad
-import * as React from "react";
-import * as m from "@/paraglide/messages";
-
-// Good
-import { useRef, useState } from "react";
-import { m } from "@/paraglide/messages";
-```
-
 ### State and Reactivity
 
 Shared server state lives in `@tanstack/react-store` instances. Components must subscribe through `useChildData(directory, selector, compare?)`, `useSyncData(selector, compare?)` within a `<SyncProvider>`, or `useStore` directly.
@@ -113,7 +103,7 @@ Never expose a context getter that returns `store.state`. A read such as `ctx.da
 - **Choose provider shape deliberately.** Use a `Store` when at least three consumers read different slices, when a consumer is on a hot render path such as typing, scrolling, or animation, or when imperative callbacks must read fresh state at call time (event handlers, subscriptions, after `await`). Expose `_store` for internal access plus a `useFooData(selector, compare?)` hook when consumers subscribe. Existing examples include `global-sync`, `notification`, and `permission`.
 - **Otherwise, use `useState` or `useReducer`** and memoize the context value with `useMemo<ContextValue>(...)`. Existing examples include `server`, `settings`, `models`, `local`, and `prompt`.
 - **Do not migrate provider styles for consistency alone.** Imperative callbacks read fresh state from `store.state`, never from React state mirrored into a ref.
-- **Never assign refs during render** (`react-hooks/refs` rejects it). Child effects run before parent effects, so provider closures reading such refs observe stale values. Read from a `Store` at call time, or rebuild the context value with `useMemo` when its inputs change. Syncing a ref in `useEffect` is acceptable when every reader is post-commit (own effects, timers, event handlers). Lazy init is fine for non-React instance state such as `Map`s.
+- **Never assign refs during render** (`react-hooks/refs` rejects it). Child effects run before parent effects, so provider closures reading such refs observe stale values. Syncing a ref in `useEffect` is acceptable when every reader is post-commit (own effects, timers, event handlers). Lazy init is fine for non-React instance state such as `Map`s.
 
 ### Code Organization
 
@@ -153,16 +143,6 @@ Tests use Vitest and are colocated as `*.test.ts(x)` next to the source.
 - Node environment by default. React component tests opt into jsdom with a `// @vitest-environment jsdom` docblock on the first line and use `@testing-library/react` with `@testing-library/user-event`.
 - Keep Vitest `globals` off; import `describe`/`it`/`expect` from `vitest`. jest-dom matchers and DOM cleanup are registered in `packages/app/src/test-setup.ts`.
 - For files with `@opencode-ref` headers: port the upstream `*.test.ts` when one exists (e.g. `contexts/global-sync/*` ↔ `opencode/packages/app/src/context/global-sync/`), adapting `bun:test` imports to `vitest`. Ported tests verify the port and protect future backports.
-
-### CI
-
-Workflows in `.github/workflows/` follow shared conventions:
-
-- Top-level key order: `name`, `run-name`, `on`, `permissions`, `env`, `concurrency`, `jobs`.
-- Every workflow declares explicit least-privilege `permissions` (`contents: read` unless more is needed).
-- Concurrency groups use `${{ github.workflow }}-${{ github.ref }}`; `release.yml` keeps the global group `release` to serialize releases.
-- Pin actions by SHA with a version comment matching the tag the SHA resolves to: the moving major tag (`# v7`), or the exact tag (`# v3.0.1`) when the pin intentionally lags the major. Dependabot updates pins weekly.
-- Name every `run` step with a short imperative sentence-case name; leave standard setup `uses:` steps (checkout, pnpm, node) anonymous.
 
 ### Commits
 
