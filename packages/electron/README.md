@@ -4,13 +4,13 @@ Electron desktop shell for Kowork. Spawns the OpenCode sidecar server and hosts 
 
 ## Commands
 
-| Command          | Action                                                  |
-| ---------------- | ------------------------------------------------------- |
-| `pnpm dev`       | Build the sidecar and start the desktop app in dev mode |
-| `pnpm build`     | Build the main, preload, and renderer bundles           |
-| `pnpm test`      | Run the Vitest suite                                    |
-| `pnpm typecheck` | Run `tsc -b`                                            |
-| `pnpm package`   | Package the desktop app for the current platform        |
+| Command          | Action                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`       | Build the sidecar (and the document-skill runtime on first run), then start the desktop app in dev mode |
+| `pnpm build`     | Build the main, preload, and renderer bundles                                                           |
+| `pnpm test`      | Run the Vitest suite                                                                                    |
+| `pnpm typecheck` | Run `tsc -b`                                                                                            |
+| `pnpm package`   | Package the desktop app for the current platform                                                        |
 
 Run them from this directory or from the repo root with `pnpm --filter @kowork/electron <command>`. `pnpm package` has `:mac`, `:win`, and `:linux` variants for packaging a specific platform.
 

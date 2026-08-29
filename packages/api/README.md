@@ -49,7 +49,7 @@ If several endpoints ever only differ by hostname and share all their code and s
 
 The default worker currently declares no `routes`: it answers only at its `workers.dev` URL (`https://kowork-api.<account-subdomain>.workers.dev`). When the first real route lands, pick its domain (e.g. `api.kowork.dev`) and declare it in the worker's `wrangler.<name>.jsonc` as a [Workers custom domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) (`routes` with `custom_domain: true`), so `wrangler deploy` manages DNS and certificates automatically — do not attach it manually in the dashboard.
 
-- **CI**: `.github/workflows/api.yml` deploys on every push to `main` that touches `packages/api/**` (or manually via workflow dispatch). It requires two repository secrets (Settings → Secrets and variables → Actions):
+- **CI**: `.github/workflows/api.yml` deploys on every push to `main` that touches `packages/api/**` or the workflow file itself (or manually via workflow dispatch). It requires two repository secrets (Settings → Secrets and variables → Actions):
   - `CLOUDFLARE_API_TOKEN` — an API token with account _Workers Scripts: Edit_ plus, on the `kowork.dev` zone, _Workers Routes: Edit_ and _DNS: Edit_ once a custom domain is declared there (so deploys can manage the domain record)
   - `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account ID
 - **Manual**: `pnpm --filter @kowork/api run deploy` after `pnpm --filter @kowork/api exec wrangler login`.
