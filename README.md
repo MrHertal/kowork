@@ -54,8 +54,10 @@ pnpm dev
 
 `pnpm dev` builds the OpenCode sidecar and launches the desktop app. The first run also builds the document-skill runtime, so it can take a few minutes.
 
+Each package under `packages/` has its own README with commands and structure notes.
+
 **[Contributing](CONTRIBUTING.md)** · **[Security](SECURITY.md)** · **[MIT License](LICENSE)**
 
 <sub>Claude and Claude Cowork are trademarks of Anthropic, PBC. Kowork is not affiliated with, sponsored, or endorsed by Anthropic.</sub>
 
-<sub>Kowork is built on [OpenCode](https://github.com/anomalyco/opencode), but it is not built by the OpenCode team and is not affiliated with OpenCode in any way.</sub>
+<sub>Kowork is not built by the OpenCode team and is not affiliated with OpenCode in any way.</sub>
