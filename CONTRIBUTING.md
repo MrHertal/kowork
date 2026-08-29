@@ -9,6 +9,8 @@ Follow the [Development section of the README](README.md#development). Two extra
 - `pnpm dev` builds the OpenCode sidecar automatically; build it alone with `pnpm build:sidecar`.
 - The built-in document skills (docx, pdf, xlsx, pptx) embed a Python/Node runtime that builds automatically on first run. Prepare it with `pnpm --filter @kowork/electron ensure:runtime` and smoke-test it with `pnpm --filter @kowork/electron smoke:runtime`.
 
+Each package under `packages/` has its own README with commands and structure notes.
+
 ## Checks
 
 ```bash
@@ -28,7 +30,7 @@ Style and architecture rules live in [AGENTS.md](AGENTS.md) — read it before c
 
 - User-facing text uses Kowork's terminology (task, subtask, folder, connector, skill) — see the terminology table in AGENTS.md.
 - Translations live in `packages/app/messages/*.json`. Keys stay technical (`session`, `directory`, `mcp`); values are localized using that same terminology. Recompile after editing (command above).
-- Commit messages and PR titles are short lowercase imperative (`add portuguese language`); branch names are short kebab-case. PRs are squash-merged, so the PR title becomes the commit message.
+- Commit messages and PR titles are short lowercase imperative (`add portuguese language`); branch names are short lowercase kebab-case. PRs are squash-merged, so the PR title becomes the commit message.
 
 ## Pull requests
 

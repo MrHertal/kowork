@@ -23,7 +23,7 @@ Starlight documentation is served from <https://getkowork.com/docs/> as part of 
 
 The Astro site remains a fully static build (`dist/`) served as [Cloudflare Workers static assets](https://developers.cloudflare.com/workers/static-assets/), configured in `wrangler.jsonc`. No SSR adapter is used. The Worker entry point handles `/download`, redirecting macOS and Windows visitors to the corresponding asset from the latest GitHub release and falling back to the release page on unsupported platforms. All other requests are served by the static asset binding.
 
-- **CI**: `.github/workflows/web.yml` deploys on every push to `main` that touches `packages/web/**` (or manually via workflow dispatch). It requires two repository secrets (Settings → Secrets and variables → Actions):
+- **CI**: `.github/workflows/web.yml` deploys on every push to `main` that touches `packages/web/**` or the workflow file itself (or manually via workflow dispatch). It requires two repository secrets (Settings → Secrets and variables → Actions):
   - `CLOUDFLARE_API_TOKEN` — an API token with account _Workers Scripts: Edit_ plus, on the `getkowork.com` zone, _Workers Routes: Edit_ and _DNS: Edit_ (so deploys can manage the custom domain record)
   - `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account ID
 - **Manual**: `pnpm --filter @kowork/web run deploy` after `pnpm --filter @kowork/web exec wrangler login`.
