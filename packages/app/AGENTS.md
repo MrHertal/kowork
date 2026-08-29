@@ -14,7 +14,7 @@ Shared React application — runs in the Electron desktop shell and as a standal
 
 Never edit generated files by hand:
 
-- `src/routeTree.gen.ts` — TanStack Router CLI
+- `src/routeTree.gen.ts` — TanStack Router Vite plugin
 - `src/paraglide/` — inlang Paraglide compile
 - `src/components/ui/`, `src/components/ai-elements/` — shadcn/ui and AI Elements
 

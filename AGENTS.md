@@ -16,8 +16,8 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 | -------------------- | --------------------------------------------------------------------------------------------------------- |
 | `packages/app/`      | Shared React application, including the standalone browser build                                          |
 | `packages/electron/` | Electron main process, preload, and desktop renderer entry point                                          |
-| `packages/web/`      | Landing page (Astro + React islands + Tailwind 4), deployed to Cloudflare Workers static assets           |
-| `packages/api/`      | Backend Cloudflare workers; plain wrangler, one `wrangler.<name>.jsonc` + `src/<name>/` per worker        |
+| `packages/web/`      | Website and docs (Astro + Starlight + React islands + Tailwind 4), on Cloudflare Workers static assets    |
+| `packages/api/`      | Backend Cloudflare workers; plain wrangler, one wrangler config + one `src/<name>/` entry per worker      |
 | `opencode/`          | OpenCode fork submodule used for the sidecar and as a reference implementation                            |
 | `.github/workflows/` | CI: PR checks (`check.yml`), release pipeline (`release.yml`), and web/api deploys (`web.yml`, `api.yml`) |
 | `CONTRIBUTING.md`    | Contributor guide: setup, checks, conventions, translations, PR expectations                              |
