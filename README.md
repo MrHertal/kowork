@@ -4,13 +4,13 @@
 <h1 align="center">Kowork</h1>
 <p align="center">An open-source <a href="https://claude.com/product/cowork">Claude Cowork</a> alternative that gets things done on your desktop.</p>
 <p align="center">
-  <a href="https://getkowork.com"><strong>Website</strong></a> ·
-  <a href="https://getkowork.com/docs/"><strong>Documentation</strong></a>
-</p>
-<p align="center">
   <a href="https://github.com/MrHertal/kowork/actions/workflows/check.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/MrHertal/kowork/check.yml?style=flat-square&branch=main" /></a>
   <a href="https://github.com/MrHertal/kowork/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/MrHertal/kowork?style=flat-square" /></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" /></a>
+</p>
+<p align="center">
+  <a href="https://getkowork.com"><strong>Website</strong></a> ·
+  <a href="https://getkowork.com/docs/"><strong>Documentation</strong></a>
 </p>
 
 ![A finished Kowork task: an Excel sales report with live formulas and a revenue chart, created from a plain-language request](.github/assets/screenshot.png)
@@ -53,8 +53,6 @@ pnpm dev
 ```
 
 `pnpm dev` builds the OpenCode sidecar and launches the desktop app. The first run also builds the document-skill runtime, so it can take a few minutes.
-
----
 
 **[Contributing](CONTRIBUTING.md)** · **[Security](SECURITY.md)** · **[MIT License](LICENSE)**
 
