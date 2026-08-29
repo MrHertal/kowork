@@ -1,15 +1,15 @@
 {
   "name": "@kowork/api",
   "version": "0.0.1",
-  "license": "MIT",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
+    "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "deploy": "wrangler deploy"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260829.1",

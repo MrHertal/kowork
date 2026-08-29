@@ -1,26 +1,27 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "name": "kowork",
-  "license": "MIT",
   "private": true,
+  "license": "MIT",
   "type": "module",
-  "packageManager": "pnpm@11.24.0+sha512.vSfjRel23LC+C3oSKCF7BJqBfiGx81XJDb59xGZxiVqLwebQbCRVRQXqk+oLRfSJon7Bv7yN5qlln8oPFvoAAA==",
-  "engines": {
-    "node": ">=24"
-  },
   "scripts": {
-    "dev": "pnpm --filter @kowork/electron dev",
     "build": "pnpm --filter @kowork/electron build",
-    "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck",
+    "build:sidecar": "pnpm --filter @kowork/electron build:sidecar",
+    "dev": "pnpm --filter @kowork/electron dev",
+    "format": "prettier . --write",
     "lint": "pnpm --filter @kowork/app lint",
     "lint:fix": "pnpm --filter @kowork/app lint:fix",
-    "format": "prettier . --write",
-    "build:sidecar": "pnpm --filter @kowork/electron build:sidecar"
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
     "prettier": "3.8.3",
     "prettier-plugin-astro": "0.14.1",
+    "prettier-plugin-packagejson": "3.0.2",
     "prettier-plugin-tailwindcss": "0.8.1"
+  },
+  "packageManager": "pnpm@11.24.0+sha512.vSfjRel23LC+C3oSKCF7BJqBfiGx81XJDb59xGZxiVqLwebQbCRVRQXqk+oLRfSJon7Bv7yN5qlln8oPFvoAAA==",
+  "engines": {
+    "node": ">=24"
   }
 }
