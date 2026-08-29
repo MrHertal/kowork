@@ -8,6 +8,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "preview:worker": "astro build && wrangler dev",
     "typecheck": "astro check",
     "deploy": "astro build && wrangler deploy"
   },

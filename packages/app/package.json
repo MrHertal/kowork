@@ -10,14 +10,14 @@
     "./index.css": "./src/index.css"
   },
   "scripts": {
-    "typecheck": "tsc -b",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "typecheck": "tsc -b",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "messages:sort": "node scripts/sort-messages.mjs"
   },
   "dependencies": {

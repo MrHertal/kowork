@@ -30,7 +30,7 @@ To add a worker:
 
 1. Create its entry point at `src/<name>/index.ts` (colocate tests as `*.test.ts`, run by `pnpm test`).
 2. Add `wrangler.<name>.jsonc` with its own `name`, `main`, and `routes`.
-3. Add a matching script to `package.json`: `"deploy:<name>": "wrangler deploy -c wrangler.<name>.jsonc"`.
+3. Add matching scripts to `package.json`: `"deploy:<name>": "wrangler deploy -c wrangler.<name>.jsonc"` and, for local development, `"dev:<name>": "wrangler dev -c wrangler.<name>.jsonc"`.
 4. In `.github/workflows/api.yml`, switch the deploy step to an explicit multi-command form so each config deploys:
 
    ```yaml
