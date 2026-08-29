@@ -391,6 +391,7 @@
   "settings_mcp_custom_type_remote_description": "HTTP से MCP सर्वर को कनेक्ट करें।",
   "settings_mcp_navItem": "कनेक्टर",
   "settings_mcp_popular_atlassian_description": "Jira, Confluence और Compass इस्तेमाल करें।",
+  "settings_mcp_popular_canva_description": "अपने Canva डिज़ाइन बनाएं, एडिट करें और एक्सपोर्ट करें।",
   "settings_mcp_popular_google_calendar_description": "अपने Google Calendar इवेंट देखें और मैनेज करें।",
   "settings_mcp_popular_linear_description": "Linear issues और projects बनाएं, ट्रैक करें और अपडेट करें।",
   "settings_mcp_popular_monday_description": "monday.com पर boards, items और projects मैनेज करें।",
