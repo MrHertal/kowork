@@ -42,12 +42,12 @@ Get the latest build from the [releases page](https://github.com/MrHertal/kowork
 
 ## Development
 
-Requires Node 24 (see `.nvmrc`), pnpm (via `corepack enable`), and Bun (for the sidecar).
+Requires Node 24 (see `.nvmrc`), pnpm 12 (`npx get-pnpm next-12`), and Bun (for the sidecar). Corepack is not supported by pnpm 12.
 
 ```bash
 git clone --recurse-submodules https://github.com/MrHertal/kowork.git
 cd kowork
-corepack enable && pnpm install
+pnpm install
 bun install --cwd opencode
 pnpm dev
 ```
