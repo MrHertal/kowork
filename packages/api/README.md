@@ -51,9 +51,9 @@ The default worker `kowork-api` serves `api.kowork.dev`, declared as a [Workers 
 
 Current routes:
 
-| Route               | Behavior                                                                                                                                                                            |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/health`           | `200 ok`                                                                                                                                                                            |
+| Route                 | Behavior                                                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/health`             | `200 ok`                                                                                                                                                                              |
 | `/mcp/oauth/callback` | `302` to `http://127.0.0.1:19876/mcp/oauth/callback` with the query string preserved — OAuth callback relay for connectors whose provider requires an HTTPS redirect URI (e.g. Canva) |
 
 The relay mirrors `OAUTH_CALLBACK_PORT`/`OAUTH_CALLBACK_PATH` from `opencode/packages/opencode/src/mcp/oauth-provider.ts`. Authorization codes transit in the callback URL, so invocation logs (which record request URLs) are disabled in `wrangler.jsonc` and the worker never logs request URLs.
