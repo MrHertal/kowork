@@ -66,3 +66,7 @@
 .sl-markdown-content {
   --sl-color-text-accent: var(--kowork-link-color);
 }
+
+.main-pane {
+  --sl-content-margin-inline: auto;
+}
