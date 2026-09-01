@@ -101,6 +101,33 @@ describe("useMcpMutation", () => {
     );
   });
 
+  test("reloads all directory runtimes after Google Calendar re-authentication", async () => {
+    doubles.status.mockResolvedValue({
+      data: { "google-calendar": { status: "connected" } },
+    });
+    const hook = renderHook(() => useMcpMutation("/settings-project"), {
+      wrapper,
+    });
+
+    await hook.result.current.mutateAsync({
+      type: "authenticate",
+      name: "google-calendar",
+    });
+
+    expect(doubles.authenticate).toHaveBeenCalledWith(
+      { name: "google-calendar" },
+      expect.anything(),
+    );
+    expect(doubles.dispose).toHaveBeenCalledTimes(1);
+    expect(doubles.status).toHaveBeenCalledTimes(1);
+    expect(doubles.authenticate.mock.invocationCallOrder[0]).toBeLessThan(
+      doubles.dispose.mock.invocationCallOrder[0]!,
+    );
+    expect(doubles.dispose.mock.invocationCallOrder[0]).toBeLessThan(
+      doubles.status.mock.invocationCallOrder[0]!,
+    );
+  });
+
   test.each([
     ["enable", true],
     ["disable", false],
