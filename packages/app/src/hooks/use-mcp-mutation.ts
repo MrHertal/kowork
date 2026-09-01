@@ -231,6 +231,9 @@ export function useMcpMutation(directory: string) {
           } finally {
             clearAuth(directory, name, ac);
           }
+          if (platform.opencodeConfigPatch) {
+            await globalSDK.client.global.dispose();
+          }
           // Re-read regardless of whether auth threw: a partial OAuth
           // can still flip the server to "connected" or back to "needs_auth".
           const refreshed = await client.mcp.status().catch(() => null);
