@@ -1,0 +1,139 @@
+---
+import LegalLayout from "../layouts/LegalLayout.astro";
+---
+
+<LegalLayout
+  title="Privacy Policy — Kowork"
+  description="How Kowork handles your data. The short version: Kowork is local-first and collects nothing."
+  heading="Privacy Policy"
+  lastUpdated="September 2, 2026"
+>
+  <p>
+    Kowork is an open-source desktop application that lets you hand real work to
+    AI agents. It is published by Grégoire Hertault ("we", "us"). This policy
+    explains what happens to your data when you use the Kowork app and the
+    getkowork.com website.
+  </p>
+  <p>
+    <strong>The short version: Kowork collects nothing.</strong> No account, no analytics,
+    no telemetry, no cookies. Your files and conversations stay on your device, and
+    the app talks only to the services you choose, directly from your device.
+  </p>
+
+  <h2>The Kowork app</h2>
+
+  <h3>Your data stays on your device</h3>
+  <p>
+    Kowork runs locally on your computer. Your folders, files, conversations,
+    and settings are stored on your device and are never sent to us. We operate
+    no servers that receive your content.
+  </p>
+
+  <h3>AI providers</h3>
+  <p>
+    To work, Kowork sends your requests — and the files you allow agents to read
+    — to the AI provider you configure (for example Anthropic or OpenAI),
+    directly from your device, using your own account or API key. That exchange
+    is governed by your provider's privacy policy, which you should read. We
+    never see or store this data.
+  </p>
+
+  <h3>Connectors</h3>
+  <p>
+    Kowork can connect to third-party services you choose (for example Google
+    Calendar). When you connect a service:
+  </p>
+  <ul>
+    <li>
+      You sign in with the provider directly (OAuth 2.0) in your browser. Your
+      password is never shared with Kowork.
+    </li>
+    <li>Sign-in tokens are stored on your device, not on our servers.</li>
+    <li>
+      Data is exchanged directly between your device and the provider. It does
+      not pass through us.
+    </li>
+    <li>
+      You can revoke access at any time from the provider's settings (for
+      Google, at
+      <a href="https://myaccount.google.com/permissions"
+        >myaccount.google.com/permissions</a
+      >) or by disconnecting the connector in Kowork.
+    </li>
+  </ul>
+  <p>
+    Kowork's use and transfer to any other app of information received from
+    Google APIs adheres to the
+    <a href="https://developers.google.com/terms/api-services-user-data-policy"
+      >Google API Services User Data Policy</a
+    >.
+  </p>
+  <p>
+    For a few connectors whose providers do not allow local sign-in redirects,
+    the sign-in flow briefly passes through a Kowork-operated redirect endpoint
+    (api.kowork.dev) that forwards you back to the app. It stores nothing and
+    request logging is disabled on it.
+  </p>
+
+  <h3>Update checks</h3>
+  <p>
+    If enabled in settings, Kowork checks GitHub for new versions when it
+    starts; you can also trigger a check from the menu, or turn the setting off.
+    That request goes to GitHub, which processes your IP address and standard
+    request data under the
+    <a
+      href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"
+      >GitHub Privacy Statement</a
+    >.
+  </p>
+
+  <h2>The website</h2>
+  <p>
+    getkowork.com is a static website hosted on Cloudflare. Like any web host,
+    Cloudflare processes standard technical logs (IP address, browser type, time
+    of request) to deliver and secure the site, under the
+    <a href="https://www.cloudflare.com/privacypolicy/"
+      >Cloudflare Privacy Policy</a
+    >. We run no analytics, no advertising, and no tracking on the website, and
+    it sets no cookies.
+  </p>
+  <p>
+    App downloads are served by GitHub Releases, so downloading the app is a
+    request to GitHub covered by the GitHub Privacy Statement linked above.
+  </p>
+
+  <h2>What we don't collect</h2>
+  <p>
+    Because the app is local-first and the website is static, we do not collect
+    or store your name, email address, files, conversations, prompts, connector
+    data, usage statistics, or device identifiers.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    Since we collect no personal data, there is generally nothing held by us to
+    access, correct, or delete: data created by the app lives on your device and
+    disappears when you delete it there. If you are in the European Economic
+    Area, you nevertheless keep all your rights under the GDPR, including the
+    right to lodge a complaint with your supervisory authority (in France, the
+    CNIL). For any privacy question or request, contact us as described below.
+  </p>
+
+  <h2>Changes to this policy</h2>
+  <p>
+    If this policy changes, the new version is published on this page and in the
+    <a href="https://github.com/MrHertal/kowork">Kowork repository</a>.
+    Significant changes are announced in the release notes.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Kowork is an open-source project published by Grégoire Hertault. For privacy
+    questions, open an issue or discussion on
+    <a href="https://github.com/MrHertal/kowork">GitHub</a>. To report a
+    security vulnerability, use
+    <a href="https://github.com/MrHertal/kowork/security/advisories/new"
+      >GitHub Security Advisories</a
+    >.
+  </p>
+</LegalLayout>
