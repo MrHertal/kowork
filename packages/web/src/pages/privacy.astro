@@ -6,7 +6,7 @@ import LegalLayout from "../layouts/LegalLayout.astro";
   title="Privacy Policy — Kowork"
   description="How Kowork handles your data. The short version: Kowork is local-first and collects nothing."
   heading="Privacy Policy"
-  lastUpdated="September 2, 2026"
+  lastUpdated="September 3, 2026"
 >
   <p>
     Kowork is an open-source desktop application that lets you hand real work to
@@ -62,18 +62,45 @@ import LegalLayout from "../layouts/LegalLayout.astro";
     </li>
   </ul>
   <p>
-    Kowork's use and transfer to any other app of information received from
-    Google APIs adheres to the{" "}
-    <a href="https://developers.google.com/terms/api-services-user-data-policy"
-      >Google API Services User Data Policy</a
-    >.
-  </p>
-  <p>
     For a few connectors whose providers do not allow local sign-in redirects,
     the sign-in flow briefly passes through a Kowork-operated redirect endpoint
     (api.kowork.dev) that forwards you back to the app. It stores nothing and
     request logging is disabled on it.
   </p>
+
+  <h3>Google user data and Limited Use</h3>
+  <p>
+    Kowork's use and transfer to any other app of information received from
+    Google APIs adheres to the{" "}
+    <a href="https://developers.google.com/terms/api-services-user-data-policy"
+      >Google API Services User Data Policy</a
+    >, including the Limited Use requirements.
+  </p>
+  <p>
+    Kowork uses AI models to carry out your requests, and data from Google
+    services you connect (such as Google Calendar) may be included in those
+    requests. The use of raw or derived user data received from Google
+    Workspace APIs adheres to the Google API Services User Data Policy,
+    including the Limited Use requirements. In particular:
+  </p>
+  <ul>
+    <li>
+      Google user data is sent only from your device to the AI provider you
+      configure, and only to carry out the task you asked for.
+    </li>
+    <li>
+      Google user data is never used to develop, improve, or train
+      generalized AI or machine-learning models.
+    </li>
+    <li>
+      Google user data is never sold, used for advertising, or shared with
+      anyone other than your chosen AI provider as needed for your request.
+    </li>
+    <li>
+      No human at Kowork ever sees or reads your Google user data; we operate
+      no servers that receive it.
+    </li>
+  </ul>
 
   <h3>Update checks</h3>
   <p>
