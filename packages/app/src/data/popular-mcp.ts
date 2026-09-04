@@ -56,7 +56,8 @@ export const POPULAR_MCP: PopularMcp[] = [
     url: "https://workiq.svc.cloud.microsoft/mcp",
     oauth: {
       clientId: MICROSOFT_365_OAUTH_CLIENT_ID,
-      scope: "api://workiq.svc.cloud.microsoft/WorkIQAgent.Ask offline_access",
+      // WorkIQ's first-party app ID — the scope form the server advertises.
+      scope: "fdcc1f02-fc51-4226-8753-f668596af7f7/WorkIQAgent.Ask offline_access",
     },
   },
   {
