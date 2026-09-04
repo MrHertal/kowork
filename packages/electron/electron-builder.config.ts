@@ -167,7 +167,9 @@ const channel = (() => {
 })();
 
 // Unsigned builds must skip notarization, dmg signing, and signature checks.
-const canSignMac = Boolean(process.env.CSC_LINK);
+// CI signs from a pre-imported keychain (CSC_KEYCHAIN) since electron-builder's
+// CSC_LINK keychain import is broken on macOS 26 (electron-builder#10066).
+const canSignMac = Boolean(process.env.CSC_LINK || process.env.CSC_KEYCHAIN);
 const canNotarizeMac = Boolean(
   process.env.APPLE_API_KEY || process.env.APPLE_ID,
 );
