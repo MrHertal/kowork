@@ -65,6 +65,18 @@ https://login.microsoftonline.com/{tenant-id}/adminconsent?client_id=a74cabf5-5f
 
 After approval, select **Sign in** on the connector again to finish connecting.
 
+### Sending email or changing data doesn't work
+
+Work IQ tenants are read-only by default. Reading email, calendar events, and files works right away, but actions that change data — such as sending email or creating events — are blocked until an administrator enables them for the organization.
+
+To allow these actions, an administrator must:
+
+1. Open the [Microsoft 365 admin center](https://admin.microsoft.com) and select **Agents** > **Tools**.
+2. Select **Work IQ MCP** in the tools registry, then open the **Policy** tab.
+3. Enable mutation operations for the organization. See Microsoft's [Policy governance for Work IQ MCP](https://learn.microsoft.com/microsoft-365/copilot/extensibility/work-iq/mcp/policy-governance-mcp) guide for details.
+
+Policy changes can take up to 24 hours to apply across the organization.
+
 ### Use your own app registration
 
 :::caution
