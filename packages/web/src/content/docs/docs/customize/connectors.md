@@ -44,6 +44,52 @@ Turning a connector off keeps it in Kowork so you can enable it again later.
 
 To use it again, add it as a new connector.
 
+## Microsoft 365
+
+The Microsoft 365 connector uses Microsoft's Work IQ service to work with your email, calendar, and files across Microsoft 365.
+
+### Prerequisites
+
+- A **work or school account**. Personal Microsoft accounts are not supported.
+- Your organization must enable Work IQ and usage-based billing (Copilot Credits). An administrator can set this up by following Microsoft's [Enable your tenant for Work IQ](https://learn.microsoft.com/microsoft-365/copilot/extensibility/work-iq/enable-work-iq) guide.
+
+### "Need admin approval" during sign-in
+
+If sign-in stops with a **Need admin approval** message (error `AADSTS90094`), this is expected: an administrator of your organization must approve the Kowork app once before anyone in the organization can connect.
+
+Administrators can also approve Kowork for the whole organization in advance by opening this URL, replacing `{tenant-id}` with the organization's tenant ID:
+
+```text
+https://login.microsoftonline.com/{tenant-id}/adminconsent?client_id=a74cabf5-5fff-40c3-a9d0-4ab50916c65e
+```
+
+After approval, select **Sign in** on the connector again to finish connecting.
+
+### Sending email or changing data doesn't work
+
+Work IQ tenants are read-only by default. Reading email, calendar events, and files works right away, but actions that change data — such as sending email or creating events — are blocked until an administrator enables them for the organization.
+
+To allow these actions, an administrator must:
+
+1. Open the [Microsoft 365 admin center](https://admin.microsoft.com) and select **Agents** > **Tools**.
+2. Select **Work IQ MCP** in the tools registry, then open the **Policy** tab.
+3. Enable mutation operations for the organization. See Microsoft's [Policy governance for Work IQ MCP](https://learn.microsoft.com/microsoft-365/copilot/extensibility/work-iq/mcp/policy-governance-mcp) guide for details.
+
+Policy changes can take up to 24 hours to apply across the organization.
+
+### Use your own app registration
+
+:::caution
+Registering your own Microsoft Entra app is an advanced option for organizations that manage their own app registrations.
+:::
+
+Instead of the built-in Microsoft 365 connector, an organization can register its own single-tenant app in Microsoft Entra and connect through a custom connector:
+
+1. Open **Settings** > **Connectors**, find **Custom connector**, and select **Connect**.
+2. Choose **Remote**, enter a unique name and the URL `https://workiq.svc.cloud.microsoft/mcp`.
+3. Under **Authentication (OAuth)**, enter the app's **Client ID**, leave **Client secret** empty, and set **Scopes** to `api://workiq.svc.cloud.microsoft/WorkIQAgent.Ask offline_access`.
+4. Select **Submit** to save and connect.
+
 ## Custom connectors
 
 :::caution

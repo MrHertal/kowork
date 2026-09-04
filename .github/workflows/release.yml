@@ -135,7 +135,8 @@ jobs:
           fi
           xcodebuild -version
 
-      # Mirrors upstream; electron-builder imports CSC_LINK on its own too.
+      # electron-builder signs from this keychain via CSC_KEYCHAIN below; its own
+      # CSC_LINK keychain import is broken on macOS 26 (electron-builder#10066).
       - uses: apple-actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7
         if: runner.os == 'macOS'
         with:
@@ -200,8 +201,9 @@ jobs:
         run: pnpm exec electron-builder ${{ matrix.platform_flag }} --publish always --config electron-builder.config.ts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # Keychain prepared by import-codesign-certs above (mirrors upstream);
+          # inert on Windows where Azure Trusted Signing is used instead.
+          CSC_KEYCHAIN: build.keychain
           APPLE_API_KEY: ${{ runner.temp }}/apple-api-key.p8
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}

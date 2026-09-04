@@ -4,6 +4,7 @@ import atlassianLogo from "@/assets/icons/mcp/atlassian.svg";
 import canvaLogo from "@/assets/icons/mcp/canva.svg";
 import googleCalendarLogo from "@/assets/icons/mcp/google-calendar.svg";
 import linearLogo from "@/assets/icons/mcp/linear.svg";
+import microsoft365Logo from "@/assets/icons/mcp/microsoft-365.svg";
 import mondayLogo from "@/assets/icons/mcp/monday.svg";
 import notionLogo from "@/assets/icons/mcp/notion.svg";
 import { m } from "@/paraglide/messages";
@@ -22,6 +23,7 @@ const GOOGLE_CALENDAR_OAUTH_CLIENT_ID =
   "801121297074-89gb3k3te71oj640ee220ao77j5vr01t.apps.googleusercontent.com";
 const GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET =
   "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";
+const MICROSOFT_365_OAUTH_CLIENT_ID = "a74cabf5-5fff-40c3-a9d0-4ab50916c65e";
 
 export const POPULAR_MCP: PopularMcp[] = [
   {
@@ -45,6 +47,18 @@ export const POPULAR_MCP: PopularMcp[] = [
     logo: linearLogo,
     logoClassName: "dark:invert",
     url: "https://mcp.linear.app/mcp",
+  },
+  {
+    id: "microsoft-365",
+    name: "Microsoft 365",
+    description: m.settings_mcp_popular_microsoft_365_description,
+    logo: microsoft365Logo,
+    url: "https://workiq.svc.cloud.microsoft/mcp",
+    oauth: {
+      clientId: MICROSOFT_365_OAUTH_CLIENT_ID,
+      // WorkIQ's first-party app ID — the scope form the server advertises.
+      scope: "fdcc1f02-fc51-4226-8753-f668596af7f7/WorkIQAgent.Ask offline_access",
+    },
   },
   {
     id: "monday",
