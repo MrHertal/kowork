@@ -471,7 +471,9 @@ function activityStatus(
       return m.session_status_searching_web();
     default: {
       const parsed =
-        part?.type === "tool" ? parseMcpToolName(part.tool, mcpNames) : undefined;
+        part?.type === "tool"
+          ? parseMcpToolName(part.tool, mcpNames)
+          : undefined;
       if (parsed) {
         return m.session_activity_using_connector({
           connector: mcpServerTitle(parsed.server),
