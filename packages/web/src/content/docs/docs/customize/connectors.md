@@ -5,6 +5,8 @@ description: Connect Kowork to external services and manage connector access.
 
 A **connector** lets Kowork work with an external service, such as Notion, Linear, Atlassian, or monday.com. Behind the scenes, a connector connects Kowork to an **MCP server**. This page uses **connector** for the rest of the instructions.
 
+Popular built-in connectors include Airtable, Atlassian, Granola, Intercom, Linear, Microsoft 365, Miro, monday.com, Notion, and Todoist.
+
 ## Add a connector
 
 1. Select **Settings** in the sidebar.
@@ -43,6 +45,10 @@ Turning a connector off keeps it in Kowork so you can enable it again later.
 3. Select **Remove** beside it.
 
 To use it again, add it as a new connector.
+
+## Intercom
+
+The Intercom connector currently supports US-hosted workspaces (URLs starting with `app.intercom.com`). If your workspace is hosted in the EU (`app.eu.intercom.com`), add it as a [custom connector](#custom-connectors) with the URL `https://mcp.eu.intercom.com/mcp` instead.
 
 ## Microsoft 365
 

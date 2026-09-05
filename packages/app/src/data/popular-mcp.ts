@@ -1,13 +1,18 @@
 import type { McpOAuthConfig } from "@opencode-ai/sdk/v2/client";
 
+import airtableLogo from "@/assets/icons/mcp/airtable.svg";
 import atlassianLogo from "@/assets/icons/mcp/atlassian.svg";
 import canvaLogo from "@/assets/icons/mcp/canva.svg";
 import googleCalendarLogo from "@/assets/icons/mcp/google-calendar.svg";
+import granolaLogo from "@/assets/icons/mcp/granola.svg";
+import intercomLogo from "@/assets/icons/mcp/intercom.svg";
 import linearLogo from "@/assets/icons/mcp/linear.svg";
 import microsoft365Logo from "@/assets/icons/mcp/microsoft-365.svg";
+import miroLogo from "@/assets/icons/mcp/miro.svg";
 import mondayLogo from "@/assets/icons/mcp/monday.svg";
 import notionLogo from "@/assets/icons/mcp/notion.svg";
 import slackLogo from "@/assets/icons/mcp/slack.svg";
+import todoistLogo from "@/assets/icons/mcp/todoist.svg";
 import { m } from "@/paraglide/messages";
 
 export interface PopularMcp {
@@ -71,6 +76,43 @@ export const POPULAR_MCP: PopularMcp[] = [
     description: m.settings_mcp_popular_monday_description,
     logo: mondayLogo,
     url: "https://mcp.monday.com/mcp",
+  },
+  {
+    id: "airtable",
+    name: "Airtable",
+    description: m.settings_mcp_popular_airtable_description,
+    logo: airtableLogo,
+    url: "https://mcp.airtable.com/mcp",
+  },
+  {
+    id: "granola",
+    name: "Granola",
+    description: m.settings_mcp_popular_granola_description,
+    logo: granolaLogo,
+    logoClassName: "dark:invert",
+    url: "https://mcp.granola.ai/mcp",
+  },
+  {
+    id: "miro",
+    name: "Miro",
+    description: m.settings_mcp_popular_miro_description,
+    logo: miroLogo,
+    logoClassName: "dark:invert",
+    url: "https://mcp.miro.com/",
+  },
+  {
+    id: "todoist",
+    name: "Todoist",
+    description: m.settings_mcp_popular_todoist_description,
+    logo: todoistLogo,
+    url: "https://ai.todoist.net/mcp",
+  },
+  {
+    id: "intercom",
+    name: "Intercom",
+    description: m.settings_mcp_popular_intercom_description,
+    logo: intercomLogo,
+    url: "https://mcp.intercom.com/mcp",
   },
   // Google's Workspace MCP servers are in Developer Preview, whose terms
   // forbid shipping pre-GA features publicly — dev-only until GA.
