@@ -7,6 +7,7 @@ import linearLogo from "@/assets/icons/mcp/linear.svg";
 import microsoft365Logo from "@/assets/icons/mcp/microsoft-365.svg";
 import mondayLogo from "@/assets/icons/mcp/monday.svg";
 import notionLogo from "@/assets/icons/mcp/notion.svg";
+import slackLogo from "@/assets/icons/mcp/slack.svg";
 import { m } from "@/paraglide/messages";
 
 export interface PopularMcp {
@@ -24,6 +25,9 @@ const GOOGLE_CALENDAR_OAUTH_CLIENT_ID =
 const GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET =
   "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";
 const MICROSOFT_365_OAUTH_CLIENT_ID = "a74cabf5-5fff-40c3-a9d0-4ab50916c65e";
+const SLACK_OAUTH_CLIENT_ID = "11986845307171.11988684447669";
+const SLACK_OAUTH_SCOPE =
+  "search:read.public,search:read.private,search:read.im,search:read.mpim,search:read.files,search:read.users,channels:history,groups:history,im:history,mpim:history,channels:read,groups:read,im:read,mpim:read,files:read,emoji:read,users:read,users:read.email,chat:write,reactions:write";
 
 export const POPULAR_MCP: PopularMcp[] = [
   {
@@ -57,7 +61,8 @@ export const POPULAR_MCP: PopularMcp[] = [
     oauth: {
       clientId: MICROSOFT_365_OAUTH_CLIENT_ID,
       // WorkIQ's first-party app ID — the scope form the server advertises.
-      scope: "fdcc1f02-fc51-4226-8753-f668596af7f7/WorkIQAgent.Ask offline_access",
+      scope:
+        "fdcc1f02-fc51-4226-8753-f668596af7f7/WorkIQAgent.Ask offline_access",
     },
   },
   {
@@ -82,6 +87,24 @@ export const POPULAR_MCP: PopularMcp[] = [
             clientSecret: GOOGLE_CALENDAR_OAUTH_CLIENT_SECRET,
             scope:
               "https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.events.freebusy https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.events",
+          },
+        },
+      ]
+    : []),
+  // Slack requires a Marketplace-published OAuth app with an HTTPS redirect
+  // URI — dev-only until the Kowork Slack app passes Marketplace review.
+  ...(import.meta.env.DEV
+    ? [
+        {
+          id: "slack",
+          name: "Slack",
+          description: m.settings_mcp_popular_slack_description,
+          logo: slackLogo,
+          url: "https://mcp.slack.com/mcp",
+          oauth: {
+            clientId: SLACK_OAUTH_CLIENT_ID,
+            scope: SLACK_OAUTH_SCOPE,
+            redirectUri: "https://api.kowork.dev/mcp/oauth/callback",
           },
         },
       ]
