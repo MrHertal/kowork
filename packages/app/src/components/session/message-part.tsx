@@ -444,10 +444,14 @@ function isActivityGroup(
 function activityStatus(
   group: PartGroup,
   partsIndex: Map<string, Map<string, Part>>,
+  mcpNames: readonly string[],
 ): string {
+  const part =
+    group.type === "part"
+      ? partsIndex.get(group.ref.messageID)?.get(group.ref.partID)
+      : undefined;
   const category = (() => {
     if (group.type === "context") return "context";
-    const part = partsIndex.get(group.ref.messageID)?.get(group.ref.partID);
     if (!part) return undefined;
     return classifyActivityPart(part);
   })();
@@ -465,8 +469,16 @@ function activityStatus(
       return m.session_activity_loading_skill();
     case "websearch":
       return m.session_status_searching_web();
-    default:
+    default: {
+      const parsed =
+        part?.type === "tool" ? parseMcpToolName(part.tool, mcpNames) : undefined;
+      if (parsed) {
+        return m.session_activity_using_connector({
+          connector: mcpServerTitle(parsed.server),
+        });
+      }
       return m.session_activity_working();
+    }
   }
 }
 
@@ -556,6 +568,12 @@ function GroupedPartsRenderer({
   shellToolDefaultOpen?: boolean;
   editToolDefaultOpen?: boolean;
 }) {
+  const { directory } = useSDK();
+  const mcpNames = useChildData(
+    directory,
+    (s) => Object.keys(s.mcp),
+    shallowArrayEqual,
+  );
   const lastKey = grouped[grouped.length - 1]?.key;
 
   const renderGroup = (group: PartGroup) => {
@@ -616,7 +634,7 @@ function GroupedPartsRenderer({
         <Activity
           key={`activity:${activity[0]!.key}`}
           running={busy && last.key === lastKey}
-          status={activityStatus(last, partsIndex)}
+          status={activityStatus(last, partsIndex, mcpNames)}
           summary={activitySummary(activity, partsIndex)}
         >
           {rendered}
