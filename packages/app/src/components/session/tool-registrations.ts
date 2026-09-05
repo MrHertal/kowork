@@ -11,6 +11,7 @@ import { SkillTool } from "./tools/skill-tool";
 import { TaskTool } from "./tools/task-tool";
 import { TodoWriteTool } from "./tools/todowrite-tool";
 import { WebFetchTool } from "./tools/webfetch-tool";
+import { WebSearchTool } from "./tools/websearch-tool";
 import { WriteTool } from "./tools/write-tool";
 
 ToolRegistry.register({ name: "read", render: ReadTool });
@@ -18,6 +19,7 @@ ToolRegistry.register({ name: "list", render: ListTool });
 ToolRegistry.register({ name: "glob", render: GlobTool });
 ToolRegistry.register({ name: "grep", render: GrepTool });
 ToolRegistry.register({ name: "webfetch", render: WebFetchTool });
+ToolRegistry.register({ name: "websearch", render: WebSearchTool });
 ToolRegistry.register({ name: "bash", render: BashTool });
 ToolRegistry.register({ name: "edit", render: EditTool });
 ToolRegistry.register({ name: "write", render: WriteTool });

@@ -206,6 +206,7 @@
   "session_activity_summary_other_other": "{count} actions effectuées",
   "session_activity_summary_skill_one": "{count} compétence chargée",
   "session_activity_summary_skill_other": "{count} compétences chargées",
+  "session_activity_using_connector": "Utilisation de {connector}...",
   "session_activity_working": "Traitement en cours...",
   "session_composer_directory_choose_different": "Choisir un autre dossier",
   "session_composer_directory_detach": "Détacher le dossier",

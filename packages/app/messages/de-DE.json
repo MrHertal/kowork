@@ -206,6 +206,7 @@
   "session_activity_summary_other_other": "{count} Aktionen ausgeführt",
   "session_activity_summary_skill_one": "{count} Skill geladen",
   "session_activity_summary_skill_other": "{count} Skills geladen",
+  "session_activity_using_connector": "{connector} wird verwendet...",
   "session_activity_working": "Kowork arbeitet...",
   "session_composer_directory_choose_different": "Anderen Ordner auswählen",
   "session_composer_directory_detach": "Ordner nicht mehr verwenden",

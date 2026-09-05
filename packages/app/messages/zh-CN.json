@@ -206,6 +206,7 @@
   "session_activity_summary_other_other": "已完成 {count} 项操作",
   "session_activity_summary_skill_one": "已加载 {count} 个技能",
   "session_activity_summary_skill_other": "已加载 {count} 个技能",
+  "session_activity_using_connector": "正在使用 {connector}...",
   "session_activity_working": "正在处理...",
   "session_composer_directory_choose_different": "选择其他文件夹",
   "session_composer_directory_detach": "取消关联文件夹",
