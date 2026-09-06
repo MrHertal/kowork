@@ -1,4 +1,4 @@
-import { CheckIcon, SettingsIcon } from "lucide-react";
+import { CheckIcon, PlusIcon, SettingsIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 import {
@@ -64,6 +64,12 @@ export function ModelPicker({ model }: { model: ModelState }) {
     dialog.show(() => <DialogSettings initialSection="models" />);
   }, [dialog]);
 
+  const handleConnectProvider = useCallback(() => {
+    document.body.setAttribute("data-swapping", "");
+    setOpen(false);
+    dialog.show(() => <DialogSettings initialSection="providers" />);
+  }, [dialog]);
+
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
@@ -123,16 +129,26 @@ export function ModelPicker({ model }: { model: ModelState }) {
           ))}
         </ModelSelectorList>
         <ModelSelectorSeparator />
-        <div className="flex p-1">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 p-1">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="self-start"
+            className="whitespace-nowrap"
             onClick={handleManage}
           >
             <SettingsIcon data-icon="inline-start" aria-hidden="true" />
             {m.session_model_manage_link()}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="whitespace-nowrap"
+            onClick={handleConnectProvider}
+          >
+            <PlusIcon data-icon="inline-start" aria-hidden="true" />
+            {m.session_model_connect_provider()}
           </Button>
         </div>
       </ModelSelectorContent>
