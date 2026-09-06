@@ -319,6 +319,7 @@
   "session_tool_todos": "काम की सूची",
   "session_tool_webfetch": "वेब पेज पढ़ें",
   "session_tool_websearch": "वेब पर खोजें",
+  "session_tool_websearch_via": "वेब पर खोजें ({provider})",
   "session_tool_write": "लिखें",
 
   "settings_appearance_displaySize_description": "चुनें कि Kowork में सब कुछ कितना बड़ा दिखे",
@@ -336,6 +337,10 @@
   "settings_general_theme_system": "सिस्टम",
   "settings_general_theme_title": "रंग योजना",
   "settings_general_title": "सामान्य",
+  "settings_general_websearch_description_link": "Exa की गोपनीयता नीति",
+  "settings_general_websearch_description_prefix": "Kowork को प्रश्नों के उत्तर देने के लिए वेब पर खोजने दें। खोज क्वेरी Exa को भेजी जाती हैं — देखें ",
+  "settings_general_websearch_description_suffix": "।",
+  "settings_general_websearch_title": "वेब खोज",
   "settings_mcp_auth_failed_description": "साइन इन नहीं हो सका। फिर कोशिश करें।",
   "settings_mcp_auth_failed_title": "साइन इन नहीं हो सका",
   "settings_mcp_authenticate": "साइन इन करें",

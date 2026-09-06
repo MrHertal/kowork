@@ -319,6 +319,7 @@
   "session_tool_todos": "To-dos",
   "session_tool_webfetch": "Read web page",
   "session_tool_websearch": "Search the web",
+  "session_tool_websearch_via": "Search the web ({provider})",
   "session_tool_write": "Write",
 
   "settings_appearance_displaySize_description": "Choose how large everything in Kowork appears",
@@ -336,6 +337,10 @@
   "settings_general_theme_system": "System",
   "settings_general_theme_title": "Color scheme",
   "settings_general_title": "General",
+  "settings_general_websearch_description_link": "Exa's privacy policy",
+  "settings_general_websearch_description_prefix": "Let Kowork search the web to answer questions. Search queries are sent to Exa — see ",
+  "settings_general_websearch_description_suffix": ".",
+  "settings_general_websearch_title": "Web search",
   "settings_mcp_auth_failed_description": "We couldn't sign you in. Please try again.",
   "settings_mcp_auth_failed_title": "Couldn't sign in",
   "settings_mcp_authenticate": "Sign in",

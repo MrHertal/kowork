@@ -319,6 +319,7 @@
   "session_tool_todos": "Aufgabenliste",
   "session_tool_webfetch": "Webseite lesen",
   "session_tool_websearch": "Im Web suchen",
+  "session_tool_websearch_via": "Im Web suchen ({provider})",
   "session_tool_write": "Schreiben",
 
   "settings_appearance_displaySize_description": "Wählen Sie, wie groß Kowork insgesamt erscheinen soll",
@@ -336,6 +337,10 @@
   "settings_general_theme_system": "System",
   "settings_general_theme_title": "Farbschema",
   "settings_general_title": "Allgemein",
+  "settings_general_websearch_description_link": "Exas Datenschutzerklärung",
+  "settings_general_websearch_description_prefix": "Kowork das Web durchsuchen lassen, um Fragen zu beantworten. Suchanfragen werden an Exa gesendet — siehe ",
+  "settings_general_websearch_description_suffix": ".",
+  "settings_general_websearch_title": "Websuche",
   "settings_mcp_auth_failed_description": "Wir konnten Sie nicht anmelden. Bitte versuchen Sie es erneut.",
   "settings_mcp_auth_failed_title": "Anmeldung fehlgeschlagen",
   "settings_mcp_authenticate": "Anmelden",

@@ -78,6 +78,7 @@ export function preferAppEnv() {
     OPENCODE_EXPERIMENTAL_ICON_DISCOVERY: "true",
     OPENCODE_DISABLE_EXTERNAL_SKILLS: "true",
     OPENCODE_DISABLE_PROJECT_CONFIG: "true",
+    OPENCODE_ENABLE_EXA: "true",
     OPENCODE_CLIENT: "desktop",
   });
 }

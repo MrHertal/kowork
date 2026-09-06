@@ -1,6 +1,6 @@
 ---
 title: Settings
-description: Change Kowork's language, appearance, notifications, sounds, and update checks.
+description: Change Kowork's language, appearance, web search, notifications, sounds, and update checks.
 ---
 
 Select **Settings** in the sidebar to customize Kowork. On smaller windows, use the menu at the top of the Settings dialog to move between sections.
@@ -12,6 +12,7 @@ Open **Settings** > **General** to change these options:
 - **Language** changes the text displayed in Kowork. Available languages are English, French, German, Hindi, Portuguese (Brazil), Simplified Chinese, Spanish (Latin America), and Spanish (Spain).
 - **Color scheme** can follow your system setting or always use **Light** or **Dark**.
 - **Display size** changes how large everything in Kowork appears. Choose **Small**, **Normal**, or **Large**.
+- **Web search** lets Kowork search the web for current information. Search queries are sent to Exa — see [Exa's privacy policy](https://exa.ai/privacy-policy).
 - **Check for updates** controls whether Kowork checks for new versions and shows an update notice when one is available.
 
 Changes take effect when you select them.

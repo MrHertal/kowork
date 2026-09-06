@@ -319,6 +319,7 @@
   "session_tool_todos": "Tarefas pendentes",
   "session_tool_webfetch": "Ler página da web",
   "session_tool_websearch": "Pesquisar na web",
+  "session_tool_websearch_via": "Pesquisar na web ({provider})",
   "session_tool_write": "Escrever",
 
   "settings_appearance_displaySize_description": "Escolha o tamanho dos elementos exibidos no Kowork",
@@ -336,6 +337,10 @@
   "settings_general_theme_system": "Sistema",
   "settings_general_theme_title": "Esquema de cores",
   "settings_general_title": "Geral",
+  "settings_general_websearch_description_link": "a política de privacidade da Exa",
+  "settings_general_websearch_description_prefix": "Permitir que o Kowork pesquise na web para responder a perguntas. As consultas de pesquisa são enviadas para a Exa — consulte ",
+  "settings_general_websearch_description_suffix": ".",
+  "settings_general_websearch_title": "Pesquisa na web",
   "settings_mcp_auth_failed_description": "Não foi possível entrar. Tente novamente.",
   "settings_mcp_auth_failed_title": "Não foi possível entrar",
   "settings_mcp_authenticate": "Entrar",

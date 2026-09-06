@@ -52,7 +52,9 @@ export function SettingsRow({
       <div className={cn("flex flex-col gap-2", !vertical && "min-w-0 flex-1")}>
         <span className="text-sm font-medium">{title}</span>
         {description && (
-          <span className="text-xs text-muted-foreground">{description}</span>
+          <span className="max-w-md text-xs text-muted-foreground">
+            {description}
+          </span>
         )}
       </div>
       {children}

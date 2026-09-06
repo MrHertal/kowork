@@ -6,7 +6,7 @@ import LegalLayout from "../layouts/LegalLayout.astro";
   title="Privacy Policy — Kowork"
   description="How Kowork handles your data. The short version: Kowork is local-first and collects nothing."
   heading="Privacy Policy"
-  lastUpdated="September 3, 2026"
+  lastUpdated="September 6, 2026"
 >
   <p>
     Kowork is an open-source desktop application that lets you hand real work to
@@ -16,8 +16,9 @@ import LegalLayout from "../layouts/LegalLayout.astro";
   </p>
   <p>
     <strong>The short version: Kowork collects nothing.</strong> No account, no analytics,
-    no telemetry, no cookies. Your files and conversations stay on your device, and
-    the app talks only to the services you choose, directly from your device.
+    no telemetry, no cookies. Your files and conversations stay on your device. The
+    app talks only to the AI providers you choose, directly from your device. If web
+    search is enabled, search queries also go to Exa.
   </p>
 
   <h2>The Kowork app</h2>
@@ -94,7 +95,10 @@ import LegalLayout from "../layouts/LegalLayout.astro";
     </li>
     <li>
       Google user data is never sold, used for advertising, or shared with
-      anyone other than your chosen AI provider as needed for your request.
+      anyone other than your chosen AI provider as needed for your request. One
+      exception: when web search is enabled, the queries the agent writes may
+      draw on the task's context — including data from Google services you
+      connected — and those queries go to Exa.
     </li>
     <li>
       No human at Kowork ever sees or reads your Google user data; we operate no
@@ -112,6 +116,16 @@ import LegalLayout from "../layouts/LegalLayout.astro";
       href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"
       >GitHub Privacy Statement</a
     >.
+  </p>
+
+  <h3>Web search</h3>
+  <p>
+    When an agent needs current information, Kowork can search the web. The
+    agent writes the search queries itself, based on your request. Queries are
+    sent from your device directly to Exa, without an account or API key, under
+    the{" "}
+    <a href="https://exa.ai/privacy-policy">Exa Privacy Policy</a>. Web search
+    is enabled by default; you can turn it off in Settings → General.
   </p>
 
   <h2>The website</h2>

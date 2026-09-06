@@ -319,6 +319,7 @@
   "session_tool_todos": "待办事项",
   "session_tool_webfetch": "读取网页",
   "session_tool_websearch": "搜索网页",
+  "session_tool_websearch_via": "搜索网页 ({provider})",
   "session_tool_write": "写入",
 
   "settings_appearance_displaySize_description": "选择 Kowork 的界面显示大小",
@@ -336,6 +337,10 @@
   "settings_general_theme_system": "跟随系统",
   "settings_general_theme_title": "颜色主题",
   "settings_general_title": "通用",
+  "settings_general_websearch_description_link": "Exa 的隐私政策",
+  "settings_general_websearch_description_prefix": "允许 Kowork 搜索网页以回答问题。搜索查询会发送至 Exa — 请参阅",
+  "settings_general_websearch_description_suffix": "。",
+  "settings_general_websearch_title": "网页搜索",
   "settings_mcp_auth_failed_description": "无法登录，请重试。",
   "settings_mcp_auth_failed_title": "无法登录",
   "settings_mcp_authenticate": "登录",
