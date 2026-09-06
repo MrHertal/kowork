@@ -78,6 +78,7 @@ export function SettingsProviders() {
   );
 
   const connected = providers.paid;
+  const free = providers.free;
 
   const popular = useMemo(() => {
     const connectedIDs = new Set(connected.map((p) => p.id));
@@ -184,9 +185,9 @@ export function SettingsProviders() {
     <div className="flex flex-col gap-6">
       <SettingsSection
         title={m.settings_providers_section_connected()}
-        bordered={connected.length > 0}
+        bordered={connected.length > 0 || free.length > 0}
       >
-        {connected.length === 0 ? (
+        {connected.length === 0 && free.length === 0 ? (
           <p className="py-4 text-center text-xs text-muted-foreground">
             {m.settings_providers_connected_empty()}
           </p>
@@ -236,6 +237,24 @@ export function SettingsProviders() {
                 />
               );
             })}
+            {free.map((item) => (
+              <SettingsListItem
+                key={item.id}
+                icon={
+                  <ModelSelectorLogo
+                    provider={item.id}
+                    className="size-5 shrink-0"
+                  />
+                }
+                title={item.name}
+                badge={
+                  <Badge variant="secondary">
+                    {m.settings_providers_tag_free()}
+                  </Badge>
+                }
+                description={m.settings_providers_connected_freeDescription()}
+              />
+            ))}
           </>
         )}
       </SettingsSection>
