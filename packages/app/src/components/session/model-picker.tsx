@@ -15,29 +15,36 @@ import {
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector";
 import { PromptInputButton } from "@/components/ai-elements/prompt-input";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDialog } from "@/contexts/dialog";
 import type { useLocal } from "@/contexts/local";
 import { DialogSettings } from "@/components/settings/dialog-settings";
+import { isFreeTierProvider } from "@/hooks/use-providers";
 import { m } from "@/paraglide/messages";
 
 type ModelState = ReturnType<typeof useLocal>["model"];
 type ListModel = NonNullable<ModelState["current"]>;
+
+type ProviderGroup = {
+  provider: ListModel["provider"];
+  items: ListModel[];
+};
 
 export function ModelPicker({ model }: { model: ModelState }) {
   const dialog = useDialog();
   const [open, setOpen] = useState(false);
 
   const grouped = useMemo(() => {
-    const groups: Record<string, ListModel[]> = {};
+    const groups: Record<string, ProviderGroup> = {};
     for (const item of model.list) {
       if (!model.visible({ modelID: item.id, providerID: item.provider.id }))
         continue;
-      const provider = item.provider.name ?? item.provider.id;
-      if (!groups[provider]) groups[provider] = [];
-      groups[provider].push(item);
+      const id = item.provider.id;
+      if (!groups[id]) groups[id] = { provider: item.provider, items: [] };
+      groups[id].items.push(item);
     }
-    return groups;
+    return Object.values(groups);
   }, [model]);
 
   const handleSelect = useCallback(
@@ -82,9 +89,26 @@ export function ModelPicker({ model }: { model: ModelState }) {
         />
         <ModelSelectorList>
           <ModelSelectorEmpty>{m.session_model_empty()}</ModelSelectorEmpty>
-          {Object.entries(grouped).map(([provider, items]) => (
-            <ModelSelectorGroup heading={provider} key={provider}>
-              {items.map((item) => (
+          {grouped.map((group) => (
+            <ModelSelectorGroup
+              heading={
+                isFreeTierProvider(group.provider) ? (
+                  <span className="inline-flex items-center gap-1.5 align-middle">
+                    {m.settings_providers_free_title()}
+                    <Badge
+                      variant="secondary"
+                      className="h-4 px-1.5 text-[10px] leading-none"
+                    >
+                      {m.settings_providers_tag_free()}
+                    </Badge>
+                  </span>
+                ) : (
+                  (group.provider.name ?? group.provider.id)
+                )
+              }
+              key={group.provider.id}
+            >
+              {group.items.map((item) => (
                 <PickerItem
                   key={`${item.provider.id}:${item.id}`}
                   item={item}
