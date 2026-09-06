@@ -2,6 +2,7 @@
 import { SearchIcon, XIcon } from "lucide-react";
 
 import { ModelSelectorLogo } from "@/components/ai-elements/model-selector";
+import { Badge } from "@/components/ui/badge";
 import {
   InputGroup,
   InputGroupAddon,
@@ -11,7 +12,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useModels } from "@/contexts/models";
 import { type FilteredGroup, useFilteredList } from "@/hooks/use-filtered-list";
-import { popularProviders } from "@/hooks/use-providers";
+import { isFreeTierProvider, popularProviders } from "@/hooks/use-providers";
 import { m } from "@/paraglide/messages";
 
 type ModelItem = ReturnType<typeof useModels>["list"][number];
@@ -97,7 +98,16 @@ export function SettingsModels() {
                     provider={provider.id}
                     className="size-5 shrink-0"
                   />
-                  <span className="text-sm font-medium">{provider.name}</span>
+                  <span className="text-sm font-medium">
+                    {isFreeTierProvider(provider)
+                      ? m.settings_providers_free_title()
+                      : provider.name}
+                  </span>
+                  {isFreeTierProvider(provider) && (
+                    <Badge variant="secondary">
+                      {m.settings_providers_tag_free()}
+                    </Badge>
+                  )}
                 </div>
                 <div className="divide-y divide-border rounded-lg border">
                   {group.items.map((item) => {
