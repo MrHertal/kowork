@@ -7,12 +7,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import {
+  useGlobalData,
+  useGlobalSync,
+} from "@/contexts/global-sync";
 import { usePlatform } from "@/contexts/platform";
 import { useSettings } from "@/contexts/settings";
 import { m } from "@/paraglide/messages";
 import { locales } from "@/paraglide/runtime";
 
 import { SettingsRow, SettingsSection } from "./settings-row";
+import { webSearchEnabled, webSearchPermission } from "./websearch-permission";
 
 const DISPLAY_SIZES = [
   { value: 14, label: () => m.settings_appearance_displaySize_small() },
@@ -43,6 +48,14 @@ const sortedLocales = [...locales].sort((a, b) => {
 export function SettingsGeneral() {
   const platform = usePlatform();
   const settings = useSettings();
+  const globalSync = useGlobalSync();
+  const webSearchOn = useGlobalData((s) => webSearchEnabled(s.config.permission));
+
+  const handleWebSearchChange = (enabled: boolean) => {
+    void globalSync
+      .updateConfig({ permission: webSearchPermission(enabled) })
+      .catch(() => undefined);
+  };
 
   const currentSize = DISPLAY_SIZES.find(
     (s) => s.value === settings.appearance.fontSize,
@@ -122,6 +135,31 @@ export function SettingsGeneral() {
               ))}
             </SelectContent>
           </Select>
+        </SettingsRow>
+
+        <SettingsRow
+          title={m.settings_general_websearch_title()}
+          description={
+            <>
+              {m.settings_general_websearch_description_prefix()}
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  platform.openLink("https://exa.ai/privacy-policy");
+                }}
+                className="underline underline-offset-3 hover:text-foreground"
+              >
+                {m.settings_general_websearch_description_link()}
+              </a>
+              {m.settings_general_websearch_description_suffix()}
+            </>
+          }
+        >
+          <Switch
+            checked={webSearchOn}
+            onCheckedChange={handleWebSearchChange}
+          />
         </SettingsRow>
 
         <SettingsRow
