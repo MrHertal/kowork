@@ -554,6 +554,7 @@ describe("preferAppEnv", () => {
     "OPENCODE_EXPERIMENTAL_ICON_DISCOVERY",
     "OPENCODE_DISABLE_EXTERNAL_SKILLS",
     "OPENCODE_DISABLE_PROJECT_CONFIG",
+    "OPENCODE_ENABLE_EXA",
     "OPENCODE_CLIENT",
     "CUSTOM",
   ];
@@ -580,6 +581,7 @@ describe("preferAppEnv", () => {
     expect(process.env.OPENCODE_CLIENT).toBe("desktop");
     expect(process.env.OPENCODE_DISABLE_EXTERNAL_SKILLS).toBe("true");
     expect(process.env.OPENCODE_DISABLE_PROJECT_CONFIG).toBe("true");
+    expect(process.env.OPENCODE_ENABLE_EXA).toBe("true");
     expect(process.env.OPENCODE_EXPERIMENTAL_ICON_DISCOVERY).toBe("true");
   });
 });
