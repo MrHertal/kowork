@@ -9,7 +9,11 @@ import type {
 } from "@opencode-ai/sdk/v2/client";
 
 const doubles = vi.hoisted(() => {
-  const providers: ProviderListResponse = { all: [], connected: [], default: {} };
+  const providers: ProviderListResponse = {
+    all: [],
+    connected: [],
+    default: {},
+  };
   return { providers };
 });
 
@@ -32,10 +36,7 @@ function model(id: string, cost?: { input: number }): Model {
   return { id, cost } as Model;
 }
 
-function provider(
-  id: string,
-  models: Record<string, Model>,
-): Provider {
+function provider(id: string, models: Record<string, Model>): Provider {
   return { id, name: id, models } as Provider;
 }
 
