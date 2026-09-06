@@ -243,6 +243,7 @@
   "session_duration_seconds": "{count}s",
   "session_error_create_failed": "Não foi possível criar a tarefa",
   "session_error_generic_title": "Algo deu errado",
+  "session_model_connect_provider": "Conectar um provedor",
   "session_model_dialog_title": "Selecionar um modelo",
   "session_model_empty": "Nenhum modelo encontrado",
   "session_model_manage_link": "Gerenciar modelos",

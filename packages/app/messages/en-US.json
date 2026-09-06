@@ -243,6 +243,7 @@
   "session_duration_seconds": "{count}s",
   "session_error_create_failed": "Failed to create task",
   "session_error_generic_title": "Something went wrong",
+  "session_model_connect_provider": "Connect a provider",
   "session_model_dialog_title": "Select a model",
   "session_model_empty": "No models found",
   "session_model_manage_link": "Manage models",

@@ -243,6 +243,7 @@
   "session_duration_seconds": "{count}s",
   "session_error_create_failed": "Aufgabe konnte nicht erstellt werden",
   "session_error_generic_title": "Ein Fehler ist aufgetreten",
+  "session_model_connect_provider": "Anbieter verbinden",
   "session_model_dialog_title": "Modell auswählen",
   "session_model_empty": "Keine Modelle gefunden",
   "session_model_manage_link": "Modelle verwalten",
