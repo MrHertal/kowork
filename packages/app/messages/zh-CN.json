@@ -454,7 +454,7 @@
   "settings_permissions_tool_websearch_description": "搜索网页",
   "settings_providers_connected_empty": "尚未添加服务商",
   "settings_providers_connected_environmentDescription": "已通过环境变量配置",
-  "settings_providers_connected_freeDescription": "Kowork 内置的免费模型与网页搜索",
+  "settings_providers_connected_freeDescription": "免费模型，开箱即用——无需设置",
   "settings_providers_custom_connect": "连接",
   "settings_providers_custom_description": "使用基础 URL 添加兼容 OpenAI 的服务商。",
   "settings_providers_custom_label": "自定义服务商",
