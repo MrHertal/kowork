@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { renderHook } from "@testing-library/react";
-import type { ReactNode } from "react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type {
   Model,
@@ -20,8 +19,6 @@ const doubles = vi.hoisted(() => {
 vi.mock("@/contexts/global-sync", async () => {
   const { Store } = await import("@tanstack/react-store");
   return {
-    shallowArrayEqual: <T,>(a: T[], b: T[]) =>
-      a.length === b.length && a.every((item, i) => item === b[i]),
     useGlobalSync: () => ({
       _globalStore: new Store({}),
       _child: () => undefined,
@@ -40,10 +37,6 @@ function provider(id: string, models: Record<string, Model>): Provider {
   return { id, name: id, models } as Provider;
 }
 
-function wrapper() {
-  return ({ children }: { children: ReactNode }) => <>{children}</>;
-}
-
 describe("useProviders", () => {
   beforeEach(() => {
     doubles.providers = { all: [], connected: [], default: {} };
@@ -59,13 +52,25 @@ describe("useProviders", () => {
       default: {},
     };
 
-    const { result } = renderHook(() => useProviders(), {
-      wrapper: wrapper(),
-    });
+    const { result } = renderHook(() => useProviders());
 
     expect(result.current.free.map((p) => p.id)).toEqual(["opencode"]);
     expect(result.current.paid).toEqual([]);
     expect(result.current.connected.map((p) => p.id)).toEqual(["opencode"]);
+  });
+
+  test("never classifies opencode without models as free tier", () => {
+    const opencode = provider("opencode", {});
+    doubles.providers = {
+      all: [opencode],
+      connected: ["opencode"],
+      default: {},
+    };
+
+    const { result } = renderHook(() => useProviders());
+
+    expect(result.current.free).toEqual([]);
+    expect(result.current.paid.map((p) => p.id)).toEqual(["opencode"]);
   });
 
   test("classifies opencode with paid models as paid", () => {
@@ -79,9 +84,7 @@ describe("useProviders", () => {
       default: {},
     };
 
-    const { result } = renderHook(() => useProviders(), {
-      wrapper: wrapper(),
-    });
+    const { result } = renderHook(() => useProviders());
 
     expect(result.current.paid.map((p) => p.id)).toEqual(["opencode"]);
     expect(result.current.free).toEqual([]);
@@ -97,9 +100,7 @@ describe("useProviders", () => {
       default: {},
     };
 
-    const { result } = renderHook(() => useProviders(), {
-      wrapper: wrapper(),
-    });
+    const { result } = renderHook(() => useProviders());
 
     expect(result.current.paid.map((p) => p.id)).toEqual(["anthropic"]);
     expect(result.current.free).toEqual([]);
@@ -111,9 +112,7 @@ describe("useProviders", () => {
     });
     doubles.providers = { all: [opencode], connected: [], default: {} };
 
-    const { result } = renderHook(() => useProviders(), {
-      wrapper: wrapper(),
-    });
+    const { result } = renderHook(() => useProviders());
 
     expect(result.current.free).toEqual([]);
     expect(result.current.paid).toEqual([]);

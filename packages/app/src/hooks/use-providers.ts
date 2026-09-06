@@ -70,6 +70,7 @@ export function useProviders(directory?: string) {
     // free models — that implicit connection is the built-in free tier.
     const freeTier = (p: Provider) =>
       p.id === "opencode" &&
+      Object.keys(p.models).length > 0 &&
       !Object.values(p.models).some((m) => m.cost?.input);
 
     return {

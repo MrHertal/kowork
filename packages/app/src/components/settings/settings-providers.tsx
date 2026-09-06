@@ -77,11 +77,11 @@ export function SettingsProviders() {
     [config],
   );
 
-  const connected = providers.paid;
+  const paid = providers.paid;
   const free = providers.free;
 
   const popular = useMemo(() => {
-    const connectedIDs = new Set(connected.map((p) => p.id));
+    const connectedIDs = new Set(paid.map((p) => p.id));
     return providers.popular
       .filter((p) => !connectedIDs.has(p.id))
       .slice()
@@ -89,7 +89,7 @@ export function SettingsProviders() {
         (a, b) =>
           popularProviders.indexOf(a.id) - popularProviders.indexOf(b.id),
       );
-  }, [providers, connected]);
+  }, [providers, paid]);
 
   const disableProvider = useCallback(
     async (providerID: string, name: string) => {
@@ -158,7 +158,7 @@ export function SettingsProviders() {
 
   // Clear the spinner once the row leaves the list (env rows stay; their source flips).
   if (disconnecting) {
-    const item = connected.find((p) => p.id === disconnecting);
+    const item = paid.find((p) => p.id === disconnecting);
     if (!item || getSource(item) === "env") {
       setDisconnecting(null);
     }
@@ -185,15 +185,15 @@ export function SettingsProviders() {
     <div className="flex flex-col gap-6">
       <SettingsSection
         title={m.settings_providers_section_connected()}
-        bordered={connected.length > 0 || free.length > 0}
+        bordered={paid.length > 0 || free.length > 0}
       >
-        {connected.length === 0 && free.length === 0 ? (
+        {paid.length === 0 && free.length === 0 ? (
           <p className="py-4 text-center text-xs text-muted-foreground">
             {m.settings_providers_connected_empty()}
           </p>
         ) : (
           <>
-            {connected.map((item) => {
+            {paid.map((item) => {
               const source = getSource(item);
               const canDisconnect = source !== "env";
               const label = sourceLabel(
