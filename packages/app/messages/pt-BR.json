@@ -319,6 +319,7 @@
   "session_tool_todos": "Tarefas pendentes",
   "session_tool_webfetch": "Ler página da web",
   "session_tool_websearch": "Pesquisar na web",
+  "session_tool_websearch_via": "Pesquisar na web ({provider})",
   "session_tool_write": "Escrever",
 
   "settings_appearance_displaySize_description": "Escolha o tamanho dos elementos exibidos no Kowork",

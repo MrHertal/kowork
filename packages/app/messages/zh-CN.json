@@ -319,6 +319,7 @@
   "session_tool_todos": "待办事项",
   "session_tool_webfetch": "读取网页",
   "session_tool_websearch": "搜索网页",
+  "session_tool_websearch_via": "搜索网页 ({provider})",
   "session_tool_write": "写入",
 
   "settings_appearance_displaySize_description": "选择 Kowork 的界面显示大小",

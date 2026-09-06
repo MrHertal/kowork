@@ -4,16 +4,27 @@ import { m } from "@/paraglide/messages";
 
 import { BasicTool, type ToolProps } from "./basic-tool";
 
+export function webSearchBackendLabel(provider: unknown) {
+  if (provider === "exa") return "Exa";
+  if (provider === "parallel") return "Parallel";
+  return undefined;
+}
+
 export function WebSearchTool(props: ToolProps) {
   const query =
     typeof props.input.query === "string" && props.input.query
       ? props.input.query
       : undefined;
+  const backend = webSearchBackendLabel(props.metadata.provider);
 
   return (
     <BasicTool
       icon={<GlobeIcon />}
-      title={m.session_tool_websearch()}
+      title={
+        backend
+          ? m.session_tool_websearch_via({ provider: backend })
+          : m.session_tool_websearch()
+      }
       subtitle={query}
       status={props.status}
       hideDetails={props.hideDetails}

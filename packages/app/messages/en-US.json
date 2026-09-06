@@ -319,6 +319,7 @@
   "session_tool_todos": "To-dos",
   "session_tool_webfetch": "Read web page",
   "session_tool_websearch": "Search the web",
+  "session_tool_websearch_via": "Search the web ({provider})",
   "session_tool_write": "Write",
 
   "settings_appearance_displaySize_description": "Choose how large everything in Kowork appears",

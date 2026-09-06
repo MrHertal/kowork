@@ -319,6 +319,7 @@
   "session_tool_todos": "Aufgabenliste",
   "session_tool_webfetch": "Webseite lesen",
   "session_tool_websearch": "Im Web suchen",
+  "session_tool_websearch_via": "Im Web suchen ({provider})",
   "session_tool_write": "Schreiben",
 
   "settings_appearance_displaySize_description": "Wählen Sie, wie groß Kowork insgesamt erscheinen soll",

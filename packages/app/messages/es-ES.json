@@ -319,6 +319,7 @@
   "session_tool_todos": "Pendientes",
   "session_tool_webfetch": "Leer página web",
   "session_tool_websearch": "Buscar en internet",
+  "session_tool_websearch_via": "Buscar en internet ({provider})",
   "session_tool_write": "Escribir",
 
   "settings_appearance_displaySize_description": "Elige el tamaño de todo lo que aparece en Kowork",
