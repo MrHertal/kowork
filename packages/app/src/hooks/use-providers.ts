@@ -40,6 +40,16 @@ const optionalProviderListEqual = (
   b: ProviderListResponse | undefined,
 ) => a === b || (!!a && !!b && providerListEqual(a, b));
 
+// The opencode provider autoloads without credentials and keeps only
+// free models — that implicit connection is the built-in free tier.
+export function isFreeTierProvider(p: Provider) {
+  return (
+    p.id === "opencode" &&
+    Object.keys(p.models).length > 0 &&
+    !Object.values(p.models).some((m) => m.cost?.input)
+  );
+}
+
 export function useProviders(directory?: string) {
   const globalSync = useGlobalSync();
 
@@ -66,20 +76,14 @@ export function useProviders(directory?: string) {
     const all = providers.all;
     const connectedSet = new Set(providers.connected);
     const connected = all.filter((p): p is Provider => connectedSet.has(p.id));
-    // The opencode provider autoloads without credentials and keeps only
-    // free models — that implicit connection is the built-in free tier.
-    const freeTier = (p: Provider) =>
-      p.id === "opencode" &&
-      Object.keys(p.models).length > 0 &&
-      !Object.values(p.models).some((m) => m.cost?.input);
 
     return {
       all,
       default: providers.default,
       popular: all.filter((p) => popularProviderSet.has(p.id)),
       connected,
-      paid: connected.filter((p) => !freeTier(p)),
-      free: connected.filter(freeTier),
+      paid: connected.filter((p) => !isFreeTierProvider(p)),
+      free: connected.filter(isFreeTierProvider),
     };
   }, [providers]);
 }

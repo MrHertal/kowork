@@ -454,7 +454,7 @@
   "settings_permissions_tool_websearch_description": "वेब पर खोजें",
   "settings_providers_connected_empty": "अभी कोई प्रोवाइडर नहीं है",
   "settings_providers_connected_environmentDescription": "आपके एनवायरनमेंट वेरिएबल से सेट किया गया",
-  "settings_providers_connected_freeDescription": "Kowork के साथ मुफ़्त मॉडल और वेब खोज शामिल हैं",
+  "settings_providers_connected_freeDescription": "मुफ़्त मॉडल, उपयोग के लिए तैयार — किसी सेटअप की ज़रूरत नहीं",
   "settings_providers_custom_connect": "कनेक्ट करें",
   "settings_providers_custom_description": "Base URL से OpenAI-compatible प्रोवाइडर जोड़ें।",
   "settings_providers_custom_label": "कस्टम प्रोवाइडर",

@@ -454,7 +454,7 @@
   "settings_permissions_tool_websearch_description": "Search the web",
   "settings_providers_connected_empty": "No providers yet",
   "settings_providers_connected_environmentDescription": "Configured using your environment variables",
-  "settings_providers_connected_freeDescription": "Free models and web search included with Kowork",
+  "settings_providers_connected_freeDescription": "Free models, ready to use — no setup required",
   "settings_providers_custom_connect": "Connect",
   "settings_providers_custom_description": "Add an OpenAI-compatible provider using a base URL.",
   "settings_providers_custom_label": "Custom provider",
