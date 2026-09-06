@@ -65,18 +65,21 @@ export function useProviders(directory?: string) {
   return useMemo(() => {
     const all = providers.all;
     const connectedSet = new Set(providers.connected);
+    const connected = all.filter((p): p is Provider => connectedSet.has(p.id));
+    // The opencode provider autoloads without credentials and keeps only
+    // free models — that implicit connection is the built-in free tier.
+    const freeTier = (p: Provider) =>
+      p.id === "opencode" &&
+      Object.keys(p.models).length > 0 &&
+      !Object.values(p.models).some((m) => m.cost?.input);
 
     return {
       all,
       default: providers.default,
       popular: all.filter((p) => popularProviderSet.has(p.id)),
-      connected: all.filter((p): p is Provider => connectedSet.has(p.id)),
-      paid: all.filter(
-        (p): p is Provider =>
-          connectedSet.has(p.id) &&
-          (p.id !== "opencode" ||
-            Object.values(p.models).some((m) => m.cost?.input)),
-      ),
+      connected,
+      paid: connected.filter((p) => !freeTier(p)),
+      free: connected.filter(freeTier),
     };
   }, [providers]);
 }
