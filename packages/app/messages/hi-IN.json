@@ -243,6 +243,7 @@
   "session_duration_seconds": "{count} सेकंड",
   "session_error_create_failed": "कार्य नहीं बन सका",
   "session_error_generic_title": "कुछ गड़बड़ हुई",
+  "session_model_connect_provider": "प्रोवाइडर कनेक्ट करें",
   "session_model_dialog_title": "मॉडल चुनें",
   "session_model_empty": "कोई मॉडल नहीं मिला",
   "session_model_manage_link": "मॉडल मैनेज करें",
