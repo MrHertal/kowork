@@ -7,10 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import {
-  useGlobalData,
-  useGlobalSync,
-} from "@/contexts/global-sync";
+import { useGlobalData, useGlobalSync } from "@/contexts/global-sync";
 import { usePlatform } from "@/contexts/platform";
 import { useSettings } from "@/contexts/settings";
 import { m } from "@/paraglide/messages";
@@ -49,7 +46,9 @@ export function SettingsGeneral() {
   const platform = usePlatform();
   const settings = useSettings();
   const globalSync = useGlobalSync();
-  const webSearchOn = useGlobalData((s) => webSearchEnabled(s.config.permission));
+  const webSearchOn = useGlobalData((s) =>
+    webSearchEnabled(s.config.permission),
+  );
 
   const handleWebSearchChange = (enabled: boolean) => {
     void globalSync
