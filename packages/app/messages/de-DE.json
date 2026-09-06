@@ -453,6 +453,7 @@
   "settings_providers_custom_connect": "Verbinden",
   "settings_providers_custom_description": "Fügen Sie einen OpenAI-kompatiblen Anbieter mithilfe einer Basis-URL hinzu.",
   "settings_providers_custom_label": "Benutzerdefinierter Anbieter",
+  "settings_providers_free_title": "OpenCode",
   "settings_providers_navItem": "Anbieter",
   "settings_providers_section_connected": "Verbunden",
   "settings_providers_section_popular": "Beliebt",

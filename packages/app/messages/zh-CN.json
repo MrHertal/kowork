@@ -453,6 +453,7 @@
   "settings_providers_custom_connect": "连接",
   "settings_providers_custom_description": "使用基础 URL 添加兼容 OpenAI 的服务商。",
   "settings_providers_custom_label": "自定义服务商",
+  "settings_providers_free_title": "OpenCode",
   "settings_providers_navItem": "服务商",
   "settings_providers_section_connected": "已连接",
   "settings_providers_section_popular": "热门",

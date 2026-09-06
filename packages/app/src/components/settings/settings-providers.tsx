@@ -246,7 +246,7 @@ export function SettingsProviders() {
                     className="size-5 shrink-0"
                   />
                 }
-                title={item.name}
+                title={m.settings_providers_free_title()}
                 badge={
                   <Badge variant="secondary">
                     {m.settings_providers_tag_free()}
