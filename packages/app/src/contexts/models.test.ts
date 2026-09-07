@@ -36,6 +36,20 @@ describe("dedupeAvailable", () => {
     expect(result[0]!.id).toBe("openai.gpt-oss-120b");
   });
 
+  test("collapses dated and (latest) aliases, preferring the (latest) alias", () => {
+    const dated = model("anthropic", "claude-haiku-4-5-20251001", {
+      name: "Claude Haiku 4.5",
+      family: "claude-haiku",
+    });
+    const latest = model("anthropic", "claude-haiku-4-5", {
+      name: "Claude Haiku 4.5 (latest)",
+      family: "claude-haiku",
+    });
+    const result = dedupeAvailable([dated, latest], baseStore);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe("claude-haiku-4-5");
+  });
+
   test("does not collapse same name across different providers", () => {
     const bedrock = model("amazon-bedrock", "openai.gpt-oss-120b");
     const openrouter = model("openrouter", "openai/gpt-oss-120b");

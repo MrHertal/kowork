@@ -50,10 +50,10 @@ function modelKey(model: ModelKey) {
   return `${model.providerID}:${model.modelID}`;
 }
 
-// Providers (e.g. Amazon Bedrock) can expose the same model twice, differing
-// only by a versioned id suffix such as `openai.gpt-oss-120b-1:0`. Collapse
-// entries that share provider + name + family into one, preferring an entry
-// the user has interacted with so an existing selection/toggle keeps working.
+// Providers can expose the same model twice (Bedrock versioned id suffix,
+// Anthropic dated id + "(latest)" alias). Collapse entries that share
+// provider + name + family, preferring an entry the user has interacted with
+// so an existing selection/toggle keeps working.
 export function dedupeAvailable(
   models: AvailableModel[],
   store: ModelsStore,
@@ -73,7 +73,8 @@ export function dedupeAvailable(
 
   const groups = new Map<string, AvailableModel[]>();
   for (const m of models) {
-    const groupKey = `${m.provider.id}${m.name}${m.family ?? ""}`;
+    const name = m.name.replace("(latest)", "").trim();
+    const groupKey = `${m.provider.id}${name}${m.family ?? ""}`;
     const group = groups.get(groupKey);
     if (group) group.push(m);
     else groups.set(groupKey, [m]);
