@@ -73,7 +73,7 @@ export function dedupeAvailable(
 
   const groups = new Map<string, AvailableModel[]>();
   for (const m of models) {
-    const name = m.name.replace("(latest)", "").trim();
+    const name = m.name.replace(/\s*\(latest\)\s*$/, "");
     const groupKey = `${m.provider.id}${name}${m.family ?? ""}`;
     const group = groups.get(groupKey);
     if (group) group.push(m);
@@ -174,8 +174,8 @@ function buildDerived(
 
   const list = available.map((m) => ({
     ...m,
-    name: m.name.replace("(latest)", "").trim(),
-    latest: m.name.includes("(latest)"),
+    name: m.name.replace(/\s*\(latest\)\s*$/, ""),
+    latest: /\s*\(latest\)\s*$/.test(m.name),
   }));
 
   return { available, releaseMap, latestSet, visibilityMap, list };
