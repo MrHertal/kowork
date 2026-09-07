@@ -50,6 +50,60 @@ function modelKey(model: ModelKey) {
   return `${model.providerID}:${model.modelID}`;
 }
 
+// Providers can expose the same model twice (Bedrock versioned id suffix,
+// Anthropic dated id + "(latest)" alias). Collapse entries that share
+// provider + name + family, preferring an entry the user has interacted with
+// so an existing selection/toggle keeps working.
+export function dedupeAvailable(
+  models: AvailableModel[],
+  store: ModelsStore,
+): AvailableModel[] {
+  const interacted = new Set<string>();
+  for (const u of store.user) interacted.add(modelKey(u));
+  for (const r of store.recent) interacted.add(modelKey(r));
+  for (const key of Object.keys(store.variant ?? {})) {
+    const [providerID, modelID] = key.split("/");
+    if (providerID && modelID) interacted.add(`${providerID}:${modelID}`);
+  }
+
+  const releaseTime = (m: AvailableModel) => {
+    const time = new Date(m.release_date).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
+
+  const groups = new Map<string, AvailableModel[]>();
+  for (const m of models) {
+    const name = m.name.replace(/\s*\(latest\)\s*$/, "");
+    const groupKey = `${m.provider.id}${name}${m.family ?? ""}`;
+    const group = groups.get(groupKey);
+    if (group) group.push(m);
+    else groups.set(groupKey, [m]);
+  }
+
+  const result: AvailableModel[] = [];
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      result.push(group[0]!);
+      continue;
+    }
+    const best = firstBy(
+      group,
+      [
+        (m) =>
+          interacted.has(modelKey({ providerID: m.provider.id, modelID: m.id }))
+            ? 0
+            : 1,
+        "asc",
+      ],
+      [(m) => (/-\d+:/.test(m.id) ? 1 : 0), "asc"],
+      [(m) => -releaseTime(m), "asc"],
+      [(m) => m.id, "asc"],
+    );
+    if (best) result.push(best);
+  }
+  return result;
+}
+
 interface DerivedModels {
   available: AvailableModel[];
   releaseMap: Map<string, Date>;
@@ -62,11 +116,14 @@ function buildDerived(
   store: ModelsStore,
   connectedProviders: Provider[],
 ): DerivedModels {
-  const available = connectedProviders.flatMap((p) =>
-    Object.values(p.models).map((m) => ({
-      ...m,
-      provider: p,
-    })),
+  const available = dedupeAvailable(
+    connectedProviders.flatMap((p) =>
+      Object.values(p.models).map((m) => ({
+        ...m,
+        provider: p,
+      })),
+    ),
+    store,
   );
 
   const releaseMap = new Map(
@@ -117,8 +174,8 @@ function buildDerived(
 
   const list = available.map((m) => ({
     ...m,
-    name: m.name.replace("(latest)", "").trim(),
-    latest: m.name.includes("(latest)"),
+    name: m.name.replace(/\s*\(latest\)\s*$/, ""),
+    latest: /\s*\(latest\)\s*$/.test(m.name),
   }));
 
   return { available, releaseMap, latestSet, visibilityMap, list };
