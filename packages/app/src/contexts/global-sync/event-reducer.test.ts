@@ -192,6 +192,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(store.state.session.map((x) => x.id)).toEqual(["a", "b"]);
@@ -207,6 +208,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(store.state.sessionTotal).toBe(2);
@@ -236,6 +238,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(store.state.session.map((x) => x.id)).toEqual(["ses_2"]);
@@ -283,6 +286,7 @@ describe("applyDirectoryEvent", () => {
         push() {},
         directory: "/tmp",
         loadLsp() {},
+        loadMcp() {},
       });
 
       expect(
@@ -324,6 +328,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(store.state.session.map((x) => x.id)).toEqual([kept.id]);
@@ -372,6 +377,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(store.state.message[sessionID]?.map((x) => x.id)).toEqual([
@@ -395,6 +401,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(
@@ -411,6 +418,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(store.state.message[sessionID]?.map((x) => x.id)).toEqual([
@@ -442,6 +450,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
     expect(store.state.part[messageID]?.map((x) => x.id)).toEqual([
       "prt_1",
@@ -464,6 +473,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
     const updated = store.state.part[messageID]?.find((x) => x.id === "prt_2");
     expect(updated?.type).toBe("text");
@@ -480,6 +490,7 @@ describe("applyDirectoryEvent", () => {
         push() {},
         directory: "/tmp",
         loadLsp() {},
+        loadMcp() {},
       });
     }
 
@@ -513,6 +524,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
     expect(store.state.permission[sessionID]?.map((x) => x.id)).toEqual([
       "perm_1",
@@ -530,6 +542,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
     expect(
       store.state.permission[sessionID]?.find((x) => x.id === "perm_2")
@@ -546,6 +559,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
     expect(store.state.permission[sessionID]?.map((x) => x.id)).toEqual([
       "perm_1",
@@ -562,6 +576,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
     expect(store.state.question[sessionID]?.map((x) => x.id)).toEqual([
       "q_1",
@@ -579,6 +594,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
     expect(
       store.state.question[sessionID]?.find((x) => x.id === "q_2")?.questions[0]
@@ -595,6 +611,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
     expect(store.state.question[sessionID]?.map((x) => x.id)).toEqual([
       "q_1",
@@ -617,6 +634,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(store.state.vcs).toEqual({
@@ -634,6 +652,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     expect(store.state.vcs).toEqual({
@@ -642,10 +661,11 @@ describe("applyDirectoryEvent", () => {
     });
   });
 
-  test("routes disposal and lsp events to side-effect handlers", () => {
+  test("routes disposal, lsp, and mcp events to side-effect handlers", () => {
     const store = createState();
     const pushes: string[] = [];
     let lspLoads = 0;
+    let mcpLoads = 0;
 
     applyDirectoryEvent({
       event: { type: "server.instance.disposed" },
@@ -657,6 +677,9 @@ describe("applyDirectoryEvent", () => {
       directory: "/tmp",
       loadLsp() {
         lspLoads += 1;
+      },
+      loadMcp() {
+        mcpLoads += 1;
       },
     });
 
@@ -671,10 +694,30 @@ describe("applyDirectoryEvent", () => {
       loadLsp() {
         lspLoads += 1;
       },
+      loadMcp() {
+        mcpLoads += 1;
+      },
+    });
+
+    applyDirectoryEvent({
+      event: { type: "mcp.tools.changed" },
+      getState: store.getState,
+      setState: store.setState,
+      push(directory) {
+        pushes.push(directory);
+      },
+      directory: "/tmp",
+      loadLsp() {
+        lspLoads += 1;
+      },
+      loadMcp() {
+        mcpLoads += 1;
+      },
     });
 
     expect(pushes).toEqual(["/tmp"]);
     expect(lspLoads).toBe(1);
+    expect(mcpLoads).toBe(1);
   });
 
   test("appends message part deltas to the existing field value", () => {
@@ -703,6 +746,7 @@ describe("applyDirectoryEvent", () => {
       push() {},
       directory: "/tmp",
       loadLsp() {},
+      loadMcp() {},
     });
 
     const updated = store.state.part[messageID]?.find((x) => x.id === "prt_1");
@@ -728,6 +772,7 @@ describe("applyDirectoryEvent", () => {
         push() {},
         directory: "/tmp",
         loadLsp() {},
+        loadMcp() {},
       });
     }
 

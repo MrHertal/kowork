@@ -9,22 +9,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { m } from "@/paraglide/messages";
-import { SOUND_IDS, type SoundID, playSoundById } from "@/utils/sound";
+import { SOUND_IDS, SOUND_LABEL, playSoundById } from "@/utils/sound";
 
 const OFF_VALUE = "off";
-
-const SOUND_LABEL: Record<SoundID, string> = {
-  "alert-01": "Alert 1",
-  "alert-05": "Alert 2",
-  "bip-bop-01": "Bip-Bop 1",
-  "bip-bop-05": "Bip-Bop 2",
-  "staplebops-01": "Staplebops 1",
-  "staplebops-02": "Staplebops 2",
-  "nope-03": "Nope 1",
-  "nope-07": "Nope 2",
-  "yup-01": "Yup 1",
-  "yup-04": "Yup 2",
-};
 
 const PREVIEW_DEBOUNCE_MS = 100;
 

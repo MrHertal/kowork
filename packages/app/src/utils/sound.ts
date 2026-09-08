@@ -25,6 +25,19 @@ export const SOUND_IDS = [
 
 export type SoundID = (typeof SOUND_IDS)[number];
 
+export const SOUND_LABEL: Record<SoundID, string> = {
+  "alert-01": "Alert 1",
+  "alert-05": "Alert 2",
+  "bip-bop-01": "Bip-Bop 1",
+  "bip-bop-05": "Bip-Bop 2",
+  "staplebops-01": "Staplebops 1",
+  "staplebops-02": "Staplebops 2",
+  "nope-03": "Nope 1",
+  "nope-07": "Nope 2",
+  "yup-01": "Yup 1",
+  "yup-04": "Yup 2",
+};
+
 function getLoads() {
   if (loads) return loads;
   loads = Object.fromEntries(

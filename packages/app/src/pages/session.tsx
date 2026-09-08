@@ -34,11 +34,13 @@ import {
   PermissionModeSelector,
   type PermissionMode,
 } from "@/components/session/permission-mode-selector";
+import { webSearchEnabled } from "@/components/settings/websearch-permission";
 import { KOWORK_SYSTEM_PROMPT } from "@/constants/kowork-system-prompt";
 import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useLocal } from "@/contexts/local";
 import { usePermission, usePermissionData } from "@/contexts/permission";
 import { autoRespondsPermission } from "@/contexts/permission/auto-respond";
+import { usePlatform } from "@/contexts/platform";
 import {
   usePrompt,
   type ImageAttachmentPart,
@@ -46,7 +48,9 @@ import {
 } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useServer } from "@/contexts/server";
+import { useSettings } from "@/contexts/settings";
 import { useSync } from "@/contexts/sync";
+import { useSkills } from "@/hooks/use-skills";
 import { cn } from "@/lib/utils";
 import { m } from "@/paraglide/messages";
 import {
@@ -59,6 +63,7 @@ import {
 } from "@/pages/session/session-model-helpers";
 import { blobDataUrl } from "@/utils/blob";
 import { ascending } from "@/utils/id";
+import { buildKoworkConfiguration } from "@/utils/kowork-configuration";
 import { officeAttachmentMatchesServer } from "@/utils/office-attachments";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
@@ -88,6 +93,8 @@ export function Page({
   const sync = useSync();
   const local = useLocal();
   const permission = usePermission();
+  const platform = usePlatform();
+  const version = platform.version;
   const prompt = usePrompt();
   const { handlePaste: handlePromptPaste } = usePromptAttachments();
   const { isDragging } = useGlobalAttachmentDrop();
@@ -103,6 +110,43 @@ export function Page({
 
   const autoAccept = usePermissionData((s) => s.autoAccept);
   const sessions = useChildData(directory, (s) => s.session, shallowArrayEqual);
+  const settings = useSettings();
+  const connectors = useChildData(directory, (s) => s.mcp);
+  const connectorsReady = useChildData(directory, (s) => s.mcp_ready);
+  const webSearch = useChildData(directory, (s) =>
+    webSearchEnabled(s.config.permission),
+  );
+  const skills = useSkills(directory);
+  const configuration = useMemo(
+    () =>
+      buildKoworkConfiguration({
+        settings: settings.ready
+          ? {
+              language: settings.general.language,
+              theme: settings.general.theme,
+              fontSize: settings.appearance.fontSize,
+              notifications: {
+                agent: settings.notifications.agent,
+                permissions: settings.notifications.permissions,
+                errors: settings.notifications.errors,
+              },
+              sounds: {
+                agentEnabled: settings.sounds.agentEnabled,
+                agent: settings.sounds.agent,
+                permissionsEnabled: settings.sounds.permissionsEnabled,
+                permissions: settings.sounds.permissions,
+                errorsEnabled: settings.sounds.errorsEnabled,
+                errors: settings.sounds.errors,
+              },
+              updates: { startup: settings.updates.startup },
+            }
+          : undefined,
+        webSearch,
+        connectors: connectorsReady ? connectors : undefined,
+        skills: skills.data?.map((skill) => ({ name: skill.name })),
+      }),
+    [settings, webSearch, connectors, connectorsReady, skills.data],
+  );
   const sessionPermissionMode =
     !sessionId || !permission.ready
       ? defaultPermissionMode
@@ -289,7 +333,11 @@ export function Page({
         await sdk.client.session.promptAsync({
           sessionID: sid,
           messageID,
-          system: KOWORK_SYSTEM_PROMPT,
+          // 0.0.1 is the repo placeholder; only release builds are stamped.
+          system: KOWORK_SYSTEM_PROMPT.replace(
+            "{{version}}",
+            version && version !== "0.0.1" ? version : "unknown",
+          ).replace("{{configuration}}", configuration),
           agent: currentAgentVal.name,
           model: {
             modelID: currentModelVal.id,
@@ -334,6 +382,8 @@ export function Page({
       newSessionPermissionMode,
       permission,
       server.key,
+      version,
+      configuration,
     ],
   );
 

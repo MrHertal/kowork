@@ -479,6 +479,18 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
               );
             });
         },
+        loadMcp: () => {
+          void sdkFor(directory)
+            .mcp.status()
+            .then((x) => {
+              childStore.setState((prev) =>
+                produce(prev, (d) => {
+                  d.mcp = x.data ?? {};
+                  d.mcp_ready = true;
+                }),
+              );
+            });
+        },
       });
     });
 
