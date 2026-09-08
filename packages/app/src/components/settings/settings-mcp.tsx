@@ -20,7 +20,6 @@ import { useServer } from "@/contexts/server";
 import { POPULAR_MCP, type PopularMcp } from "@/data/popular-mcp";
 import { useDelayedShow } from "@/hooks/use-delayed-show";
 import { useMcpMutation } from "@/hooks/use-mcp-mutation";
-import { useMcpStatusSync } from "@/hooks/use-mcp-status-sync";
 import { cn } from "@/lib/utils";
 import { m } from "@/paraglide/messages";
 
@@ -58,7 +57,6 @@ export function SettingsMcp({ directory }: SettingsMcpProps) {
 }
 
 function SettingsMcpContent({ directory }: { directory: string }) {
-  useMcpStatusSync(directory);
   const mcp = useChildData(directory, (s) => s.mcp);
   const ready = useChildData(directory, (s) => s.mcp_ready);
   const mcpMutation = useMcpMutation(directory);

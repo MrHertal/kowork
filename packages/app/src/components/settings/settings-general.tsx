@@ -12,6 +12,7 @@ import { usePlatform } from "@/contexts/platform";
 import { useSettings } from "@/contexts/settings";
 import { m } from "@/paraglide/messages";
 import { locales } from "@/paraglide/runtime";
+import { localeLabel } from "@/utils/locale";
 
 import { SettingsRow, SettingsSection } from "./settings-row";
 import { webSearchEnabled, webSearchPermission } from "./websearch-permission";
@@ -23,17 +24,6 @@ const DISPLAY_SIZES = [
 ] as const;
 
 const DEFAULT_DISPLAY_SIZE = 16;
-
-const localeLabel: Record<(typeof locales)[number], string> = {
-  "en-US": "English (United States)",
-  "de-DE": "Deutsch (Deutschland)",
-  "fr-FR": "Français (France)",
-  "es-419": "Español (Latinoamérica)",
-  "es-ES": "Español (España)",
-  "zh-CN": "简体中文（中国大陆）",
-  "hi-IN": "हिन्दी (भारत)",
-  "pt-BR": "Português (Brasil)",
-};
 
 const localeCollator = new Intl.Collator("en");
 const sortedLocales = [...locales].sort((a, b) => {
