@@ -1,10 +1,14 @@
 import { describe, expect, test } from "vitest";
-import type { OfficeAttachmentPart } from "@/contexts/prompt";
+import type {
+  ImageAttachmentPart,
+  OfficeAttachmentPart,
+} from "@/contexts/prompt";
 import {
   OFFICE_ATTACHMENTS_METADATA_KEY,
   officeAttachmentMatchesServer,
   officeAttachmentsFromMetadata,
   officeAttachmentsPrompt,
+  pdfFallbackOfficePart,
 } from "./office-attachments";
 
 describe("officeAttachmentMatchesServer", () => {
@@ -32,6 +36,74 @@ const attachment = (
   format: "docx",
   serverKey: "sidecar",
   ...input,
+});
+
+const pdfImage = (
+  input: Partial<ImageAttachmentPart> = {},
+): ImageAttachmentPart => ({
+  type: "image",
+  id: "img_1",
+  filename: "guide.pdf",
+  mime: "application/pdf",
+  blob: { id: "abc123", url: "blob:http://localhost/abc123" },
+  path: "/Users/example/guide.pdf",
+  serverKey: "sidecar",
+  ...input,
+});
+
+describe("pdfFallbackOfficePart", () => {
+  test("converts a captured PDF when the model lacks PDF input", () => {
+    expect(
+      pdfFallbackOfficePart(pdfImage(), {
+        pdfInput: false,
+        serverKey: "sidecar",
+      }),
+    ).toEqual({
+      type: "office",
+      id: "img_1",
+      filename: "guide.pdf",
+      mime: "application/pdf",
+      path: "/Users/example/guide.pdf",
+      format: "pdf",
+      serverKey: "sidecar",
+    });
+  });
+
+  test("keeps the base64 flow when the model supports PDF input", () => {
+    expect(
+      pdfFallbackOfficePart(pdfImage(), {
+        pdfInput: true,
+        serverKey: "sidecar",
+      }),
+    ).toBeUndefined();
+  });
+
+  test("keeps the base64 flow without a captured path", () => {
+    expect(
+      pdfFallbackOfficePart(pdfImage({ path: undefined }), {
+        pdfInput: false,
+        serverKey: "sidecar",
+      }),
+    ).toBeUndefined();
+  });
+
+  test("keeps the base64 flow when the server changed", () => {
+    expect(
+      pdfFallbackOfficePart(pdfImage(), {
+        pdfInput: false,
+        serverKey: "wsl:Ubuntu",
+      }),
+    ).toBeUndefined();
+  });
+
+  test("ignores non-PDF attachments", () => {
+    expect(
+      pdfFallbackOfficePart(pdfImage({ mime: "image/png" }), {
+        pdfInput: false,
+        serverKey: "sidecar",
+      }),
+    ).toBeUndefined();
+  });
 });
 
 describe("officeAttachmentsPrompt", () => {
