@@ -31,7 +31,12 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 
 function format(value: unknown): value is OfficeAttachmentFormat {
-  return value === "docx" || value === "xlsx" || value === "pptx";
+  return (
+    value === "docx" ||
+    value === "xlsx" ||
+    value === "pptx" ||
+    value === "pdf"
+  );
 }
 
 export function officeAttachmentsFromMetadata(

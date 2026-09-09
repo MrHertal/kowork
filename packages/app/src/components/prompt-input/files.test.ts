@@ -32,6 +32,10 @@ describe("officeAttachmentInfo", () => {
     expect(officeAttachmentInfo({ name: "report.docx.exe" })).toBeUndefined();
   });
 
+  test("does not route PDFs to the path flow at attach time", () => {
+    expect(officeAttachmentInfo({ name: "guide.pdf" })).toBeUndefined();
+  });
+
   test("adds Office extensions only when path attachments are available", () => {
     expect(acceptedFileTypes(false)).toBe(ACCEPTED_FILE_TYPES);
     expect(acceptedFileTypes(true)).toEqual([

@@ -140,6 +140,7 @@ describe("officeAttachmentsFromMetadata", () => {
           version: 1,
           items: [
             valid,
+            { ...valid, format: "odt" },
             { ...valid, format: "pdf" },
             { ...valid, mime: "application/octet-stream" },
             { ...valid, path: 42 },
@@ -147,5 +148,30 @@ describe("officeAttachmentsFromMetadata", () => {
         },
       }),
     ).toEqual([{ ...valid, position: 1 }]);
+  });
+
+  test("round-trips pdf attachments from the PDF fallback", () => {
+    const prompt = officeAttachmentsPrompt([
+      {
+        ...attachment({
+          filename: "guide.pdf",
+          path: "/Users/example/guide.pdf",
+          mime: "application/pdf",
+          format: "pdf",
+        }),
+        position: 1,
+      },
+    ]);
+
+    expect(prompt.text).toContain("<format>pdf</format>");
+    expect(officeAttachmentsFromMetadata(prompt.metadata)).toEqual([
+      {
+        filename: "guide.pdf",
+        path: "/Users/example/guide.pdf",
+        mime: "application/pdf",
+        format: "pdf",
+        position: 1,
+      },
+    ]);
   });
 });

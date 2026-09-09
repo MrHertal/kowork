@@ -8,11 +8,15 @@ export const ACCEPTED_IMAGE_TYPES = [
 ];
 
 export const ACCEPTED_OFFICE_FILE_TYPES = [".docx", ".xlsx", ".pptx"];
-export type OfficeAttachmentFormat = "docx" | "xlsx" | "pptx";
+// "pdf" is a path-attachment format too, but only as a submit-time fallback
+// for models without PDF input; it never routes to the path flow at attach
+// time, so it stays out of ACCEPTED_OFFICE_FILE_TYPES.
+export type OfficeAttachmentFormat = "docx" | "xlsx" | "pptx" | "pdf";
 export const OFFICE_FILE_MIMES: Record<OfficeAttachmentFormat, string> = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  pdf: "application/pdf",
 };
 
 export const ACCEPTED_FILE_TYPES = [

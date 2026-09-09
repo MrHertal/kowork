@@ -3,6 +3,7 @@
 import {
   ACCEPTED_FILE_TYPES,
   ACCEPTED_IMAGE_TYPES,
+  ACCEPTED_OFFICE_FILE_TYPES,
   OFFICE_FILE_MIMES,
   type OfficeAttachmentFormat,
 } from "@/constants/file-picker";
@@ -42,7 +43,9 @@ export function officeAttachmentInfo(
   file: Pick<File, "name">,
 ): { format: OfficeAttachmentFormat; mime: string } | undefined {
   const format = ext(file.name);
-  if (!(format in OFFICE_FILE_MIMES)) return;
+  // OFFICE_FILE_MIMES also covers pdf, but PDFs only become path attachments
+  // as a submit-time fallback; at attach time they go through attachmentMime.
+  if (!ACCEPTED_OFFICE_FILE_TYPES.includes(`.${format}`)) return;
   return {
     format: format as OfficeAttachmentFormat,
     mime: OFFICE_FILE_MIMES[format as OfficeAttachmentFormat],
