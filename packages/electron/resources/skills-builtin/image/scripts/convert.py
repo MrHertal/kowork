@@ -27,28 +27,18 @@ from PIL import Image
 
 from imgutil import (
     ImageError,
-    flatten,
+    check_distinct_paths,
     format_for_path,
     human_size,
     open_image,
     parse_color,
+    prepare_for_format,
 )
 
 EXIF_FORMATS = ("JPEG", "PNG", "WEBP", "TIFF")
 ICC_FORMATS = ("JPEG", "PNG", "TIFF", "WEBP")
 DPI_FORMATS = ("JPEG", "PNG")
 QUALITY_FORMATS = ("JPEG", "WEBP", "AVIF")
-NO_ALPHA_FORMATS = ("JPEG", "BMP")
-
-
-def check_distinct_paths(in_path: str, out_path: str) -> None:
-    """Refuse to overwrite the input file with the output."""
-    if os.path.realpath(in_path) == os.path.realpath(out_path) or (
-        os.path.exists(out_path) and os.path.samefile(in_path, out_path)
-    ):
-        raise ImageError(
-            f"input and output are the same file: {in_path}; choose a different output path"
-        )
 
 
 def save_with_metadata(
@@ -61,15 +51,16 @@ def save_with_metadata(
 ) -> str:
     """``imgutil.save_image`` plus metadata passthrough (which it does not do).
 
-    Captures metadata before flattening: flattening builds a fresh image whose
-    ``info`` is empty.
+    Captures metadata before ``prepare_for_format`` runs: normalization and
+    flattening build a fresh image whose ``info`` is empty.
     """
     fmt = format_for_path(path)
     exif = im.info.get("exif")
     icc = im.info.get("icc_profile")
     dpi = im.info.get("dpi")
-    if fmt in NO_ALPHA_FORMATS:
-        im = flatten(im, background)
+    im, notes = prepare_for_format(im, fmt, background)
+    for note in notes:
+        sys.stderr.write(f"note: {note}\n")
     kwargs: dict = {}
     if quality is not None and fmt in QUALITY_FORMATS:
         kwargs["quality"] = quality
@@ -115,7 +106,7 @@ def main(argv: list[str]) -> int:
         return 1
 
     try:
-        check_distinct_paths(args.input, args.output)
+        check_distinct_paths(args.output, args.input)
         background = parse_color(args.background) if args.background else (255, 255, 255, 255)
         im = open_image(args.input)
         animated = bool(getattr(im, "is_animated", False)) and getattr(im, "n_frames", 1) > 1

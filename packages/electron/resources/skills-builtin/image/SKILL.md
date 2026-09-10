@@ -123,7 +123,8 @@ frame count (plus frame duration and loop count for animations), DPI, and the
 printable EXIF tags — including the Orientation tag that makes phone photos
 display sideways. GPS EXIF is reported as present/absent, never as coordinates.
 Run it before any edit; `info.py` shows the raw stored geometry, while the
-mutating paths below bake EXIF orientation into the pixels first.
+editing paths (Transform, Adjust, Annotate, Combine) bake EXIF orientation into
+the pixels first — Convert deliberately does not.
 
 ## Convert (re-encode)
 
@@ -145,7 +146,9 @@ nothing else changes.
   `--strip-metadata` drops all three. EXIF is preserved or dropped, never
   edited.
 - Formats without an alpha channel (JPEG, BMP) flatten transparent pixels onto
-  `--background` (default white).
+  `--background` (default white). GIF keeps only on/off transparency, so
+  partially transparent pixels are flattened onto `--background` with a
+  `note:`.
 - An animated input converts to its first frame only, with a `note:` on stderr.
 
 ## Transform (resize / crop / rotate / flip)
@@ -178,6 +181,9 @@ kowork-python scripts/transform.py flip in.png out.png --horizontal   # or --ver
   `--expand` the canvas keeps its size and the corners are cropped; `--expand`
   grows the canvas to fit. New area fills white (opaque image) or transparent
   (alpha image).
+- Output pixel counts are capped at Pillow's safety limit
+  (`Image.MAX_IMAGE_PIXELS`); an oversized output fails with a clean `error:`
+  instead of exhausting memory.
 - An animated input transforms as its first frame only.
 
 ## Adjust (brightness / contrast / color / sharpness / filters)
@@ -242,7 +248,8 @@ kowork-python scripts/combine.py out.png a.png b.png --hstack --background '#000
   At least 2 inputs are required.
 - The canvas is RGBA, so `--background '#00000000'` leaves transparent gaps
   when the output is PNG (JPEG/BMP flatten onto white). EXIF orientation is
-  baked in; the output gets fresh metadata.
+  baked in; the output gets fresh metadata. Canvas pixel counts are capped at
+  Pillow's safety limit — an oversized grid fails with a clean `error:`.
 
 ## Animated GIF (create / extract)
 
@@ -290,7 +297,10 @@ image before handing it back.
 - **No RAW camera formats** (.cr2, .nef, .dng, ...).
 - **Color profiles pass through unchanged** — convert.py preserves the ICC
   profile, but nothing converts between color spaces.
-- **Animated WebP is not supported** (animated GIF is).
+- **Animated WebP is read-only** — `info.py`, `validate.py`, and
+  `gif.py extract` work on it, but no path writes animated WebP; use animated
+  GIF for that.
 - **EXIF is reported and preserved (by convert.py) but cannot be edited.**
 - **JPEG re-encoding is lossy** — pass `--quality` when fidelity matters.
-- **ICO output is capped at 256×256 px.**
+- **ICO output is capped at 256×256 px** — the scripts emit a `note:` when the
+  format shrinks the output.

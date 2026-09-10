@@ -25,22 +25,20 @@ from __future__ import annotations
 
 import argparse
 import math
-import os
 import sys
 
 from PIL import Image
 
-from imgutil import ImageError, apply_orientation, open_image, parse_size, save_image
-
-
-def check_distinct_paths(in_path: str, out_path: str) -> None:
-    """Refuse to overwrite the input file with the output."""
-    if os.path.realpath(in_path) == os.path.realpath(out_path) or (
-        os.path.exists(out_path) and os.path.samefile(in_path, out_path)
-    ):
-        raise ImageError(
-            f"input and output are the same file: {in_path}; choose a different output path"
-        )
+from imgutil import (
+    ImageError,
+    apply_orientation,
+    check_distinct_paths,
+    check_output_pixels,
+    normalize_for_edit,
+    open_image,
+    parse_size,
+    save_image,
+)
 
 
 def prepare(path: str) -> Image.Image:
@@ -114,12 +112,14 @@ def clamp_box(box: tuple[int, int, int, int], w: int, h: int) -> tuple[tuple[int
 
 def do_resize(im: Image.Image, args: argparse.Namespace) -> tuple[Image.Image, str | None, str]:
     tw, th, note = target_size(im, args)
+    check_output_pixels(tw, th)
     out = im.resize((tw, th), Image.Resampling.LANCZOS)
     return out, note, f"resized {im.width}x{im.height} -> {tw}x{th}"
 
 
 def do_crop(im: Image.Image, args: argparse.Namespace) -> tuple[Image.Image, str | None, str]:
     box, note = clamp_box(parse_box(args.box), im.width, im.height)
+    check_output_pixels(box[2] - box[0], box[3] - box[1])
     out = im.crop(box)
     return out, note, f"cropped {im.width}x{im.height} -> {out.width}x{out.height} at ({box[0]},{box[1]})"
 
@@ -128,16 +128,37 @@ def do_rotate(im: Image.Image, args: argparse.Namespace) -> tuple[Image.Image, s
     degrees = args.degrees
     if not math.isfinite(degrees):
         raise ImageError("--degrees must be a finite number")
+    note = None
     if "A" in im.getbands():
         im = im.convert("RGBA")
-        fill: tuple = (0, 0, 0, 0)
+        fill: tuple | int = (0, 0, 0, 0)
+    elif im.mode == "CMYK":
+        fill = (0, 0, 0, 0)  # white in CMYK is "no ink"
+    elif im.mode in ("I;16", "I;16B", "I;16L", "I", "F"):
+        if degrees % 90 == 0:
+            fill = 65535  # multiples of 90 take Pillow's exact transpose path
+        else:
+            # Pillow's bilinear/bicubic affine path mis-scales I;16/I/F samples
+            # (a uniform 50% gray comes out doubled), so normalize to 8-bit
+            # grayscale before an arbitrary-angle rotate.
+            im, note = normalize_for_edit(im)
+            fill = 255
     else:
         if im.mode != "RGB":
             im = im.convert("RGB")
         fill = (255, 255, 255)
+    if args.expand:
+        # The rotated bounding box, computed up front so an oversized expanded
+        # canvas is refused before any allocation.
+        radians = math.radians(degrees)
+        cos, sin = abs(math.cos(radians)), abs(math.sin(radians))
+        check_output_pixels(
+            math.ceil(im.width * cos + im.height * sin),
+            math.ceil(im.width * sin + im.height * cos),
+        )
     out = im.rotate(degrees, resample=Image.Resampling.BICUBIC, expand=args.expand, fillcolor=fill)
     expanded = " (canvas expanded)" if args.expand else ""
-    return out, None, f"rotated {degrees:g} degrees{expanded}, {im.width}x{im.height} -> {out.width}x{out.height}"
+    return out, note, f"rotated {degrees:g} degrees{expanded}, {im.width}x{im.height} -> {out.width}x{out.height}"
 
 
 def do_flip(im: Image.Image, args: argparse.Namespace) -> tuple[Image.Image, str | None, str]:
@@ -198,7 +219,7 @@ def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
 
     try:
-        check_distinct_paths(args.input, args.output)
+        check_distinct_paths(args.output, args.input)
         im = prepare(args.input)
         out, note, summary = args.func(im, args)
         save_image(out, args.output)

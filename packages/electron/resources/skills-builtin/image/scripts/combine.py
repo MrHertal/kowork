@@ -20,22 +20,20 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 
 from PIL import Image
 
-from imgutil import ImageError, apply_orientation, open_image, parse_color, parse_size, save_image
-
-
-def check_distinct_paths(in_path: str, out_path: str) -> None:
-    """Refuse to overwrite the input file with the output."""
-    if os.path.realpath(in_path) == os.path.realpath(out_path) or (
-        os.path.exists(out_path) and os.path.samefile(in_path, out_path)
-    ):
-        raise ImageError(
-            f"input and output are the same file: {in_path}; choose a different output path"
-        )
+from imgutil import (
+    ImageError,
+    apply_orientation,
+    check_distinct_paths,
+    check_output_pixels,
+    open_image,
+    parse_color,
+    parse_size,
+    save_image,
+)
 
 
 def combine(
@@ -45,19 +43,20 @@ def combine(
     gap: int,
     background: tuple[int, int, int, int],
 ) -> Image.Image:
-    """Paste the images row-major into a ``cols x rows`` grid of equal cells."""
+    """Composite the images row-major into a ``cols x rows`` grid of equal cells."""
     cell_w = max(im.width for im in images)
     cell_h = max(im.height for im in images)
     width = cols * cell_w + (cols - 1) * gap
     height = rows * cell_h + (rows - 1) * gap
+    check_output_pixels(width, height)
     canvas = Image.new("RGBA", (width, height), background)
     for i, im in enumerate(images):
         col, row = i % cols, i // cols
         x = col * (cell_w + gap) + (cell_w - im.width) // 2
         y = row * (cell_h + gap) + (cell_h - im.height) // 2
-        # Paste with the image's own alpha as the mask so translucent inputs
-        # composite over the background instead of replacing it.
-        canvas.paste(im, (x, y), im if "A" in im.getbands() else None)
+        # Alpha-composite every input: paste-with-self-as-mask would square the
+        # alpha and premultiply the colors, corrupting translucent pixels.
+        canvas.alpha_composite(im.convert("RGBA"), (x, y))
     return canvas
 
 
@@ -100,9 +99,9 @@ def main(argv: list[str]) -> int:
             raise ImageError(
                 f"{len(args.inputs)} images do not fit in a {cols}x{rows} grid ({cols * rows} cell(s))"
             )
+        check_distinct_paths(args.output, *args.inputs)
         images = []
         for path in args.inputs:
-            check_distinct_paths(path, args.output)
             im = apply_orientation(open_image(path))
             if im.mode == "P":
                 im = im.convert("RGBA" if "transparency" in im.info else "RGB")

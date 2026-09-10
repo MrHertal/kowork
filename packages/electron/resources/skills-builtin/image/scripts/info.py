@@ -73,12 +73,38 @@ def collect_exif(im: Image.Image) -> dict[str, str]:
     return out
 
 
+def frame_durations(im: Image.Image, n_frames: int) -> list[int]:
+    """Every frame's duration in ms (0 when a frame does not state one).
+
+    Seeks through the animation, so a truncated file may yield fewer values --
+    that is fine, the range of what was readable is still reported. The image
+    is left back on the first frame.
+    """
+    durations: list[int] = []
+    try:
+        for index in range(n_frames):
+            im.seek(index)
+            durations.append(im.info.get("duration", 0))
+    except EOFError:
+        pass
+    try:
+        im.seek(0)
+    except EOFError:
+        pass
+    return durations
+
+
 def describe(path: str) -> dict:
     """Gather everything ``info.py`` reports about the image at ``path``."""
     im = open_image(path)
     n_frames = getattr(im, "n_frames", 1)
     animated = bool(getattr(im, "is_animated", False)) and n_frames > 1
-    return {
+    exif = collect_exif(im)  # frame 0, before duration gathering seeks around
+    durations = frame_durations(im, n_frames) if animated else []
+    duration_range = None
+    if durations and len(set(durations)) > 1:
+        duration_range = [min(durations), max(durations)]
+    info = {
         "path": path,
         "bytes": os.path.getsize(path),
         "format": im.format,
@@ -92,8 +118,12 @@ def describe(path: str) -> dict:
         "dpi": im.info.get("dpi"),
         "duration_ms": im.info.get("duration") if animated else None,
         "loop": im.info.get("loop") if animated else None,
-        "exif": collect_exif(im),
+        "exif": exif,
     }
+    if duration_range is not None:
+        # Keyed separately so uniform animations keep the single duration_ms.
+        info["duration_ms_range"] = duration_range
+    return info
 
 
 def print_human(info: dict) -> None:
@@ -107,7 +137,12 @@ def print_human(info: dict) -> None:
     print(f"  mode: {info['mode']}{alpha}")
     if info["animated"]:
         loop = "forever" if info["loop"] == 0 else f"{info['loop']} time(s)"
-        print(f"  frames: {info['frames']} (animated, {info['duration_ms']} ms/frame, loops {loop})")
+        if info.get("duration_ms_range"):
+            lo, hi = info["duration_ms_range"]
+            timing = f"{lo}-{hi} ms/frame"
+        else:
+            timing = f"{info['duration_ms']} ms/frame"
+        print(f"  frames: {info['frames']} (animated, {timing}, loops {loop})")
     else:
         print(f"  frames: {info['frames']}")
     if info["dpi"]:

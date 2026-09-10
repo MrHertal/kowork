@@ -40,11 +40,11 @@
     {
       "id": 4,
       "prompt": "Resize photo.jpg so its longest side is 300 px, saved as photo-small.jpg.",
-      "expected_output": "photo-small.jpg at 300x400: orientation baked in, so the portrait display size is preserved (300 wide, 400 tall).",
+      "expected_output": "photo-small.jpg at 225x300: orientation baked in, so the portrait display size is preserved (225 wide, 300 tall).",
       "files": ["evals/files/photo.jpg"],
       "expectations": [
         "transform.py resize --max 300x300 was used via kowork-python",
-        "The output is 300x400 — the EXIF orientation (6) was baked into the pixels before resizing, so the stored geometry is portrait",
+        "The output is 225x300 — the EXIF orientation (6) was baked into the pixels before resizing, so the stored geometry is portrait 480x640, the longest side (height) lands on 300, and the width follows at 225",
         "validate.py reports the result OK",
         "The input file was not modified (in == out is refused; a new path was written)"
       ]
@@ -76,11 +76,11 @@
     {
       "id": 7,
       "prompt": "Put wide.png and tall.png side by side in one image with a transparent gap between them, saved as pair.png.",
-      "expected_output": "pair.png: the two images in a horizontal row, unscaled and centered in their cells, with transparent padding (240x240 canvas).",
+      "expected_output": "pair.png: the two images in a horizontal row, unscaled and centered in their 240x240 cells, with transparent padding ((480+gap)x240 canvas).",
       "files": ["evals/files/wide.png", "evals/files/tall.png"],
       "expectations": [
         "combine.py --hstack (or --grid 2x1) was used via kowork-python with --background '#00000000' and a --gap",
-        "The inputs were NOT rescaled — cells are padded, so the canvas is 240px tall plus the gap",
+        "The inputs were NOT rescaled — cells are 240x240 each, so the canvas is exactly 240px tall and the gap only adds width",
         "The padding pixels are transparent (PNG output keeps the alpha), confirmed by Reading the image or checking corner pixels",
         "validate.py reports the result OK"
       ]

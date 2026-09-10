@@ -1,4 +1,4 @@
-# Kowork office runtime — top-level Python deps (shared by the document skills).
+# Kowork office runtime — top-level Python deps (shared by the document and image skills).
 # Regenerate the lock after editing this file:
 #   uv pip compile requirements.in -o requirements.lock --generate-hashes --python-version 3.12
 #

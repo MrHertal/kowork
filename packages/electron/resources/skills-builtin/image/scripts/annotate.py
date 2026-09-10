@@ -30,7 +30,14 @@ import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
-from imgutil import ImageError, apply_orientation, open_image, parse_color, save_image
+from imgutil import (
+    ImageError,
+    apply_orientation,
+    check_distinct_paths,
+    open_image,
+    parse_color,
+    save_image,
+)
 
 POSITIONS = ("center", "top-left", "top-right", "bottom-left", "bottom-right")
 DEFAULT_POSITION = "bottom-right"
@@ -44,16 +51,6 @@ ANCHORS = {
     "bottom-left": "ld",
     "bottom-right": "rd",
 }
-
-
-def check_distinct_paths(in_path: str, out_path: str) -> None:
-    """Refuse to overwrite the input file with the output."""
-    if os.path.realpath(in_path) == os.path.realpath(out_path) or (
-        os.path.exists(out_path) and os.path.samefile(in_path, out_path)
-    ):
-        raise ImageError(
-            f"input and output are the same file: {in_path}; choose a different output path"
-        )
 
 
 def check_position(position: str) -> None:
@@ -218,9 +215,9 @@ def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
 
     try:
-        check_distinct_paths(args.input, args.output)
+        check_distinct_paths(args.output, args.input)
         if args.command == "watermark" and args.mark:
-            check_distinct_paths(args.mark, args.output)
+            check_distinct_paths(args.output, args.mark)
         base = apply_orientation(open_image(args.input)).convert("RGBA")
         detail = args.func(base, args)
         save_image(base, args.output)

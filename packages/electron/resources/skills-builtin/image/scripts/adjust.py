@@ -21,12 +21,18 @@ from __future__ import annotations
 
 import argparse
 import math
-import os
 import sys
 
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
-from imgutil import ImageError, apply_orientation, open_image, save_image
+from imgutil import (
+    ImageError,
+    apply_orientation,
+    check_distinct_paths,
+    normalize_for_edit,
+    open_image,
+    save_image,
+)
 
 ENHANCERS = (
     ("brightness", ImageEnhance.Brightness),
@@ -34,16 +40,6 @@ ENHANCERS = (
     ("color", ImageEnhance.Color),
     ("sharpness", ImageEnhance.Sharpness),
 )
-
-
-def check_distinct_paths(in_path: str, out_path: str) -> None:
-    """Refuse to overwrite the input file with the output."""
-    if os.path.realpath(in_path) == os.path.realpath(out_path) or (
-        os.path.exists(out_path) and os.path.samefile(in_path, out_path)
-    ):
-        raise ImageError(
-            f"input and output are the same file: {in_path}; choose a different output path"
-        )
 
 
 def check_factor(name: str, value: float) -> None:
@@ -97,8 +93,13 @@ def main(argv: list[str]) -> int:
         return 1
 
     try:
-        check_distinct_paths(args.input, args.output)
+        check_distinct_paths(args.output, args.input)
         im = apply_orientation(open_image(args.input))
+        # The enhancement math and filters only handle the common 8-bit modes,
+        # so 16-bit/int/float grayscale and CMYK are normalized up front.
+        im, norm_note = normalize_for_edit(im)
+        if norm_note:
+            sys.stderr.write(f"note: {norm_note}\n")
         if im.mode == "P":
             im = im.convert("RGBA" if "transparency" in im.info else "RGB")
         alpha = im.getchannel("A") if "A" in im.getbands() else None

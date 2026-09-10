@@ -25,17 +25,14 @@ import sys
 
 from PIL import Image
 
-from imgutil import ImageError, apply_orientation, flatten, format_for_path, open_image
-
-
-def check_distinct_paths(in_path: str, out_path: str) -> None:
-    """Refuse to overwrite the input file with the output."""
-    if os.path.realpath(in_path) == os.path.realpath(out_path) or (
-        os.path.exists(out_path) and os.path.samefile(in_path, out_path)
-    ):
-        raise ImageError(
-            f"input and output are the same file: {in_path}; choose a different output path"
-        )
+from imgutil import (
+    ImageError,
+    apply_orientation,
+    check_distinct_paths,
+    flatten,
+    format_for_path,
+    open_image,
+)
 
 
 def create(args: argparse.Namespace) -> tuple[bool, int, int]:
@@ -49,9 +46,9 @@ def create(args: argparse.Namespace) -> tuple[bool, int, int]:
     if format_for_path(args.output) != "GIF":
         raise ImageError(f"output must be a .gif file: {args.output}")
 
+    check_distinct_paths(args.output, *args.frames)
     frames = []
     for path in args.frames:
-        check_distinct_paths(path, args.output)
         frames.append(flatten(apply_orientation(open_image(path))))
 
     size = frames[0].size
