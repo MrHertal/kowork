@@ -21,9 +21,10 @@ function builtinSkillsDir(): string {
     : path.join(root, "../../resources/skills-builtin");
 }
 
-// Office document skills (docx/pdf/xlsx/pptx) ship bundled and are always on:
-// no install step, and hidden from the UI. Register their dir on each startup
-// so a moved or updated install self-heals (see registerBuiltinSkillsPath).
+// Builtin document/image skills (docx/pdf/xlsx/pptx/image) ship bundled and are
+// always on: no install step, and hidden from the UI. Register their dir on
+// each startup so a moved or updated install self-heals (see
+// registerBuiltinSkillsPath).
 export async function ensureBuiltinSkillsRegistered(): Promise<void> {
   const dir = builtinSkillsDir();
   if (!existsSync(dir)) return;
