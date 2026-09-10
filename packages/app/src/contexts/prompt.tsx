@@ -35,6 +35,9 @@ export interface ImageAttachmentPart {
   filename: string;
   mime: string;
   blob: BlobReference;
+  // Local path captured on a sidecar, for the submit-time PDF fallback.
+  path?: string;
+  serverKey?: string;
 }
 
 export interface OfficeAttachmentPart {

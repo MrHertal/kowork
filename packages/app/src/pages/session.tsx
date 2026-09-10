@@ -64,7 +64,10 @@ import {
 import { blobDataUrl } from "@/utils/blob";
 import { ascending } from "@/utils/id";
 import { buildKoworkConfiguration } from "@/utils/kowork-configuration";
-import { officeAttachmentMatchesServer } from "@/utils/office-attachments";
+import {
+  officeAttachmentMatchesServer,
+  pdfFallbackOfficePart,
+} from "@/utils/office-attachments";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
 import {
@@ -270,6 +273,16 @@ export function Page({
         return;
       }
 
+      const resolvedAttachments = attachments.map(
+        (part): ImageAttachmentPart | OfficeAttachmentPart =>
+          part.type === "image"
+            ? (pdfFallbackOfficePart(part, {
+                pdfInput: currentModelVal.capabilities.input.pdf,
+                serverKey: server.key,
+              }) ?? part)
+            : part,
+      );
+
       sendingRef.current = true;
       setSending(true);
 
@@ -301,7 +314,7 @@ export function Page({
 
         messageID = ascending("message");
         const encodedAttachments = await Promise.all(
-          attachments.map(async (part) =>
+          resolvedAttachments.map(async (part) =>
             part.type === "image"
               ? { ...part, dataUrl: await blobDataUrl(part.blob, part.mime) }
               : part,

@@ -2,6 +2,10 @@ import {
   OFFICE_FILE_MIMES,
   type OfficeAttachmentFormat,
 } from "@/constants/file-picker";
+import type {
+  ImageAttachmentPart,
+  OfficeAttachmentPart,
+} from "@/contexts/prompt";
 
 export const OFFICE_ATTACHMENTS_METADATA_KEY = "koworkAttachments";
 
@@ -26,12 +30,32 @@ export function officeAttachmentMatchesServer(
   return attachment.serverKey === serverKey;
 }
 
+// Models without PDF input only get an error text for base64 PDF parts, so
+// fall back to a path attachment when a local path was captured.
+export function pdfFallbackOfficePart(
+  part: ImageAttachmentPart,
+  input: { pdfInput: boolean; serverKey: string },
+): OfficeAttachmentPart | undefined {
+  if (part.mime !== "application/pdf") return undefined;
+  if (input.pdfInput) return undefined;
+  if (!part.path || part.serverKey !== input.serverKey) return undefined;
+  return {
+    type: "office",
+    id: part.id,
+    filename: part.filename,
+    mime: part.mime,
+    path: part.path,
+    format: "pdf",
+    serverKey: part.serverKey,
+  };
+}
+
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
 function format(value: unknown): value is OfficeAttachmentFormat {
-  return value === "docx" || value === "xlsx" || value === "pptx";
+  return typeof value === "string" && value in OFFICE_FILE_MIMES;
 }
 
 export function officeAttachmentsFromMetadata(

@@ -67,6 +67,9 @@ function createStorage(memory: Map<string, string>): AsyncStorage {
 
 const png = (name = "a.png") => new File(["abc"], name, { type: "image/png" });
 
+const pdf = (name = "guide.pdf") =>
+  new File(["%PDF-1.7"], name, { type: "application/pdf" });
+
 const binary = () =>
   new File([Uint8Array.of(0, 255, 1, 2)], "blob.bin", {
     type: "application/octet-stream",
@@ -283,6 +286,101 @@ describe("usePromptAttachments", () => {
     expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
       description: "Kowork couldn't open this document. Try choosing it again.",
     });
+  });
+
+  test("captures the local path for PDF attachments on a sidecar", async () => {
+    const getPathForFile = vi.fn(() => Promise.resolve("/tmp/guide.pdf"));
+    platform.platform = "desktop";
+    platform.getPathForFile = getPathForFile;
+    currentServer = {
+      type: "sidecar",
+      variant: "base",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    const added = await attachments.addAttachment(pdf());
+
+    expect(added).toBe(true);
+    await waitFor(() => expect(images()).toHaveLength(1));
+    expect(images()[0]).toMatchObject({
+      filename: "guide.pdf",
+      mime: "application/pdf",
+      path: "/tmp/guide.pdf",
+    });
+    expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
+      target: "native",
+      wslDistro: undefined,
+    });
+  });
+
+  test("requests a WSL path for PDF attachments on a WSL sidecar", async () => {
+    const getPathForFile = vi.fn(() => Promise.resolve("/mnt/c/guide.pdf"));
+    platform.platform = "desktop";
+    platform.getPathForFile = getPathForFile;
+    currentServer = {
+      type: "sidecar",
+      variant: "wsl",
+      distro: "Ubuntu",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    await attachments.addAttachment(pdf());
+
+    expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
+      target: "wsl",
+      wslDistro: "Ubuntu",
+    });
+  });
+
+  test("adds PDFs without a path outside a local sidecar", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() => Promise.resolve("/tmp/guide.pdf"));
+    await setup();
+
+    const added = await attachments.addAttachment(pdf());
+
+    expect(added).toBe(true);
+    await waitFor(() => expect(images()).toHaveLength(1));
+    expect(images()[0]?.path).toBeUndefined();
+    expect(platform.getPathForFile).not.toHaveBeenCalled();
+  });
+
+  test("keeps PDFs without a path when the path lookup fails", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() => Promise.resolve(null));
+    currentServer = {
+      type: "sidecar",
+      variant: "base",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    const added = await attachments.addAttachment(pdf());
+
+    expect(added).toBe(true);
+    await waitFor(() => expect(images()).toHaveLength(1));
+    expect(images()[0]?.path).toBeUndefined();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  test("does not capture paths for image attachments", async () => {
+    const getPathForFile = vi.fn(() => Promise.resolve("/tmp/a.png"));
+    platform.platform = "desktop";
+    platform.getPathForFile = getPathForFile;
+    currentServer = {
+      type: "sidecar",
+      variant: "base",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    await attachments.addAttachment(png());
+
+    await waitFor(() => expect(images()).toHaveLength(1));
+    expect(images()[0]?.path).toBeUndefined();
+    expect(getPathForFile).not.toHaveBeenCalled();
   });
 
   test("warns only when no attachment could be added", async () => {
