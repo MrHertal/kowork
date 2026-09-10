@@ -61,9 +61,11 @@ versions. If validation or `present_files` fails, do not claim the PDF is ready.
 reportlab is a library, not a CLI, so creating a PDF means running a short
 script. Create a **uniquely named task directory with a random suffix inside the
 exact pre-approved temporary directory shown in the Bash tool instructions —
-never in the user's folder**. Use that task directory (`<task-temp-dir>`) for
-every working file. Do not work directly in the pre-approved directory, derive
-another path from environment variables, or create a sibling directory.
+never in the user's folder**. Copy that pre-approved path in full, exactly as
+shown — never shorten or reconstruct it. Use that task directory
+(`<task-temp-dir>`) for every working file. Do not work directly in the
+pre-approved directory, derive another path from environment variables, or
+create a sibling directory.
 
 1. Copy `scripts/create_pdf.py` into that task directory and edit the
    copy's `build_story()` to build the requested content.
@@ -75,10 +77,11 @@ another path from environment variables, or create a sibling directory.
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the task directory for the rest of the task: to
-   revise a PDF you generated this session, re-edit this script and re-run it
-   rather than rebuilding from scratch. The task directory is never beside the
-   user's file, and the OS reclaims it later.
+4. Keep that working copy in the task directory for the whole session — it
+   survives app restarts: to revise a PDF you generated in this session, even
+   days later, re-edit this script and re-run it rather than rebuilding from
+   scratch. The task directory is never beside the user's file, and the OS
+   reclaims it eventually.
 
 The template covers a document title, two heading levels, paragraphs, a bulleted
 and a numbered list, a styled table, an inline image, and a "Page N of M"

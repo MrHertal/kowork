@@ -1,4 +1,4 @@
-import { mkdtempSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 
 export function getSidecarConfigPath(userDataPath: string) {
@@ -10,10 +10,7 @@ export function createSidecarStorageEnv(
   tempPath: string,
 ) {
   const root = join(userDataPath, "sidecar");
-  const tmp = join(
-    mkdtempSync(join(tempPath, `${basename(userDataPath)}-`)),
-    "sidecar",
-  );
+  const tmp = join(stableTempDir(tempPath, basename(userDataPath)), "sidecar");
 
   return {
     XDG_CONFIG_HOME: join(root, "config"),
@@ -24,4 +21,19 @@ export function createSidecarStorageEnv(
     TMP: tmp,
     TEMP: tmp,
   };
+}
+
+function stableTempDir(tempPath: string, name: string) {
+  const dir = join(tempPath, name);
+  const stat = statSync(dir, { throwIfNoEntry: false });
+  const uid = process.getuid?.();
+  if (
+    stat &&
+    (!stat.isDirectory() || (uid !== undefined && stat.uid !== uid))
+  ) {
+    return mkdtempSync(join(tempPath, `${name}-`));
+  }
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  if (process.platform !== "win32") chmodSync(dir, 0o700);
+  return dir;
 }

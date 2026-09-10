@@ -63,9 +63,11 @@ ready.
 docx-js is a library, not a CLI, so creating a document means running a short
 script. Create a **uniquely named task directory with a random suffix inside the
 exact pre-approved temporary directory shown in the Bash tool instructions —
-never in the user's folder**. Use that task directory (`<task-temp-dir>`) for
-every working file. Do not work directly in the pre-approved directory, derive
-another path from environment variables, or create a sibling directory.
+never in the user's folder**. Copy that pre-approved path in full, exactly as
+shown — never shorten or reconstruct it. Use that task directory
+(`<task-temp-dir>`) for every working file. Do not work directly in the
+pre-approved directory, derive another path from environment variables, or
+create a sibling directory.
 
 1. Copy `scripts/create_docx.cjs` into that task directory and edit the
    copy's `children` array to build the requested content.
@@ -84,11 +86,12 @@ another path from environment variables, or create a sibling directory.
    If validation fails, repair via the Edit path (unpack → fix XML → validate →
    pack) — do not hand back an unvalidated file.
 
-4. Keep that working copy in the task directory for the rest of the task: to
-   revise a document you generated this session, re-edit this script and
-   re-run it rather than rebuilding from scratch. (For a document you did
-   **not** generate here, use the **Edit** path.) The task directory is never
-   beside the user's document, and the OS reclaims it later.
+4. Keep that working copy in the task directory for the whole session — it
+   survives app restarts: to revise a document you generated in this session,
+   even days later, re-edit this script and re-run it rather than rebuilding
+   from scratch. (For a document you did **not** generate here, use the
+   **Edit** path.) The task directory is never beside the user's document, and
+   the OS reclaims it eventually.
 
 The template covers headings, paragraphs, bulleted and numbered lists, a table,
 an inline image, a header, and a footer with page numbers, and sets the page to
