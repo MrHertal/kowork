@@ -30,9 +30,8 @@ export function officeAttachmentMatchesServer(
   return attachment.serverKey === serverKey;
 }
 
-// PDFs are sent as base64 file parts, but models without PDF input only get
-// an error text for them. When the local path was captured at attach time,
-// fall back to a path attachment so the model reads the PDF via its skill.
+// Models without PDF input only get an error text for base64 PDF parts, so
+// fall back to a path attachment when a local path was captured.
 export function pdfFallbackOfficePart(
   part: ImageAttachmentPart,
   input: { pdfInput: boolean; serverKey: string },
@@ -56,12 +55,7 @@ function record(value: unknown): value is Record<string, unknown> {
 }
 
 function format(value: unknown): value is OfficeAttachmentFormat {
-  return (
-    value === "docx" ||
-    value === "xlsx" ||
-    value === "pptx" ||
-    value === "pdf"
-  );
+  return typeof value === "string" && value in OFFICE_FILE_MIMES;
 }
 
 export function officeAttachmentsFromMetadata(

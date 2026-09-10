@@ -78,25 +78,22 @@ export function usePromptAttachments() {
       const mime = await attachmentMime(file);
       if (!mime) return "unsupported";
 
+      // Best-effort local path for the submit-time PDF fallback.
+      const pdfPath =
+        mime === "application/pdf" && platform.getPathForFile && sidecar
+          ? await platform.getPathForFile(file, {
+              target: sidecar.variant === "wsl" ? "wsl" : "native",
+              wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
+            })
+          : null;
       const attachment: ImageAttachmentPart = {
         type: "image",
         id: nanoid(),
         filename: file.name,
         mime,
         blob: await createBlobReference(file),
+        ...(pdfPath ? { path: pdfPath, serverKey: server.key } : {}),
       };
-      // Best-effort local path for the submit-time PDF fallback; failure
-      // just means the PDF is always sent as base64.
-      if (mime === "application/pdf" && platform.getPathForFile && sidecar) {
-        const path = await platform.getPathForFile(file, {
-          target: sidecar.variant === "wsl" ? "wsl" : "native",
-          wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
-        });
-        if (path) {
-          attachment.path = path;
-          attachment.serverKey = server.key;
-        }
-      }
       update((prev) => [...prev, attachment]);
       return "added";
     },

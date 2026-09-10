@@ -43,8 +43,8 @@ export function officeAttachmentInfo(
   file: Pick<File, "name">,
 ): { format: OfficeAttachmentFormat; mime: string } | undefined {
   const format = ext(file.name);
-  // OFFICE_FILE_MIMES also covers pdf, but PDFs only become path attachments
-  // as a submit-time fallback; at attach time they go through attachmentMime.
+  // OFFICE_FILE_MIMES covers pdf, but PDFs only become path attachments at
+  // submit time; at attach time they go through attachmentMime.
   if (!ACCEPTED_OFFICE_FILE_TYPES.includes(`.${format}`)) return;
   return {
     format: format as OfficeAttachmentFormat,

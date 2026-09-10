@@ -35,8 +35,7 @@ export interface ImageAttachmentPart {
   filename: string;
   mime: string;
   blob: BlobReference;
-  // Local path captured for PDFs on a local sidecar; enables the submit-time
-  // path-attachment fallback for models without PDF input.
+  // Local path captured on a sidecar, for the submit-time PDF fallback.
   path?: string;
   serverKey?: string;
 }
