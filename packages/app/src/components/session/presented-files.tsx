@@ -1,6 +1,7 @@
 import {
   ExternalLinkIcon,
   FileIcon,
+  FileImageIcon,
   FileSpreadsheetIcon,
   FileTextIcon,
   PresentationIcon,
@@ -25,20 +26,40 @@ export type PresentedFile = {
   size: number;
 };
 
-type DocumentKind = "word" | "excel" | "powerpoint" | "pdf";
+type FileKind = "word" | "excel" | "powerpoint" | "pdf" | "image";
 
 const openSpinnerDelay = 250;
 const openSpinnerMinimum = 300;
 
-const icons: Record<DocumentKind, LucideIcon> = {
+const icons: Record<FileKind, LucideIcon> = {
   word: FileTextIcon,
   excel: FileSpreadsheetIcon,
   powerpoint: PresentationIcon,
   pdf: FileIcon,
+  image: FileImageIcon,
 };
 
-function documentKind(file: PresentedFile): DocumentKind {
+const imageTypeLabels: Record<string, string> = {
+  avif: "AVIF",
+  bmp: "BMP",
+  gif: "GIF",
+  ico: "ICO",
+  jpeg: "JPEG",
+  jpg: "JPEG",
+  png: "PNG",
+  tif: "TIFF",
+  tiff: "TIFF",
+  webp: "WebP",
+};
+
+function fileExtension(filename: string) {
+  return filename.split(".").at(-1)?.toLowerCase() ?? "";
+}
+
+function fileKind(file: PresentedFile): FileKind {
   const name = file.filename.toLowerCase();
+  if (file.mime.startsWith("image/") || fileExtension(name) in imageTypeLabels)
+    return "image";
   if (file.mime === "application/pdf" || name.endsWith(".pdf")) return "pdf";
   if (file.mime.includes("spreadsheetml") || name.endsWith(".xlsx"))
     return "excel";
@@ -47,7 +68,7 @@ function documentKind(file: PresentedFile): DocumentKind {
   return "word";
 }
 
-function documentTypeLabel(kind: DocumentKind): string {
+function fileTypeLabel(file: PresentedFile, kind: FileKind): string {
   switch (kind) {
     case "word":
       return m.session_document_type_word();
@@ -57,6 +78,8 @@ function documentTypeLabel(kind: DocumentKind): string {
       return m.session_document_type_powerpoint();
     case "pdf":
       return m.session_document_type_pdf();
+    case "image":
+      return imageTypeLabels[fileExtension(file.filename)] ?? file.mime;
   }
 }
 
@@ -76,7 +99,7 @@ function PresentedFileCard({
     openSpinnerDelay,
     openSpinnerMinimum,
   );
-  const kind = documentKind(file);
+  const kind = fileKind(file);
   const Icon = icons[kind];
 
   const handleOpen = async () => {
@@ -109,6 +132,8 @@ function PresentedFileCard({
               "bg-orange-500/10 text-orange-700 ring-orange-500/15 dark:text-orange-300",
             kind === "pdf" &&
               "bg-red-500/10 text-red-700 ring-red-500/15 dark:text-red-300",
+            kind === "image" &&
+              "bg-purple-500/10 text-purple-700 ring-purple-500/15 dark:text-purple-300",
           )}
         >
           <Icon className="size-5" aria-hidden="true" />
@@ -118,7 +143,7 @@ function PresentedFileCard({
             {file.filename}
           </div>
           <div className="text-xs text-muted-foreground">
-            {documentTypeLabel(kind)}
+            {fileTypeLabel(file, kind)}
           </div>
         </div>
         {canOpen && (

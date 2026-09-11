@@ -48,11 +48,15 @@ const spreadsheetExtensions = new Set(["csv", "xls", "xlsx"]);
 const presentationExtensions = new Set(["key", "ppt", "pptx"]);
 const imageExtensions = new Set([
   "avif",
+  "bmp",
   "gif",
+  "ico",
   "jpeg",
   "jpg",
   "png",
   "svg",
+  "tif",
+  "tiff",
   "webp",
 ]);
 const documentExtensions = new Set(["doc", "docx", "md", "odt", "rtf", "txt"]);
