@@ -135,10 +135,13 @@ Replace `<skill-creator-base-dir>` with the absolute base directory reported
 when this skill is loaded. Do not resolve `scripts/quick_validate.py` from the
 user's current working directory.
 
-This checks the required frontmatter, the skill name and folder, and local
-package paths mentioned by the instructions. Also run every new or changed
-helper on a representative safe input. Validation confirms that the package is
-coherent; it does not prove that the instructions produce a useful result.
+This checks the required frontmatter using the canonical YAML subset described
+above, the skill name and folder, and local package paths mentioned by the
+instructions. Use plain or quoted string values, indented block strings, and an
+indented string-to-string `metadata` map; avoid YAML aliases, tags, collections,
+or other advanced syntax. Also run every new or changed helper on a
+representative safe input. Validation confirms that the package is coherent;
+it does not prove that the instructions produce a useful result.
 
 ## Improve an existing skill
 

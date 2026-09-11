@@ -46,12 +46,37 @@ class QuickValidateTests(TestCase):
         )
         self.assertEqual(errors, [])
 
+    def test_accepts_yaml_comments_and_single_space_indentation(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            "---\n"
+            'name: "meeting-notes" # stable identifier\n'
+            "description: >-\n Format notes\n"
+            "metadata:\n # portable metadata\n audience: managers\n"
+            "---\n",
+        )
+        self.assertEqual(errors, [])
+
     def test_rejects_invalid_yaml(self) -> None:
         errors = self.validate(
             "meeting-notes",
             '---\nname: meeting-notes\ndescription: "unterminated\n---\n',
         )
         self.assertIn("frontmatter description has an invalid quoted value", errors)
+
+    def test_rejects_unescaped_single_quote(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            "---\nname: meeting-notes\ndescription: 'it's reusable'\n---\n",
+        )
+        self.assertIn("frontmatter description has an invalid quoted value", errors)
+
+    def test_requires_exact_frontmatter_delimiters(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            " --- \nname: meeting-notes\ndescription: Format notes\n --- \n",
+        )
+        self.assertIn("SKILL.md must start with YAML frontmatter", errors)
 
     def test_rejects_empty_required_values(self) -> None:
         errors = self.validate(

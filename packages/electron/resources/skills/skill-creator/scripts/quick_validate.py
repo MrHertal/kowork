@@ -35,8 +35,22 @@ def _parse_string_scalar(raw_value: str, key: str) -> str:
         return ""
 
     if value.startswith('"'):
+        escaped = False
+        closing = None
+        for position, character in enumerate(value[1:], start=1):
+            if character == '"' and not escaped:
+                closing = position
+                break
+            escaped = character == "\\" and not escaped
+            if character != "\\":
+                escaped = False
+        if closing is None:
+            raise ValueError(f"frontmatter {key} has an invalid quoted value")
+        suffix = value[closing + 1 :].strip()
+        if suffix and not suffix.startswith("#"):
+            raise ValueError(f"frontmatter {key} has an invalid quoted value")
         try:
-            parsed = json.loads(value)
+            parsed = json.loads(value[: closing + 1])
         except json.JSONDecodeError as error:
             raise ValueError(f"frontmatter {key} has an invalid quoted value") from error
         if not isinstance(parsed, str):
@@ -44,9 +58,26 @@ def _parse_string_scalar(raw_value: str, key: str) -> str:
         return parsed
 
     if value.startswith("'"):
-        if len(value) < 2 or not value.endswith("'"):
+        output: list[str] = []
+        position = 1
+        closing = None
+        while position < len(value):
+            if value[position] != "'":
+                output.append(value[position])
+                position += 1
+                continue
+            if position + 1 < len(value) and value[position + 1] == "'":
+                output.append("'")
+                position += 2
+                continue
+            closing = position
+            break
+        if closing is None:
             raise ValueError(f"frontmatter {key} has an invalid quoted value")
-        return value[1:-1].replace("''", "'")
+        suffix = value[closing + 1 :].strip()
+        if suffix and not suffix.startswith("#"):
+            raise ValueError(f"frontmatter {key} has an invalid quoted value")
+        return "".join(output)
 
     value = _strip_plain_comment(value)
     if not value:
@@ -63,14 +94,14 @@ def _parse_string_scalar(raw_value: str, key: str) -> str:
 def read_frontmatter(skill_md: Path) -> tuple[dict[str, Any], str]:
     content = skill_md.read_text(encoding="utf-8")
     lines = content.splitlines()
-    if not lines or lines[0].strip() != FRONTMATTER_BOUNDARY:
+    if not lines or lines[0] != FRONTMATTER_BOUNDARY:
         raise ValueError("SKILL.md must start with YAML frontmatter")
 
     try:
         end = next(
             index
             for index, line in enumerate(lines[1:], start=1)
-            if line.strip() == FRONTMATTER_BOUNDARY
+            if line == FRONTMATTER_BOUNDARY
         )
     except StopIteration as error:
         raise ValueError("SKILL.md frontmatter is missing its closing ---") from error
@@ -97,13 +128,21 @@ def read_frontmatter(skill_md: Path) -> tuple[dict[str, Any], str]:
         if value in {"|", "|-", "|+", ">", ">-", ">+"}:
             block: list[str] = []
             index += 1
+            indentation = None
             while index < end and (not lines[index] or lines[index][0].isspace()):
-                if lines[index] and not lines[index].startswith("  "):
+                if "\t" in lines[index][: len(lines[index]) - len(lines[index].lstrip())]:
                     raise ValueError(
                         f"invalid YAML frontmatter at line {index + 1}: "
-                        "block values must be indented"
+                        "use spaces to indent block values"
                     )
-                block.append(lines[index][2:] if lines[index] else "")
+                if lines[index]:
+                    current = len(lines[index]) - len(lines[index].lstrip(" "))
+                    indentation = indentation or current
+                    if current < indentation:
+                        break
+                    block.append(lines[index][indentation:])
+                else:
+                    block.append("")
                 index += 1
             separator = "\n" if value.startswith("|") else " "
             fields[key] = separator.join(part for part in block if part)
@@ -112,9 +151,16 @@ def read_frontmatter(skill_md: Path) -> tuple[dict[str, Any], str]:
         if key == "metadata" and not value:
             metadata: dict[str, str] = {}
             index += 1
-            while index < end and lines[index].startswith("  "):
+            while index < end and (
+                not lines[index]
+                or lines[index].lstrip().startswith("#")
+                or lines[index][0].isspace()
+            ):
+                if not lines[index] or lines[index].lstrip().startswith("#"):
+                    index += 1
+                    continue
                 nested = re.match(
-                    r"^  ([A-Za-z][A-Za-z0-9_-]*):(?:[ \t]*(.*))?$", lines[index]
+                    r"^ +([A-Za-z][A-Za-z0-9_-]*):(?:[ \t]*(.*))?$", lines[index]
                 )
                 if not nested:
                     raise ValueError(
