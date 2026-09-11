@@ -1,0 +1,94 @@
+{
+  "skill_name": "kowork-image",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a 1200x630 banner image called banner.png: a vertical gradient from dark blue to teal, the title \"Summer Sale\" in large white text, and a smaller \"Up to 50% off\" subtitle under it.",
+      "expected_output": "A new, valid 1200x630 PNG authored with Pillow showing the gradient background and the two text lines.",
+      "files": [],
+      "expectations": [
+        "The create path was used: create_image.py copied into a uniquely named task directory with a random suffix inside the exact pre-approved session temporary directory from the Bash tool instructions (not the user's folder), its build_image() edited, and the copy run via kowork-python — not a hand-assembled file",
+        "The working script is retained for later revisions in the same session, including after app restarts",
+        "The output is 1200x630 with a gradient background and the title and subtitle text",
+        "Translucent elements, if any, were drawn on an overlay and merged with Image.alpha_composite (ImageDraw does not alpha-blend)",
+        "validate.py reports the result OK, and the image was Read for visual QA",
+        "No external tools (ImageMagick, ffmpeg, sips) and no image library other than Pillow were used"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What are the dimensions of photo.jpg, and why does it display rotated in some viewers?",
+      "expected_output": "Stored geometry 640x480, with EXIF Orientation 6, so viewers rotate it to display as 480x640 portrait; camera Make/Model TestMake/TestCam 3000.",
+      "files": ["evals/files/photo.jpg"],
+      "expectations": [
+        "info.py was used via kowork-python (not a guess from the file name or size)",
+        "The answer reports the stored 640x480 geometry AND the EXIF Orientation 6 tag as the reason it displays rotated",
+        "No EXIF-capable external tool (exiftool, sips) was used"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Convert photo.jpg to WebP for the web, quality 80, and make sure no camera metadata ends up in the web version.",
+      "expected_output": "A valid WebP next to the original, encoded at quality 80 with no EXIF metadata.",
+      "files": ["evals/files/photo.jpg"],
+      "expectations": [
+        "convert.py was used via kowork-python with --quality 80 and --strip-metadata",
+        "The output is a WebP; validate.py reports it OK",
+        "info.py on the output shows no EXIF tags (Make/Model/Orientation gone)",
+        "EXIF orientation was not baked in (convert re-encodes; the tag would have traveled — stripping it leaves stored 640x480 pixels)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Resize photo.jpg so its longest side is 300 px, saved as photo-small.jpg.",
+      "expected_output": "photo-small.jpg at 225x300: orientation baked in, so the portrait display size is preserved (225 wide, 300 tall).",
+      "files": ["evals/files/photo.jpg"],
+      "expectations": [
+        "transform.py resize --max 300x300 was used via kowork-python",
+        "The output is 225x300 — the EXIF orientation (6) was baked into the pixels before resizing, so the stored geometry is portrait 480x640, the longest side (height) lands on 300, and the width follows at 225",
+        "validate.py reports the result OK",
+        "The input file was not modified (in == out is refused; a new path was written)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Put logo.png as a semi-transparent watermark in the bottom-right corner of photo.jpg, about a quarter of the image width, and save it as photo-watermarked.jpg.",
+      "expected_output": "photo-watermarked.jpg with the logo at ~25% width, bottom-right, semi-transparent, flattened correctly onto the photo.",
+      "files": ["evals/files/photo.jpg", "evals/files/logo.png"],
+      "expectations": [
+        "annotate.py watermark was used via kowork-python with --mark logo.png, --position bottom-right (or default), --scale 0.25, and an --opacity below 1",
+        "The output was visually confirmed by Reading it (the logo sits bottom-right over the baked-orientation portrait photo)",
+        "Saving to JPEG flattened the alpha cleanly (no black or white box around the circular logo beyond the flatten background)",
+        "validate.py reports the result OK"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Make an animated GIF called cycle.gif from frame-1.png, frame-2.png, and frame-3.png, half a second per frame, looping forever.",
+      "expected_output": "cycle.gif with the 3 frames in order, 500 ms per frame, looping forever.",
+      "files": [
+        "evals/files/frame-1.png",
+        "evals/files/frame-2.png",
+        "evals/files/frame-3.png"
+      ],
+      "expectations": [
+        "gif.py create was used via kowork-python with --duration 500 --loop 0",
+        "info.py on the output reports 3 frames, 500 ms/frame, looping forever (frames are distinct, so no merging occurred)",
+        "validate.py reports the result OK (all 3 frames decode)",
+        "Frames are in the requested red, green, blue order (confirmed via gif.py extract + Reading a frame, or equivalent)"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Put wide.png and tall.png side by side in one image with a transparent gap between them, saved as pair.png.",
+      "expected_output": "pair.png: the two images in a horizontal row, unscaled and centered in their 240x240 cells, with transparent padding ((480+gap)x240 canvas).",
+      "files": ["evals/files/wide.png", "evals/files/tall.png"],
+      "expectations": [
+        "combine.py --hstack (or --grid 2x1) was used via kowork-python with --background '#00000000' and a --gap",
+        "The inputs were NOT rescaled — cells are 240x240 each, so the canvas is exactly 240px tall and the gap only adds width",
+        "The padding pixels are transparent (PNG output keeps the alpha), confirmed by Reading the image or checking corner pixels",
+        "validate.py reports the result OK"
+      ]
+    }
+  ]
+}

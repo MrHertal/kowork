@@ -11,6 +11,7 @@ import { usePlatform } from "@/contexts/platform";
 const HIDDEN_SKILL_NAMES = new Set([
   "customize-opencode",
   "kowork-docx",
+  "kowork-image",
   "kowork-pdf",
   "kowork-pptx",
   "kowork-xlsx",

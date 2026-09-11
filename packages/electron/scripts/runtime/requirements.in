@@ -1,4 +1,4 @@
-# Kowork office runtime — top-level Python deps (shared by the document skills).
+# Kowork office runtime — top-level Python deps (shared by the document and image skills).
 # Regenerate the lock after editing this file:
 #   uv pip compile requirements.in -o requirements.lock --generate-hashes --python-version 3.12
 #
@@ -13,9 +13,9 @@ lxml==6.1.1
 defusedxml==0.7.1
 mammoth==1.12.0
 
-# pdf skill. pillow and pypdfium2 are transitive (via pdfplumber) but pinned
-# explicitly: pillow is the shared imaging library and pypdfium2 is used directly
-# for rendering.
+# pdf + image skills. pillow and pypdfium2 are transitive (via pdfplumber) but
+# pinned explicitly: pillow is the shared imaging library (pdf embedding and all
+# image-skill work) and pypdfium2 is used directly for rendering.
 pypdf==6.13.3
 pdfplumber==0.11.10
 reportlab==5.0.0
