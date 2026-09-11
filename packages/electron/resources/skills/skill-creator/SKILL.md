@@ -147,7 +147,12 @@ Sometimes the user doesn't want a new skill — they want to fix or upgrade one 
   - If the skill **doesn't kick in when it should** (or kicks in when it shouldn't), the fix is almost always in the **description** — adjust which situations and phrasings it names.
   - If the skill **runs but the result isn't right**, the fix is in the **body** — clarify the steps, add a missing rule or example, or explain the reasoning better.
 - **Revise with the same principles** as writing a new skill: a clear description that names when to use it, and a direct, example-backed body. Keep the skill's existing name and folder unless the user specifically wants to rename it.
-- **Save over the same SKILL.md.** Let the user know they may need to start a fresh request (or reload) for the updated version to take effect — and that it's completely normal to go a couple of rounds: adjust, try it, adjust again.
+- **Save over the same SKILL.md.** Kowork may keep an already loaded skill in
+  memory, so tell the user to reload or restart Kowork after editing an
+  installed skill. Removing and re-adding its folder in Settings also refreshes
+  it. Starting a fresh request alone does not guarantee that the edit is
+  loaded. It is completely normal to go a couple of rounds: adjust, reload,
+  try it, and adjust again.
 
 ## Save it and switch it on
 
