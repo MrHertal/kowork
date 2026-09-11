@@ -8,7 +8,7 @@ description: >-
   style cells (fonts, fills, number formats, widths); add/rename/remove/move/copy
   sheets; inspect a workbook's structure; make a chart; or convert between .xlsx
   and .csv. Triggers on any mention of a spreadsheet, Excel, or a
-  .xlsx/.xlsm/.xltx/.csv file, even without the word "xlsx".
+  .xlsx/.xlsm/.xltx/.xltm/.csv file, even without the word "xlsx".
 ---
 
 # Working with Excel (.xlsx) files
@@ -49,6 +49,9 @@ ready.
   was loaded, not against the user's working directory. They print clear errors
   and use non-zero exit codes, and every mutating
   command writes a **new** file (`-o`) — it never edits in place.
+- For raster images used in a workbook, use the image skill for standalone
+  image processing and this skill for container-level work, including embedding
+  the finished asset where supported.
 
 ## Styling
 
@@ -89,6 +92,8 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+The pre-approved directory is scoped to the current task/session and remains
+available when that same task resumes after an app restart.
 Use absolute paths for any source assets referenced by the copied template so
 they do not resolve against the user's working directory.
 
@@ -102,12 +107,12 @@ they do not resolve against the user's working directory.
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise a workbook you generated in this session,
-   even days later, re-edit this script and re-run it rather than rebuilding
-   from scratch. (For a workbook you did **not** generate here, use the
-   **Edit** path.) The task directory is never beside the user's workbook, and
-   the OS reclaims it eventually.
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise a workbook you generated in this task, re-edit this script and re-run
+   it rather than rebuilding from scratch. (For a workbook you did **not**
+   generate here, use the **Edit** path.) The task directory is never beside
+   the user's workbook, and the OS reclaims it eventually.
 
 The template covers a styled header row (bold, filled, centred), data rows,
 number formats (currency and percent), live formulas (a per-row `=B*C` and a

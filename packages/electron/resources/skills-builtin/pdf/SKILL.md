@@ -45,6 +45,9 @@ versions. If validation or `present_files` fails, do not claim the PDF is ready.
   was loaded, not against the user's working directory. They print clear errors
   and use non-zero exit codes. File-editing commands write a **new** output with
   `-o`; directory-producing commands take an explicit output directory.
+- For raster images used in a PDF, use the image skill for standalone image
+  processing and this skill for container-level work, including embedding the
+  finished asset where supported.
 
 ## Styling
 
@@ -86,6 +89,8 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+The pre-approved directory is scoped to the current task/session and remains
+available when that same task resumes after an app restart.
 Use absolute paths for any source assets referenced by the copied template so
 they do not resolve against the user's working directory.
 
@@ -99,11 +104,11 @@ they do not resolve against the user's working directory.
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise a PDF you generated in this session, even
-   days later, re-edit this script and re-run it rather than rebuilding from
-   scratch. The task directory is never beside the user's file, and the OS
-   reclaims it eventually.
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise a PDF you generated in this task, re-edit this script and re-run it
+   rather than rebuilding from scratch. The task directory is never beside the
+   user's file, and the OS reclaims it eventually.
 
 Set `FONT`, `SIZE`, and the color constants at the top to restyle the PDF.
 Custom fonts must be registered with reportlab before use.

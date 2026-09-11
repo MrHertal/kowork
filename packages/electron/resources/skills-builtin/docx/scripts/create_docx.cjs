@@ -9,11 +9,11 @@
 //
 //     kowork-node create_docx.cjs out.docx
 //
-// It runs from a temp directory (never the user's folder); the copy is kept
-// there after a successful write so you can edit it and re-run to revise the
-// document in the same session (the OS reclaims temp later). Use the .cjs
-// extension so `require` works even when the surrounding project is an ES module
-// ("type": "module" in package.json).
+// The directory is scoped to the current task/session. The copy stays there
+// after a successful write, so you can edit and re-run it when that same task
+// resumes after an app restart (the OS reclaims temp eventually). Use the .cjs
+// extension so `require` works even when the surrounding project is an ES
+// module ("type": "module" in package.json).
 //
 // It demonstrates every "create" building block: heading levels, paragraphs, a
 // bulleted list, a numbered list (needs a `numbering` config), a table, an

@@ -11,8 +11,10 @@ description: >-
   Triggers on any mention of an image, photo, picture, logo, watermark,
   thumbnail, banner, or screenshot, or a
   .png/.jpg/.jpeg/.webp/.gif/.bmp/.tiff/.tif/.ico/.avif file, even without the
-  word "image". Images embedded in Office documents or PDFs are handled by
-  those skills, not this one.
+  word "image". For raster images used inside an Office document or PDF, use
+  this skill for standalone image processing and the relevant document skill
+  for container-level work, including embedding the finished asset where
+  supported.
 ---
 
 # Working with image files
@@ -101,7 +103,8 @@ path in full, exactly as shown — never shorten or reconstruct it. Use that tas
 directory (`<task-temp-dir>`) for every working file. Do not work directly in
 the pre-approved directory, derive another path from environment variables, or
 create a sibling directory. The pre-approved directory is scoped to the current
-session; use it for intermediate images and extracted frames used for QA too.
+task/session and remains available when that same task resumes after an app
+restart; use it for intermediate images and extracted frames used for QA too.
 Use absolute paths for any source assets referenced by the copied template so
 they do not resolve against the user's working directory.
 
@@ -116,11 +119,11 @@ they do not resolve against the user's working directory.
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file. Where appearance matters, also Read the output as
    visual QA.
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise an image you generated in this session, even
-   days later, re-edit this script and re-run it rather than rebuilding from
-   scratch. The task directory is never beside the user's file, and the OS
-   reclaims it eventually.
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise an image you generated in this task, re-edit this script and re-run it
+   rather than rebuilding from scratch. The task directory is never beside the
+   user's file, and the OS reclaims it eventually.
 
 Set `FONT` (absolute TrueType font paths or `None` for Pillow's bundled font),
 `SIZE`, and the color constants at the top to restyle the image.
@@ -280,6 +283,9 @@ kowork-python scripts/combine.py a.png b.png -o out.png --hstack --background '#
   Pillow's safety limit — an oversized grid fails with a clean `error:`.
 
 ## Animated GIF (create / extract)
+
+For QA extraction or other temporary GIF work, create the unique task directory
+described under Create if one does not already exist for the current task.
 
 ```sh
 kowork-python scripts/gif.py create frame1.png frame2.png frame3.png -o out.gif --duration 200 --loop 0

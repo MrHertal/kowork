@@ -9,13 +9,13 @@
 //
 //     kowork-node create_pptx.cjs out.pptx
 //
-// It runs from a temp directory (never the user's folder); the copy is kept
-// there after a successful write so you can edit it and re-run to revise the
-// deck in the same session (the OS reclaims temp later). Use the .cjs extension
-// so `require` works even when the surrounding project is an ES module
-// ("type": "module" in package.json). This file is intentionally standalone: it
-// does NOT import the skill's Python helpers (pptxutil.py); pptxgenjs is the only
-// dependency.
+// The directory is scoped to the current task/session. The copy stays there
+// after a successful write, so you can edit and re-run it when that same task
+// resumes after an app restart (the OS reclaims temp eventually). Use the .cjs
+// extension so `require` works even when the surrounding project is an ES
+// module ("type": "module" in package.json). This file is intentionally
+// standalone: it does NOT import the skill's Python helpers (pptxutil.py);
+// pptxgenjs is the only dependency.
 //
 // Slide size: pptxgenjs ships four layouts; pick one and the whole deck scales to
 // it. Dimensions are width x height in inches:

@@ -11,9 +11,9 @@ the path the user wants:
 
     kowork-python create_pdf.py out.pdf
 
-It runs from a temp directory (never the user's folder); the copy is kept there
-after a successful write so you can edit it and re-run to revise the PDF in the
-same session (the OS reclaims temp later).
+The directory is scoped to the current task/session. The copy stays there after
+a successful write, so you can edit and re-run it when that same task resumes
+after an app restart (the OS reclaims temp eventually).
 
 It demonstrates every "create" building block, each editable in one obvious
 place: a document title, two heading levels, body paragraphs, a bulleted list, a

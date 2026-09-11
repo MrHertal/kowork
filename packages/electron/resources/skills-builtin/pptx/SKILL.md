@@ -6,8 +6,8 @@ description: >-
   summarize, or extract slide titles, body text, tables, or speaker notes; edit
   a slide template by hand; reorder, duplicate, delete, add, or clean up whole
   slides; or check a deck's layout. Triggers on any mention of a presentation,
-  deck, slides, slideshow, or a .pptx/.pptm/.potx/.ppsx file, even without the word
-  "pptx".
+  deck, slides, slideshow, or a .pptx/.pptm/.potx/.potm/.ppsx/.ppsm file, even
+  without the word "pptx".
 ---
 
 # Working with PowerPoint (.pptx) presentations
@@ -53,6 +53,9 @@ is ready.
   and use non-zero exit codes, and every mutating
   command writes a **new** file (`-o`) — it never edits in place — and refuses to
   write a macro-enabled (`.pptm`/`.potm`/`.ppsm`) output.
+- For raster images used in a presentation, use the image skill for standalone
+  image processing and this skill for container-level work, including embedding
+  the finished asset where supported.
 
 ## Styling
 
@@ -91,6 +94,8 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+The pre-approved directory is scoped to the current task/session and remains
+available when that same task resumes after an app restart.
 Use absolute paths for any source assets referenced by the copied template so
 they do not resolve against the user's working directory.
 
@@ -104,10 +109,11 @@ they do not resolve against the user's working directory.
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise a deck you generated in this session, even
-   days later, re-edit this script and re-run it rather than rebuilding from
-   scratch. (For a deck you did **not** generate here, use the raw-OOXML
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise a deck you generated in this task, re-edit this script and re-run it
+   rather than rebuilding from scratch. (For a deck you did **not** generate
+   here, use the raw-OOXML
    **Edit a template** path or **Slide operations**.) The task directory is
    never beside the user's deck, and the OS reclaims it eventually.
 

@@ -6,8 +6,8 @@ description: >-
   redline, or extract text from a Word document — e.g. building a doc with
   headings, tables, lists, images, headers/footers, or a table of contents;
   making tracked-change edits; adding comments; or converting a Word file to
-  Markdown. Triggers on any mention of Word documents or a .docx/.docm/.dotm
-  file, even without the word "docx".
+  Markdown. Triggers on any mention of Word documents or a
+  .docx/.docm/.dotx/.dotm file, even without the word "docx".
 ---
 
 # Working with Word (.docx) documents
@@ -49,6 +49,9 @@ ready.
   and use non-zero exit codes, and
   every mutating command writes to a **new** output (never editing the input
   in place) and refuses a macro-enabled (`.docm`/`.dotm`) output.
+- For raster images used in a document, use the image skill for standalone
+  image processing and this skill for container-level work, including embedding
+  the finished asset where supported.
 
 ## Styling
 
@@ -87,6 +90,8 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+The pre-approved directory is scoped to the current task/session and remains
+available when that same task resumes after an app restart.
 Use absolute paths for any source assets referenced by the copied template so
 they do not resolve against the user's working directory.
 
@@ -108,12 +113,12 @@ they do not resolve against the user's working directory.
    validate again — do not hand back an unvalidated file. Keep the script as
    the source of truth so later revisions preserve the repairs.
 
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise a document you generated in this session,
-   even days later, re-edit this script and re-run it rather than rebuilding
-   from scratch. (For a document you did **not** generate here, use the
-   **Edit** path.) The task directory is never beside the user's document, and
-   the OS reclaims it eventually.
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise a document you generated in this task, re-edit this script and re-run
+   it rather than rebuilding from scratch. (For a document you did **not**
+   generate here, use the **Edit** path.) The task directory is never beside
+   the user's document, and the OS reclaims it eventually.
 
 The template covers headings, paragraphs, bulleted and numbered lists, a table,
 an inline image, a header, and a footer with page numbers, and sets the page to
