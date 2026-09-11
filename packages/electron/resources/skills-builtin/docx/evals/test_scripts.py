@@ -65,19 +65,23 @@ class DocxScriptsTest(unittest.TestCase):
             self.assertIn("OK:", self.run_script("validate", output).stdout)
 
     def test_edit_refuses_in_place(self):
-        source = FIXTURES / "contract.docx"
-        result = self.run_script(
-            "edit_text",
-            source,
-            "--find",
-            "twelve months",
-            "--replace",
-            "twenty-four months",
-            "-o",
-            source,
-            success=False,
-        )
-        self.assertIn("error:", result.stderr)
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "source.docx"
+            shutil.copyfile(FIXTURES / "contract.docx", source)
+            original = source.read_bytes()
+            result = self.run_script(
+                "edit_text",
+                source,
+                "--find",
+                "twelve months",
+                "--replace",
+                "twenty-four months",
+                "-o",
+                source,
+                success=False,
+            )
+            self.assertIn("error:", result.stderr)
+            self.assertEqual(source.read_bytes(), original)
 
     def test_edit_refuses_hard_link_alias(self):
         with tempfile.TemporaryDirectory() as temp:

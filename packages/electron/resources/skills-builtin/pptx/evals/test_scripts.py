@@ -55,18 +55,22 @@ class PptxScriptsTest(unittest.TestCase):
             self.assertIn("OK:", self.run_script("validate", output).stdout)
 
     def test_reorder_refuses_in_place(self):
-        source = FIXTURES / "quarterly.pptx"
-        result = self.run_script(
-            "slides",
-            "reorder",
-            source,
-            "-o",
-            source,
-            "--order",
-            "5,1,2,3,4",
-            success=False,
-        )
-        self.assertIn("error:", result.stderr)
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "source.pptx"
+            shutil.copyfile(FIXTURES / "quarterly.pptx", source)
+            original = source.read_bytes()
+            result = self.run_script(
+                "slides",
+                "reorder",
+                source,
+                "-o",
+                source,
+                "--order",
+                "5,1,2,3,4",
+                success=False,
+            )
+            self.assertIn("error:", result.stderr)
+            self.assertEqual(source.read_bytes(), original)
 
     def test_reorder_refuses_hard_link_alias(self):
         with tempfile.TemporaryDirectory() as temp:

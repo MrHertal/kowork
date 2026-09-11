@@ -20,6 +20,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
 from PIL import Image
@@ -86,6 +87,12 @@ def main(argv: list[str]) -> int:
     else:
         if len(args.paths) < 3:
             sys.stderr.write("error: an output path is required; pass -o <out>\n")
+            return 1
+        if os.path.exists(args.paths[0]):
+            sys.stderr.write(
+                "error: the first positional path already exists; pass -o <out> "
+                "to distinguish the output from the inputs\n"
+            )
             return 1
         args.output, *args.inputs = args.paths
 

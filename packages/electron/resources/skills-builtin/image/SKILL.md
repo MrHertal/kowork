@@ -66,9 +66,10 @@ appearance matters, Read the output image as visual QA before handing it back.
 ## Styling
 
 Preserve an existing image's style unless asked to restyle it. For related
-artifacts, reuse the user's palette and font roles. Without a reference, keep
-the template defaults. Keep reusable colors, fonts, and pixel sizes near the top
-of the creation script; substitute an available font when necessary.
+artifacts, reuse the user's palette and font roles. For a new image without a
+reference, choose a palette, typography, and composition suited to its subject
+and intended use. Keep reusable colors, fonts, and pixel sizes near the top of
+the creation script; substitute an available font when necessary.
 
 ## Choose the path
 

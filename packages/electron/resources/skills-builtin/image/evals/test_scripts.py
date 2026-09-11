@@ -64,6 +64,30 @@ class ImageScriptsTest(unittest.TestCase):
             with self.subTest(script=script):
                 self.run_script(script, *args)
 
+    def test_missing_output_flag_does_not_overwrite_first_input(self):
+        first = self.root / "first.png"
+        second = self.root / "second.png"
+        third = self.root / "third.png"
+        for path, color in ((first, "red"), (second, "green"), (third, "blue")):
+            Image.new("RGB", (40, 40), color).save(path)
+        original = first.read_bytes()
+
+        result = self.run_script(
+            "combine", first, second, third, "--hstack", success=False
+        )
+
+        self.assertIn("pass -o", result.stderr)
+        self.assertEqual(first.read_bytes(), original)
+
+        animation = self.root / "first.gif"
+        self.animation(animation, "GIF")
+        original = animation.read_bytes()
+        result = self.run_script(
+            "gif", "create", animation, second, third, success=False
+        )
+        self.assertIn("pass -o", result.stderr)
+        self.assertEqual(animation.read_bytes(), original)
+
     def test_extract_protects_source_and_later_aliases(self):
         for alias in ("direct", "symlink", "hardlink"):
             with self.subTest(alias=alias):

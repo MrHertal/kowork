@@ -38,12 +38,21 @@ class PdfScriptsTest(unittest.TestCase):
             self.assertTrue((root / "preview" / "page_001.png").is_file())
 
     def test_merge_refuses_an_input_as_output(self):
-        report = FIXTURES / "report.pdf"
-        appendix = FIXTURES / "appendix.pdf"
-        result = self.run_script(
-            "pages", "merge", report, appendix, "-o", report, success=False
-        )
-        self.assertIn("error:", result.stderr)
+        with tempfile.TemporaryDirectory() as temp:
+            report = Path(temp) / "report.pdf"
+            shutil.copyfile(FIXTURES / "report.pdf", report)
+            original = report.read_bytes()
+            result = self.run_script(
+                "pages",
+                "merge",
+                report,
+                FIXTURES / "appendix.pdf",
+                "-o",
+                report,
+                success=False,
+            )
+            self.assertIn("error:", result.stderr)
+            self.assertEqual(report.read_bytes(), original)
 
     def test_merge_refuses_hard_link_alias(self):
         with tempfile.TemporaryDirectory() as temp:

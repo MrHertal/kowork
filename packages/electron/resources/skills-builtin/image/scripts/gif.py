@@ -141,6 +141,12 @@ def main(argv: list[str]) -> int:
             if len(args.paths) < 3:
                 sys.stderr.write("error: an output path and at least 2 frames are required\n")
                 return 1
+            if os.path.exists(args.paths[0]):
+                sys.stderr.write(
+                    "error: the first positional path already exists; pass -o <out.gif> "
+                    "to distinguish the output from the frames\n"
+                )
+                return 1
             args.output, *args.frames = args.paths
 
     try:
