@@ -155,6 +155,12 @@ class ImageScriptsTest(unittest.TestCase):
         )
         self.run_script("validate", self.root / "cycle.gif")
 
+    def test_create_rejects_unknown_extension(self):
+        output = self.root / "card.image"
+        result = self.run_script("create_image", output, success=False)
+        self.assertIn("cannot infer an image format", result.stderr)
+        self.assertFalse(output.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

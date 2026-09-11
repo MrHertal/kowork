@@ -1,5 +1,7 @@
 """CLI regressions: kowork-python -B -m unittest discover -s evals -p 'test_*.py'."""
 from pathlib import Path
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -8,6 +10,7 @@ import unittest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 FIXTURES = Path(__file__).resolve().parent / "files"
+NODE_LIBS = SCRIPTS.parents[2] / "runtime" / "node_libs"
 
 
 class DocxScriptsTest(unittest.TestCase):
@@ -19,6 +22,21 @@ class DocxScriptsTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0 if success else 1, result.stderr)
         self.assertNotIn("Traceback", result.stderr)
+        return result
+
+    def run_create_template(self, output, *, success=True):
+        node = shutil.which("node")
+        if node is None or not NODE_LIBS.is_dir():
+            self.skipTest("Node runtime dependencies are unavailable")
+        env = os.environ.copy()
+        env["NODE_PATH"] = str(NODE_LIBS)
+        result = subprocess.run(
+            [node, str(SCRIPTS / "create_docx.cjs"), str(output)],
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        self.assertEqual(result.returncode, 0 if success else 1, result.stderr)
         return result
 
     def test_read_edit_and_validate(self):
@@ -60,6 +78,34 @@ class DocxScriptsTest(unittest.TestCase):
             success=False,
         )
         self.assertIn("error:", result.stderr)
+
+    def test_edit_refuses_hard_link_alias(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "source.docx"
+            alias = Path(temp) / "alias.docx"
+            shutil.copyfile(FIXTURES / "contract.docx", source)
+            os.link(source, alias)
+            original = source.read_bytes()
+            result = self.run_script(
+                "edit_text",
+                source,
+                "--find",
+                "twelve months",
+                "--replace",
+                "twenty-four months",
+                "-o",
+                alias,
+                success=False,
+            )
+            self.assertIn("error:", result.stderr)
+            self.assertEqual(source.read_bytes(), original)
+
+    def test_create_requires_docx_extension(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "document.word"
+            result = self.run_create_template(output, success=False)
+            self.assertIn(".docx extension", result.stderr)
+            self.assertFalse(output.exists())
 
 
 if __name__ == "__main__":

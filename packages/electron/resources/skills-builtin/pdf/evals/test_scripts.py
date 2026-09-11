@@ -1,5 +1,7 @@
 """CLI regressions: kowork-python -B -m unittest discover -s evals -p 'test_*.py'."""
 from pathlib import Path
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -42,6 +44,32 @@ class PdfScriptsTest(unittest.TestCase):
             "pages", "merge", report, appendix, "-o", report, success=False
         )
         self.assertIn("error:", result.stderr)
+
+    def test_merge_refuses_hard_link_alias(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "source.pdf"
+            alias = Path(temp) / "alias.pdf"
+            shutil.copyfile(FIXTURES / "report.pdf", source)
+            os.link(source, alias)
+            original = source.read_bytes()
+            result = self.run_script(
+                "pages",
+                "merge",
+                source,
+                FIXTURES / "appendix.pdf",
+                "-o",
+                alias,
+                success=False,
+            )
+            self.assertIn("error:", result.stderr)
+            self.assertEqual(source.read_bytes(), original)
+
+    def test_create_requires_pdf_extension(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "report.pfd"
+            result = self.run_script("create_pdf", output, success=False)
+            self.assertIn(".pdf extension", result.stderr)
+            self.assertFalse(output.exists())
 
 
 if __name__ == "__main__":

@@ -180,11 +180,12 @@ function bodyCell(text, rowIndex, align) {
 const outPath = process.argv[2] || "output.pptx";
 
 const outExt = path.extname(outPath).toLowerCase();
-if (outExt === ".pptm" || outExt === ".potm" || outExt === ".ppsm") {
-  console.error(
-    `error: refusing to write a macro-enabled presentation (${outExt}); macros are ` +
-      "never authored here. Write a .pptx instead.",
-  );
+if (outExt !== ".pptx") {
+  const reason =
+    outExt === ".pptm" || outExt === ".potm" || outExt === ".ppsm"
+      ? `refusing to write a macro-enabled presentation (${outExt}); macros are never authored here. Write a .pptx instead.`
+      : `output must use the .pptx extension: ${outPath}`;
+  console.error(`error: ${reason}`);
   process.exit(1);
 }
 

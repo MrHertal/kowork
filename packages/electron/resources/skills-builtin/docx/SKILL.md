@@ -49,8 +49,10 @@ ready.
   failures as `error: ...` and exit non-zero; validators additionally end failed
   checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
   labels such as `note`, `warning`, `info`, or `issue` as appropriate. In addition,
-  every mutating command writes to a **new** output (never editing the input
-  in place) and refuses a macro-enabled (`.docm`/`.dotm`) output.
+  every command that mutates a packed document writes to a **new** output
+  (never editing the input in place) and refuses a macro-enabled
+  (`.docm`/`.dotm`) output. `validate.py --fix` may repair an unpacked working
+  directory in place inside the task temporary directory.
 - For raster images used in a document, use the image skill for standalone
   image processing and this skill for container-level work, including embedding
   the finished asset where supported.

@@ -25,10 +25,16 @@ def refuse_inplace(out_path: str, source_path: str) -> None:
     read; raises ``PdfError`` on a collision, which the scripts surface as
     ``error: ...``.
     """
-    try:
-        same = os.path.realpath(out_path) == os.path.realpath(source_path)
-    except OSError:
-        same = os.path.abspath(out_path) == os.path.abspath(source_path)
+    same = os.path.realpath(out_path) == os.path.realpath(source_path)
+    if not same:
+        try:
+            same = (
+                os.path.isfile(out_path)
+                and os.path.isfile(source_path)
+                and os.path.samefile(out_path, source_path)
+            )
+        except OSError:
+            same = False
     if same:
         raise PdfError(
             f"refusing to write the result over {source_path}; write to a "

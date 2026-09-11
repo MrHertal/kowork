@@ -217,11 +217,17 @@ def main(argv: list[str]) -> int:
     args = ap.parse_args(argv)
 
     ext = os.path.splitext(args.output)[1].lower()
-    if ext in (".xlsm", ".xltm"):
+    if ext != ".xlsx":
+        if ext in (".xlsm", ".xltm"):
+            reason = (
+                f"refusing to write a macro-enabled workbook ({ext}); openpyxl "
+                "can silently drop macros and other parts it does not model. Write a "
+                ".xlsx instead."
+            )
+        else:
+            reason = f"output must use the .xlsx extension: {args.output}"
         sys.stderr.write(
-            f"error: refusing to write a macro-enabled workbook ({ext}); openpyxl "
-            "can silently drop macros and other parts it does not model. Write a "
-            ".xlsx instead.\n"
+            f"error: {reason}\n"
         )
         return 1
 

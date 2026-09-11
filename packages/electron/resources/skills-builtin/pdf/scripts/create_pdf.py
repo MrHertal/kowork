@@ -216,6 +216,12 @@ def main(argv: list[str]) -> int:
     ap.add_argument("output", nargs="?", default="output.pdf", help="path to write the .pdf")
     args = ap.parse_args(argv)
 
+    if os.path.splitext(args.output)[1].lower() != ".pdf":
+        sys.stderr.write(
+            f"error: output must use the .pdf extension: {args.output}\n"
+        )
+        return 1
+
     try:
         build_pdf(args.output)
     except Exception as exc:

@@ -64,11 +64,12 @@ const PNG_BASE64 =
 const outPath = process.argv[2] || "output.docx";
 
 const outExt = path.extname(outPath).toLowerCase();
-if (outExt === ".docm" || outExt === ".dotm") {
-  console.error(
-    `error: refusing to write a macro-enabled document (${outExt}); macros are ` +
-      "never authored here. Write a .docx instead.",
-  );
+if (outExt !== ".docx") {
+  const reason =
+    outExt === ".docm" || outExt === ".dotm"
+      ? `refusing to write a macro-enabled document (${outExt}); macros are never authored here. Write a .docx instead.`
+      : `output must use the .docx extension: ${outPath}`;
+  console.error(`error: ${reason}`);
   process.exit(1);
 }
 

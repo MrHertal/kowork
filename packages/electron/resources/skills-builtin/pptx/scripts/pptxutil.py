@@ -332,10 +332,16 @@ def refuse_macro_output(out_path: str) -> None:
 
 def refuse_inplace(out_path: str, source_path: str) -> None:
     """Block writing the result back over a file we are reading from."""
-    try:
-        same = os.path.realpath(out_path) == os.path.realpath(source_path)
-    except OSError:
-        same = os.path.abspath(out_path) == os.path.abspath(source_path)
+    same = os.path.realpath(out_path) == os.path.realpath(source_path)
+    if not same:
+        try:
+            same = (
+                os.path.isfile(out_path)
+                and os.path.isfile(source_path)
+                and os.path.samefile(out_path, source_path)
+            )
+        except OSError:
+            same = False
     if same:
         raise PptxError(
             f"refusing to overwrite {source_path} in place; round-trips can be "

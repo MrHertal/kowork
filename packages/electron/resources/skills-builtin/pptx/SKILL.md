@@ -52,9 +52,10 @@ is ready.
   was loaded, not against the user's working directory. They report command
   failures as `error: ...` and exit non-zero; validators additionally end failed
   checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
-  labels such as `note`, `warning`, `info`, or `issue` as appropriate. Every mutating
-  command writes a **new** file (`-o`) — it never edits in place — and refuses to
-  write a macro-enabled (`.pptm`/`.potm`/`.ppsm`) output.
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate. Every
+  mutating command writes a **new** file — usually through `-o`, with a positional
+  output path for `pack.py` — and refuses to write a macro-enabled
+  (`.pptm`/`.potm`/`.ppsm`) output.
 - For raster images used in a presentation, use the image skill for standalone
   image processing and this skill for container-level work, including embedding
   the finished asset where supported.
