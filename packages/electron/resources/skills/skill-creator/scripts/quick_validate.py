@@ -8,14 +8,22 @@ import re
 import sys
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
 
 FRONTMATTER_BOUNDARY = "---"
 SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+MARKDOWN_LINK = re.compile(
+    r"!?\[[^\]]*\]\(\s*(?:<([^>\n]+)>|([^\s)]+))"
+    r"(?:\s+(?:\"[^\"]*\"|'[^']*'|\([^)]*\)))?\s*\)"
+)
+MARKDOWN_REFERENCE = re.compile(
+    r"^\s{0,3}\[[^\]]+\]:\s*(?:<([^>\n]+)>|([^\s]+))", re.MULTILINE
+)
 PACKAGE_PATH = re.compile(
     r"`((?:scripts|references|assets|tasks|workflows|routing|features|troubleshooting)/[A-Za-z0-9._/-]+)`"
 )
+URI_SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 
 
 NON_STRING_PLAIN_SCALAR = re.compile(
@@ -184,6 +192,11 @@ def read_frontmatter(skill_md: Path) -> tuple[dict[str, Any], str]:
     return fields, "\n".join(lines[end + 1 :])
 
 
+def _markdown_destinations(body: str) -> set[str]:
+    matches = MARKDOWN_LINK.findall(body) + MARKDOWN_REFERENCE.findall(body)
+    return {angle or bare for angle, bare in matches}
+
+
 def validate_skill(skill_dir: Path) -> list[str]:
     errors: list[str] = []
     skill_md = skill_dir / "SKILL.md"
@@ -216,14 +229,24 @@ def validate_skill(skill_dir: Path) -> list[str]:
         errors.append("description must be no more than 1024 characters")
 
     referenced_paths = set(PACKAGE_PATH.findall(body))
-    for target in MARKDOWN_LINK.findall(body):
-        path_text = target.split("#", 1)[0].strip()
-        if not path_text or "://" in path_text or path_text.startswith(("#", "/")):
+    for target in _markdown_destinations(body):
+        path_text = unquote(target.split("#", 1)[0].split("?", 1)[0].strip())
+        if (
+            not path_text
+            or URI_SCHEME.match(path_text)
+            or path_text.startswith(("#", "/"))
+        ):
             continue
         referenced_paths.add(path_text)
 
+    skill_root = skill_dir.resolve()
     for relative_path in sorted(referenced_paths):
-        if not (skill_dir / relative_path).exists():
+        resolved = (skill_dir / relative_path).resolve()
+        if not resolved.is_relative_to(skill_root):
+            errors.append(
+                f"referenced package path must stay inside the skill folder: {relative_path}"
+            )
+        elif not resolved.exists():
             errors.append(f"referenced package path does not exist: {relative_path}")
     return errors
 

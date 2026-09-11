@@ -9,11 +9,17 @@ from quick_validate import validate_skill
 
 
 class QuickValidateTests(TestCase):
-    def validate(self, folder: str, content: str) -> list[str]:
+    def validate(
+        self, folder: str, content: str, files: tuple[str, ...] = ()
+    ) -> list[str]:
         with TemporaryDirectory() as temporary_directory:
             skill_dir = Path(temporary_directory) / folder
             skill_dir.mkdir()
             (skill_dir / "SKILL.md").write_text(content, encoding="utf-8")
+            for relative_path in files:
+                target = skill_dir / relative_path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.touch()
             return validate_skill(skill_dir)
 
     def test_accepts_a_minimal_valid_skill(self) -> None:
@@ -98,6 +104,33 @@ class QuickValidateTests(TestCase):
         )
         self.assertIn(
             "referenced package path does not exist: scripts/format_notes.py", errors
+        )
+
+    def test_accepts_standard_markdown_package_links(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            "---\nname: meeting-notes\ndescription: Format notes\n---\n"
+            '[rules](references/rules.md "Rules")\n'
+            "[template](<assets/meeting%20notes.md>)\n"
+            "[workflow][workflow]\n\n"
+            "[workflow]: references/workflow.md\n",
+            (
+                "references/rules.md",
+                "assets/meeting notes.md",
+                "references/workflow.md",
+            ),
+        )
+        self.assertEqual(errors, [])
+
+    def test_rejects_package_references_outside_the_skill(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            "---\nname: meeting-notes\ndescription: Format notes\n---\n"
+            "[outside](../outside.md)\n",
+        )
+        self.assertIn(
+            "referenced package path must stay inside the skill folder: ../outside.md",
+            errors,
         )
 
     def test_rejects_values_over_kowork_limits(self) -> None:
