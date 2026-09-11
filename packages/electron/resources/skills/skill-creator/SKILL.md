@@ -167,11 +167,14 @@ Sometimes the user doesn't want a new skill — they want to fix or upgrade one 
 - **Turn it on in Kowork.** Walk the user through it, one click at a time:
   1. Open **Settings**.
   2. Go to **Skills**.
-  3. Choose **Add custom skill**.
-  4. Pick the **Local folder** option.
-  5. Select the skill's folder.
+  3. Find **Custom skill** and choose **Add**.
+  4. Select **Local folder**.
+  5. Choose the folder containing the skill.
+  6. Select **Submit**.
 
-  Once it's added, the skill is active.
+  Confirm that the skill appears in the **Added** section. Adding a folder does
+  not prove that every file inside it was valid; if the skill is absent, check
+  validation errors before treating it as active.
 
 - **Use it and refine.** From here, the user doesn't need to do anything special to trigger it — they just make the kind of request the skill is built for, and it takes over. Encourage them to try it on something real, and to come back anytime to fine-tune it (that loops right back to improving an existing skill).
 
