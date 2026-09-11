@@ -127,8 +127,12 @@ Before handing the skill back, run the bundled validator. It has no package
 dependencies and works with `kowork-python`:
 
 ```sh
-kowork-python scripts/quick_validate.py /absolute/path/to/skill-folder
+kowork-python "<skill-creator-base-dir>/scripts/quick_validate.py" /absolute/path/to/skill-folder
 ```
+
+Replace `<skill-creator-base-dir>` with the absolute base directory reported
+when this skill is loaded. Do not resolve `scripts/quick_validate.py` from the
+user's current working directory.
 
 This checks the required frontmatter, the skill name and folder, and local
 package paths mentioned by the instructions. Also run every new or changed
