@@ -87,6 +87,20 @@ class SheetPositionsTest(unittest.TestCase):
             self.assertTrue(wb.active["A1"].font.bold)
             wb.close()
 
+    def test_theme_replacements_do_not_cascade(self):
+        spec = importlib.util.spec_from_file_location(
+            "create_xlsx", SCRIPTS / "create_xlsx.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        module.OFFICE_THEME_REPLACEMENTS["4F81BD"] = "C0504D"
+        module.OFFICE_THEME_REPLACEMENTS["C0504D"] = "4F81BD"
+
+        theme = module.modern_office_theme()
+
+        self.assertEqual(theme.count("4F81BD"), 1)
+        self.assertEqual(theme.count("C0504D"), 1)
+
     def test_edit_refuses_hard_link_alias(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

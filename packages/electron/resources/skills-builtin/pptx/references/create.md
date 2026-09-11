@@ -302,8 +302,8 @@ not defaulted.
 
 ### Palette discipline
 
-Keep the template palette by default; use the user's palette when branding or
-restyling is requested. One **dominant** color carries most of the weight (backgrounds, headers, primary bars), **one or two
+Pick a **topic-fit** palette, not reflexive blue-on-white. One **dominant** color
+carries most of the weight (backgrounds, headers, primary bars), **one or two
 supporting tones** sit near it, and a **single accent** marks the few things that
 matter (a key number, one bar, a divider). The template's set:
 

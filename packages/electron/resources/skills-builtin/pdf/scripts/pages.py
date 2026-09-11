@@ -13,7 +13,7 @@ through. Encrypted inputs that need a password cannot be read by the other
 subcommands; ``decrypt`` writes an unencrypted copy to work from.
 
 Usage:
-    kowork-python pages.py metadata <in.pdf>
+    kowork-python pages.py info <in.pdf>
     kowork-python pages.py merge <a.pdf> <b.pdf> [<c.pdf> ...] -o <out.pdf>
     kowork-python pages.py split <in.pdf> <outdir> [--pages 1-3,5]
     kowork-python pages.py extract <in.pdf> -o <out.pdf> --pages 1-3,5

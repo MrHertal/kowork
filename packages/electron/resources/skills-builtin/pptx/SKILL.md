@@ -64,8 +64,9 @@ is ready.
 
 Preserve existing deck styling unless asked to restyle it. For related
 artifacts, reuse the user's palette, heading/body font roles, and hierarchy.
-Without a reference, keep the template defaults. Keep reusable PowerPoint
-colors, fonts, and point sizes near the top of the creation script.
+For a new deck without a reference, choose a restrained palette suited to its
+topic. Keep reusable PowerPoint colors, fonts, and point sizes near the top of
+the creation script.
 
 ## Choose the path
 

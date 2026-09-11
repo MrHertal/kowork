@@ -4,7 +4,7 @@
 PDFs come in two flavours for form-filling: those with real interactive AcroForm
 fields, and "flat" forms that are just labels and lines printed on the page.
 
-Interactive forms (pypdf): ``inspect`` reports what fields exist, ``fields`` dumps
+Interactive forms (pypdf): ``info`` reports what fields exist, ``fields`` dumps
 them as JSON, ``fill`` sets them from a values JSON. Button (checkbox/radio) values
 are shown without the PDF's internal leading slash and re-added when writing, so
 what ``fields`` reports is exactly what ``fill`` accepts (text -> the string to
@@ -43,7 +43,7 @@ pages, pixels for image pages) -- this keeps the geometry checks system-agnostic
 ``label``/``description`` are optional.
 
 Usage:
-    kowork-python forms.py inspect <in.pdf>
+    kowork-python forms.py info <in.pdf>
     kowork-python forms.py fields <in.pdf> [-o fields.json]
     kowork-python forms.py fill <in.pdf> <values.json> -o <out.pdf>
     kowork-python forms.py structure <in.pdf> [-o structure.json] [--pages 1-3,5]

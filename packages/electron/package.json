@@ -20,6 +20,7 @@
     "preview": "pnpm run ensure:runtime && electron-vite preview",
     "smoke:runtime": "tsx ./scripts/smoke-runtime.ts",
     "test": "vitest run",
+    "test:skills": "tsx ./scripts/test-skills.ts",
     "test:watch": "vitest",
     "typecheck": "tsc -b"
   },

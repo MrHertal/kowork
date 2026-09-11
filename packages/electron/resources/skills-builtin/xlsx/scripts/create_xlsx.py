@@ -49,6 +49,7 @@ from __future__ import annotations
 import argparse
 import io
 import os
+import re
 import sys
 
 from openpyxl import Workbook
@@ -185,11 +186,10 @@ def modern_office_theme() -> str:
     """
     from openpyxl.writer.theme import theme_xml
 
-    theme = theme_xml
-    for old, new in OFFICE_THEME_REPLACEMENTS.items():
-        assert theme.count(old) == 1, f"expected exactly one {old} in openpyxl's theme_xml"
-        theme = theme.replace(old, new)
-    return theme
+    for old in OFFICE_THEME_REPLACEMENTS:
+        assert theme_xml.count(old) == 1, f"expected exactly one {old} in openpyxl's theme_xml"
+    pattern = re.compile("|".join(re.escape(old) for old in OFFICE_THEME_REPLACEMENTS))
+    return pattern.sub(lambda match: OFFICE_THEME_REPLACEMENTS[match.group(0)], theme_xml)
 
 
 def build_xlsx(out_path: str) -> None:
