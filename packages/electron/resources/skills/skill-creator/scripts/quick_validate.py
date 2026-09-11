@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Validate the core structure of a Kowork skill without third-party packages."""
+"""Validate the canonical Kowork skill format without third-party packages."""
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 
 FRONTMATTER_BOUNDARY = "---"
@@ -16,7 +18,49 @@ PACKAGE_PATH = re.compile(
 )
 
 
-def read_frontmatter(skill_md: Path) -> tuple[dict[str, str], str]:
+NON_STRING_PLAIN_SCALAR = re.compile(
+    r"^(?:null|~|true|false|[-+]?(?:\d[\d_]*)(?:\.\d[\d_]*)?(?:e[-+]?\d+)?)$",
+    re.IGNORECASE,
+)
+
+
+def _strip_plain_comment(value: str) -> str:
+    comment = re.search(r"[ \t]+#", value)
+    return value[: comment.start()].rstrip() if comment else value.rstrip()
+
+
+def _parse_string_scalar(raw_value: str, key: str) -> str:
+    value = raw_value.strip()
+    if not value:
+        return ""
+
+    if value.startswith('"'):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError as error:
+            raise ValueError(f"frontmatter {key} has an invalid quoted value") from error
+        if not isinstance(parsed, str):
+            raise ValueError(f"frontmatter {key} must be a string")
+        return parsed
+
+    if value.startswith("'"):
+        if len(value) < 2 or not value.endswith("'"):
+            raise ValueError(f"frontmatter {key} has an invalid quoted value")
+        return value[1:-1].replace("''", "'")
+
+    value = _strip_plain_comment(value)
+    if not value:
+        return ""
+    if value[0] in "[{&*!" or value.startswith(("- ", "? ")):
+        raise ValueError(
+            f"frontmatter {key} uses unsupported YAML; write it as a string"
+        )
+    if ": " in value or NON_STRING_PLAIN_SCALAR.fullmatch(value):
+        raise ValueError(f"frontmatter {key} must be a string")
+    return value
+
+
+def read_frontmatter(skill_md: Path) -> tuple[dict[str, Any], str]:
     content = skill_md.read_text(encoding="utf-8")
     lines = content.splitlines()
     if not lines or lines[0].strip() != FRONTMATTER_BOUNDARY:
@@ -31,29 +75,64 @@ def read_frontmatter(skill_md: Path) -> tuple[dict[str, str], str]:
     except StopIteration as error:
         raise ValueError("SKILL.md frontmatter is missing its closing ---") from error
 
-    fields: dict[str, str] = {}
+    fields: dict[str, Any] = {}
     index = 1
     while index < end:
         line = lines[index]
-        match = re.match(r"^([A-Za-z][A-Za-z0-9_-]*):(?:[ \t]*(.*))?$", line)
-        if not match:
+        if not line.strip() or line.lstrip().startswith("#"):
             index += 1
             continue
+        if line[0].isspace():
+            raise ValueError(
+                f"invalid YAML frontmatter at line {index + 1}: unexpected indentation"
+            )
+        match = re.match(r"^([A-Za-z][A-Za-z0-9_-]*):(?:[ \t]*(.*))?$", line)
+        if not match:
+            raise ValueError(f"invalid YAML frontmatter at line {index + 1}")
 
         key, raw_value = match.groups()
+        if key in fields:
+            raise ValueError(f"frontmatter contains duplicate field: {key}")
         value = (raw_value or "").strip()
         if value in {"|", "|-", "|+", ">", ">-", ">+"}:
             block: list[str] = []
             index += 1
             while index < end and (not lines[index] or lines[index][0].isspace()):
-                block.append(lines[index].strip())
+                if lines[index] and not lines[index].startswith("  "):
+                    raise ValueError(
+                        f"invalid YAML frontmatter at line {index + 1}: "
+                        "block values must be indented"
+                    )
+                block.append(lines[index][2:] if lines[index] else "")
                 index += 1
-            fields[key] = " ".join(part for part in block if part)
+            separator = "\n" if value.startswith("|") else " "
+            fields[key] = separator.join(part for part in block if part)
             continue
 
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
-            value = value[1:-1]
-        fields[key] = value
+        if key == "metadata" and not value:
+            metadata: dict[str, str] = {}
+            index += 1
+            while index < end and lines[index].startswith("  "):
+                nested = re.match(
+                    r"^  ([A-Za-z][A-Za-z0-9_-]*):(?:[ \t]*(.*))?$", lines[index]
+                )
+                if not nested:
+                    raise ValueError(
+                        f"invalid YAML frontmatter at line {index + 1}"
+                    )
+                metadata_key, metadata_value = nested.groups()
+                if metadata_key in metadata:
+                    raise ValueError(
+                        f"frontmatter metadata contains duplicate field: {metadata_key}"
+                    )
+                metadata[metadata_key] = _parse_string_scalar(
+                    metadata_value or "", f"metadata.{metadata_key}"
+                )
+                index += 1
+            fields[key] = metadata
+            continue
+
+        fields[key] = _parse_string_scalar(value, key)
         index += 1
 
     return fields, "\n".join(lines[end + 1 :])
@@ -70,22 +149,24 @@ def validate_skill(skill_dir: Path) -> list[str]:
     except (OSError, UnicodeError, ValueError) as error:
         return [str(error)]
 
-    if not fields.get("name", "").strip():
+    name = fields.get("name")
+    description = fields.get("description")
+    if not isinstance(name, str) or not name.strip():
         errors.append("frontmatter name must not be empty")
     else:
-        if not SKILL_NAME.fullmatch(fields["name"]):
+        if not SKILL_NAME.fullmatch(name):
             errors.append(
                 "name must use lowercase letters or digits separated by single hyphens"
             )
-        if fields["name"] != skill_dir.name:
+        if name != skill_dir.name:
             errors.append(
                 f"name must match its folder ({skill_dir.name!r})"
             )
-        if len(fields["name"]) > 64:
+        if len(name) > 64:
             errors.append("name must be no more than 64 characters")
-    if not fields.get("description", "").strip():
+    if not isinstance(description, str) or not description.strip():
         errors.append("frontmatter description must not be empty")
-    elif len(fields["description"]) > 1024:
+    elif len(description) > 1024:
         errors.append("description must be no more than 1024 characters")
 
     referenced_paths = set(PACKAGE_PATH.findall(body))

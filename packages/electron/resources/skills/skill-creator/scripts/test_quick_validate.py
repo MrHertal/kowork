@@ -38,6 +38,21 @@ class QuickValidateTests(TestCase):
         )
         self.assertEqual(errors, [])
 
+    def test_accepts_folded_description(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            "---\nname: meeting-notes\ndescription: >-\n"
+            "  Format notes and extract\n  decisions and actions\n---\n",
+        )
+        self.assertEqual(errors, [])
+
+    def test_rejects_invalid_yaml(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            '---\nname: meeting-notes\ndescription: "unterminated\n---\n',
+        )
+        self.assertIn("frontmatter description has an invalid quoted value", errors)
+
     def test_rejects_empty_required_values(self) -> None:
         errors = self.validate(
             "meeting-notes",
