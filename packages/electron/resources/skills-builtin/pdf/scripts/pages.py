@@ -280,7 +280,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Structural page operations on PDFs (pypdf).")
     sub = ap.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("metadata", help="print page count and document info")
+    p = sub.add_parser("info", aliases=["metadata"], help="print page count and document info")
     p.add_argument("input", help="path to the .pdf file")
     p.set_defaults(func=cmd_metadata)
 

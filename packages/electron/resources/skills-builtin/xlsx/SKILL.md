@@ -55,13 +55,17 @@ ready.
 For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
 brand or reference styling: the same palette, heading/body font roles, and
 visual hierarchy. Preserve existing styling when editing unless asked to restyle.
-When no reference is supplied, choose a readable, restrained style suited to the
-content; template defaults are fallbacks, not a required brand. Keep text
-legible, contrast strong, spacing consistent, and emphasis selective.
+When no reference is supplied, retain the format-specific template defaults
+(including Office typography and themes where provided). Different formats may
+use different defaults; do not impose one shared palette or font on all of them.
+Keep text legible, contrast strong, spacing consistent, and emphasis selective.
 Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
-number formats and input/formula colors. Configure reusable colors, fonts, and
-sizes near the top of the creation script. Use fonts the runtime can access;
-when an exact font is unavailable, use a consistent available substitute.
+number formats and input/formula colors. Keep reusable colors, fonts, and
+sizes near the top of the creation script, using the library's native units and
+color representation. For themed formats, configure theme colors and fonts there
+too; explicit element styling and theme styling are separate controls.
+Use fonts the runtime can access; when an exact font is unavailable, use a
+consistent available substitute.
 
 ## Choose the path
 
@@ -113,7 +117,9 @@ The default font is **Calibri 11** (change `DEFAULT_FONT_*`); the creation
 script applies it to every populated cell while preserving emphasis and colors.
 Set deliberate per-cell font exceptions after that font pass. The workbook is
 saved with the current Office theme, so charts and theme-colored elements render
-in the same colors a new Excel file uses. It refuses to write
+in the same colors a new Excel file uses. `OFFICE_THEME_REPLACEMENTS` near the
+top controls theme fonts and colors separately from the explicit cell font and
+header constants; customize both when applying a brand. It refuses to write
 `.xlsm`/`.xltm`. **Prefer real formulas over Python-computed constants** so the
 workbook recalculates in Excel; only write a fixed number when the user explicitly
 needs one (see Formulas & computed values).
@@ -185,24 +191,27 @@ read-only; the rest write a new file with `-o` and refuse `.xlsm`:
 
 ```sh
 kowork-python scripts/sheets.py info in.xlsx
-kowork-python scripts/sheets.py add in.xlsx -o out.xlsx --name Q3 --index 1
+kowork-python scripts/sheets.py add in.xlsx -o out.xlsx --name Q3 --to 1
 kowork-python scripts/sheets.py rename in.xlsx -o out.xlsx --sheet Sheet1 --to Summary
-kowork-python scripts/sheets.py remove in.xlsx -o out.xlsx --sheet Draft
-kowork-python scripts/sheets.py move in.xlsx -o out.xlsx --sheet Summary --to-index 1
-kowork-python scripts/sheets.py copy in.xlsx -o out.xlsx --sheet Template --to Q4
+kowork-python scripts/sheets.py delete in.xlsx -o out.xlsx --sheet Draft
+kowork-python scripts/sheets.py move in.xlsx -o out.xlsx --sheet Summary --to 1
+kowork-python scripts/sheets.py duplicate in.xlsx -o out.xlsx --sheet Template --to Q4
 kowork-python scripts/sheets.py from-csv data.csv -o out.xlsx
 kowork-python scripts/sheets.py from-csv data.csv -o out.xlsx --into book.xlsx --sheet Imported --text-columns A
 ```
 
-All sheet positions are **1-based**, including `--index`, `--to-index`, and
-numeric `--sheet` selections. Insertion at 1 prepends; omitting `--index` appends.
+All sheet positions are **1-based**, including `--to` for `add`/`move` and
+numeric `--sheet` selections. Insertion at 1 prepends; omitting `--to` on `add`
+appends. For `rename`/`duplicate`, `--to` is a sheet name. Legacy aliases remain
+available: `remove` for `delete`, `copy` for `duplicate`, `--index` for `add --to`,
+and `--to-index` for `move --to`.
 
 `info` prints the sheet names (and which is active) and, per sheet, the used range,
 dimensions, merged ranges, freeze panes, and chart/image counts, plus any defined
 names. `from-csv` builds a new workbook from a CSV, or appends it as a sheet to an
 existing workbook with `--into`; pass `--text-columns A,C` (letters or 1-based
 indices) to keep those columns as text (IDs, zip codes, leading zeros), while the
-rest coerce to numbers. `--sheet` accepts a name or a 1-based index. `copy`
+rest coerce to numbers. `--sheet` accepts a name or a 1-based index. `duplicate`
 duplicates a sheet's cell values and styles **but not its charts, images, data
 validations, or conditional formatting** (an openpyxl limit) and warns when the
 source has any.

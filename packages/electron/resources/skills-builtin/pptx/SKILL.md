@@ -59,13 +59,17 @@ is ready.
 For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
 brand or reference styling: the same palette, heading/body font roles, and
 visual hierarchy. Preserve existing styling when editing unless asked to restyle.
-When no reference is supplied, choose a readable, restrained style suited to the
-content; template defaults are fallbacks, not a required brand. Keep text
-legible, contrast strong, spacing consistent, and emphasis selective.
+When no reference is supplied, retain the format-specific template defaults
+(including Office typography and themes where provided). Different formats may
+use different defaults; do not impose one shared palette or font on all of them.
+Keep text legible, contrast strong, spacing consistent, and emphasis selective.
 Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
-number formats and input/formula colors. Configure reusable colors, fonts, and
-sizes near the top of the creation script. Use fonts the runtime can access;
-when an exact font is unavailable, use a consistent available substitute.
+number formats and input/formula colors. Keep reusable colors, fonts, and
+sizes near the top of the creation script, using the library's native units and
+color representation. For themed formats, configure theme colors and fonts there
+too; explicit element styling and theme styling are separate controls.
+Use fonts the runtime can access; when an exact font is unavailable, use a
+consistent available substitute.
 
 ## Choose the path
 
@@ -192,7 +196,9 @@ failures; **unresolved geometry** and **tight margins** (content within 0.25" of
 an edge) are reported as info and never fail on their own. It prints `OK: ...` or
 `FAILED: ...` and exits non-zero on failure. There is no XSD validation (schemas
 are not bundled) and no recalculation or rendering — run it on the final file,
-then open the deck in a real viewer for visual QA.
+then deliver it after validation succeeds. Visual review in PowerPoint or
+Keynote is optional user review, not a prerequisite for delivery. Do not claim
+that structural validation verifies the rendered appearance.
 
 ## Limitations (state plainly to the user)
 

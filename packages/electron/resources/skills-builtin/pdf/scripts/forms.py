@@ -639,7 +639,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Fill interactive (AcroForm) PDF forms (pypdf).")
     sub = ap.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("inspect", help="report whether the PDF has fillable fields")
+    p = sub.add_parser("info", aliases=["inspect"], help="report whether the PDF has fillable fields")
     p.add_argument("input", help="path to the .pdf file")
     p.set_defaults(func=cmd_inspect)
 

@@ -65,6 +65,22 @@ HEADER_FONT_COLOR = "FFFFFFFF"
 CURRENCY_FORMAT = "$#,##0"
 PERCENT_FORMAT = "0.0%"
 
+# Theme controls for charts and theme-colored elements. Keep these defaults for
+# standard Office styling; customize separately from explicit cell styles above.
+OFFICE_THEME_REPLACEMENTS = {
+    'typeface="Cambria"': 'typeface="Calibri Light"',  # majorFont (minorFont is already Calibri)
+    "4F81BD": "4472C4",  # accent1
+    "C0504D": "ED7D31",  # accent2
+    "9BBB59": "A5A5A5",  # accent3
+    "8064A2": "FFC000",  # accent4
+    "4BACC6": "5B9BD5",  # accent5
+    "F79646": "70AD47",  # accent6
+    "1F497D": "44546A",  # dk2
+    "EEECE1": "E7E6E6",  # lt2
+    "0000FF": "0563C1",  # hyperlink
+    "800080": "954F72",  # followed hyperlink
+}
+
 
 def demo_image() -> XLImage:
     """A tiny solid-colour PNG built in memory, so the template needs no assets.
@@ -171,19 +187,7 @@ def modern_office_theme() -> str:
     from openpyxl.writer.theme import theme_xml
 
     theme = theme_xml
-    for old, new in {
-        'typeface="Cambria"': 'typeface="Calibri Light"',  # majorFont (minorFont is already Calibri)
-        "4F81BD": "4472C4",  # accent1
-        "C0504D": "ED7D31",  # accent2
-        "9BBB59": "A5A5A5",  # accent3
-        "8064A2": "FFC000",  # accent4
-        "4BACC6": "5B9BD5",  # accent5
-        "F79646": "70AD47",  # accent6
-        "1F497D": "44546A",  # dk2
-        "EEECE1": "E7E6E6",  # lt2
-        "0000FF": "0563C1",  # hyperlink
-        "800080": "954F72",  # followed hyperlink
-    }.items():
+    for old, new in OFFICE_THEME_REPLACEMENTS.items():
         assert theme.count(old) == 1, f"expected exactly one {old} in openpyxl's theme_xml"
         theme = theme.replace(old, new)
     return theme

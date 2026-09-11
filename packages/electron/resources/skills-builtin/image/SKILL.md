@@ -65,13 +65,17 @@ appearance matters, Read the output image as visual QA before handing it back.
 For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
 brand or reference styling: the same palette, heading/body font roles, and
 visual hierarchy. Preserve existing styling when editing unless asked to restyle.
-When no reference is supplied, choose a readable, restrained style suited to the
-content; template defaults are fallbacks, not a required brand. Keep text
-legible, contrast strong, spacing consistent, and emphasis selective.
+When no reference is supplied, retain the format-specific template defaults
+(including Office typography and themes where provided). Different formats may
+use different defaults; do not impose one shared palette or font on all of them.
+Keep text legible, contrast strong, spacing consistent, and emphasis selective.
 Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
-number formats and input/formula colors. Configure reusable colors, fonts, and
-sizes near the top of the creation script. Use fonts the runtime can access;
-when an exact font is unavailable, use a consistent available substitute.
+number formats and input/formula colors. Keep reusable colors, fonts, and
+sizes near the top of the creation script, using the library's native units and
+color representation. For themed formats, configure theme colors and fonts there
+too; explicit element styling and theme styling are separate controls.
+Use fonts the runtime can access; when an exact font is unavailable, use a
+consistent available substitute.
 
 ## Choose the path
 
@@ -279,7 +283,7 @@ kowork-python scripts/combine.py a.png b.png -o out.png --hstack --background '#
 
 ```sh
 kowork-python scripts/gif.py create frame1.png frame2.png frame3.png -o out.gif --duration 200 --loop 0
-kowork-python scripts/gif.py extract in.gif frames/
+kowork-python scripts/gif.py extract in.gif <task-temp-dir>/frames/
 ```
 
 - `create` takes 2+ frames in play order; the output must be a `.gif`.
@@ -292,6 +296,8 @@ kowork-python scripts/gif.py extract in.gif frames/
 - Pillow merges identical consecutive frames, so the output may hold fewer
   frames than you passed (their durations add up). Verify an animation by its
   duration and by Reading the extracted frames — never by frame count.
+- For QA, extract into `<task-temp-dir>/frames/`; use a user-requested
+  destination only when the extracted frames are final deliverables.
 - `extract` writes every frame as `frame_001.png`-style names into the output
   directory (created if needed); each PNG is the full composited picture even
   when the GIF stores per-frame diffs. A single-frame input is refused — it is

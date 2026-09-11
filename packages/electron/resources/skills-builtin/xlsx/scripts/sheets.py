@@ -299,7 +299,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("input", help="path to the .xlsx/.xlsm file")
     p.add_argument("-o", "--out", required=True, help="path to write the result")
     p.add_argument("--name", required=True, help="name of the new sheet")
-    p.add_argument("--index", type=int, help="1-based position (default: append at the end)")
+    p.add_argument("--to", "--index", dest="index", type=int, help="1-based position (default: append at the end)")
     p.set_defaults(func=cmd_add)
 
     p = sub.add_parser("rename", help="rename a sheet")
@@ -309,7 +309,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--to", required=True, help="new sheet name")
     p.set_defaults(func=cmd_rename)
 
-    p = sub.add_parser("remove", help="remove a sheet (not the last remaining one)")
+    p = sub.add_parser("delete", aliases=["remove"], help="remove a sheet (not the last remaining one)")
     p.add_argument("input", help="path to the .xlsx/.xlsm file")
     p.add_argument("-o", "--out", required=True, help="path to write the result")
     p.add_argument("--sheet", required=True, help="sheet to remove (name or 1-based index)")
@@ -319,10 +319,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("input", help="path to the .xlsx/.xlsm file")
     p.add_argument("-o", "--out", required=True, help="path to write the result")
     p.add_argument("--sheet", required=True, help="sheet to move (name or 1-based index)")
-    p.add_argument("--to-index", dest="to_index", type=int, required=True, help="1-based destination position")
+    p.add_argument("--to", "--to-index", dest="to_index", type=int, required=True, help="1-based destination position")
     p.set_defaults(func=cmd_move)
 
-    p = sub.add_parser("copy", help="duplicate a sheet within the workbook")
+    p = sub.add_parser("duplicate", aliases=["copy"], help="duplicate a sheet within the workbook")
     p.add_argument("input", help="path to the .xlsx/.xlsm file")
     p.add_argument("-o", "--out", required=True, help="path to write the result")
     p.add_argument("--sheet", required=True, help="sheet to copy (name or 1-based index)")

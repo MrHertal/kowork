@@ -51,13 +51,17 @@ versions. If validation or `present_files` fails, do not claim the PDF is ready.
 For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
 brand or reference styling: the same palette, heading/body font roles, and
 visual hierarchy. Preserve existing styling when editing unless asked to restyle.
-When no reference is supplied, choose a readable, restrained style suited to the
-content; template defaults are fallbacks, not a required brand. Keep text
-legible, contrast strong, spacing consistent, and emphasis selective.
+When no reference is supplied, retain the format-specific template defaults
+(including Office typography and themes where provided). Different formats may
+use different defaults; do not impose one shared palette or font on all of them.
+Keep text legible, contrast strong, spacing consistent, and emphasis selective.
 Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
-number formats and input/formula colors. Configure reusable colors, fonts, and
-sizes near the top of the creation script. Use fonts the runtime can access;
-when an exact font is unavailable, use a consistent available substitute.
+number formats and input/formula colors. Keep reusable colors, fonts, and
+sizes near the top of the creation script, using the library's native units and
+color representation. For themed formats, configure theme colors and fonts there
+too; explicit element styling and theme styling are separate controls.
+Use fonts the runtime can access; when an exact font is unavailable, use a
+consistent available substitute.
 
 ## Choose the path
 
@@ -128,10 +132,12 @@ extract as a contiguous string — render to confirm.
 
 ## Page operations (pypdf, Python)
 
-`scripts/pages.py` has one subcommand per operation:
+`scripts/pages.py` has one subcommand per operation. `info` reads metadata
+(`metadata` remains an alias); `forms.py info` checks for fillable fields
+(`inspect` remains an alias):
 
 ```sh
-kowork-python scripts/pages.py metadata in.pdf
+kowork-python scripts/pages.py info in.pdf
 kowork-python scripts/pages.py merge a.pdf b.pdf -o out.pdf
 kowork-python scripts/pages.py split in.pdf outdir/
 kowork-python scripts/pages.py split in.pdf outdir/ --pages 1-3,5
@@ -196,7 +202,7 @@ back.
 First decide which kind of form it is:
 
 ```sh
-kowork-python scripts/forms.py inspect in.pdf
+kowork-python scripts/forms.py info in.pdf
 ```
 
 For either form path, create a unique task directory as described under Create
@@ -222,7 +228,7 @@ live in appearance streams, so `read_pdf.py` (text extraction) will **not** show
 them. Verify the stored values with `forms.py fields` on the output, which reads
 the authoritative `/V` for each field. Then render the output with `render.py`,
 which initialises the form environment so the filled fields appear, and Read the
-image to confirm placement. If `inspect` reports no fillable fields, it is a flat
+image to confirm placement. If `info` reports no fillable fields, it is a flat
 form — use the overlay path.
 
 ## Fill a flat (non-interactive) form (overlay, Python)

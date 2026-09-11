@@ -1,7 +1,7 @@
 # Filling flat (non-interactive) PDF forms
 
 Reference detail deferred from `SKILL.md`. Read this before authoring a
-`fields.json`. A **flat form** has no AcroForm fields (`forms.py inspect` reports
+`fields.json`. A **flat form** has no AcroForm fields (`forms.py info` reports
 "no fillable form fields") — it is just printed labels and rule lines. To "fill"
 it you stamp text onto the page at the right positions. That is the overlay
 workflow, all via `scripts/forms.py` (plus `scripts/render.py` to look at the

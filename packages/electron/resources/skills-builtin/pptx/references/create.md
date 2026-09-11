@@ -4,8 +4,9 @@ Reference detail deferred from `SKILL.md`. The create path builds a deck with
 **pptxgenjs**, run under `kowork-node`; this is the companion to
 `scripts/create_pptx.cjs`. Part A is the API you actually need. Part B is how to
 keep the result from looking generic. Confirm the output with
-`kowork-python scripts/validate.py`, and — since nothing here renders — open it
-in PowerPoint or Keynote for true visual QA.
+`kowork-python scripts/validate.py deck.pptx`, then deliver after validation
+succeeds. Nothing here renders; visual review in PowerPoint or Keynote is
+optional user review, not a prerequisite for delivery.
 
 ## A. pptxgenjs essentials
 
@@ -301,8 +302,8 @@ not defaulted.
 
 ### Palette discipline
 
-Pick a **topic-fit** palette, not reflexive blue-on-white. One **dominant** color
-carries most of the weight (backgrounds, headers, primary bars), **one or two
+Keep the template palette by default; use the user's palette when branding or
+restyling is requested. One **dominant** color carries most of the weight (backgrounds, headers, primary bars), **one or two
 supporting tones** sit near it, and a **single accent** marks the few things that
 matter (a key number, one bar, a divider). The template's set:
 
@@ -355,5 +356,5 @@ is a **full-bleed background**, which is meant to run to the edges.
 
 Run `kowork-python scripts/validate.py deck.pptx` for the structure + layout
 check (off-slide shapes, collisions, leftover placeholder text), fix what it
-flags, then open the file in a real viewer — there is no renderer here, so a
-human (or PowerPoint/Keynote) is the last word on how it looks.
+flags, then deliver the validated file. There is no renderer here; do not claim
+visual QA. The user can optionally review its appearance in PowerPoint or Keynote.
