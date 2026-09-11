@@ -23,6 +23,21 @@ class QuickValidateTests(TestCase):
         )
         self.assertEqual(errors, [])
 
+    def test_accepts_supported_optional_frontmatter(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            "---\n"
+            "name: meeting-notes\n"
+            "description: Format meeting notes\n"
+            "license: MIT\n"
+            "compatibility: opencode\n"
+            "metadata:\n"
+            "  audience: managers\n"
+            "  workflow: meetings\n"
+            "---\n",
+        )
+        self.assertEqual(errors, [])
+
     def test_rejects_empty_required_values(self) -> None:
         errors = self.validate(
             "meeting-notes",
