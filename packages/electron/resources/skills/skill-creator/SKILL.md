@@ -150,7 +150,11 @@ it does not prove that the instructions produce a useful result.
 
 Sometimes the user doesn't want a new skill — they want to fix or upgrade one they already have.
 
-- **Start with what's there.** Have the user point you to that skill's folder, then read its current SKILL.md so you understand what it does today.
+- **Start with what's there.** Have the user point you to that skill's folder,
+  then read its current `SKILL.md` and inventory its supporting files. Follow
+  the links and inspect the scripts, references, or assets relevant to the
+  requested change before editing. Preserve unrelated resources and update or
+  remove a supporting file only when the revised instructions require it.
 - **Ask what's off.** Find out what isn't working or what they'd like to be different, and get a concrete example of a time it fell short. Specifics beat vague dissatisfaction — "it ignored the deadline column" tells you far more than "it's not great."
 - **Diagnose before rewriting.** The right fix usually depends on the symptom:
   - First confirm that the skill appears in Kowork's **Added** section. If it is
