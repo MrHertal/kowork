@@ -153,8 +153,15 @@ Sometimes the user doesn't want a new skill — they want to fix or upgrade one 
 - **Start with what's there.** Have the user point you to that skill's folder, then read its current SKILL.md so you understand what it does today.
 - **Ask what's off.** Find out what isn't working or what they'd like to be different, and get a concrete example of a time it fell short. Specifics beat vague dissatisfaction — "it ignored the deadline column" tells you far more than "it's not great."
 - **Diagnose before rewriting.** The right fix usually depends on the symptom:
-  - If the skill **doesn't kick in when it should** (or kicks in when it shouldn't), the fix is almost always in the **description** — adjust which situations and phrasings it names.
-  - If the skill **runs but the result isn't right**, the fix is in the **body** — clarify the steps, add a missing rule or example, or explain the reasoning better.
+  - First confirm that the skill appears in Kowork's **Added** section. If it is
+    absent, validate its frontmatter and folder, confirm its source is still
+    added, refresh the skill cache, and check for a duplicate name or a denied
+    skill permission before changing its description.
+  - If the skill is available but **isn't selected when it should be** (or is
+    selected when it should not be), revise the **description** and its trigger
+    boundaries.
+  - If the skill **loads but the result isn't right**, inspect the **body and
+    supporting resources** for missing or conflicting guidance.
 - **Revise with the same principles** as writing a new skill: a clear description that names when to use it, and a direct, example-backed body. Keep the skill's existing name and folder unless the user specifically wants to rename it.
 - **Save over the same SKILL.md.** Kowork may keep an already loaded skill in
   memory, so tell the user to reload or restart Kowork after editing an
