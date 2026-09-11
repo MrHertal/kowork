@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: Use this skill whenever the user wants to build, create, make, set up, write, edit, improve, refine, or fix a Kowork skill, or when they describe a repeatable way they want the agent to work going forward — for example "can you always format my meeting notes like this from now on", "remember these steps so you do them every time", "set up a reusable checklist for X", or "turn this into something you'll reuse". When in doubt, prefer using this skill.
+description: Use when the user explicitly asks to create, update, fix, or review a Kowork skill, or asks to save a workflow as reusable behavior for future requests — for example "make this a skill", "do this every time", or "turn these steps into a reusable checklist". Do not use for a one-off task, ordinary document formatting, or a preference that applies only to the current request unless the user asks to save or reuse it.
 ---
 
 # Skill Creator
@@ -94,7 +94,10 @@ separate UI-description length rule for custom skills. Prefer the shortest
 description that still distinguishes the skill and includes the trigger cues
 needed for reliable discovery.
 
-**Lean toward getting used.** A skill that never activates is useless, and the more common mistake is a skill sitting idle when it should have helped. So make the description a little assertive about when to apply, and name the trigger situations generously.
+**Aim for precise activation.** Name the concrete requests and situations the
+skill should handle, including common phrasings, while also stating important
+exclusions. Do not make the description so broad that an ordinary one-off task
+looks like a request to create or invoke reusable behavior.
 
 **Before / after example** (for an imagined "meeting notes" skill):
 
