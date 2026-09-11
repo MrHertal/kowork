@@ -51,6 +51,21 @@ You don't need everything perfect up front. Gather enough to write a solid first
 1. A small header block at the very top, written in YAML (a simple `field: value` format) between `---` fences. It has exactly two fields: `name` and `description`.
 2. Below the header, the body — plain Markdown instructions written to the agent, telling it how to do the task.
 
+**The skill folder can contain supporting material.** `SKILL.md` is the only
+required file. Add other files only when they make the workflow more reliable
+or keep conditional detail out of the main instructions. Common conventions
+include:
+
+- `scripts/` for reusable, deterministic helpers.
+- `references/` for details the agent reads only when relevant.
+- `assets/` for templates, images, or other files the skill consumes.
+
+Those names are conventions, not an exhaustive schema. A larger skill may use
+clear purpose-specific folders such as `tasks/`, `workflows/`, `routing/`,
+`features/`, or `troubleshooting/`. Link each supporting file from `SKILL.md` or
+another discoverable guide and say when it should be read or run. Do not create
+empty folders or placeholder files without a concrete use.
+
 **The name.** A short, lowercase, hyphenated label of a few words, like
 `meeting-notes-formatter`. Kowork treats this identifier as exact and
 case-sensitive: use only lowercase letters and digits separated by single
