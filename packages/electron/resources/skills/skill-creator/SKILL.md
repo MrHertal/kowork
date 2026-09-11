@@ -113,7 +113,11 @@ looks like a request to create or invoke reusable behavior.
 
 - **Explain the *why*, don't just bark rules.** The agent follows guidance far better when it understands the purpose behind a step, and it can then handle situations the instructions never anticipated. If you notice yourself piling up shouty ALL-CAPS "ALWAYS" and "NEVER" rules, treat that as a warning sign — usually it's better to explain the reason so the agent genuinely gets why it matters.
 
-- **Show, don't just tell.** Include a concrete example or two of good input → output. If the skill must produce a specific format, give a short template the agent can follow, like:
+- **Use examples when they clarify something non-obvious.** Add a concise input
+  → output example when it materially explains a required format, routing
+  decision, or tricky behavior. Do not add examples that merely restate clear
+  instructions. If the skill must produce a specific format, a short template
+  may be enough, such as:
 
   ```
   ## Summary
