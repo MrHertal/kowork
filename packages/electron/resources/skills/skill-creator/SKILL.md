@@ -13,8 +13,11 @@ The person you're helping may not be technical, so keep things warm and simple.
 
 - Skip jargon. If you must use a technical word, explain it in a few plain words right away.
 - Keep it a friendly back-and-forth, not a form to fill out.
-- Ask before you assume — a quick question beats a wrong guess.
-- Play back what you heard in your own words and confirm it before you write anything.
+- Ask a focused question only when missing information would materially change
+  the skill. Otherwise make reasonable assumptions and identify them for the
+  user when presenting the draft.
+- Reflect your understanding when it would prevent a meaningful mismatch; do
+  not require confirmation before drafting when the request is already clear.
 
 ## How this goes
 
@@ -28,7 +31,7 @@ Here's the rough shape of the work. The order isn't strict — meet the user whe
 
 ## Figure out what they want
 
-**Mine the conversation first.** Often the user is already partway through something and says "turn this into a skill" or "do it like that every time." Before you ask a single question, look back at what just happened — the steps you took, the corrections they made, the format or wording they clearly preferred — and build on that. Then confirm it with them, so they don't have to repeat themselves.
+**Mine the conversation first.** Often the user is already partway through something and says "turn this into a skill" or "do it like that every time." Before you ask a single question, look back at what just happened — the steps you took, the corrections they made, the format or wording they clearly preferred — and build on that. Clarify only material ambiguity so the user does not have to repeat themselves.
 
 **Draw out the essentials** with a few focused questions, not an interrogation. Three things you really need:
 
