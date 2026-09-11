@@ -42,8 +42,11 @@ versions. If validation or `present_files` fails, do not claim the PDF is ready.
 - Creating a PDF uses **reportlab** (Python) — there is no Node path for pdf.
 - The scripts below live in this skill's `scripts/` directory. Resolve every
   `scripts/...` path against the skill base directory reported when this skill
-  was loaded, not against the user's working directory. They print clear errors
-  and use non-zero exit codes. File-editing commands write a **new** output with
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate. File-editing
+  commands write a **new** output with
   `-o`; directory-producing commands take an explicit output directory.
 - For raster images used in a PDF, use the image skill for standalone image
   processing and this skill for container-level work, including embedding the

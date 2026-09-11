@@ -45,8 +45,10 @@ ready.
   Do not install anything.
 - The scripts below live in this skill's `scripts/` directory. Resolve every
   `scripts/...` path against the skill base directory reported when this skill
-  was loaded, not against the user's working directory. They print clear errors
-  and use non-zero exit codes, and
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate. In addition,
   every mutating command writes to a **new** output (never editing the input
   in place) and refuses a macro-enabled (`.docm`/`.dotm`) output.
 - For raster images used in a document, use the image skill for standalone
@@ -79,6 +81,7 @@ consistent available substitute.
 | Summarize / read / extract text                             | **Read**                             |
 | Suggest changes as redlines                                 | **Tracked changes** (a kind of Edit) |
 | Leave review notes                                          | **Comment**                          |
+| Confirm a document is sound                                 | **Validate**                         |
 
 ## Create (docx-js, Node)
 

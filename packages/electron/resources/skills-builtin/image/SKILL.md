@@ -49,9 +49,10 @@ previews, validation artifacts, or intermediate versions. If validation or
   are not available and must not be used.
 - The scripts below live in this skill's `scripts/` directory. Resolve every
   `scripts/...` path against the skill base directory reported when this skill
-  was loaded, not against the user's working directory. On failure they print
-  `error: ...` to stderr and exit non-zero; non-fatal notes go to stderr prefixed
-  `note: ...`.
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate.
 - No script overwrites its input: passing the same path for input and output is
   an error. Always write to a new path.
 

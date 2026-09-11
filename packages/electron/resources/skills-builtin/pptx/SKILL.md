@@ -49,8 +49,10 @@ is ready.
   `require("pptxgenjs")`. Do not install anything.
 - The scripts below live in this skill's `scripts/` directory. Resolve every
   `scripts/...` path against the skill base directory reported when this skill
-  was loaded, not against the user's working directory. They print clear errors
-  and use non-zero exit codes, and every mutating
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate. Every mutating
   command writes a **new** file (`-o`) — it never edits in place — and refuses to
   write a macro-enabled (`.pptm`/`.potm`/`.ppsm`) output.
 - For raster images used in a presentation, use the image skill for standalone

@@ -46,8 +46,10 @@ ready.
   engines, no LibreOffice/`soffice`, no system tools). There is no Node path.
 - The scripts below live in this skill's `scripts/` directory. Resolve every
   `scripts/...` path against the skill base directory reported when this skill
-  was loaded, not against the user's working directory. They print clear errors
-  and use non-zero exit codes, and every mutating
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate. Every mutating
   command writes a **new** file (`-o`) — it never edits in place.
 - For raster images used in a workbook, use the image skill for standalone
   image processing and this skill for container-level work, including embedding

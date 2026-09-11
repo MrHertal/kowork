@@ -8,7 +8,8 @@
       "files": [],
       "expectations": [
         "A new .pdf file is produced",
-        "The create path was used: create_pdf.py (reportlab) run via kowork-python, copied into a temp dir and edited — not a hand-assembled or string-built PDF",
+        "The create path was used: create_pdf.py copied into a uniquely named task directory with a random suffix inside the exact pre-approved session temporary directory from the Bash tool instructions (not the user's folder), its build_story() edited for reportlab, and the copy run via kowork-python — not a hand-assembled or string-built PDF",
+        "The working script is retained for later revisions in the same session, including after app restarts",
         "The document contains the title, a table with exactly 3 rows, and a summary paragraph",
         "validate.py reports the result valid (it opens and all pages render)",
         "No OCR, LibreOffice/soffice, or external CLI tools (pdftoppm/qpdf/pdftk) were used"
