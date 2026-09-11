@@ -82,7 +82,8 @@ Bash tool instructions — never in the user's folder**. Copy that pre-approved
 path in full, exactly as shown — never shorten or reconstruct it. Use that task
 directory (`<task-temp-dir>`) for every working file. Do not work directly in
 the pre-approved directory, derive another path from environment variables, or
-create a sibling directory.
+create a sibling directory. The pre-approved directory is scoped to the current
+session; use it for intermediate images and extracted frames used for QA too.
 
 1. Copy `scripts/create_image.py` into that task directory and edit the
    copy's `build_image()` to build the requested image.
@@ -95,10 +96,11 @@ create a sibling directory.
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file. Where appearance matters, also Read the output as
    visual QA.
-4. Keep that working copy in the task directory for the rest of the task: to
-   revise an image you generated this session, re-edit this script and re-run it
-   rather than rebuilding from scratch. The task directory is never beside the
-   user's file, and the OS reclaims it later.
+4. Keep that working copy in the task directory for the whole session — it
+   survives app restarts: to revise an image you generated in this session, even
+   days later, re-edit this script and re-run it rather than rebuilding from
+   scratch. The task directory is never beside the user's file, and the OS
+   reclaims it eventually.
 
 The template is self-contained (Pillow + standard library only — no `imgutil`
 import) and renders a demo card showing every building block: canvas size

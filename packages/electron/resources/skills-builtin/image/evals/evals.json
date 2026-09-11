@@ -7,7 +7,8 @@
       "expected_output": "A new, valid 1200x630 PNG authored with Pillow showing the gradient background and the two text lines.",
       "files": [],
       "expectations": [
-        "The create path was used: create_image.py copied into a task temp dir (not the user's folder), its build_image() edited, and the copy run via kowork-python — not a hand-assembled file",
+        "The create path was used: create_image.py copied into a uniquely named task directory with a random suffix inside the exact pre-approved session temporary directory from the Bash tool instructions (not the user's folder), its build_image() edited, and the copy run via kowork-python — not a hand-assembled file",
+        "The working script is retained for later revisions in the same session, including after app restarts",
         "The output is 1200x630 with a gradient background and the title and subtitle text",
         "Translucent elements, if any, were drawn on an overlay and merged with Image.alpha_composite (ImageDraw does not alpha-blend)",
         "validate.py reports the result OK, and the image was Read for visual QA",

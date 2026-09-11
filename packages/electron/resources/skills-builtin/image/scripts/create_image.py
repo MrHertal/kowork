@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Authoring template for creating an image from scratch with Pillow.
 
-Copy this into a temp directory (never the user's folder), edit
+Copy this into a uniquely named task directory with a random suffix inside the
+exact pre-approved session temporary directory shown in the Bash tool
+instructions (never the user's folder), edit
 ``build_image()`` to build the requested image, then run it to write the image
 to the path the user wants:
 
     kowork-python create_image.py out.png
 
 The copy stays in the temp directory after a successful write, so you can edit
-it and re-run to revise the image within the same session (the OS reclaims
-temp later).
+it and re-run to revise the image within the same session, even after app
+restarts or days later (the OS reclaims temp eventually).
 
 It demonstrates every "create" building block, each editable in one obvious
 place: the canvas size (``WIDTH``/``HEIGHT``), a vertical-gradient background
