@@ -9,17 +9,18 @@ needs more than the happy path.
 Hand-editing changes the _content_ of a slide. Work in a temp dir, never the
 user's folder:
 
-1. `unpack.py deck.pptx work/` — explodes the package and pretty-prints the XML
-   so a slide is line-editable.
-2. Edit `work/ppt/slides/slideN.xml` (the slide number is its position-ish part
-   name, not its 1-based order — confirm with `slides.py info`).
-3. `pack.py work/ out.pptx` — rebuilds the package.
-4. `validate.py out.pptx` — confirm it reopens and the layout is sound; re-edit
-   and repack if it reports problems. Pass `pack.py ... --cleanup` once validated
-   to drop the temp tree.
+1. `kowork-python scripts/unpack.py deck.pptx <task-temp-dir>/work/` — explodes
+   the package and pretty-prints the XML so a slide is line-editable.
+2. Edit `<task-temp-dir>/work/ppt/slides/slideN.xml` (the slide number is its
+   position-ish part name, not its 1-based order — confirm with
+   `kowork-python scripts/slides.py info deck.pptx`).
+3. `kowork-python scripts/pack.py <task-temp-dir>/work/ out.pptx --cleanup` —
+   rebuilds the package and removes the unpacked tree.
+4. `kowork-python scripts/validate.py out.pptx` — confirm it reopens and the
+   layout is sound; unpack, re-edit, and repack if it reports problems.
 
 Adding, duplicating, deleting, reordering, or cleaning up **whole slides** is
-`slides.py`'s job — it rewires `presentation.xml`, the rels, and
+`scripts/slides.py`'s job — it rewires `presentation.xml`, the rels, and
 `[Content_Types].xml` for you. Don't hand-wire those for a whole slide.
 
 ## Package shape (Open Packaging Conventions)

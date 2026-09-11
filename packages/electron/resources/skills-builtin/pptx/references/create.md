@@ -3,9 +3,9 @@
 Reference detail deferred from `SKILL.md`. The create path builds a deck with
 **pptxgenjs**, run under `kowork-node`; this is the companion to
 `scripts/create_pptx.cjs`. Part A is the API you actually need. Part B is how to
-keep the result from looking generic. Confirm the output with `validate.py`, and
-— since nothing here renders — open it in PowerPoint or Keynote for true visual
-QA.
+keep the result from looking generic. Confirm the output with
+`kowork-python scripts/validate.py`, and — since nothing here renders — open it
+in PowerPoint or Keynote for true visual QA.
 
 ## A. pptxgenjs essentials
 
@@ -163,7 +163,13 @@ ratio on its own. Either let it fit a box, or compute one dimension:
 
 ```js
 // From a file (or base64 data: "image/png;base64," + buf.toString("base64")).
-slide.addImage({ path: "photo.png", x: 0.6, y: 2, w: 3.2, h: 2.4 });
+slide.addImage({
+  path: "/absolute/path/photo.png",
+  x: 0.6,
+  y: 2,
+  w: 3.2,
+  h: 2.4,
+});
 
 // Fit inside a box without distortion:
 slide.addImage({
@@ -177,14 +183,14 @@ slide.addImage({
 
 // Or keep the ratio yourself by reading the pixel size first:
 const { width, height } = require("image-size")(
-  require("fs").readFileSync("photo.png"),
+  require("fs").readFileSync("/absolute/path/photo.png"),
 );
 const w = 4,
   h = w * (height / width);
-slide.addImage({ path: "photo.png", x: 0.6, y: 2, w, h });
+slide.addImage({ path: "/absolute/path/photo.png", x: 0.6, y: 2, w, h });
 ```
 
-(Pillow via `kowork-python -c "from PIL import Image; print(Image.open('photo.png').size)"`
+(Pillow via `kowork-python -c "from PIL import Image; print(Image.open('/absolute/path/photo.png').size)"`
 gives the pixel size too.)
 
 ### Background, table, chart, notes
@@ -326,7 +332,8 @@ chart, an image), even if small. A wall of bullets reads as a draft.
 ### Spacing and margins
 
 Use a consistent margin (the template keeps ~0.6") and even gaps between blocks;
-align edges to an invisible grid. Keep content off the slide edges — `validate.py`
+align edges to an invisible grid. Keep content off the slide edges —
+`kowork-python scripts/validate.py`
 flags anything within 0.25" of an edge as a tight margin. The deliberate exception
 is a **full-bleed background**, which is meant to run to the edges.
 
@@ -342,7 +349,7 @@ is a **full-bleed background**, which is meant to run to the edges.
 
 ### After building
 
-Run `validate.py deck.pptx` for the structure + layout check (off-slide shapes,
-collisions, leftover placeholder text), fix what it flags, then open the file in a
-real viewer — there is no renderer here, so a human (or PowerPoint/Keynote) is the
-last word on how it looks.
+Run `kowork-python scripts/validate.py deck.pptx` for the structure + layout
+check (off-slide shapes, collisions, leftover placeholder text), fix what it
+flags, then open the file in a real viewer — there is no renderer here, so a
+human (or PowerPoint/Keynote) is the last word on how it looks.

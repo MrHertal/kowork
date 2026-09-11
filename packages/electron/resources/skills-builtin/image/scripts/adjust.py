@@ -13,7 +13,7 @@ the enhancement math and re-attached afterwards, so translucent pixels keep
 their exact opacity.
 
 Usage:
-    kowork-python adjust.py <in> <out> [--brightness F] [--contrast F] [--color F] [--sharpness F]
+    kowork-python adjust.py <in> -o <out> [--brightness F] [--contrast F] [--color F] [--sharpness F]
         [--blur R | --sharpen | --grayscale]
 """
 
@@ -72,7 +72,7 @@ def apply_adjustments(im: Image.Image, args: argparse.Namespace) -> tuple[Image.
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Adjust an image's brightness, contrast, color, or sharpness.")
     ap.add_argument("input", help="path to the input image")
-    ap.add_argument("output", help="path to write to; the extension picks the format")
+    ap.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
     ap.add_argument("--brightness", type=float, metavar="F", help="brightness factor, 1.0 = no change")
     ap.add_argument("--contrast", type=float, metavar="F", help="contrast factor, 1.0 = no change")
     ap.add_argument("--color", type=float, metavar="F", help="color (saturation) factor, 1.0 = no change")

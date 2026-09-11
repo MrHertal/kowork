@@ -13,7 +13,7 @@ full picture even when the file stores only per-frame diffs. A single-frame
 input is refused: it is not an animation.
 
 Usage:
-    kowork-python gif.py create <out.gif> <frames...> [--duration MS] [--loop N]
+    kowork-python gif.py create <frames...> -o <out.gif> [--duration MS] [--loop N]
     kowork-python gif.py extract <in.gif> <outdir/>
 """
 
@@ -107,8 +107,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub = ap.add_subparsers(dest="command", required=True, metavar="command")
 
     cp = sub.add_parser("create", help="create an animated GIF from 2+ still images")
-    cp.add_argument("output", help="path of the .gif to write")
     cp.add_argument("frames", nargs="+", metavar="frame", help="input images, in play order")
+    cp.add_argument("-o", "--out", dest="output", required=True, help="path of the .gif to write")
     cp.add_argument(
         "--duration",
         type=int,

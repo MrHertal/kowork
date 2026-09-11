@@ -7,8 +7,8 @@ description: >-
   formulas; add, format, or compute a column; insert or delete rows or columns;
   style cells (fonts, fills, number formats, widths); add/rename/remove/move/copy
   sheets; inspect a workbook's structure; make a chart; or convert between .xlsx
-  and .csv. Triggers on any mention of a spreadsheet, Excel, or a .xlsx/.xlsm/.csv
-  file, even without the word "xlsx".
+  and .csv. Triggers on any mention of a spreadsheet, Excel, or a
+  .xlsx/.xlsm/.xltx/.csv file, even without the word "xlsx".
 ---
 
 # Working with Excel (.xlsx) files
@@ -30,8 +30,8 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an in-place
-edit, call `present_files` exactly once with every final user-facing output path.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path.
 Never call it for read-only or summarization work, and never pass temporary files,
 scripts, previews, unpacked directories, validation artifacts, or intermediate
 versions. If validation or `present_files` fails, do not claim the workbook is
@@ -44,8 +44,10 @@ ready.
   Available libraries: `openpyxl`, `et_xmlfile`, and `Pillow` (PIL, for embedding
   images). Import nothing else (no `pandas`, no `numpy`, no other spreadsheet
   engines, no LibreOffice/`soffice`, no system tools). There is no Node path.
-- The scripts below live in this skill's `scripts/` directory; paths are relative
-  to it. They print clear errors and use non-zero exit codes, and every mutating
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. They print clear errors
+  and use non-zero exit codes, and every mutating
   command writes a **new** file (`-o`) — it never edits in place.
 
 ## Choose the path
@@ -70,6 +72,8 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_xlsx.py` into that task directory and edit the
    copy's `build_workbook()` to build the requested content.

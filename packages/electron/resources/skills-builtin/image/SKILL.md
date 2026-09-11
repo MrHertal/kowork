@@ -32,12 +32,11 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an
-in-place-style re-encode, call `present_files` exactly once with every final
-user-facing output path. Never call it for read-only or summarization work, and
-never pass temporary files, scripts, previews, validation artifacts, or
-intermediate versions. If validation or `present_files` fails, do not claim the
-image is ready.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path. Never call it for
+read-only or summarization work, and never pass temporary files, scripts,
+previews, validation artifacts, or intermediate versions. If validation or
+`present_files` fails, do not claim the image is ready.
 
 ## Runtime (obey exactly)
 
@@ -46,9 +45,11 @@ image is ready.
   **Pillow is the only image library**: import nothing else (no numpy, opencv,
   or scipy), and use no system tools — ImageMagick, ffmpeg, sips, and exiftool
   are not available and must not be used.
-- The scripts below live in this skill's `scripts/` directory; paths are
-  relative to it. On failure they print `error: ...` to stderr and exit
-  non-zero; non-fatal notes go to stderr prefixed `note: ...`.
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. On failure they print
+  `error: ...` to stderr and exit non-zero; non-fatal notes go to stderr prefixed
+  `note: ...`.
 - No script overwrites its input: passing the same path for input and output is
   an error. Always write to a new path.
 
@@ -84,6 +85,8 @@ directory (`<task-temp-dir>`) for every working file. Do not work directly in
 the pre-approved directory, derive another path from environment variables, or
 create a sibling directory. The pre-approved directory is scoped to the current
 session; use it for intermediate images and extracted frames used for QA too.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_image.py` into that task directory and edit the
    copy's `build_image()` to build the requested image.
@@ -107,7 +110,7 @@ import) and renders a demo card showing every building block: canvas size
 (`WIDTH`/`HEIGHT`), a vertical-gradient background, a translucent
 rounded-rectangle card, accent shapes, a title and subtitle in the scalable
 default font, and an alpha-masked badge. Swap the badge for a real picture with
-`Image.open("photo.png")` + `resize()` + `paste()`. `ImageDraw` does not
+`Image.open("/absolute/path/photo.png")` + `resize()` + `paste()`. `ImageDraw` does not
 alpha-blend, so translucent shapes and text go on a clear overlay merged with
 `Image.alpha_composite` — the template comments demonstrate this. The output
 format comes from the extension; JPEG/BMP have no alpha channel and flatten
@@ -131,9 +134,9 @@ the pixels first — Convert deliberately does not.
 ## Convert (re-encode)
 
 ```sh
-kowork-python scripts/convert.py in.png out.jpg --quality 85
-kowork-python scripts/convert.py in.jpg out.webp --quality 80
-kowork-python scripts/convert.py in.png out.jpg --strip-metadata --background '#EEEEEE'
+kowork-python scripts/convert.py in.png -o out.jpg --quality 85
+kowork-python scripts/convert.py in.jpg -o out.webp --quality 80
+kowork-python scripts/convert.py in.png -o out.jpg --strip-metadata --background '#EEEEEE'
 ```
 
 The output extension picks the format; pixels are decoded and re-encoded,
@@ -156,14 +159,14 @@ nothing else changes.
 ## Transform (resize / crop / rotate / flip)
 
 ```sh
-kowork-python scripts/transform.py resize in.png out.png --max 1600x1600
-kowork-python scripts/transform.py resize in.png out.png --width 800
-kowork-python scripts/transform.py resize in.png out.png --percent 50
-kowork-python scripts/transform.py resize in.png out.png --size 800x600
-kowork-python scripts/transform.py crop in.png out.png --box 10,10,300,180
-kowork-python scripts/transform.py rotate in.png out.png --degrees 90
-kowork-python scripts/transform.py rotate in.png out.png --degrees -15 --expand
-kowork-python scripts/transform.py flip in.png out.png --horizontal   # or --vertical
+kowork-python scripts/transform.py resize in.png -o out.png --max 1600x1600
+kowork-python scripts/transform.py resize in.png -o out.png --width 800
+kowork-python scripts/transform.py resize in.png -o out.png --percent 50
+kowork-python scripts/transform.py resize in.png -o out.png --size 800x600
+kowork-python scripts/transform.py crop in.png -o out.png --box 10,10,300,180
+kowork-python scripts/transform.py rotate in.png -o out.png --degrees 90
+kowork-python scripts/transform.py rotate in.png -o out.png --degrees -15 --expand
+kowork-python scripts/transform.py flip in.png -o out.png --horizontal   # or --vertical
 ```
 
 - EXIF orientation is baked into the pixels before transforming, so the
@@ -191,9 +194,9 @@ kowork-python scripts/transform.py flip in.png out.png --horizontal   # or --ver
 ## Adjust (brightness / contrast / color / sharpness / filters)
 
 ```sh
-kowork-python scripts/adjust.py in.png out.png --brightness 1.1 --contrast 1.2
-kowork-python scripts/adjust.py in.png out.png --grayscale
-kowork-python scripts/adjust.py in.png out.png --blur 2
+kowork-python scripts/adjust.py in.png -o out.png --brightness 1.1 --contrast 1.2
+kowork-python scripts/adjust.py in.png -o out.png --grayscale
+kowork-python scripts/adjust.py in.png -o out.png --blur 2
 ```
 
 Factors are floats where **1.0 = no change** (0.5 halves, 2.0 doubles);
@@ -209,11 +212,11 @@ its first frame only.
 ## Annotate (watermark / text)
 
 ```sh
-kowork-python scripts/annotate.py watermark in.png out.png --mark logo.png
-kowork-python scripts/annotate.py watermark in.png out.png --mark logo.png --position top-left --opacity 0.6 --scale 0.15
-kowork-python scripts/annotate.py watermark in.png out.png --mark logo.png --tile --opacity 0.2
-kowork-python scripts/annotate.py text in.png out.png --text "© 2026 Acme"
-kowork-python scripts/annotate.py text in.png out.png --text "SALE" --font /path/font.ttf --size 64 --color '#FF0000'
+kowork-python scripts/annotate.py watermark in.png -o out.png --mark logo.png
+kowork-python scripts/annotate.py watermark in.png -o out.png --mark logo.png --position top-left --opacity 0.6 --scale 0.15
+kowork-python scripts/annotate.py watermark in.png -o out.png --mark logo.png --tile --opacity 0.2
+kowork-python scripts/annotate.py text in.png -o out.png --text "© 2026 Acme"
+kowork-python scripts/annotate.py text in.png -o out.png --text "SALE" --font /path/font.ttf --size 64 --color '#FF0000'
 ```
 
 - Positions are named only: `center`, `top-left`, `top-right`, `bottom-left`,
@@ -235,10 +238,10 @@ kowork-python scripts/annotate.py text in.png out.png --text "SALE" --font /path
 ## Combine (grid / row / column)
 
 ```sh
-kowork-python scripts/combine.py out.png a.png b.png c.png d.png --grid 2x2 --gap 8
-kowork-python scripts/combine.py out.png a.png b.png --hstack --gap 16
-kowork-python scripts/combine.py out.png a.png b.png --vstack
-kowork-python scripts/combine.py out.png a.png b.png --hstack --background '#00000000'
+kowork-python scripts/combine.py a.png b.png c.png d.png -o out.png --grid 2x2 --gap 8
+kowork-python scripts/combine.py a.png b.png -o out.png --hstack --gap 16
+kowork-python scripts/combine.py a.png b.png -o out.png --vstack
+kowork-python scripts/combine.py a.png b.png -o out.png --hstack --background '#00000000'
 ```
 
 - Inputs are **never rescaled**: every cell is as large as the widest and
@@ -256,7 +259,7 @@ kowork-python scripts/combine.py out.png a.png b.png --hstack --background '#000
 ## Animated GIF (create / extract)
 
 ```sh
-kowork-python scripts/gif.py create out.gif frame1.png frame2.png frame3.png --duration 200 --loop 0
+kowork-python scripts/gif.py create frame1.png frame2.png frame3.png -o out.gif --duration 200 --loop 0
 kowork-python scripts/gif.py extract in.gif frames/
 ```
 

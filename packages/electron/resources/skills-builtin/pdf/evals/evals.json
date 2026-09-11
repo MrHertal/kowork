@@ -32,7 +32,7 @@
       "files": ["evals/files/report.pdf", "evals/files/appendix.pdf"],
       "expectations": [
         "pages.py merge was used (pypdf) via kowork-python, in the requested order",
-        "The merged file has 3 pages (report's 2 pages then appendix's 1), confirmed via pages.py metadata or validate.py",
+        "The merged file has 3 pages (report's 2 pages then appendix's 1), and validate.py reports it valid",
         "No external tools such as qpdf, pdftk, or Ghostscript were used"
       ]
     },
@@ -71,6 +71,7 @@
         "forms.py structure was used to locate the lines/labels/boxes, and a fields.json of boxes+text authored",
         "forms.py check-boxes validated the boxes, then forms.py overlay stamped the text (via kowork-python)",
         "The result shows 'Dana Lee' and 'dana@example.com' near the Name/Email lines and an X on the Yes box (confirmed by rendering / preview-boxes and reading the image)",
+        "validate.py confirms the filled PDF still opens and renders",
         "The text was overlaid onto the page, with no attempt to create AcroForm fields and no OCR/LibreOffice"
       ]
     },
@@ -82,6 +83,7 @@
       "expectations": [
         "pages.py encrypt was used (pypdf) via kowork-python with the given password",
         "The output is encrypted: a PDF reader reports it as encrypted, and opening it without the password fails",
+        "validate.py --password s3cret confirms the encrypted PDF opens and renders",
         "No external tools such as qpdf or pdftk were used"
       ]
     }

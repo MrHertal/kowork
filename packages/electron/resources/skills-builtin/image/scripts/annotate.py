@@ -15,9 +15,9 @@ blend correctly instead of punching holes); saving to JPEG/BMP flattens onto
 white via ``imgutil.save_image``.
 
 Usage:
-    kowork-python annotate.py watermark <in> <out> --mark logo.png \\
+    kowork-python annotate.py watermark <in> -o <out> --mark logo.png \\
         [--position P] [--opacity F] [--scale F] [--tile]
-    kowork-python annotate.py text <in> <out> --text "..." \\
+    kowork-python annotate.py text <in> -o <out> --text "..." \\
         [--position P] [--font PATH] [--size N] [--color #hex]
 """
 
@@ -169,7 +169,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     wp = sub.add_parser("watermark", help="paste a logo at a position, or tiled across the image")
     wp.add_argument("input", help="path to the input image")
-    wp.add_argument("output", help="path to write to; the extension picks the format")
+    wp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
     wp.add_argument("--mark", metavar="PATH", help="logo image to paste (required)")
     wp.add_argument(
         "--position",
@@ -194,7 +194,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     tp = sub.add_parser("text", help="draw a text label")
     tp.add_argument("input", help="path to the input image")
-    tp.add_argument("output", help="path to write to; the extension picks the format")
+    tp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
     tp.add_argument("--text", metavar="TEXT", help="the label text (required); a newline draws multiple lines")
     tp.add_argument(
         "--position",

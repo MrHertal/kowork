@@ -26,8 +26,8 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an in-place
-edit, call `present_files` exactly once with every final user-facing output path.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path.
 Never call it for read-only or summarization work, and never pass temporary files,
 scripts, previews, unpacked directories, validation artifacts, or intermediate
 versions. If validation or `present_files` fails, do not claim the PDF is ready.
@@ -40,8 +40,11 @@ versions. If validation or `present_files` fails, do not claim the PDF is ready.
   `pypdfium2`. Import nothing else (no PyMuPDF/fitz, pdf2image, pikepdf, or
   system tools like pdftoppm/qpdf/tesseract).
 - Creating a PDF uses **reportlab** (Python) — there is no Node path for pdf.
-- The scripts below live in this skill's `scripts/` directory; paths are
-  relative to it. They print clear errors and use non-zero exit codes.
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. They print clear errors
+  and use non-zero exit codes. File-editing commands write a **new** output with
+  `-o`; directory-producing commands take an explicit output directory.
 
 ## Choose the path
 
@@ -66,6 +69,8 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_pdf.py` into that task directory and edit the
    copy's `build_story()` to build the requested content.
@@ -86,8 +91,9 @@ create a sibling directory.
 The template covers a document title, two heading levels, paragraphs, a bulleted
 and a numbered list, a styled table, an inline image, and a "Page N of M"
 footer, at **US Letter** (swap `LETTER` for `A4` from `reportlab.lib.pagesizes`).
-Pillow is bundled, so a real image can be embedded with `Image("photo.png")` and
-its `width`/`height` are optional (reportlab reads the file's own dimensions).
+Pillow is bundled, so a real image can be embedded with
+`Image("/absolute/path/photo.png")`; its `width`/`height` are optional (reportlab
+reads the file's own dimensions).
 
 ## Read / extract (pdfplumber, Python)
 
@@ -111,14 +117,17 @@ extract as a contiguous string — render to confirm.
 ```sh
 kowork-python scripts/pages.py metadata in.pdf
 kowork-python scripts/pages.py merge a.pdf b.pdf -o out.pdf
-kowork-python scripts/pages.py split in.pdf outdir/ [--pages 1-3,5]
+kowork-python scripts/pages.py split in.pdf outdir/
+kowork-python scripts/pages.py split in.pdf outdir/ --pages 1-3,5
 kowork-python scripts/pages.py extract in.pdf -o out.pdf --pages 1-3,5
 kowork-python scripts/pages.py delete in.pdf -o out.pdf --pages 2,4
 kowork-python scripts/pages.py reorder in.pdf -o out.pdf --order 3,1,2
-kowork-python scripts/pages.py rotate in.pdf -o out.pdf --degrees 90 [--pages 1-3]
-kowork-python scripts/pages.py crop in.pdf -o out.pdf --box L,B,R,T [--pages 1]
-kowork-python scripts/pages.py watermark in.pdf -o out.pdf --stamp stamp.pdf [--pages 1-3] [--under]
-kowork-python scripts/pages.py encrypt in.pdf -o out.pdf --password USER [--owner OWNER]
+kowork-python scripts/pages.py rotate in.pdf -o out.pdf --degrees 90 --pages 1-3
+kowork-python scripts/pages.py crop in.pdf -o out.pdf --box 36,36,576,756 --pages 1
+kowork-python scripts/pages.py watermark in.pdf -o out.pdf --stamp stamp.pdf --pages 1-3
+kowork-python scripts/pages.py watermark in.pdf -o out.pdf --stamp stamp.pdf --under
+kowork-python scripts/pages.py encrypt in.pdf -o out.pdf --password USER
+kowork-python scripts/pages.py encrypt in.pdf -o out.pdf --password USER --owner OWNER
 kowork-python scripts/pages.py decrypt in.pdf -o out.pdf --password PW
 ```
 
@@ -131,10 +140,20 @@ stamp itself, so make a see-through stamp with `create_pdf.py`. `encrypt` uses
 AES-256 and `--owner` defaults to the user password. **An encrypted input to any
 other operation fails** — run `decrypt` first.
 
+Validate every output PDF after a page operation. For `split`, validate each
+generated PDF. For an encrypted output, pass its user password:
+
+```sh
+kowork-python scripts/validate.py out.pdf
+kowork-python scripts/validate.py encrypted.pdf --password USER
+```
+
 ## Render to image (pypdfium2, Python)
 
 ```sh
-kowork-python scripts/render.py in.pdf outdir/ [--pages 1-3,5] [--dpi 150 | --scale 2.0] [--format png|jpeg] [--jpeg-quality 85]
+kowork-python scripts/render.py in.pdf outdir/
+kowork-python scripts/render.py in.pdf outdir/ --pages 1-3,5 --dpi 150 --format png
+kowork-python scripts/render.py in.pdf outdir/ --scale 2.0 --format jpeg --jpeg-quality 85
 ```
 
 Writes `page_NNN.png` (or `.jpg`). Default: all pages, PNG, 150 DPI (`--dpi` and
@@ -148,6 +167,13 @@ and how to confirm form-fill placement. Render around 150 DPI — very high DPI 
 wasted because large images are downscaled before the model sees them. For text
 and QA prefer PNG (JPEG is lossy and can be larger on text-heavy pages).
 
+When rendering only for preview or QA, put the output directory inside the
+unique task directory described under Create; use a user-requested destination
+only when the rendered images themselves are final deliverables. After creating
+or visually changing a PDF (for example by rotating, cropping, watermarking, or
+filling it), render the final output there and Read it before handing the PDF
+back.
+
 ## Fill an interactive (AcroForm) form (pypdf, Python)
 
 First decide which kind of form it is:
@@ -156,12 +182,17 @@ First decide which kind of form it is:
 kowork-python scripts/forms.py inspect in.pdf
 ```
 
+For either form path, create a unique task directory as described under Create
+and keep all JSON files and preview images inside it.
+
 If it reports fillable fields, dump them, author a values JSON, fill, validate:
 
 ```sh
-kowork-python scripts/forms.py fields in.pdf -o fields.json
-# write values.json: a {"field_id": value, ...} map using the values fields.json shows
-kowork-python scripts/forms.py fill in.pdf values.json -o out.pdf
+kowork-python scripts/forms.py fields in.pdf -o <task-temp-dir>/fields.json
+# write <task-temp-dir>/values.json using the field ids and legal values above
+kowork-python scripts/forms.py fill in.pdf <task-temp-dir>/values.json -o out.pdf
+kowork-python scripts/forms.py fields out.pdf
+kowork-python scripts/render.py out.pdf <task-temp-dir>/final-preview/
 kowork-python scripts/validate.py out.pdf
 ```
 
@@ -171,11 +202,11 @@ current value, and the legal values (checkbox `on`/`off`, radio/choice
 illegal checkbox/radio/choice value is an error and nothing is written — and
 sets the AcroForm NeedAppearances flag so viewers show the values. Filled values
 live in appearance streams, so `read_pdf.py` (text extraction) will **not** show
-them. Verify the result one of two ways: `forms.py fields` on the output, which
-reads the authoritative stored `/V` for each field (the reliable check); or
-`render.py`, which initialises the form environment so the filled fields appear
-in the image (Read it to confirm placement). If `inspect` reports no fillable
-fields, it is a flat form — use the overlay path.
+them. Verify the stored values with `forms.py fields` on the output, which reads
+the authoritative `/V` for each field. Then render the output with `render.py`,
+which initialises the form environment so the filled fields appear, and Read the
+image to confirm placement. If `inspect` reports no fillable fields, it is a flat
+form — use the overlay path.
 
 ## Fill a flat (non-interactive) form (overlay, Python)
 
@@ -183,31 +214,33 @@ Flat forms are just printed labels and lines with no fields, so "filling" means
 stamping text onto the page at the right spots. Outline:
 
 ```sh
-kowork-python scripts/forms.py structure in.pdf -o structure.json   # labels, lines, tick boxes (PDF points)
-kowork-python scripts/render.py in.pdf prev/ --pages 1               # render, then Read prev/page_001.png to see the layout
-# author fields.json describing the boxes + text to stamp (see references/forms.md)
-kowork-python scripts/forms.py check-boxes fields.json              # validate the boxes first
-kowork-python scripts/forms.py overlay in.pdf fields.json -o out.pdf
-kowork-python scripts/forms.py preview-boxes in.pdf fields.json prev/  # render with boxes drawn; Read to verify
+kowork-python scripts/forms.py structure in.pdf -o <task-temp-dir>/structure.json
+kowork-python scripts/render.py in.pdf <task-temp-dir>/preview/ --pages 1
+# author <task-temp-dir>/fields.json as described in references/forms.md
+kowork-python scripts/forms.py check-boxes <task-temp-dir>/fields.json
+kowork-python scripts/forms.py overlay in.pdf <task-temp-dir>/fields.json -o out.pdf
+kowork-python scripts/forms.py preview-boxes in.pdf <task-temp-dir>/fields.json <task-temp-dir>/preview/
+kowork-python scripts/render.py out.pdf <task-temp-dir>/final-preview/
 kowork-python scripts/validate.py out.pdf
 ```
 
 The full procedure, the two coordinate systems, and the `fields.json` schema are
 in **`references/forms.md`** — read it before authoring a `fields.json`.
 
-## Validate (always, after creating, overlaying, or filling)
+## Validate (always, after creating or editing)
 
 ```sh
 kowork-python scripts/validate.py out.pdf            # structure + render every page
 kowork-python scripts/validate.py out.pdf --pages 1-3
 kowork-python scripts/validate.py out.pdf --no-render # structure only (weaker)
+kowork-python scripts/validate.py encrypted.pdf --password PW
 ```
 
 Opens with pypdf (does it parse? at least one page?) and renders each selected
 page with pypdfium2 (exercising its content stream). This catches the real
-failure modes — truncated or corrupt files, unrenderable pages — and reports an
-encrypted file. It is a soundness smoke test, not a content/pixel checker. Run
-it on the final PDF before handing it back.
+failure modes — truncated or corrupt files and unrenderable pages — and supports
+encrypted input when given `--password`. It is a soundness smoke test, not a
+content/pixel checker. Run it on every final PDF before handing it back.
 
 ## Limitations (state plainly to the user)
 

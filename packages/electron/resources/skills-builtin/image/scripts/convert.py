@@ -14,7 +14,7 @@ BMP). An animated input (e.g. GIF) converts to its first frame only, with a
 note on stderr; notes never pollute the one-line stdout summary.
 
 Usage:
-    kowork-python convert.py <in> <out> [--quality N] [--strip-metadata] [--background #hex]
+    kowork-python convert.py <in> -o <out> [--quality N] [--strip-metadata] [--background #hex]
 """
 
 from __future__ import annotations
@@ -84,7 +84,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="Re-encode an image into the format implied by the output extension."
     )
     ap.add_argument("input", help="path to the input image")
-    ap.add_argument("output", help="path to write to; the extension picks the format")
+    ap.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
     ap.add_argument("--quality", type=int, metavar="N", help="lossy quality 1-100 (JPEG, WebP, AVIF)")
     ap.add_argument(
         "--strip-metadata",

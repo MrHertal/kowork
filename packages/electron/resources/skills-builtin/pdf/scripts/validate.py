@@ -4,18 +4,18 @@
 PDF has no schema to validate against, so "valid" here means the file re-opens
 with a parser and its pages actually rasterise -- which is what catches the real
 failure modes (truncated or corrupt files, broken content streams) that make a
-PDF unusable. Run this after creating, overlaying, or filling a PDF.
+PDF unusable. Run this after creating or editing a PDF.
 
 Two layers, weakest to strongest:
   * structure -- pypdf opens the file and it has at least one page;
   * render smoke (default) -- pypdfium2 rasterises the selected pages, exercising
     each page's content stream. ``--no-render`` skips this; it is a weaker check.
 
-An encrypted file that needs a password blocks full validation (decrypt it first
-with 'pages.py decrypt'); empty-password files validate normally.
+Pass ``--password`` to validate an encrypted output. Empty-password files
+validate normally.
 
 Usage:
-    kowork-python validate.py <in.pdf> [--pages 1-3,5] [--no-render]
+    kowork-python validate.py <in.pdf> [--password PW] [--pages 1-3,5] [--no-render]
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from pypdf import PdfReader
 from pdfutil import parse_page_ranges
 
 
-def check_structure(path: str) -> int:
+def check_structure(path: str, password: str | None = None) -> int:
     """Open with pypdf and return the page count, or raise ValueError on failure."""
     try:
         reader = PdfReader(path)
@@ -38,11 +38,11 @@ def check_structure(path: str) -> int:
         raise ValueError(f"not a readable PDF: {exc}")
     if reader.is_encrypted:
         try:
-            opened = reader.decrypt("")
+            opened = reader.decrypt(password or "")
         except Exception:
             opened = 0
         if not opened:
-            raise ValueError("encrypted: needs a password; decrypt it first with 'pages.py decrypt'")
+            raise ValueError("encrypted: --password is missing or incorrect")
     try:
         count = len(reader.pages)
     except Exception as exc:
@@ -52,17 +52,21 @@ def check_structure(path: str) -> int:
     return count
 
 
-def render_pages(path: str, indices: list[int] | None) -> tuple[int, list[tuple[int, str]]]:
+def render_pages(
+    path: str,
+    indices: list[int] | None,
+    password: str | None = None,
+) -> tuple[int, list[tuple[int, str]]]:
     """Render the given page indices (or all if None); return (checked, failures).
 
     Each failure is a (page_number, reason) pair. Raises ValueError if the file
     cannot be opened for rendering at all.
     """
     try:
-        pdf = pdfium.PdfDocument(path)
+        pdf = pdfium.PdfDocument(path, password=password)
     except pdfium.PdfiumError as exc:
         if "password" in str(exc).lower():
-            raise ValueError("encrypted: needs a password; decrypt it first with 'pages.py decrypt'")
+            raise ValueError("encrypted: --password is missing or incorrect")
         raise ValueError(f"render engine could not open the file: {exc}")
     try:
         targets = list(range(len(pdf))) if indices is None else indices
@@ -80,6 +84,7 @@ def render_pages(path: str, indices: list[int] | None) -> tuple[int, list[tuple[
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Validate that a PDF re-opens and renders.")
     ap.add_argument("input", help="path to the .pdf file")
+    ap.add_argument("--password", help="password for an encrypted PDF")
     ap.add_argument("--pages", help="pages to render-check, e.g. '1-3,5' (default: all)")
     ap.add_argument("--no-render", action="store_true", help="structure only; skip the render smoke (weaker check)")
     args = ap.parse_args(argv)
@@ -89,7 +94,7 @@ def main(argv: list[str]) -> int:
         return 1
 
     try:
-        page_count = check_structure(args.input)
+        page_count = check_structure(args.input, args.password)
     except ValueError as exc:
         sys.stderr.write(f"error: {exc}\n")
         sys.stderr.write("FAILED: structure check\n")
@@ -109,7 +114,7 @@ def main(argv: list[str]) -> int:
         indices = None
 
     try:
-        checked, failures = render_pages(args.input, indices)
+        checked, failures = render_pages(args.input, indices, args.password)
     except ValueError as exc:
         sys.stderr.write(f"error: {exc}\n")
         sys.stderr.write("FAILED: render smoke\n")

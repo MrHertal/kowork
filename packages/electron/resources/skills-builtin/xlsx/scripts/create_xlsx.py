@@ -29,7 +29,7 @@ None for those cells, which is not the same as empty.
 
 Image note: the demo PNG is generated in memory so the template needs no
 external asset. For a real picture, point ``demo_image()`` at a file with
-``XLImage("photo.png")``; to omit the image, delete the ``ws.add_image(...)``
+``XLImage("/absolute/path/photo.png")``; to omit the image, delete the ``ws.add_image(...)``
 line in build_workbook().
 
 Macro-enabled output (.xlsm / .xltm) is refused: openpyxl can silently drop
@@ -64,7 +64,7 @@ PERCENT_FORMAT = "0.0%"
 def demo_image() -> XLImage:
     """A tiny solid-colour PNG built in memory, so the template needs no assets.
 
-    Swap for ``XLImage("photo.png")`` to embed a real file.
+    Swap for ``XLImage("/absolute/path/photo.png")`` to embed a real file.
     """
     buf = io.BytesIO()
     PILImage.new("RGB", (96, 96), (52, 80, 122)).save(buf, format="PNG")

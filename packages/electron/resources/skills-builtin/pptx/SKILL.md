@@ -29,8 +29,8 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an in-place
-edit, call `present_files` exactly once with every final user-facing output path.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path.
 Never call it for read-only or summarization work, and never pass temporary files,
 scripts, previews, unpacked directories, validation artifacts, or intermediate
 versions. If validation or `present_files` fails, do not claim the presentation
@@ -47,8 +47,10 @@ is ready.
   Node and works in any shell) — never bare `node`. The `pptxgenjs` package is
   pre-bundled and resolvable (Kowork sets `NODE_PATH`); just
   `require("pptxgenjs")`. Do not install anything.
-- The scripts below live in this skill's `scripts/` directory; paths are relative
-  to it. They print clear errors and use non-zero exit codes, and every mutating
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. They print clear errors
+  and use non-zero exit codes, and every mutating
   command writes a **new** file (`-o`) — it never edits in place — and refuses to
   write a macro-enabled (`.pptm`/`.potm`/`.ppsm`) output.
 
@@ -72,6 +74,8 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_pptx.cjs` into that task directory and edit the
    copy to build the requested slides.

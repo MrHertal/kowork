@@ -20,7 +20,7 @@ it as ``pagesize`` instead).
 
 Image note: the tiny PNG below is generated in-memory with Pillow so this file
 is self-contained. For a real picture, replace ``demo_image()`` with
-``Image("photo.png", width=2 * inch, height=2 * inch)`` pointing at a file.
+``Image("/absolute/path/photo.png", width=2 * inch, height=2 * inch)`` pointing at a file.
 
 Usage:
     kowork-python create_pdf.py <out.pdf>
@@ -95,8 +95,8 @@ class NumberedCanvas(canvas.Canvas):
 def demo_image() -> Image:
     """A tiny solid-colour PNG built in memory, so the template needs no assets.
 
-    Swap this for ``Image("photo.png", width=..., height=...)`` to embed a real
-    image file.
+    Swap this for ``Image("/absolute/path/photo.png", width=..., height=...)`` to
+    embed a real image file.
     """
     buf = io.BytesIO()
     PILImage.new("RGB", (96, 96), (52, 80, 122)).save(buf, format="PNG")

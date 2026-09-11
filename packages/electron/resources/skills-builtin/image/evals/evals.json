@@ -32,7 +32,7 @@
       "expected_output": "A valid WebP next to the original, encoded at quality 80 with no EXIF metadata.",
       "files": ["evals/files/photo.jpg"],
       "expectations": [
-        "convert.py was used via kowork-python with --quality 80 and --strip-metadata",
+        "convert.py was used via kowork-python with -o, --quality 80, and --strip-metadata",
         "The output is a WebP; validate.py reports it OK",
         "info.py on the output shows no EXIF tags (Make/Model/Orientation gone)",
         "EXIF orientation was not baked in (convert re-encodes; the tag would have traveled — stripping it leaves stored 640x480 pixels)"
@@ -44,7 +44,7 @@
       "expected_output": "photo-small.jpg at 225x300: orientation baked in, so the portrait display size is preserved (225 wide, 300 tall).",
       "files": ["evals/files/photo.jpg"],
       "expectations": [
-        "transform.py resize --max 300x300 was used via kowork-python",
+        "transform.py resize was used via kowork-python with -o and --max 300x300",
         "The output is 225x300 — the EXIF orientation (6) was baked into the pixels before resizing, so the stored geometry is portrait 480x640, the longest side (height) lands on 300, and the width follows at 225",
         "validate.py reports the result OK",
         "The input file was not modified (in == out is refused; a new path was written)"
@@ -56,7 +56,7 @@
       "expected_output": "photo-watermarked.jpg with the logo at ~25% width, bottom-right, semi-transparent, flattened correctly onto the photo.",
       "files": ["evals/files/photo.jpg", "evals/files/logo.png"],
       "expectations": [
-        "annotate.py watermark was used via kowork-python with --mark logo.png, --position bottom-right (or default), --scale 0.25, and an --opacity below 1",
+        "annotate.py watermark was used via kowork-python with -o, --mark logo.png, --position bottom-right (or default), --scale 0.25, and an --opacity below 1",
         "The output was visually confirmed by Reading it (the logo sits bottom-right over the baked-orientation portrait photo)",
         "Saving to JPEG flattened the alpha cleanly (no black or white box around the circular logo beyond the flatten background)",
         "validate.py reports the result OK"
@@ -72,7 +72,7 @@
         "evals/files/frame-3.png"
       ],
       "expectations": [
-        "gif.py create was used via kowork-python with --duration 500 --loop 0",
+        "gif.py create was used via kowork-python with -o, --duration 500, and --loop 0",
         "info.py on the output reports 3 frames, 500 ms/frame, looping forever (frames are distinct, so no merging occurred)",
         "validate.py reports the result OK (all 3 frames decode)",
         "Frames are in the requested red, green, blue order (confirmed via gif.py extract + Reading a frame, or equivalent)"
@@ -84,7 +84,7 @@
       "expected_output": "pair.png: the two images in a horizontal row, unscaled and centered in their 240x240 cells, with transparent padding ((480+gap)x240 canvas).",
       "files": ["evals/files/wide.png", "evals/files/tall.png"],
       "expectations": [
-        "combine.py --hstack (or --grid 2x1) was used via kowork-python with --background '#00000000' and a --gap",
+        "combine.py --hstack (or --grid 2x1) was used via kowork-python with -o, --background '#00000000', and a --gap",
         "The inputs were NOT rescaled — cells are 240x240 each, so the canvas is exactly 240px tall and the gap only adds width",
         "The padding pixels are transparent (PNG output keeps the alpha), confirmed by Reading the image or checking corner pixels",
         "validate.py reports the result OK"

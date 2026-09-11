@@ -21,8 +21,8 @@
 // Image note: docx-js needs explicit width/height in `transformation` (EMUs are
 // derived for you from these pixel values); it does not auto-size. Read a real
 // image's pixel size with Pillow (kowork-python -c "from PIL import Image;
-// print(Image.open('photo.png').size)") and pass it. The tiny PNG below keeps
-// this file self-contained; for a real image use fs.readFileSync("photo.png").
+// print(Image.open('/absolute/path/photo.png').size)") and pass it. The tiny PNG
+// below keeps this file self-contained; for a real image use an absolute path.
 
 const fs = require("fs");
 const path = require("path");

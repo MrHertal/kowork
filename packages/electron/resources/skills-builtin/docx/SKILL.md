@@ -6,8 +6,8 @@ description: >-
   redline, or extract text from a Word document — e.g. building a doc with
   headings, tables, lists, images, headers/footers, or a table of contents;
   making tracked-change edits; adding comments; or converting a Word file to
-  Markdown. Triggers on any mention of Word documents or .docx files, even
-  without the word "docx".
+  Markdown. Triggers on any mention of Word documents or a .docx/.docm/.dotm
+  file, even without the word "docx".
 ---
 
 # Working with Word (.docx) documents
@@ -25,8 +25,8 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an in-place
-edit, call `present_files` exactly once with every final user-facing output path.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path.
 Never call it for read-only or summarization work, and never pass temporary files,
 scripts, previews, unpacked directories, validation artifacts, or intermediate
 versions. If validation or `present_files` fails, do not claim the document is
@@ -43,8 +43,10 @@ ready.
   Node and works in any shell) — never bare `node`. The `docx` package is
   pre-bundled and resolvable (Kowork sets `NODE_PATH`); just `require('docx')`.
   Do not install anything.
-- The scripts below live in this skill's `scripts/` directory; paths are
-  relative to it. They print clear errors and use non-zero exit codes, and
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. They print clear errors
+  and use non-zero exit codes, and
   every mutating command writes to a **new** output (never editing the input
   in place) and refuses a macro-enabled (`.docm`/`.dotm`) output.
 
@@ -68,6 +70,8 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_docx.cjs` into that task directory and edit the
    copy's `children` array to build the requested content.
@@ -108,7 +112,7 @@ only when the user asks. Keep the `.cjs` extension so `require` works in any
 project. For numbered lists you must declare a `numbering` config (the template
 shows the shape). docx-js needs an image's `width`/`height` in pixels (it does
 not auto-size); read them with Pillow (`kowork-python -c "from PIL import Image;
-print(Image.open('photo.png').size)"`) rather than guessing.
+print(Image.open('/absolute/path/photo.png').size)"`) rather than guessing.
 
 ## Edit (Python)
 

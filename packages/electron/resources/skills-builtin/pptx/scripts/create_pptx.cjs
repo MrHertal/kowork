@@ -36,13 +36,13 @@
 //   - Shadow `offset` must be non-negative.
 //
 // Image note: the tiny inline PNG below keeps this file self-contained. For a real
-// image, read the bytes with fs.readFileSync("photo.png") and pass them as a data
+// image, read the bytes from an absolute path with fs.readFileSync() and pass them as a data
 // URL: { data: "image/png;base64," + buf.toString("base64") } (or { path: "..." }).
 // pptxgenjs sizes images by width/height in INCHES and does not preserve aspect
 // ratio for you: read the pixel size first and derive one dimension from the other
 // so it isn't stretched. The bundled runtime has `image-size`
 // (require("image-size")) for Node, and Pillow for Python
-// (kowork-python -c "from PIL import Image; print(Image.open('photo.png').size)").
+// (kowork-python -c "from PIL import Image; print(Image.open('/absolute/path/photo.png').size)").
 
 const fs = require("fs");
 const path = require("path");
@@ -174,7 +174,7 @@ function bodyCell(text, rowIndex, align) {
 
 // --- Deck ------------------------------------------------------------------
 
-const outPath = process.argv[2] || "presentation.pptx";
+const outPath = process.argv[2] || "output.pptx";
 
 const outExt = path.extname(outPath).toLowerCase();
 if (outExt === ".pptm" || outExt === ".potm" || outExt === ".ppsm") {
@@ -486,7 +486,7 @@ imageSlide.addText(
     { text: "Drop in a real image", options: { bold: true, breakLine: true } },
     {
       text:
-        'Replace PNG_BASE64 with fs.readFileSync("photo.png"), then size it by ' +
+        'Replace PNG_BASE64 with fs.readFileSync("/absolute/path/photo.png"), then size it by ' +
         "reading the pixel dimensions and keeping the aspect ratio so it is not stretched.",
       options: { color: COLOR.muted },
     },

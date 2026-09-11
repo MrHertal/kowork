@@ -22,7 +22,7 @@ is inferred from the file extension; JPEG and BMP have no alpha channel, so the
 image is flattened onto white for them.
 
 Image note: the badge below is generated in-memory with Pillow so this file is
-self-contained. For a real picture, open one with ``Image.open("photo.png")``,
+self-contained. For a real picture, open one with ``Image.open("/absolute/path/photo.png")``,
 ``resize()`` it to fit, and ``paste()`` it the same way.
 
 Usage:
@@ -98,7 +98,7 @@ def flatten(im: Image.Image, background: tuple[int, int, int] = (255, 255, 255))
 def demo_badge() -> Image.Image:
     """A small badge built in memory, so the template needs no assets.
 
-    Swap this for ``Image.open("photo.png").convert("RGBA")`` to paste a real
+    Swap this for ``Image.open("/absolute/path/photo.png").convert("RGBA")`` to paste a real
     image file -- ``resize()`` it to fit first.
     """
     badge = Image.new("RGBA", (160, 160), (0, 0, 0, 0))
@@ -130,7 +130,7 @@ def build_image() -> Image.Image:
     cx = WIDTH // 2
     badge = demo_badge()
     # The badge's own alpha channel is the paste mask, so the circle keeps its
-    # soft edges; to paste a real picture instead, use Image.open("photo.png").
+    # soft edges; to paste a real picture instead, use an absolute path.
     im.paste(badge, (cx - badge.width // 2, margin + 64), badge)
 
     draw.line((cx - 60, 330, cx + 60, 330), fill=ACCENT, width=6)

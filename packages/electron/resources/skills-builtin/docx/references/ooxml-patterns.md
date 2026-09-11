@@ -80,7 +80,7 @@ follow from that schema; the sample wording, authors, and ids are illustrative.
   `<w:ins w:id=".." w:author=".." w:date="..">...</w:ins>`.
 - **Deletion:** wrap in `<w:del ...>` and — critically — the deleted text uses
   `<w:delText>` instead of `<w:t>`. A `w:t` inside `w:del` is invalid; Word may
-  drop the content. `validate.py --fix` corrects this.
+  drop the content. `kowork-python scripts/validate.py --fix` corrects this.
 - `w:id` values must be unique across the document. `w:date` is ISO 8601
   (`2026-06-19T00:00:00Z`).
 
