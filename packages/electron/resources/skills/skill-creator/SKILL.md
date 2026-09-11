@@ -1,6 +1,6 @@
 ---
 name: skill-creator
-description: Use this skill whenever the user wants to build, create, make, set up, write, edit, improve, refine, or fix a Kowork skill, or when they describe a repeatable way they want the agent to work going forward — for example "can you always format my meeting notes like this from now on", "remember these steps so you do them every time", "set up a reusable checklist for X", or "turn this into something you'll reuse". When in doubt, prefer using this skill.
+description: Use when the user explicitly asks to create, update, fix, or review a Kowork skill, or asks to save a workflow as reusable behavior for future requests — for example "make this a skill", "do this every time", or "turn these steps into a reusable checklist". Do not use for a one-off task, ordinary document formatting, or a preference that applies only to the current request unless the user asks to save or reuse it.
 ---
 
 # Skill Creator
@@ -13,8 +13,11 @@ The person you're helping may not be technical, so keep things warm and simple.
 
 - Skip jargon. If you must use a technical word, explain it in a few plain words right away.
 - Keep it a friendly back-and-forth, not a form to fill out.
-- Ask before you assume — a quick question beats a wrong guess.
-- Play back what you heard in your own words and confirm it before you write anything.
+- Ask a focused question only when missing information would materially change
+  the skill. Otherwise make reasonable assumptions and identify them for the
+  user when presenting the draft.
+- Reflect your understanding when it would prevent a meaningful mismatch; do
+  not require confirmation before drafting when the request is already clear.
 
 ## How this goes
 
@@ -28,7 +31,7 @@ Here's the rough shape of the work. The order isn't strict — meet the user whe
 
 ## Figure out what they want
 
-**Mine the conversation first.** Often the user is already partway through something and says "turn this into a skill" or "do it like that every time." Before you ask a single question, look back at what just happened — the steps you took, the corrections they made, the format or wording they clearly preferred — and build on that. Then confirm it with them, so they don't have to repeat themselves.
+**Mine the conversation first.** Often the user is already partway through something and says "turn this into a skill" or "do it like that every time." Before you ask a single question, look back at what just happened — the steps you took, the corrections they made, the format or wording they clearly preferred — and build on that. Clarify only material ambiguity so the user does not have to repeat themselves.
 
 **Draw out the essentials** with a few focused questions, not an interrogation. Three things you really need:
 
@@ -48,14 +51,56 @@ You don't need everything perfect up front. Gather enough to write a solid first
 
 **The shape of a SKILL.md.** It has two parts:
 
-1. A small header block at the very top, written in YAML (a simple `field: value` format) between `---` fences. It has exactly two fields: `name` and `description`.
+1. A small header block at the very top, written in YAML (a simple `field: value` format) between `---` fences. It requires `name` and `description`. For portability, a skill may also include the Agent Skills fields `license`, `compatibility`, and `metadata`; `metadata` must be a map of string keys to string values. Kowork tolerates but does not use these optional fields. Include them only when another compatible tool or person will use them; they do not replace the required description or configure Kowork's UI.
 2. Below the header, the body — plain Markdown instructions written to the agent, telling it how to do the task.
 
-**The name.** A short, lowercase, hyphenated label of a few words, like `meeting-notes-formatter`. Make it match the skill's folder name. It's just an identifier, so keep it simple.
+**The skill folder can contain supporting material.** `SKILL.md` is the only
+required file. Add other files only when they make the workflow more reliable
+or keep conditional detail out of the main instructions. Common conventions
+include:
+
+- `scripts/` for reusable, deterministic helpers.
+- `references/` for details the agent reads only when relevant.
+- `assets/` for non-instruction files consumed by the skill or copied into its
+  output, such as templates, images, fonts, and starter files. Do not read
+  assets into context as instructions unless the task requires inspecting them.
+
+Those names are conventions, not an exhaustive schema. A larger skill may use
+clear purpose-specific folders such as `tasks/`, `workflows/`, `routing/`,
+`features/`, or `troubleshooting/`. Link each supporting file from `SKILL.md` or
+another discoverable guide and say when it should be read or run. Do not create
+empty folders or placeholder files without a concrete use.
+
+Keep helper examples local and current. A command in `SKILL.md` should name a
+script that actually ships in that skill, and validation should confirm the
+path exists. Do not cite a helper from another built-in skill as if it were
+available locally. When no real helper exists yet, explain the intended purpose
+in prose instead of inventing a filename.
+
+**The name.** A short, lowercase, hyphenated label of a few words, like
+`meeting-notes-formatter`. Kowork treats this identifier as exact and
+case-sensitive: use only lowercase letters and digits separated by single
+hyphens, with no leading, trailing, or repeated hyphens. It must exactly match
+the folder containing `SKILL.md` and may be at most 64 characters. Keep an existing valid name unchanged unless
+the user explicitly asks to rename the skill.
 
 **The description is the most important line you'll write.** Here's why: up front, Kowork only shows the agent the name and description — not the body. The agent reads that description to decide whether to open the skill and follow it at all. So the description has to do two jobs at once: (1) say plainly what the skill does, and (2) name the concrete situations, request types, and phrasings that should switch it on. Put **all** the "when to use this" cues here — never bury them in the body, because the body isn't seen until the skill has already been chosen.
 
-**Lean toward getting used.** A skill that never activates is useless, and the more common mistake is a skill sitting idle when it should have helped. So make the description a little assertive about when to apply, and name the trigger situations generously.
+**Do not add OpenAI-specific interface files.** Kowork does not read
+`agents/openai.yaml`, `default_prompt`, `short_description`, icon metadata, or
+implicit-invocation policy from a custom skill package. Do not create or copy
+those fields when building a Kowork skill. The `name` and `description` in
+`SKILL.md` are the discovery interface Kowork uses.
+
+Kowork requires the description to contain 1–1024 characters. There is no
+separate UI-description length rule for custom skills. Prefer the shortest
+description that still distinguishes the skill and includes the trigger cues
+needed for reliable discovery.
+
+**Aim for precise activation.** Name the concrete requests and situations the
+skill should handle, including common phrasings, while also stating important
+exclusions. Do not make the description so broad that an ordinary one-off task
+looks like a request to create or invoke reusable behavior.
 
 **Before / after example** (for an imagined "meeting notes" skill):
 
@@ -68,7 +113,11 @@ You don't need everything perfect up front. Gather enough to write a solid first
 
 - **Explain the *why*, don't just bark rules.** The agent follows guidance far better when it understands the purpose behind a step, and it can then handle situations the instructions never anticipated. If you notice yourself piling up shouty ALL-CAPS "ALWAYS" and "NEVER" rules, treat that as a warning sign — usually it's better to explain the reason so the agent genuinely gets why it matters.
 
-- **Show, don't just tell.** Include a concrete example or two of good input → output. If the skill must produce a specific format, give a short template the agent can follow, like:
+- **Use examples when they clarify something non-obvious.** Add a concise input
+  → output example when it materially explains a required format, routing
+  decision, or tricky behavior. Do not add examples that merely restate clear
+  instructions. If the skill must produce a specific format, a short template
+  may be enough, such as:
 
   ```
   ## Summary
@@ -82,17 +131,52 @@ You don't need everything perfect up front. Gather enough to write a solid first
 
 - **Then polish.** Write a first draft, reread it with fresh eyes as if you were the agent seeing it cold, and simplify anything confusing.
 
+Before handing the skill back, run the bundled validator. It has no package
+dependencies and works with `kowork-python`:
+
+```sh
+kowork-python "<skill-creator-base-dir>/scripts/quick_validate.py" /absolute/path/to/skill-folder
+```
+
+Replace `<skill-creator-base-dir>` with the absolute base directory reported
+when this skill is loaded. Do not resolve `scripts/quick_validate.py` from the
+user's current working directory.
+
+This checks the required frontmatter using the canonical YAML subset described
+above, the skill name and folder, and local package paths mentioned by the
+instructions. Use plain or quoted string values, indented block strings, and an
+indented string-to-string `metadata` map; avoid YAML aliases, tags, collections,
+or other advanced syntax. Also run every new or changed helper on a
+representative safe input. Validation confirms that the package is coherent;
+it does not prove that the instructions produce a useful result.
+
 ## Improve an existing skill
 
 Sometimes the user doesn't want a new skill — they want to fix or upgrade one they already have.
 
-- **Start with what's there.** Have the user point you to that skill's folder, then read its current SKILL.md so you understand what it does today.
+- **Start with what's there.** Have the user point you to that skill's folder,
+  then read its current `SKILL.md` and inventory its supporting files. Follow
+  the links and inspect the scripts, references, or assets relevant to the
+  requested change before editing. Preserve unrelated resources and update or
+  remove a supporting file only when the revised instructions require it.
 - **Ask what's off.** Find out what isn't working or what they'd like to be different, and get a concrete example of a time it fell short. Specifics beat vague dissatisfaction — "it ignored the deadline column" tells you far more than "it's not great."
 - **Diagnose before rewriting.** The right fix usually depends on the symptom:
-  - If the skill **doesn't kick in when it should** (or kicks in when it shouldn't), the fix is almost always in the **description** — adjust which situations and phrasings it names.
-  - If the skill **runs but the result isn't right**, the fix is in the **body** — clarify the steps, add a missing rule or example, or explain the reasoning better.
+  - First confirm that the skill appears in Kowork's **Added** section. If it is
+    absent, validate its frontmatter and folder, confirm its source is still
+    added, refresh the skill cache, and check for a duplicate name or a denied
+    skill permission before changing its description.
+  - If the skill is available but **isn't selected when it should be** (or is
+    selected when it should not be), revise the **description** and its trigger
+    boundaries.
+  - If the skill **loads but the result isn't right**, inspect the **body and
+    supporting resources** for missing or conflicting guidance.
 - **Revise with the same principles** as writing a new skill: a clear description that names when to use it, and a direct, example-backed body. Keep the skill's existing name and folder unless the user specifically wants to rename it.
-- **Save over the same SKILL.md.** Let the user know they may need to start a fresh request (or reload) for the updated version to take effect — and that it's completely normal to go a couple of rounds: adjust, try it, adjust again.
+- **Save over the same SKILL.md.** Kowork may keep an already loaded skill in
+  memory. After editing an installed skill, tell the user either to remove and
+  re-add its folder in Settings or to fully quit and reopen Kowork. A fresh
+  request or renderer reload alone does not guarantee that the edit is loaded.
+  It is completely normal to go a couple of rounds: adjust, refresh, try it,
+  and adjust again.
 
 ## Save it and switch it on
 
@@ -101,11 +185,14 @@ Sometimes the user doesn't want a new skill — they want to fix or upgrade one 
 - **Turn it on in Kowork.** Walk the user through it, one click at a time:
   1. Open **Settings**.
   2. Go to **Skills**.
-  3. Choose **Add custom skill**.
-  4. Pick the **Local folder** option.
-  5. Select the skill's folder.
+  3. Find **Custom skill** and choose **Add**.
+  4. Select **Local folder**.
+  5. Choose the folder containing the skill.
+  6. Select **Submit**.
 
-  Once it's added, the skill is active.
+  Confirm that the skill appears in the **Added** section. Adding a folder does
+  not prove that every file inside it was valid; if the skill is absent, check
+  validation errors before treating it as active.
 
 - **Use it and refine.** From here, the user doesn't need to do anything special to trigger it — they just make the kind of request the skill is built for, and it takes over. Encourage them to try it on something real, and to come back anytime to fine-tune it (that loops right back to improving an existing skill).
 

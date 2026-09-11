@@ -20,7 +20,23 @@ env[pathKey] = [pack.binDir, env[pathKey]].filter(Boolean).join(delimiter);
 const python =
   process.platform === "win32" ? "kowork-python.cmd" : "kowork-python";
 
-for (const skill of ["docx", "pdf", "xlsx", "pptx", "image"]) {
+const suites = [
+  ...["docx", "pdf", "xlsx", "pptx", "image"].map((skill) => ({
+    name: skill,
+    startDirectory: path.join("resources", "skills-builtin", skill, "evals"),
+  })),
+  {
+    name: "skill-creator",
+    startDirectory: path.join(
+      "resources",
+      "skills",
+      "skill-creator",
+      "scripts",
+    ),
+  },
+];
+
+for (const suite of suites) {
   const result = spawnSync(
     python,
     [
@@ -29,7 +45,7 @@ for (const skill of ["docx", "pdf", "xlsx", "pptx", "image"]) {
       "unittest",
       "discover",
       "-s",
-      path.join("resources", "skills-builtin", skill, "evals"),
+      suite.startDirectory,
       "-p",
       "test_*.py",
     ],
@@ -43,7 +59,7 @@ for (const skill of ["docx", "pdf", "xlsx", "pptx", "image"]) {
   if (result.error) throw result.error;
   if (result.status !== 0) {
     throw new Error(
-      `${skill} skill tests failed with exit code ${String(result.status)}`,
+      `${suite.name} skill tests failed with exit code ${String(result.status)}`,
     );
   }
 }
