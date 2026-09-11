@@ -72,7 +72,8 @@ def apply_adjustments(im: Image.Image, args: argparse.Namespace) -> tuple[Image.
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Adjust an image's brightness, contrast, color, or sharpness.")
     ap.add_argument("input", help="path to the input image")
-    ap.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
+    ap.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    ap.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     ap.add_argument("--brightness", type=float, metavar="F", help="brightness factor, 1.0 = no change")
     ap.add_argument("--contrast", type=float, metavar="F", help="contrast factor, 1.0 = no change")
     ap.add_argument("--color", type=float, metavar="F", help="color (saturation) factor, 1.0 = no change")
@@ -86,6 +87,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.output and args.legacy_output:
+        sys.stderr.write("error: pass the output either positionally or with -o, not both\n")
+        return 1
+    args.output = args.output or args.legacy_output
+    if not args.output:
+        sys.stderr.write("error: an output path is required; pass -o <out>\n")
+        return 1
 
     requested = [args.brightness, args.contrast, args.color, args.sharpness, args.blur]
     if all(v is None for v in requested) and not args.sharpen and not args.grayscale:

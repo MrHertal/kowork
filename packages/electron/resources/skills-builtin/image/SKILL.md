@@ -65,20 +65,10 @@ appearance matters, Read the output image as visual QA before handing it back.
 
 ## Styling
 
-For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
-brand or reference styling: the same palette, heading/body font roles, and
-visual hierarchy. Preserve existing styling when editing unless asked to restyle.
-When no reference is supplied, retain the format-specific template defaults
-(including Office typography and themes where provided). Different formats may
-use different defaults; do not impose one shared palette or font on all of them.
-Keep text legible, contrast strong, spacing consistent, and emphasis selective.
-Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
-number formats and input/formula colors. Keep reusable colors, fonts, and
-sizes near the top of the creation script, using the library's native units and
-color representation. For themed formats, configure theme colors and fonts there
-too; explicit element styling and theme styling are separate controls.
-Use fonts the runtime can access; when an exact font is unavailable, use a
-consistent available substitute.
+Preserve an existing image's style unless asked to restyle it. For related
+artifacts, reuse the user's palette and font roles. Without a reference, keep
+the template defaults. Keep reusable colors, fonts, and pixel sizes near the top
+of the creation script; substitute an available font when necessary.
 
 ## Choose the path
 
@@ -206,7 +196,7 @@ kowork-python scripts/transform.py flip in.png -o out.png --horizontal   # or --
   overhanging the edge is clamped with a `note:`; fully outside is an error.
   Negative coordinates need the `=` form, `--box=-50,-50,100,100` — argparse
   reads a bare leading `-` as a flag.
-- `rotate --degrees` is clockwise (negative for counter-clockwise), matching PDF; multiples of 90 are exact. Without
+- `rotate --degrees` is counter-clockwise; multiples of 90 are exact. Without
   `--expand` the canvas keeps its size and the corners are cropped; `--expand`
   grows the canvas to fit. New area fills white (opaque image) or transparent
   (alpha image).

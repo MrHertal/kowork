@@ -169,7 +169,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     wp = sub.add_parser("watermark", help="paste a logo at a position, or tiled across the image")
     wp.add_argument("input", help="path to the input image")
-    wp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
+    wp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    wp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     wp.add_argument("--mark", metavar="PATH", help="logo image to paste (required)")
     wp.add_argument(
         "--position",
@@ -194,7 +195,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     tp = sub.add_parser("text", help="draw a text label")
     tp.add_argument("input", help="path to the input image")
-    tp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
+    tp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    tp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     tp.add_argument("--text", metavar="TEXT", help="the label text (required); a newline draws multiple lines")
     tp.add_argument(
         "--position",
@@ -217,6 +219,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.output and args.legacy_output:
+        sys.stderr.write("error: pass the output either positionally or with -o, not both\n")
+        return 1
+    args.output = args.output or args.legacy_output
+    if not args.output:
+        sys.stderr.write("error: an output path is required; pass -o <out>\n")
+        return 1
 
     try:
         check_distinct_paths(args.output, args.input)

@@ -156,8 +156,7 @@ def do_rotate(im: Image.Image, args: argparse.Namespace) -> tuple[Image.Image, s
             math.ceil(im.width * cos + im.height * sin),
             math.ceil(im.width * sin + im.height * cos),
         )
-    # Pillow uses counter-clockwise angles; the skill CLI matches PDF's clockwise convention.
-    out = im.rotate(-degrees, resample=Image.Resampling.BICUBIC, expand=args.expand, fillcolor=fill)
+    out = im.rotate(degrees, resample=Image.Resampling.BICUBIC, expand=args.expand, fillcolor=fill)
     expanded = " (canvas expanded)" if args.expand else ""
     return out, note, f"rotated {degrees:g} degrees{expanded}, {im.width}x{im.height} -> {out.width}x{out.height}"
 
@@ -174,7 +173,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     rp = sub.add_parser("resize", help="resize with LANCZOS resampling")
     rp.add_argument("input", help="path to the input image")
-    rp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
+    rp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    rp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     size = rp.add_mutually_exclusive_group(required=True)
     size.add_argument("--size", metavar="WxH", help="exact output size (may change the aspect ratio)")
     size.add_argument("--width", type=positive_int, metavar="W", help="output width; height follows the aspect ratio")
@@ -190,14 +190,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     cp = sub.add_parser("crop", help="crop to a pixel box, origin top-left")
     cp.add_argument("input", help="path to the input image")
-    cp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
+    cp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    cp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     cp.add_argument("--box", required=True, metavar="L,T,R,B", help="crop box in pixels, e.g. 10,10,100,80")
     cp.set_defaults(func=do_crop)
 
     rotp = sub.add_parser("rotate", help="rotate by an arbitrary angle (multiples of 90 are exact)")
     rotp.add_argument("input", help="path to the input image")
-    rotp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
-    rotp.add_argument("--degrees", type=float, required=True, metavar="D", help="clockwise angle (negative for counter-clockwise)")
+    rotp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    rotp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
+    rotp.add_argument("--degrees", type=float, required=True, metavar="D", help="counter-clockwise angle")
     rotp.add_argument(
         "--expand",
         action="store_true",
@@ -207,7 +209,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     fp = sub.add_parser("flip", help="mirror an image horizontally or vertically")
     fp.add_argument("input", help="path to the input image")
-    fp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
+    fp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    fp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     direction = fp.add_mutually_exclusive_group(required=True)
     direction.add_argument("--horizontal", action="store_true", help="mirror left-right")
     direction.add_argument("--vertical", action="store_true", help="mirror top-bottom")
@@ -218,6 +221,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.output and args.legacy_output:
+        sys.stderr.write("error: pass the output either positionally or with -o, not both\n")
+        return 1
+    args.output = args.output or args.legacy_output
+    if not args.output:
+        sys.stderr.write("error: an output path is required; pass -o <out>\n")
+        return 1
 
     try:
         check_distinct_paths(args.output, args.input)

@@ -14,10 +14,11 @@ user's folder:
 2. Edit `<task-temp-dir>/work/ppt/slides/slideN.xml` (the slide number is its
    position-ish part name, not its 1-based order — confirm with
    `kowork-python scripts/slides.py info deck.pptx`).
-3. `kowork-python scripts/pack.py <task-temp-dir>/work/ out.pptx --cleanup` —
-   rebuilds the package and removes the unpacked tree.
+3. `kowork-python scripts/pack.py <task-temp-dir>/work/ out.pptx` — rebuilds the
+   package while retaining the editable tree.
 4. `kowork-python scripts/validate.py out.pptx` — confirm it reopens and the
-   layout is sound; unpack, re-edit, and repack if it reports problems.
+   layout is sound; re-edit and repack if it reports problems. Retain the working
+   tree for later revisions in the same task; the OS eventually reclaims it.
 
 Adding, duplicating, deleting, reordering, or cleaning up **whole slides** is
 `scripts/slides.py`'s job — it rewires `presentation.xml`, the rels, and

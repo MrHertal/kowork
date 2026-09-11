@@ -84,7 +84,8 @@ def build_parser() -> argparse.ArgumentParser:
         description="Re-encode an image into the format implied by the output extension."
     )
     ap.add_argument("input", help="path to the input image")
-    ap.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
+    ap.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    ap.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     ap.add_argument("--quality", type=int, metavar="N", help="lossy quality 1-100 (JPEG, WebP, AVIF)")
     ap.add_argument(
         "--strip-metadata",
@@ -101,6 +102,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.output and args.legacy_output:
+        sys.stderr.write("error: pass the output either positionally or with -o, not both\n")
+        return 1
+    args.output = args.output or args.legacy_output
+    if not args.output:
+        sys.stderr.write("error: an output path is required; pass -o <out>\n")
+        return 1
 
     if args.quality is not None and not 1 <= args.quality <= 100:
         sys.stderr.write(f"error: --quality must be between 1 and 100, got {args.quality}\n")

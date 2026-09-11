@@ -107,8 +107,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub = ap.add_subparsers(dest="command", required=True, metavar="command")
 
     cp = sub.add_parser("create", help="create an animated GIF from 2+ still images")
-    cp.add_argument("frames", nargs="+", metavar="frame", help="input images, in play order")
-    cp.add_argument("-o", "--out", dest="output", required=True, help="path of the .gif to write")
+    cp.add_argument("paths", nargs="+", metavar="frame", help="input images, in play order")
+    cp.add_argument("-o", "--out", dest="output", help="path of the .gif to write")
     cp.add_argument(
         "--duration",
         type=int,
@@ -133,6 +133,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.command == "create":
+        if args.output:
+            args.frames = args.paths
+        else:
+            if len(args.paths) < 3:
+                sys.stderr.write("error: an output path and at least 2 frames are required\n")
+                return 1
+            args.output, *args.frames = args.paths
 
     try:
         if args.command == "create":

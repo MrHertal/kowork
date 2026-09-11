@@ -63,8 +63,8 @@ def combine(
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Combine multiple images into a grid, a row, or a column.")
-    ap.add_argument("inputs", nargs="+", metavar="in", help="input images, in row-major order")
-    ap.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
+    ap.add_argument("paths", nargs="+", metavar="in", help="input images, in row-major order")
+    ap.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     layout = ap.add_mutually_exclusive_group(required=True)
     layout.add_argument("--grid", metavar="CxR", help="arrange into C columns x R rows")
     layout.add_argument("--hstack", action="store_true", help="arrange into a single row, left to right")
@@ -80,6 +80,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.output:
+        args.inputs = args.paths
+    else:
+        if len(args.paths) < 3:
+            sys.stderr.write("error: an output path is required; pass -o <out>\n")
+            return 1
+        args.output, *args.inputs = args.paths
 
     try:
         if len(args.inputs) < 2:

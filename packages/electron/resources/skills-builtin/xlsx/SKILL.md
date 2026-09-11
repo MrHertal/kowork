@@ -57,20 +57,10 @@ ready.
 
 ## Styling
 
-For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
-brand or reference styling: the same palette, heading/body font roles, and
-visual hierarchy. Preserve existing styling when editing unless asked to restyle.
-When no reference is supplied, retain the format-specific template defaults
-(including Office typography and themes where provided). Different formats may
-use different defaults; do not impose one shared palette or font on all of them.
-Keep text legible, contrast strong, spacing consistent, and emphasis selective.
-Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
-number formats and input/formula colors. Keep reusable colors, fonts, and
-sizes near the top of the creation script, using the library's native units and
-color representation. For themed formats, configure theme colors and fonts there
-too; explicit element styling and theme styling are separate controls.
-Use fonts the runtime can access; when an exact font is unavailable, use a
-consistent available substitute.
+Preserve existing workbook styling unless asked to restyle it. For related
+artifacts, reuse the user's palette and font roles. Without a reference, keep
+the template defaults. Preserve meaningful number formats and input/formula
+colors; configure workbook themes separately from explicit cell styles.
 
 ## Choose the path
 
@@ -120,9 +110,8 @@ The template covers a styled header row (bold, filled, centred), data rows,
 number formats (currency and percent), live formulas (a per-row `=B*C` and a
 `=SUM(...)` total), frozen panes, column widths, a second sheet with a cross-sheet
 formula, a bar chart, and an embedded image — each editable in one obvious place.
-The default font is **Calibri 11** (change `DEFAULT_FONT_*`); the creation
-script applies it to every populated cell while preserving emphasis and colors.
-Set deliberate per-cell font exceptions after that font pass. The workbook is
+The default font is **Calibri 11** (change `DEFAULT_FONT_*`); explicit per-cell
+fonts assigned in `build_workbook()` take precedence. The workbook is
 saved with the current Office theme, so charts and theme-colored elements render
 in the same colors a new Excel file uses. `OFFICE_THEME_REPLACEMENTS` near the
 top controls theme fonts and colors separately from the explicit cell font and
@@ -210,8 +199,9 @@ kowork-python scripts/sheets.py from-csv data.csv -o out.xlsx --into book.xlsx -
 All sheet positions are **1-based**, including `--to` for `add`/`move` and
 numeric `--sheet` selections. Insertion at 1 prepends; omitting `--to` on `add`
 appends. For `rename`/`duplicate`, `--to` is a sheet name. Legacy aliases remain
-available: `remove` for `delete`, `copy` for `duplicate`, `--index` for `add --to`,
-and `--to-index` for `move --to`.
+available: `remove` for `delete` and `copy` for `duplicate`. Legacy `--index`
+and `--to-index` remain **0-based**; use the new 1-based `--to` forms for
+consistent sheet positions.
 
 `info` prints the sheet names (and which is active) and, per sheet, the used range,
 dimensions, merged ranges, freeze panes, and chart/image counts, plus any defined

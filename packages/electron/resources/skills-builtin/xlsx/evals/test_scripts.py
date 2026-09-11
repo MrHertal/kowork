@@ -1,5 +1,6 @@
 """CLI regressions: kowork-python -B -m unittest discover -s evals -p 'test_*.py'."""
 from pathlib import Path
+import importlib.util
 import os
 import subprocess
 import sys
@@ -7,6 +8,7 @@ import tempfile
 import unittest
 
 from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 
@@ -33,14 +35,18 @@ class SheetPositionsTest(unittest.TestCase):
             wb.close()
 
             for command, options, expected in (
-                ("add", ["--name", "New", "--index", "1"], ["New", "Original", "Last"]),
-                ("add", ["--name", "New", "--index", "3"], ["Original", "Last", "New"]),
-                ("move", ["--sheet", "2", "--to-index", "1"], ["Last", "Original"]),
-                ("move", ["--sheet", "1", "--to-index", "2"], ["Last", "Original"]),
-                ("add", ["--name", "New", "--index", "0"], None),
-                ("move", ["--sheet", "1", "--to-index", "0"], None),
-                ("add", ["--name", "New", "--index", "4"], None),
-                ("move", ["--sheet", "1", "--to-index", "3"], None),
+                ("add", ["--name", "New", "--to", "1"], ["New", "Original", "Last"]),
+                ("add", ["--name", "New", "--to", "3"], ["Original", "Last", "New"]),
+                ("move", ["--sheet", "2", "--to", "1"], ["Last", "Original"]),
+                ("move", ["--sheet", "1", "--to", "2"], ["Last", "Original"]),
+                ("add", ["--name", "New", "--index", "0"], ["New", "Original", "Last"]),
+                ("add", ["--name", "New", "--index", "1"], ["Original", "New", "Last"]),
+                ("move", ["--sheet", "2", "--to-index", "0"], ["Last", "Original"]),
+                ("move", ["--sheet", "1", "--to-index", "1"], ["Last", "Original"]),
+                ("add", ["--name", "New", "--to", "0"], None),
+                ("move", ["--sheet", "1", "--to", "0"], None),
+                ("add", ["--name", "New", "--index", "3"], None),
+                ("move", ["--sheet", "1", "--to-index", "2"], None),
             ):
                 with self.subTest(command=command, options=options):
                     output = root / "output.xlsx"
@@ -58,6 +64,28 @@ class SheetPositionsTest(unittest.TestCase):
                         actual.close()
                     else:
                         self.assertFalse(output.exists())
+
+    def test_create_preserves_explicit_cell_fonts(self):
+        spec = importlib.util.spec_from_file_location(
+            "create_xlsx", SCRIPTS / "create_xlsx.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        def build_workbook(wb):
+            cell = wb.active["A1"]
+            cell.value = "Title"
+            cell.font = Font(name="Courier New", size=18, bold=True)
+
+        module.build_workbook = build_workbook
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "fonts.xlsx"
+            module.build_xlsx(output)
+            wb = load_workbook(output)
+            self.assertEqual(wb.active["A1"].font.name, "Courier New")
+            self.assertEqual(wb.active["A1"].font.sz, 18)
+            self.assertTrue(wb.active["A1"].font.bold)
+            wb.close()
 
     def test_edit_refuses_hard_link_alias(self):
         with tempfile.TemporaryDirectory() as temp:

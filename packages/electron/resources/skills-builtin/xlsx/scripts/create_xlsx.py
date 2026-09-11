@@ -50,7 +50,6 @@ import argparse
 import io
 import os
 import sys
-from copy import copy
 
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
@@ -195,18 +194,11 @@ def modern_office_theme() -> str:
 
 def build_xlsx(out_path: str) -> None:
     wb = Workbook()
+    # Set the workbook default before authoring cells. Explicit fonts assigned
+    # by build_workbook() remain intact.
+    normal = wb._named_styles["Normal"]
+    normal.font = Font(name=DEFAULT_FONT_NAME, size=DEFAULT_FONT_SIZE)
     build_workbook(wb)
-    # Apply the shared font to every populated cell, keeping emphasis, colors,
-    # number formats, and other cell styling intact. Set per-cell font exceptions
-    # after this loop if the requested design needs them.
-    for sheet in wb:
-        for row in sheet:
-            for cell in row:
-                if cell.value is not None:
-                    font = copy(cell.font)
-                    font.name = DEFAULT_FONT_NAME
-                    font.sz = DEFAULT_FONT_SIZE
-                    cell.font = font
     wb.loaded_theme = modern_office_theme()
     wb.save(out_path)
 

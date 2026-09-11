@@ -62,20 +62,10 @@ is ready.
 
 ## Styling
 
-For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
-brand or reference styling: the same palette, heading/body font roles, and
-visual hierarchy. Preserve existing styling when editing unless asked to restyle.
-When no reference is supplied, retain the format-specific template defaults
-(including Office typography and themes where provided). Different formats may
-use different defaults; do not impose one shared palette or font on all of them.
-Keep text legible, contrast strong, spacing consistent, and emphasis selective.
-Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
-number formats and input/formula colors. Keep reusable colors, fonts, and
-sizes near the top of the creation script, using the library's native units and
-color representation. For themed formats, configure theme colors and fonts there
-too; explicit element styling and theme styling are separate controls.
-Use fonts the runtime can access; when an exact font is unavailable, use a
-consistent available substitute.
+Preserve existing deck styling unless asked to restyle it. For related
+artifacts, reuse the user's palette, heading/body font roles, and hierarchy.
+Without a reference, keep the template defaults. Keep reusable PowerPoint
+colors, fonts, and point sizes near the top of the creation script.
 
 ## Choose the path
 
@@ -146,13 +136,14 @@ present, otherwise the top-most text box as a fallback), the **body** text, any
 
 To change a slide's content, round-trip through the XML: unpack, hand-edit the
 slide part, repack, validate. **Unpack inside the same unique task directory
-described above, never the user's folder**, and pack with `--cleanup` so no
-unpacked XML is left behind. Do not string-replace inside the raw `.pptx`.
+described above, never the user's folder**, and retain the unpacked tree until
+validation succeeds so failures can be repaired. Do not string-replace inside
+the raw `.pptx`.
 
 ```sh
 kowork-python scripts/unpack.py in.pptx <task-temp-dir>/work/
 # edit <task-temp-dir>/work/ppt/slides/slideN.xml (and other parts)
-kowork-python scripts/pack.py <task-temp-dir>/work/ "/path/the/user/wants/out.pptx" --cleanup
+kowork-python scripts/pack.py <task-temp-dir>/work/ "/path/the/user/wants/out.pptx"
 kowork-python scripts/validate.py "/path/the/user/wants/out.pptx"
 ```
 
