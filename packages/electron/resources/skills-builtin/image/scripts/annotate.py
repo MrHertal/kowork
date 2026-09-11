@@ -34,6 +34,7 @@ from imgutil import (
     ImageError,
     apply_orientation,
     check_distinct_paths,
+    normalize_for_edit,
     open_image,
     parse_color,
     save_image,
@@ -87,7 +88,10 @@ def prepare_mark(args: argparse.Namespace, base: Image.Image) -> Image.Image:
         raise ImageError(f"--opacity must be between 0 and 1, got {args.opacity:g}")
     if not math.isfinite(args.scale) or not 0 < args.scale <= 1:
         raise ImageError(f"--scale must be in the range (0, 1], got {args.scale:g}")
-    mark = apply_orientation(open_image(args.mark)).convert("RGBA")
+    mark, note = normalize_for_edit(apply_orientation(open_image(args.mark)))
+    if note:
+        sys.stderr.write(f"note: {note}\n")
+    mark = mark.convert("RGBA")
     tw = max(1, round(base.width * args.scale))
     th = max(1, round(mark.height * tw / mark.width))
     mark = mark.resize((tw, th), Image.Resampling.LANCZOS)
@@ -218,7 +222,10 @@ def main(argv: list[str]) -> int:
         check_distinct_paths(args.output, args.input)
         if args.command == "watermark" and args.mark:
             check_distinct_paths(args.output, args.mark)
-        base = apply_orientation(open_image(args.input)).convert("RGBA")
+        base, note = normalize_for_edit(apply_orientation(open_image(args.input)))
+        if note:
+            sys.stderr.write(f"note: {note}\n")
+        base = base.convert("RGBA")
         detail = args.func(base, args)
         save_image(base, args.output)
     except ImageError as exc:

@@ -33,6 +33,7 @@ from imgutil import (
     open_image,
     parse_color,
     prepare_for_format,
+    without_metadata,
 )
 
 EXIF_FORMATS = ("JPEG", "PNG", "WEBP", "TIFF")
@@ -58,7 +59,7 @@ def save_with_metadata(
     exif = im.info.get("exif")
     icc = im.info.get("icc_profile")
     dpi = im.info.get("dpi")
-    im, notes = prepare_for_format(im, fmt, background)
+    im, notes = prepare_for_format(without_metadata(im), fmt, background)
     for note in notes:
         sys.stderr.write(f"note: {note}\n")
     kwargs: dict = {}

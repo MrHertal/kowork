@@ -84,11 +84,13 @@ def frame_durations(im: Image.Image, n_frames: int) -> list[int]:
     try:
         for index in range(n_frames):
             im.seek(index)
+            im.load()
             durations.append(im.info.get("duration", 0))
     except EOFError:
         pass
     try:
         im.seek(0)
+        im.load()
     except EOFError:
         pass
     return durations

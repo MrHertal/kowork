@@ -31,6 +31,7 @@ from imgutil import (
     check_distinct_paths,
     flatten,
     format_for_path,
+    normalize_for_edit,
     open_image,
 )
 
@@ -49,7 +50,10 @@ def create(args: argparse.Namespace) -> tuple[bool, int, int]:
     check_distinct_paths(args.output, *args.frames)
     frames = []
     for path in args.frames:
-        frames.append(flatten(apply_orientation(open_image(path))))
+        im, note = normalize_for_edit(apply_orientation(open_image(path)))
+        if note:
+            sys.stderr.write(f"note: {note}\n")
+        frames.append(flatten(im))
 
     size = frames[0].size
     resized = any(im.size != size for im in frames)
@@ -81,10 +85,16 @@ def extract(args: argparse.Namespace) -> int:
     except OSError as exc:
         raise ImageError(f"cannot create {args.outdir}: {exc}") from exc
     width = max(3, len(str(total)))
-    for index in range(total):
+    outputs = [
+        os.path.join(args.outdir, f"frame_{index + 1:0{width}d}.png")
+        for index in range(total)
+    ]
+    # Preflight every frame before any write: a later alias can also be the input.
+    for out_path in outputs:
+        check_distinct_paths(out_path, args.input)
+    for index, out_path in enumerate(outputs):
         im.seek(index)
         frame = im.convert("RGBA")
-        out_path = os.path.join(args.outdir, f"frame_{index + 1:0{width}d}.png")
         try:
             frame.save(out_path, "PNG")
         except Exception as exc:

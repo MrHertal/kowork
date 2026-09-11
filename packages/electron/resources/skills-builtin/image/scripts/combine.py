@@ -29,6 +29,7 @@ from imgutil import (
     apply_orientation,
     check_distinct_paths,
     check_output_pixels,
+    normalize_for_edit,
     open_image,
     parse_color,
     parse_size,
@@ -102,7 +103,9 @@ def main(argv: list[str]) -> int:
         check_distinct_paths(args.output, *args.inputs)
         images = []
         for path in args.inputs:
-            im = apply_orientation(open_image(path))
+            im, note = normalize_for_edit(apply_orientation(open_image(path)))
+            if note:
+                sys.stderr.write(f"note: {note}\n")
             if im.mode == "P":
                 im = im.convert("RGBA" if "transparency" in im.info else "RGB")
             images.append(im)

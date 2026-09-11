@@ -143,12 +143,14 @@ def normalize_for_edit(im: Image.Image) -> tuple[Image.Image, str | None]:
     print as ``note: ...``.
     """
     if im.mode in ("I;16", "I;16B", "I;16L"):
-        return im.point(lambda p: p / 257).convert("L"), f"converted {im.mode} (16-bit) to 8-bit grayscale"
+        return im.convert("I").point(lambda p: p / 257).convert("L"), f"converted {im.mode} (16-bit) to 8-bit grayscale"
     if im.mode in ("I", "F"):
         return (
             im.point(lambda p: p / 257).convert("L"),
             f"converted {im.mode} to 8-bit grayscale (samples read as the 0-65535 range)",
         )
+    if im.mode == "1":
+        return im.convert("L"), "converted bilevel image to 8-bit grayscale"
     if im.mode == "CMYK":
         return im.convert("RGB"), "converted CMYK to RGB"
     return im, None
@@ -256,6 +258,15 @@ def prepare_for_format(
     return im, notes
 
 
+def without_metadata(im: Image.Image) -> Image.Image:
+    """Copy pixels without encoder fallback metadata, leaving the input intact."""
+    # Transparency is pixel content even when represented in the info dictionary.
+    clean = im.convert("RGBA") if "transparency" in im.info else im.copy()
+    clean.info.clear()
+    clean.getexif().clear()
+    return clean
+
+
 def save_image(
     im: Image.Image,
     path: str,
@@ -271,7 +282,7 @@ def save_image(
     AVIF) and is ignored otherwise. Returns the format written.
     """
     fmt = format_for_path(path)
-    im, notes = prepare_for_format(im, fmt, background)
+    im, notes = prepare_for_format(without_metadata(im), fmt, background)
     for note in notes:
         sys.stderr.write(f"note: {note}\n")
     kwargs: dict = {}
