@@ -70,6 +70,12 @@ clear purpose-specific folders such as `tasks/`, `workflows/`, `routing/`,
 another discoverable guide and say when it should be read or run. Do not create
 empty folders or placeholder files without a concrete use.
 
+Keep helper examples local and current. A command in `SKILL.md` should name a
+script that actually ships in that skill, and validation should confirm the
+path exists. Do not cite a helper from another built-in skill as if it were
+available locally. When no real helper exists yet, explain the intended purpose
+in prose instead of inventing a filename.
+
 **The name.** A short, lowercase, hyphenated label of a few words, like
 `meeting-notes-formatter`. Kowork treats this identifier as exact and
 case-sensitive: use only lowercase letters and digits separated by single
