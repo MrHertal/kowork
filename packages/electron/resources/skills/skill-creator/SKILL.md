@@ -82,6 +82,13 @@ You don't need everything perfect up front. Gather enough to write a solid first
 
 - **Then polish.** Write a first draft, reread it with fresh eyes as if you were the agent seeing it cold, and simplify anything confusing.
 
+Before handing the skill back, run the bundled validator. It has no package
+dependencies and works with `kowork-python`:
+
+```sh
+kowork-python scripts/quick_validate.py /absolute/path/to/skill-folder
+```
+
 ## Improve an existing skill
 
 Sometimes the user doesn't want a new skill — they want to fix or upgrade one they already have.
