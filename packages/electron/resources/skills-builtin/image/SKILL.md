@@ -61,17 +61,17 @@ appearance matters, Read the output image as visual QA before handing it back.
 
 ## Choose the path
 
-| Request                                                          | Path          |
-| ---------------------------------------------------------------- | ------------- |
-| Make a new image from scratch (banner, thumbnail, social card)   | **Create**    |
-| What is this file / dimensions / metadata / does it have alpha?  | **Inspect**   |
-| Change format, compress, strip metadata                          | **Convert**   |
-| Resize, crop, rotate, flip                                       | **Transform** |
-| Brighten, saturate, blur, sharpen, grayscale                     | **Adjust**    |
-| Add a watermark, logo, or caption                                | **Annotate**  |
-| Collage, grid, side-by-side                                      | **Combine**   |
-| Make an animated GIF, or pull its frames out                     | **GIF**       |
-| Confirm an image is sound                                        | **Validate**  |
+| Request                                                         | Path          |
+| --------------------------------------------------------------- | ------------- |
+| Make a new image from scratch (banner, thumbnail, social card)  | **Create**    |
+| What is this file / dimensions / metadata / does it have alpha? | **Inspect**   |
+| Change format, compress, strip metadata                         | **Convert**   |
+| Resize, crop, rotate, flip                                      | **Transform** |
+| Brighten, saturate, blur, sharpen, grayscale                    | **Adjust**    |
+| Add a watermark, logo, or caption                               | **Annotate**  |
+| Collage, grid, side-by-side                                     | **Combine**   |
+| Make an animated GIF, or pull its frames out                    | **GIF**       |
+| Confirm an image is sound                                       | **Validate**  |
 
 ## Create (Pillow template)
 

@@ -66,7 +66,11 @@
       "id": 6,
       "prompt": "Make an animated GIF called cycle.gif from frame-1.png, frame-2.png, and frame-3.png, half a second per frame, looping forever.",
       "expected_output": "cycle.gif with the 3 frames in order, 500 ms per frame, looping forever.",
-      "files": ["evals/files/frame-1.png", "evals/files/frame-2.png", "evals/files/frame-3.png"],
+      "files": [
+        "evals/files/frame-1.png",
+        "evals/files/frame-2.png",
+        "evals/files/frame-3.png"
+      ],
       "expectations": [
         "gif.py create was used via kowork-python with --duration 500 --loop 0",
         "info.py on the output reports 3 frames, 500 ms/frame, looping forever (frames are distinct, so no merging occurred)",
