@@ -9,10 +9,11 @@ description: >-
   caption; build a collage or side-by-side; create or extract an animated GIF;
   or answer questions about an image's format, dimensions, or metadata.
   Triggers on any mention of an image, photo, picture, logo, watermark,
-  thumbnail, banner, or screenshot, or a
-  .png/.jpg/.jpeg/.webp/.gif/.bmp/.tiff/.tif/.ico/.avif file, even without the
-  word "image". Images embedded in Office documents or PDFs are handled by
-  those skills, not this one.
+  thumbnail, banner, screenshot, or a
+  .png/.jpg/.jpeg/.webp/.gif/.bmp/.tiff/.tif/.ico/.avif file, except when an
+  existing image only needs to be embedded unchanged in an Office document or
+  PDF. For embedded images that need standalone processing first, use this
+  skill for that processing and the relevant document skill for embedding.
 ---
 
 # Working with image files
@@ -32,12 +33,11 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an
-in-place-style re-encode, call `present_files` exactly once with every final
-user-facing output path. Never call it for read-only or summarization work, and
-never pass temporary files, scripts, previews, validation artifacts, or
-intermediate versions. If validation or `present_files` fails, do not claim the
-image is ready.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path. Never call it for
+read-only or summarization work, and never pass temporary files, scripts,
+previews, validation artifacts, or intermediate versions. If validation or
+`present_files` fails, do not claim the image is ready.
 
 ## Runtime (obey exactly)
 
@@ -46,9 +46,12 @@ image is ready.
   **Pillow is the only image library**: import nothing else (no numpy, opencv,
   or scipy), and use no system tools — ImageMagick, ffmpeg, sips, and exiftool
   are not available and must not be used.
-- The scripts below live in this skill's `scripts/` directory; paths are
-  relative to it. On failure they print `error: ...` to stderr and exit
-  non-zero; non-fatal notes go to stderr prefixed `note: ...`.
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate.
 - No script overwrites its input: passing the same path for input and output is
   an error. Always write to a new path.
 
@@ -58,6 +61,14 @@ The shell returns text only, so writing or editing an image file does **not**
 put it in context. To actually _see_ an image you must **Read the file with the
 Read tool** (needs a vision-capable model). After any create or edit where
 appearance matters, Read the output image as visual QA before handing it back.
+
+## Styling
+
+Preserve an existing image's style unless asked to restyle it. For related
+artifacts, reuse the user's palette and font roles. For a new image without a
+reference, choose a palette, typography, and composition suited to its subject
+and intended use. Keep reusable colors, fonts, and pixel sizes near the top of
+the creation script; substitute an available font when necessary.
 
 ## Choose the path
 
@@ -83,7 +94,10 @@ path in full, exactly as shown — never shorten or reconstruct it. Use that tas
 directory (`<task-temp-dir>`) for every working file. Do not work directly in
 the pre-approved directory, derive another path from environment variables, or
 create a sibling directory. The pre-approved directory is scoped to the current
-session; use it for intermediate images and extracted frames used for QA too.
+task/session and remains available when that same task resumes after an app
+restart; use it for intermediate images and extracted frames used for QA too.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_image.py` into that task directory and edit the
    copy's `build_image()` to build the requested image.
@@ -96,18 +110,21 @@ session; use it for intermediate images and extracted frames used for QA too.
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file. Where appearance matters, also Read the output as
    visual QA.
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise an image you generated in this session, even
-   days later, re-edit this script and re-run it rather than rebuilding from
-   scratch. The task directory is never beside the user's file, and the OS
-   reclaims it eventually.
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise an image you generated in this task, re-edit this script and re-run it
+   rather than rebuilding from scratch. The task directory is never beside the
+   user's file, and the OS reclaims it eventually.
+
+Set `FONT` (absolute TrueType font paths or `None` for Pillow's bundled font),
+`SIZE`, and the color constants at the top to restyle the image.
 
 The template is self-contained (Pillow + standard library only — no `imgutil`
 import) and renders a demo card showing every building block: canvas size
 (`WIDTH`/`HEIGHT`), a vertical-gradient background, a translucent
 rounded-rectangle card, accent shapes, a title and subtitle in the scalable
 default font, and an alpha-masked badge. Swap the badge for a real picture with
-`Image.open("photo.png")` + `resize()` + `paste()`. `ImageDraw` does not
+`Image.open("/absolute/path/photo.png")` + `resize()` + `paste()`. `ImageDraw` does not
 alpha-blend, so translucent shapes and text go on a clear overlay merged with
 `Image.alpha_composite` — the template comments demonstrate this. The output
 format comes from the extension; JPEG/BMP have no alpha channel and flatten
@@ -131,9 +148,9 @@ the pixels first — Convert deliberately does not.
 ## Convert (re-encode)
 
 ```sh
-kowork-python scripts/convert.py in.png out.jpg --quality 85
-kowork-python scripts/convert.py in.jpg out.webp --quality 80
-kowork-python scripts/convert.py in.png out.jpg --strip-metadata --background '#EEEEEE'
+kowork-python scripts/convert.py in.png -o out.jpg --quality 85
+kowork-python scripts/convert.py in.jpg -o out.webp --quality 80
+kowork-python scripts/convert.py in.png -o out.jpg --strip-metadata --background '#EEEEEE'
 ```
 
 The output extension picks the format; pixels are decoded and re-encoded,
@@ -156,14 +173,14 @@ nothing else changes.
 ## Transform (resize / crop / rotate / flip)
 
 ```sh
-kowork-python scripts/transform.py resize in.png out.png --max 1600x1600
-kowork-python scripts/transform.py resize in.png out.png --width 800
-kowork-python scripts/transform.py resize in.png out.png --percent 50
-kowork-python scripts/transform.py resize in.png out.png --size 800x600
-kowork-python scripts/transform.py crop in.png out.png --box 10,10,300,180
-kowork-python scripts/transform.py rotate in.png out.png --degrees 90
-kowork-python scripts/transform.py rotate in.png out.png --degrees -15 --expand
-kowork-python scripts/transform.py flip in.png out.png --horizontal   # or --vertical
+kowork-python scripts/transform.py resize in.png -o out.png --max 1600x1600
+kowork-python scripts/transform.py resize in.png -o out.png --width 800
+kowork-python scripts/transform.py resize in.png -o out.png --percent 50
+kowork-python scripts/transform.py resize in.png -o out.png --size 800x600
+kowork-python scripts/transform.py crop in.png -o out.png --box 10,10,300,180
+kowork-python scripts/transform.py rotate in.png -o out.png --degrees 90
+kowork-python scripts/transform.py rotate in.png -o out.png --degrees -15 --expand
+kowork-python scripts/transform.py flip in.png -o out.png --horizontal   # or --vertical
 ```
 
 - EXIF orientation is baked into the pixels before transforming, so the
@@ -191,9 +208,9 @@ kowork-python scripts/transform.py flip in.png out.png --horizontal   # or --ver
 ## Adjust (brightness / contrast / color / sharpness / filters)
 
 ```sh
-kowork-python scripts/adjust.py in.png out.png --brightness 1.1 --contrast 1.2
-kowork-python scripts/adjust.py in.png out.png --grayscale
-kowork-python scripts/adjust.py in.png out.png --blur 2
+kowork-python scripts/adjust.py in.png -o out.png --brightness 1.1 --contrast 1.2
+kowork-python scripts/adjust.py in.png -o out.png --grayscale
+kowork-python scripts/adjust.py in.png -o out.png --blur 2
 ```
 
 Factors are floats where **1.0 = no change** (0.5 halves, 2.0 doubles);
@@ -209,11 +226,11 @@ its first frame only.
 ## Annotate (watermark / text)
 
 ```sh
-kowork-python scripts/annotate.py watermark in.png out.png --mark logo.png
-kowork-python scripts/annotate.py watermark in.png out.png --mark logo.png --position top-left --opacity 0.6 --scale 0.15
-kowork-python scripts/annotate.py watermark in.png out.png --mark logo.png --tile --opacity 0.2
-kowork-python scripts/annotate.py text in.png out.png --text "© 2026 Acme"
-kowork-python scripts/annotate.py text in.png out.png --text "SALE" --font /path/font.ttf --size 64 --color '#FF0000'
+kowork-python scripts/annotate.py watermark in.png -o out.png --mark logo.png
+kowork-python scripts/annotate.py watermark in.png -o out.png --mark logo.png --position top-left --opacity 0.6 --scale 0.15
+kowork-python scripts/annotate.py watermark in.png -o out.png --mark logo.png --tile --opacity 0.2
+kowork-python scripts/annotate.py text in.png -o out.png --text "© 2026 Acme"
+kowork-python scripts/annotate.py text in.png -o out.png --text "SALE" --font /path/font.ttf --size 64 --color '#FF0000'
 ```
 
 - Positions are named only: `center`, `top-left`, `top-right`, `bottom-left`,
@@ -226,7 +243,10 @@ kowork-python scripts/annotate.py text in.png out.png --text "SALE" --font /path
 - `text --text` draws a label (a newline draws multiple lines). The default
   font is Pillow's embedded scalable sans at 4% of the smaller dimension (min
   12 px); brand fonts need `--font /path/font.ttf` and `--size N`. `--color`
-  takes `#RRGGBB[AA]` or a named color (default white).
+  takes `#RRGGBB[AA]` or a named color (default white). Alpha goes **last**,
+  unlike XLSX's `AARRGGBB`: move its first pair to the end when reusing an
+  eight-digit spreadsheet color (`80FF0000` → `#FF000080`). Use six-digit
+  `#RRGGBB` for opaque colors.
 - Compositing happens on an RGBA copy, so semi-transparent marks and text blend
   correctly; saving to JPEG/BMP flattens onto white. EXIF orientation is baked
   in; the output gets fresh metadata. An animated input annotates as its first
@@ -235,10 +255,10 @@ kowork-python scripts/annotate.py text in.png out.png --text "SALE" --font /path
 ## Combine (grid / row / column)
 
 ```sh
-kowork-python scripts/combine.py out.png a.png b.png c.png d.png --grid 2x2 --gap 8
-kowork-python scripts/combine.py out.png a.png b.png --hstack --gap 16
-kowork-python scripts/combine.py out.png a.png b.png --vstack
-kowork-python scripts/combine.py out.png a.png b.png --hstack --background '#00000000'
+kowork-python scripts/combine.py a.png b.png c.png d.png -o out.png --grid 2x2 --gap 8
+kowork-python scripts/combine.py a.png b.png -o out.png --hstack --gap 16
+kowork-python scripts/combine.py a.png b.png -o out.png --vstack
+kowork-python scripts/combine.py a.png b.png -o out.png --hstack --background '#00000000'
 ```
 
 - Inputs are **never rescaled**: every cell is as large as the widest and
@@ -255,9 +275,12 @@ kowork-python scripts/combine.py out.png a.png b.png --hstack --background '#000
 
 ## Animated GIF (create / extract)
 
+For QA extraction or other temporary GIF work, create the unique task directory
+described under Create if one does not already exist for the current task.
+
 ```sh
-kowork-python scripts/gif.py create out.gif frame1.png frame2.png frame3.png --duration 200 --loop 0
-kowork-python scripts/gif.py extract in.gif frames/
+kowork-python scripts/gif.py create frame1.png frame2.png frame3.png -o out.gif --duration 200 --loop 0
+kowork-python scripts/gif.py extract in.gif <task-temp-dir>/frames/
 ```
 
 - `create` takes 2+ frames in play order; the output must be a `.gif`.
@@ -270,6 +293,8 @@ kowork-python scripts/gif.py extract in.gif frames/
 - Pillow merges identical consecutive frames, so the output may hold fewer
   frames than you passed (their durations add up). Verify an animation by its
   duration and by Reading the extracted frames — never by frame count.
+- For QA, extract into `<task-temp-dir>/frames/`; use a user-requested
+  destination only when the extracted frames are final deliverables.
 - `extract` writes every frame as `frame_001.png`-style names into the output
   directory (created if needed); each PNG is the full composited picture even
   when the GIF stores per-frame diffs. A single-frame input is refused — it is
@@ -295,7 +320,9 @@ image before handing it back.
 - **No SVG (vector).** Vector files can be neither read nor written.
 - **No AI image work.** No generation, background removal, inpainting, or
   upscaling beyond resampling.
-- **No OCR.** Text inside a picture cannot be extracted.
+- **No OCR.** There is no programmatic text extraction. With a vision-capable
+  model, Read the image to read or transcribe text visually, as with a scanned
+  PDF; this does not add a searchable text layer.
 - **No RAW camera formats** (.cr2, .nef, .dng, ...).
 - **Color profiles pass through unchanged** — convert.py preserves the ICC
   profile, but nothing converts between color spaces.

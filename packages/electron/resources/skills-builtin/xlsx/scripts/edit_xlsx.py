@@ -9,8 +9,8 @@ duplicate it.
 Round-trip caveat: openpyxl is a high-level model, not a lossless XML editor, so
 loading and re-saving a workbook can drop parts it does not represent (pivot
 tables, slicers, form controls, VBA, some charts). Every edit therefore writes to
-a NEW file (-o; never in place), warns when the input holds such parts, and
-refuses to write macro-enabled .xlsm/.xltm. openpyxl also does NOT rewrite
+a NEW .xlsx file (-o; never in place) and warns when the input holds such parts.
+openpyxl also does NOT rewrite
 formula references when rows/columns are inserted or deleted, so existing
 formulas can point at the wrong cells afterward; those commands print a reminder
 to verify them.
@@ -41,7 +41,7 @@ from xlsxutil import (
     load,
     parse_range,
     refuse_inplace,
-    refuse_macro_output,
+    require_xlsx_output,
     resolve_sheet,
     warn_lossy_parts,
 )
@@ -126,7 +126,7 @@ def apply_style(cell, args: argparse.Namespace) -> None:
 
 
 def cmd_set(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     force_text = args.text
     is_formula = (not force_text) and args.value.startswith("=")
@@ -159,7 +159,7 @@ def cmd_set(args: argparse.Namespace) -> int:
 
 
 def cmd_insert_rows(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     if args.at < 1:
         raise EditError("--at must be a 1-based row index >= 1")
@@ -176,7 +176,7 @@ def cmd_insert_rows(args: argparse.Namespace) -> int:
 
 
 def cmd_delete_rows(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     if args.at < 1:
         raise EditError("--at must be a 1-based row index >= 1")
@@ -193,7 +193,7 @@ def cmd_delete_rows(args: argparse.Namespace) -> int:
 
 
 def cmd_insert_cols(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     if args.count < 1:
         raise EditError("--count must be >= 1")
@@ -209,7 +209,7 @@ def cmd_insert_cols(args: argparse.Namespace) -> int:
 
 
 def cmd_delete_cols(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     if args.count < 1:
         raise EditError("--count must be >= 1")
@@ -225,7 +225,7 @@ def cmd_delete_cols(args: argparse.Namespace) -> int:
 
 
 def cmd_style(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     if not any([args.bold, args.italic, args.font, args.size is not None, args.color, args.fill, args.align]):
         raise EditError("provide at least one of --bold/--italic/--font/--size/--color/--fill/--align")
@@ -242,7 +242,7 @@ def cmd_style(args: argparse.Namespace) -> int:
 
 
 def cmd_number_format(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     wb = load(args.input)
     ws = resolve_sheet(wb, args.sheet)
@@ -255,7 +255,7 @@ def cmd_number_format(args: argparse.Namespace) -> int:
 
 
 def cmd_width(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     if args.width <= 0:
         raise EditError("--width must be > 0")

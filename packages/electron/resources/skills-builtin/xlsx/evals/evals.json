@@ -8,7 +8,8 @@
       "files": [],
       "expectations": [
         "A new .xlsx file is produced",
-        "The create path was used: create_xlsx.py (openpyxl) copied into a temp dir, its build_workbook() edited, and run via kowork-python — not a hand-assembled zip or a string-built file",
+        "The create path was used: create_xlsx.py copied into a uniquely named task directory with a random suffix inside the exact pre-approved session temporary directory from the Bash tool instructions (not the user's folder), its build_workbook() edited for openpyxl, and the copy run via kowork-python — not a hand-assembled zip or a string-built file",
+        "The working script is retained for later revisions in the same session, including after app restarts",
         "The workbook has the header row, exactly three data rows, an Amount column, and a total row",
         "The Amount cells and the total are LIVE formulas (e.g. =B2*C2 and =SUM(D2:D4)), not Python-computed hardcoded numbers",
         "A bar chart is present in the sheet",

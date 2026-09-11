@@ -15,10 +15,10 @@ Notes (aspect-ratio changes, clamped crop boxes) go to stderr; stdout carries a
 single summary line.
 
 Usage:
-    kowork-python transform.py resize <in> <out> (--size WxH | --width W | --height H | --percent P | --max WxH)
-    kowork-python transform.py crop <in> <out> --box L,T,R,B
-    kowork-python transform.py rotate <in> <out> --degrees D [--expand]
-    kowork-python transform.py flip <in> <out> (--horizontal | --vertical)
+    kowork-python transform.py resize <in> -o <out> (--size WxH | --width W | --height H | --percent P | --max WxH)
+    kowork-python transform.py crop <in> -o <out> --box L,T,R,B
+    kowork-python transform.py rotate <in> -o <out> --degrees D [--expand]
+    kowork-python transform.py flip <in> -o <out> (--horizontal | --vertical)
 """
 
 from __future__ import annotations
@@ -171,9 +171,14 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Resize, crop, rotate, or flip an image.")
     sub = ap.add_subparsers(dest="command", required=True, metavar="command")
 
-    rp = sub.add_parser("resize", help="resize with LANCZOS resampling")
+    rp = sub.add_parser(
+        "resize",
+        help="resize with LANCZOS resampling",
+        usage="%(prog)s input -o output (--size WxH | --width W | --height H | --percent P | --max WxH)",
+    )
     rp.add_argument("input", help="path to the input image")
-    rp.add_argument("output", help="path to write to; the extension picks the format")
+    rp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    rp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     size = rp.add_mutually_exclusive_group(required=True)
     size.add_argument("--size", metavar="WxH", help="exact output size (may change the aspect ratio)")
     size.add_argument("--width", type=positive_int, metavar="W", help="output width; height follows the aspect ratio")
@@ -187,15 +192,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rp.set_defaults(func=do_resize)
 
-    cp = sub.add_parser("crop", help="crop to a pixel box, origin top-left")
+    cp = sub.add_parser(
+        "crop",
+        help="crop to a pixel box, origin top-left",
+        usage="%(prog)s input -o output --box L,T,R,B",
+    )
     cp.add_argument("input", help="path to the input image")
-    cp.add_argument("output", help="path to write to; the extension picks the format")
+    cp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    cp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     cp.add_argument("--box", required=True, metavar="L,T,R,B", help="crop box in pixels, e.g. 10,10,100,80")
     cp.set_defaults(func=do_crop)
 
-    rotp = sub.add_parser("rotate", help="rotate by an arbitrary angle (multiples of 90 are exact)")
+    rotp = sub.add_parser(
+        "rotate",
+        help="rotate by an arbitrary angle (multiples of 90 are exact)",
+        usage="%(prog)s input -o output --degrees D [--expand]",
+    )
     rotp.add_argument("input", help="path to the input image")
-    rotp.add_argument("output", help="path to write to; the extension picks the format")
+    rotp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    rotp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     rotp.add_argument("--degrees", type=float, required=True, metavar="D", help="counter-clockwise angle")
     rotp.add_argument(
         "--expand",
@@ -204,9 +219,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rotp.set_defaults(func=do_rotate)
 
-    fp = sub.add_parser("flip", help="mirror an image horizontally or vertically")
+    fp = sub.add_parser(
+        "flip",
+        help="mirror an image horizontally or vertically",
+        usage="%(prog)s input -o output (--horizontal | --vertical)",
+    )
     fp.add_argument("input", help="path to the input image")
-    fp.add_argument("output", help="path to write to; the extension picks the format")
+    fp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    fp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     direction = fp.add_mutually_exclusive_group(required=True)
     direction.add_argument("--horizontal", action="store_true", help="mirror left-right")
     direction.add_argument("--vertical", action="store_true", help="mirror top-bottom")
@@ -217,6 +237,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.output and args.legacy_output:
+        sys.stderr.write("error: pass the output either positionally or with -o, not both\n")
+        return 1
+    args.output = args.output or args.legacy_output
+    if not args.output:
+        sys.stderr.write("error: an output path is required; pass -o <out>\n")
+        return 1
 
     try:
         check_distinct_paths(args.output, args.input)

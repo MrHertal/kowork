@@ -8,7 +8,8 @@
       "files": [],
       "expectations": [
         "A new review.pptx file is produced",
-        "The create path was used: create_pptx.cjs (pptxgenjs) copied into a temp dir, edited, and run via kowork-node — not a hand-assembled zip or a string-built file",
+        "The create path was used: create_pptx.cjs copied into a uniquely named task directory with a random suffix inside the exact pre-approved session temporary directory from the Bash tool instructions (not the user's folder), edited for pptxgenjs, and run via kowork-node — not a hand-assembled zip or a string-built file",
+        "The working script is retained for later revisions in the same session, including after app restarts",
         "The deck has about five slides including one slide with a table and one slide with a column (bar) chart",
         "validate.py reports the result OK via kowork-python (the structure check passes and the layout linter finds no off-slide shapes, partial-overlap collisions, or leftover placeholder text)",
         "No markitdown, pandas, numpy, LibreOffice/soffice, sharp, react-icons, or system tools were used"

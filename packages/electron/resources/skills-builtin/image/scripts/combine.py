@@ -14,12 +14,13 @@ EXIF orientation is baked in before combining, so the layout matches what
 viewers show. The output is re-encoded with fresh metadata.
 
 Usage:
-    kowork-python combine.py <out> <in...> (--grid CxR | --hstack | --vstack) [--gap N] [--background #hex]
+    kowork-python combine.py <in...> -o <out> (--grid CxR | --hstack | --vstack) [--gap N] [--background #hex]
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
 from PIL import Image
@@ -62,9 +63,12 @@ def combine(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(description="Combine multiple images into a grid, a row, or a column.")
-    ap.add_argument("output", help="path to write to; the extension picks the format")
-    ap.add_argument("inputs", nargs="+", metavar="in", help="input images, in row-major order")
+    ap = argparse.ArgumentParser(
+        description="Combine multiple images into a grid, a row, or a column.",
+        usage="%(prog)s input [input ...] -o output (--grid CxR | --hstack | --vstack) [options]",
+    )
+    ap.add_argument("paths", nargs="+", metavar="in", help="input images, in row-major order")
+    ap.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     layout = ap.add_mutually_exclusive_group(required=True)
     layout.add_argument("--grid", metavar="CxR", help="arrange into C columns x R rows")
     layout.add_argument("--hstack", action="store_true", help="arrange into a single row, left to right")
@@ -80,6 +84,20 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.output:
+        args.inputs = args.paths
+    else:
+        if len(args.paths) < 3:
+            sys.stderr.write("error: an output path is required; pass -o <out>\n")
+            return 1
+        if os.path.exists(args.paths[0]):
+            sys.stderr.write(
+                "error: the first positional path already exists; pass -o <out> "
+                "to distinguish the output from the inputs\n"
+            )
+            return 1
+        args.output, *args.inputs = args.paths
 
     try:
         if len(args.inputs) < 2:

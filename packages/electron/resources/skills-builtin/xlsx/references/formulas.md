@@ -20,10 +20,10 @@ bundled (no LibreOffice, no pure-Python evaluator). The consequences:
   file now — a point-in-time snapshot, or a value some downstream tool reads
   without opening Excel — compute it in Python and write the value instead of the
   formula.
-- **Reading results.** `read_xlsx.py --data-only` returns cached values, but those
-  exist only if Excel has saved the file since the formulas were written. An
+- **Reading results.** `kowork-python scripts/read_xlsx.py --data-only` returns
+  cached values, but those exist only if Excel has saved the file since the formulas were written. An
   openpyxl-authored file has no cache, so its formula cells read back as empty
-  (`None`) — never treat that as zero. `read_xlsx.py` prints a warning when it
+  (`None`) — never treat that as zero. `scripts/read_xlsx.py` prints a warning when it
   sees this so the emptiness is not mistaken for real data.
 
 ## Keeping values as text (`--text` / `--text-columns`)
@@ -32,9 +32,10 @@ Numeric-looking strings lose meaning when coerced to numbers: `007` becomes `7`,
 zip code like `02134` loses its leading zero, and a long account or phone number
 can turn into scientific notation. Keep such values as text:
 
-- `edit_xlsx.py set ... --text VALUE` forces a single value to a string.
-- `sheets.py from-csv ... --text-columns A,C` (column letters or 1-based indices)
-  keeps those CSV columns as text while the rest still coerce to numbers.
+- `kowork-python scripts/edit_xlsx.py set ... --text VALUE` forces a single value to a string.
+- `kowork-python scripts/sheets.py from-csv ... --text-columns A,C` (column
+  letters or 1-based indices) keeps those CSV columns as text while the rest
+  still coerce to numbers.
 
 This matches how Excel itself treats a column formatted as Text. Use it for any
 identifier where the digits are a label, not a quantity to compute on.
@@ -42,7 +43,7 @@ identifier where the digits are a label, not a quantity to compute on.
 `from-csv` also never fabricates a formula from imported data: a CSV value that
 begins with `=` (e.g. `=1+1`) is kept as the literal text `=1+1`, not turned into
 a live formula. To author a real formula, import the data, then set it explicitly
-with `edit_xlsx.py set --cell ... "=..."`.
+with `kowork-python scripts/edit_xlsx.py set --cell ... "=..."`.
 
 ## Inserting / deleting rows and columns
 
@@ -60,11 +61,13 @@ General best practice for a clean, auditable workbook (not openpyxl-specific):
 - **Color-code cell roles** so a reader can tell inputs from results at a glance: a
   distinct colour for hardcoded **inputs/assumptions** (commonly blue), the
   default colour for **formulas** (black), and another for **links to other
-  sheets** (commonly green). Apply with `edit_xlsx.py style --color`.
+  sheets** (commonly green). Apply with
+  `kowork-python scripts/edit_xlsx.py style --color`.
 - **Use number formats, not formatted text.** Currency as `$#,##0`, percentages as
   `0.0%`, and negatives in parentheses (e.g. `#,##0;(#,##0)`) so the underlying
   value stays numeric and computable. Keep year labels as text so they are not
-  accidentally summed. Apply with `edit_xlsx.py number-format`.
+  accidentally summed. Apply with
+  `kowork-python scripts/edit_xlsx.py number-format`.
 - **Put assumptions in their own labelled cells** and reference them from formulas
   rather than burying a constant inside a formula. One "tax rate" cell that ten
   formulas reference beats the rate typed into ten formulas — change it once, and

@@ -15,9 +15,9 @@ blend correctly instead of punching holes); saving to JPEG/BMP flattens onto
 white via ``imgutil.save_image``.
 
 Usage:
-    kowork-python annotate.py watermark <in> <out> --mark logo.png \\
+    kowork-python annotate.py watermark <in> -o <out> --mark logo.png \\
         [--position P] [--opacity F] [--scale F] [--tile]
-    kowork-python annotate.py text <in> <out> --text "..." \\
+    kowork-python annotate.py text <in> -o <out> --text "..." \\
         [--position P] [--font PATH] [--size N] [--color #hex]
 """
 
@@ -167,9 +167,14 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Annotate an image with a watermark logo or a text label.")
     sub = ap.add_subparsers(dest="command", required=True, metavar="command")
 
-    wp = sub.add_parser("watermark", help="paste a logo at a position, or tiled across the image")
+    wp = sub.add_parser(
+        "watermark",
+        help="paste a logo at a position, or tiled across the image",
+        usage="%(prog)s input -o output --mark PATH [options]",
+    )
     wp.add_argument("input", help="path to the input image")
-    wp.add_argument("output", help="path to write to; the extension picks the format")
+    wp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    wp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     wp.add_argument("--mark", metavar="PATH", help="logo image to paste (required)")
     wp.add_argument(
         "--position",
@@ -192,9 +197,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     wp.set_defaults(func=do_watermark)
 
-    tp = sub.add_parser("text", help="draw a text label")
+    tp = sub.add_parser(
+        "text",
+        help="draw a text label",
+        usage='%(prog)s input -o output --text "..." [options]',
+    )
     tp.add_argument("input", help="path to the input image")
-    tp.add_argument("output", help="path to write to; the extension picks the format")
+    tp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
+    tp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     tp.add_argument("--text", metavar="TEXT", help="the label text (required); a newline draws multiple lines")
     tp.add_argument(
         "--position",
@@ -217,6 +227,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.output and args.legacy_output:
+        sys.stderr.write("error: pass the output either positionally or with -o, not both\n")
+        return 1
+    args.output = args.output or args.legacy_output
+    if not args.output:
+        sys.stderr.write("error: an output path is required; pass -o <out>\n")
+        return 1
 
     try:
         check_distinct_paths(args.output, args.input)

@@ -6,8 +6,8 @@ description: >-
   summarize, or extract slide titles, body text, tables, or speaker notes; edit
   a slide template by hand; reorder, duplicate, delete, add, or clean up whole
   slides; or check a deck's layout. Triggers on any mention of a presentation,
-  deck, slides, slideshow, or a .pptx/.pptm/.potx/.ppsx file, even without the word
-  "pptx".
+  deck, slides, slideshow, or a .pptx/.pptm/.potx/.ppsx file, even without the
+  word "pptx".
 ---
 
 # Working with PowerPoint (.pptx) presentations
@@ -29,8 +29,8 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an in-place
-edit, call `present_files` exactly once with every final user-facing output path.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path.
 Never call it for read-only or summarization work, and never pass temporary files,
 scripts, previews, unpacked directories, validation artifacts, or intermediate
 versions. If validation or `present_files` fails, do not claim the presentation
@@ -47,10 +47,26 @@ is ready.
   Node and works in any shell) — never bare `node`. The `pptxgenjs` package is
   pre-bundled and resolvable (Kowork sets `NODE_PATH`); just
   `require("pptxgenjs")`. Do not install anything.
-- The scripts below live in this skill's `scripts/` directory; paths are relative
-  to it. They print clear errors and use non-zero exit codes, and every mutating
-  command writes a **new** file (`-o`) — it never edits in place — and refuses to
-  write a macro-enabled (`.pptm`/`.potm`/`.ppsm`) output.
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate. Every
+  mutating command writes a **new** file — usually through `-o`, with a positional
+  output path for `pack.py` — and refuses to write a macro-enabled
+  (`.pptm`/`.potm`/`.ppsm`) output.
+- For raster images used in a presentation, use the image skill for standalone
+  image processing and this skill for container-level work, including embedding
+  the finished asset where supported.
+
+## Styling
+
+Preserve existing deck styling unless asked to restyle it. For related
+artifacts, reuse the user's palette, heading/body font roles, and hierarchy.
+For a new deck without a reference, choose a restrained palette suited to its
+topic. Keep reusable PowerPoint colors, fonts, and point sizes near the top of
+the creation script.
 
 ## Choose the path
 
@@ -72,6 +88,10 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+The pre-approved directory is scoped to the current task/session and remains
+available when that same task resumes after an app restart.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_pptx.cjs` into that task directory and edit the
    copy to build the requested slides.
@@ -83,10 +103,11 @@ create a sibling directory.
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise a deck you generated in this session, even
-   days later, re-edit this script and re-run it rather than rebuilding from
-   scratch. (For a deck you did **not** generate here, use the raw-OOXML
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise a deck you generated in this task, re-edit this script and re-run it
+   rather than rebuilding from scratch. (For a deck you did **not** generate
+   here, use the raw-OOXML
    **Edit a template** path or **Slide operations**.) The task directory is
    never beside the user's deck, and the OS reclaims it eventually.
 
@@ -116,13 +137,14 @@ present, otherwise the top-most text box as a fallback), the **body** text, any
 
 To change a slide's content, round-trip through the XML: unpack, hand-edit the
 slide part, repack, validate. **Unpack inside the same unique task directory
-described above, never the user's folder**, and pack with `--cleanup` so no
-unpacked XML is left behind. Do not string-replace inside the raw `.pptx`.
+described above, never the user's folder**, and retain the unpacked tree until
+validation succeeds so failures can be repaired. Do not string-replace inside
+the raw `.pptx`.
 
 ```sh
 kowork-python scripts/unpack.py in.pptx <task-temp-dir>/work/
 # edit <task-temp-dir>/work/ppt/slides/slideN.xml (and other parts)
-kowork-python scripts/pack.py <task-temp-dir>/work/ "/path/the/user/wants/out.pptx" --cleanup
+kowork-python scripts/pack.py <task-temp-dir>/work/ "/path/the/user/wants/out.pptx"
 kowork-python scripts/validate.py "/path/the/user/wants/out.pptx"
 ```
 
@@ -131,7 +153,7 @@ kowork-python scripts/validate.py "/path/the/user/wants/out.pptx"
 the shared `scripts/pptxutil.py` helpers (`parse_xml`, `serialize`,
 `qn("a:t")`). Mind the gotchas — bold a header with `b="1"`, one `<a:p>` per line
 or list item, edge whitespace needs `xml:space="preserve"`, and write typographic
-quotes/dashes as XML numeric entities. See `references/ooxml-patterns.md`. Adding,
+quotes/dashes directly as UTF-8 (XML numeric entities are also accepted). See `references/ooxml-patterns.md`. Adding,
 removing, or reordering **whole slides** is `slides.py`'s job (below), not hand
 editing.
 
@@ -175,7 +197,10 @@ failures; **unresolved geometry** and **tight margins** (content within 0.25" of
 an edge) are reported as info and never fail on their own. It prints `OK: ...` or
 `FAILED: ...` and exits non-zero on failure. There is no XSD validation (schemas
 are not bundled) and no recalculation or rendering — run it on the final file,
-then open the deck in a real viewer for visual QA.
+then open the deck in PowerPoint or Keynote for visual QA when a viewer is
+available. If no viewer is available, state plainly when delivering the deck
+that its appearance was not visually verified. Never imply that structural
+validation verifies the rendered appearance.
 
 ## Limitations (state plainly to the user)
 

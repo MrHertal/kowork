@@ -34,6 +34,80 @@ class ImageScriptsTest(unittest.TestCase):
             append_images=[Image.new("RGB", (20, 20), "blue")], duration=[100, 300],
         )
 
+    def test_rotation_uses_counter_clockwise_positive_angles(self):
+        source = self.root / "corners.png"
+        im = Image.new("RGB", (3, 2), "white")
+        im.putpixel((0, 0), (255, 0, 0))
+        im.save(source)
+        for degrees, corner in ((90, (0, 2)), (-90, (1, 0))):
+            output = self.root / f"rotated-{degrees}.png"
+            self.run_script("transform", "rotate", source, "-o", output, "--degrees", degrees, "--expand")
+            with Image.open(output) as result:
+                self.assertEqual(result.size, (2, 3))
+                self.assertEqual(result.getpixel(corner), (255, 0, 0))
+
+    def test_legacy_positional_outputs_remain_supported(self):
+        source = self.root / "source.png"
+        frame = self.root / "frame.png"
+        Image.new("RGB", (40, 40), "red").save(source)
+        Image.new("RGB", (40, 40), "blue").save(frame)
+
+        commands = (
+            ("convert", source, self.root / "converted.jpg"),
+            ("adjust", source, self.root / "adjusted.png", "--brightness", "1"),
+            ("transform", "flip", source, self.root / "flipped.png", "--horizontal"),
+            ("annotate", "text", source, self.root / "annotated.png", "--text", "x"),
+            ("combine", self.root / "combined.png", source, frame, "--hstack"),
+            ("gif", "create", self.root / "animated.gif", source, frame),
+        )
+        for script, *args in commands:
+            with self.subTest(script=script):
+                self.run_script(script, *args)
+
+    def test_missing_output_flag_does_not_overwrite_first_input(self):
+        first = self.root / "first.png"
+        second = self.root / "second.png"
+        third = self.root / "third.png"
+        for path, color in ((first, "red"), (second, "green"), (third, "blue")):
+            Image.new("RGB", (40, 40), color).save(path)
+        original = first.read_bytes()
+
+        result = self.run_script(
+            "combine", first, second, third, "--hstack", success=False
+        )
+
+        self.assertIn("pass -o", result.stderr)
+        self.assertEqual(first.read_bytes(), original)
+
+        animation = self.root / "first.gif"
+        self.animation(animation, "GIF")
+        original = animation.read_bytes()
+        result = self.run_script(
+            "gif", "create", animation, second, third, success=False
+        )
+        self.assertIn("pass -o", result.stderr)
+        self.assertEqual(animation.read_bytes(), original)
+
+    def test_help_shows_canonical_output_as_required(self):
+        commands = (
+            ("convert", "--help"),
+            ("adjust", "--help"),
+            ("annotate", "watermark", "--help"),
+            ("annotate", "text", "--help"),
+            ("combine", "--help"),
+            ("gif", "create", "--help"),
+            ("transform", "resize", "--help"),
+            ("transform", "crop", "--help"),
+            ("transform", "rotate", "--help"),
+            ("transform", "flip", "--help"),
+        )
+        for script, *args in commands:
+            with self.subTest(script=script, args=args):
+                result = self.run_script(script, *args)
+                usage = result.stdout.split("\n\n", 1)[0]
+                self.assertIn("-o output", usage)
+                self.assertNotIn("[-o", usage)
+
     def test_extract_protects_source_and_later_aliases(self):
         for alias in ("direct", "symlink", "hardlink"):
             with self.subTest(alias=alias):
@@ -61,12 +135,12 @@ class ImageScriptsTest(unittest.TestCase):
             for strip in (True, False):
                 with self.subTest(ext=ext, strip=strip):
                     output = self.root / f"out-{strip}.{ext}"
-                    self.run_script("convert", source, output, *(["--strip-metadata"] if strip else []))
+                    self.run_script("convert", source, "-o", output, *(["--strip-metadata"] if strip else []))
                     with Image.open(output) as im:
                         self.assertEqual(im.info.get("icc_profile"), None if strip else icc)
                         self.assertEqual(im.getexif().get(271), None if strip else "PrivateCamera")
         output = self.root / "flipped.png"
-        self.run_script("transform", "flip", source, output, "--horizontal")
+        self.run_script("transform", "flip", source, "-o", output, "--horizontal")
         with Image.open(output) as im:
             self.assertFalse(im.getexif())
             self.assertNotIn("icc_profile", im.info)
@@ -77,12 +151,12 @@ class ImageScriptsTest(unittest.TestCase):
                 source = self.root / f"{mode}.png"
                 Image.new(mode, (20, 20), color).save(source, transparency=transparent)
                 output = self.root / f"{mode}-stripped.png"
-                self.run_script("convert", source, output, "--strip-metadata")
+                self.run_script("convert", source, "-o", output, "--strip-metadata")
                 with Image.open(output) as im:
                     self.assertEqual(im.convert("RGBA").getpixel((0, 0))[3], 0)
 
                 jpeg = self.root / f"{mode}-flattened.jpg"
-                self.run_script("convert", source, jpeg, "--strip-metadata")
+                self.run_script("convert", source, "-o", jpeg, "--strip-metadata")
                 with Image.open(jpeg) as im:
                     self.assertEqual(im.getpixel((0, 0)), (255, 255, 255))
 
@@ -92,7 +166,7 @@ class ImageScriptsTest(unittest.TestCase):
                 source = self.root / "gray.tiff"
                 Image.new(mode, (20, 20), value).save(source)
                 output = self.root / "adjusted.png"
-                self.run_script("adjust", source, output, "--brightness", 1)
+                self.run_script("adjust", source, "-o", output, "--brightness", 1)
                 with Image.open(output) as im:
                     self.assertEqual(im.getpixel((0, 0)), expected)
 
@@ -100,15 +174,15 @@ class ImageScriptsTest(unittest.TestCase):
         source = self.root / "gray.tiff"
         Image.new("I;16B", (80, 80), 32768).save(source)
         output = self.root / "annotated.png"
-        self.run_script("annotate", "text", source, output, "--text", "Label")
+        self.run_script("annotate", "text", source, "-o", output, "--text", "Label")
         with Image.open(output) as im:
             self.assertEqual(im.getpixel((0, 0)), (127, 127, 127, 255))
-        self.run_script("combine", output, source, source, "--hstack")
+        self.run_script("combine", source, source, "-o", output, "--hstack")
         with Image.open(output) as im:
             self.assertEqual(im.getpixel((0, 0)), (127, 127, 127, 255))
         base = self.root / "base.png"
         Image.new("RGB", (80, 80), "black").save(base)
-        self.run_script("annotate", "watermark", base, output, "--mark", source, "--position", "center")
+        self.run_script("annotate", "watermark", base, "-o", output, "--mark", source, "--position", "center")
         with Image.open(output) as im:
             self.assertEqual(im.getpixel((40, 40)), (127, 127, 127, 255))
 
@@ -127,18 +201,27 @@ class ImageScriptsTest(unittest.TestCase):
     def test_standard_workflows(self):
         photo = FIXTURES / "photo.jpg"
         output = self.root / "small.jpg"
-        self.run_script("transform", "resize", photo, output, "--max", "300x300")
+        self.run_script("transform", "resize", photo, "-o", output, "--max", "300x300")
         with Image.open(output) as im:
             self.assertEqual(im.size, (225, 300))
         for ext in ("png", "jpg", "webp", "gif", "bmp", "tiff", "ico", "avif"):
             with self.subTest(ext=ext):
                 output = self.root / f"converted.{ext}"
-                self.run_script("convert", photo, output)
+                self.run_script("convert", photo, "-o", output)
                 self.run_script("validate", output)
         self.run_script("create_image", self.root / "card.png")
         self.run_script("validate", self.root / "card.png")
-        self.run_script("gif", "create", self.root / "cycle.gif", FIXTURES / "frame-1.png", FIXTURES / "frame-2.png")
+        self.run_script(
+            "gif", "create", FIXTURES / "frame-1.png", FIXTURES / "frame-2.png",
+            "-o", self.root / "cycle.gif",
+        )
         self.run_script("validate", self.root / "cycle.gif")
+
+    def test_create_rejects_unknown_extension(self):
+        output = self.root / "card.image"
+        result = self.run_script("create_image", output, success=False)
+        self.assertIn("cannot infer an image format", result.stderr)
+        self.assertFalse(output.exists())
 
 
 if __name__ == "__main__":

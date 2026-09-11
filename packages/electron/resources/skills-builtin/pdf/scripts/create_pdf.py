@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """Authoring template for creating a PDF with reportlab (Platypus).
 
-Copy this into a temp directory (never the user's folder), edit the ``story``
-list to build the requested content, then run it to write the PDF to the path
-the user wants:
+Copy this into a uniquely named task directory with a random suffix inside the
+exact pre-approved session temporary directory shown in the Bash tool
+instructions (never the user's folder). Copy that path in full, exactly as
+shown; do not reconstruct it or derive it from environment variables. Keep
+every working file inside the task directory. Edit ``build_story()``
+to build the requested content, then run the copy to write the final file to
+the path the user wants:
 
     kowork-python create_pdf.py out.pdf
 
-It runs from a temp directory (never the user's folder); the copy is kept there
-after a successful write so you can edit it and re-run to revise the PDF in the
-same session (the OS reclaims temp later).
+The directory is scoped to the current task/session. The copy stays there after
+a successful write, so you can edit and re-run it when that same task resumes
+after an app restart (the OS reclaims temp eventually).
 
 It demonstrates every "create" building block, each editable in one obvious
 place: a document title, two heading levels, body paragraphs, a bulleted list, a
@@ -20,7 +24,7 @@ it as ``pagesize`` instead).
 
 Image note: the tiny PNG below is generated in-memory with Pillow so this file
 is self-contained. For a real picture, replace ``demo_image()`` with
-``Image("photo.png", width=2 * inch, height=2 * inch)`` pointing at a file.
+``Image("/absolute/path/photo.png", width=2 * inch, height=2 * inch)`` pointing at a file.
 
 Usage:
     kowork-python create_pdf.py <out.pdf>
@@ -56,6 +60,8 @@ from reportlab.platypus import (
 HEADER_FILL = colors.HexColor("#34507a")
 ROW_STRIPE = colors.HexColor("#eef1f6")
 BULLET_FONT = "Vera"
+FONT = {"head": "Helvetica-Bold", "body": "Helvetica"}  # register custom fonts before use
+SIZE = {"title": 18, "heading1": 18, "heading2": 14, "body": 10, "caption": 9}
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -83,7 +89,7 @@ class NumberedCanvas(canvas.Canvas):
         super().save()
 
     def _draw_footer(self, total: int) -> None:
-        self.setFont("Helvetica", 9)
+        self.setFont(FONT["body"], SIZE["caption"])
         self.setFillColor(colors.grey)
         self.drawCentredString(
             self._pagesize[0] / 2.0,
@@ -95,8 +101,8 @@ class NumberedCanvas(canvas.Canvas):
 def demo_image() -> Image:
     """A tiny solid-colour PNG built in memory, so the template needs no assets.
 
-    Swap this for ``Image("photo.png", width=..., height=...)`` to embed a real
-    image file.
+    Swap this for ``Image("/absolute/path/photo.png", width=..., height=...)`` to
+    embed a real image file.
     """
     buf = io.BytesIO()
     PILImage.new("RGB", (96, 96), (52, 80, 122)).save(buf, format="PNG")
@@ -121,6 +127,15 @@ def register_bullet_font() -> str:
 def build_story() -> list:
     """The document content. Edit this list to change what the PDF contains."""
     styles = getSampleStyleSheet()
+    for name, role, size in (
+        ("Title", "head", "title"),
+        ("Heading1", "head", "heading1"),
+        ("Heading2", "head", "heading2"),
+        ("BodyText", "body", "body"),
+    ):
+        styles[name].fontName = FONT[role]
+        styles[name].fontSize = SIZE[size]
+        styles[name].leading = SIZE[size] * 1.2
     body = styles["BodyText"]
     bullet_font = register_bullet_font()
 
@@ -135,7 +150,9 @@ def build_story() -> list:
             [
                 ("BACKGROUND", (0, 0), (-1, 0), HEADER_FILL),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTNAME", (0, 0), (-1, -1), FONT["body"]),
+                ("FONTSIZE", (0, 0), (-1, -1), SIZE["body"]),
+                ("FONTNAME", (0, 0), (-1, 0), FONT["head"]),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, ROW_STRIPE]),
                 ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
                 ("ALIGN", (1, 0), (-1, -1), "RIGHT"),
@@ -198,6 +215,12 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Create a PDF from an editable reportlab template.")
     ap.add_argument("output", nargs="?", default="output.pdf", help="path to write the .pdf")
     args = ap.parse_args(argv)
+
+    if os.path.splitext(args.output)[1].lower() != ".pdf":
+        sys.stderr.write(
+            f"error: output must use the .pdf extension: {args.output}\n"
+        )
+        return 1
 
     try:
         build_pdf(args.output)

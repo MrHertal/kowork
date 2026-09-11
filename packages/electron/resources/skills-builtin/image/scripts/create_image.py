@@ -3,15 +3,16 @@
 
 Copy this into a uniquely named task directory with a random suffix inside the
 exact pre-approved session temporary directory shown in the Bash tool
-instructions (never the user's folder), edit
-``build_image()`` to build the requested image, then run it to write the image
-to the path the user wants:
+instructions (never the user's folder). Copy that path in full, exactly as
+shown; do not reconstruct it or derive it from environment variables. Keep
+every working file inside the task directory. Edit ``build_image()`` to build
+the requested image, then run it to write the image to the path the user wants:
 
     kowork-python create_image.py out.png
 
-The copy stays in the temp directory after a successful write, so you can edit
-it and re-run to revise the image within the same session, even after app
-restarts or days later (the OS reclaims temp eventually).
+The directory is scoped to the current task/session. The copy stays there after
+a successful write, so you can edit and re-run it when that same task resumes
+after an app restart (the OS reclaims temp eventually).
 
 It demonstrates every "create" building block, each editable in one obvious
 place: the canvas size (``WIDTH``/``HEIGHT``), a vertical-gradient background
@@ -22,7 +23,7 @@ is inferred from the file extension; JPEG and BMP have no alpha channel, so the
 image is flattened onto white for them.
 
 Image note: the badge below is generated in-memory with Pillow so this file is
-self-contained. For a real picture, open one with ``Image.open("photo.png")``,
+self-contained. For a real picture, open one with ``Image.open("/absolute/path/photo.png")``,
 ``resize()`` it to fit, and ``paste()`` it the same way.
 
 Usage:
@@ -38,6 +39,8 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 WIDTH, HEIGHT = 1200, 630  # standard social-card size
+FONT = {"head": None, "body": None}  # absolute TrueType paths; None uses the bundled font
+SIZE = {"title": 64, "subtitle": 28}  # pixels
 
 TOP_COLOR = (26, 34, 64)
 BOTTOM_COLOR = (74, 108, 178)
@@ -98,7 +101,7 @@ def flatten(im: Image.Image, background: tuple[int, int, int] = (255, 255, 255))
 def demo_badge() -> Image.Image:
     """A small badge built in memory, so the template needs no assets.
 
-    Swap this for ``Image.open("photo.png").convert("RGBA")`` to paste a real
+    Swap this for ``Image.open("/absolute/path/photo.png").convert("RGBA")`` to paste a real
     image file -- ``resize()`` it to fit first.
     """
     badge = Image.new("RGBA", (160, 160), (0, 0, 0, 0))
@@ -130,7 +133,7 @@ def build_image() -> Image.Image:
     cx = WIDTH // 2
     badge = demo_badge()
     # The badge's own alpha channel is the paste mask, so the circle keeps its
-    # soft edges; to paste a real picture instead, use Image.open("photo.png").
+    # soft edges; to paste a real picture instead, use an absolute path.
     im.paste(badge, (cx - badge.width // 2, margin + 64), badge)
 
     draw.line((cx - 60, 330, cx + 60, 330), fill=ACCENT, width=6)
@@ -141,8 +144,8 @@ def build_image() -> Image.Image:
 
     # The default font scales with size (Pillow bundles freetype); for a
     # specific look use ImageFont.truetype("/path/to/font.ttf", size) instead.
-    title_font = ImageFont.load_default(64)
-    subtitle_font = ImageFont.load_default(28)
+    title_font = ImageFont.truetype(FONT["head"], SIZE["title"]) if FONT["head"] else ImageFont.load_default(SIZE["title"])
+    subtitle_font = ImageFont.truetype(FONT["body"], SIZE["subtitle"]) if FONT["body"] else ImageFont.load_default(SIZE["subtitle"])
     draw.text((cx, 405), "Your Title Here", font=title_font, fill=TITLE_COLOR, anchor="mm")
     draw.text(
         (cx, 465),

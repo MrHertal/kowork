@@ -6,8 +6,8 @@ description: >-
   redline, or extract text from a Word document — e.g. building a doc with
   headings, tables, lists, images, headers/footers, or a table of contents;
   making tracked-change edits; adding comments; or converting a Word file to
-  Markdown. Triggers on any mention of Word documents or .docx files, even
-  without the word "docx".
+  Markdown. Triggers on any mention of Word documents or a
+  .docx/.docm/.dotx/.dotm file, even without the word "docx".
 ---
 
 # Working with Word (.docx) documents
@@ -25,8 +25,8 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an in-place
-edit, call `present_files` exactly once with every final user-facing output path.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path.
 Never call it for read-only or summarization work, and never pass temporary files,
 scripts, previews, unpacked directories, validation artifacts, or intermediate
 versions. If validation or `present_files` fails, do not claim the document is
@@ -43,10 +43,26 @@ ready.
   Node and works in any shell) — never bare `node`. The `docx` package is
   pre-bundled and resolvable (Kowork sets `NODE_PATH`); just `require('docx')`.
   Do not install anything.
-- The scripts below live in this skill's `scripts/` directory; paths are
-  relative to it. They print clear errors and use non-zero exit codes, and
-  every mutating command writes to a **new** output (never editing the input
-  in place) and refuses a macro-enabled (`.docm`/`.dotm`) output.
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate. In addition,
+  every command that mutates a packed document writes to a **new `.docx`** output
+  (never editing the input in place). `.docm`/`.dotx`/`.dotm` may be inputs, but
+  are never outputs. `validate.py --fix` may repair an unpacked working directory
+  in place inside the task temporary directory.
+- For raster images used in a document, use the image skill for standalone
+  image processing and this skill for container-level work, including embedding
+  the finished asset where supported.
+
+## Styling
+
+Preserve existing document styling unless asked to restyle it. For related
+artifacts, reuse the user's palette, heading/body font roles, and hierarchy.
+Without a reference, keep the template defaults. Keep reusable Word colors,
+fonts, and point sizes near the top of the creation script.
 
 ## Choose the path
 
@@ -57,6 +73,7 @@ ready.
 | Summarize / read / extract text                             | **Read**                             |
 | Suggest changes as redlines                                 | **Tracked changes** (a kind of Edit) |
 | Leave review notes                                          | **Comment**                          |
+| Confirm a document is sound                                 | **Validate**                         |
 
 ## Create (docx-js, Node)
 
@@ -68,6 +85,10 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+The pre-approved directory is scoped to the current task/session and remains
+available when that same task resumes after an app restart.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_docx.cjs` into that task directory and edit the
    copy's `children` array to build the requested content.
@@ -83,15 +104,16 @@ create a sibling directory.
    kowork-python scripts/validate.py "/path/the/user/wants/output.docx"
    ```
 
-   If validation fails, repair via the Edit path (unpack → fix XML → validate →
-   pack) — do not hand back an unvalidated file.
+   If validation fails, fix the copied creation script and re-run it, then
+   validate again — do not hand back an unvalidated file. Keep the script as
+   the source of truth so later revisions preserve the repairs.
 
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise a document you generated in this session,
-   even days later, re-edit this script and re-run it rather than rebuilding
-   from scratch. (For a document you did **not** generate here, use the
-   **Edit** path.) The task directory is never beside the user's document, and
-   the OS reclaims it eventually.
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise a document you generated in this task, re-edit this script and re-run
+   it rather than rebuilding from scratch. (For a document you did **not**
+   generate here, use the **Edit** path.) The task directory is never beside
+   the user's document, and the OS reclaims it eventually.
 
 The template covers headings, paragraphs, bulleted and numbered lists, a table,
 an inline image, a header, and a footer with page numbers, and sets the page to
@@ -99,8 +121,9 @@ an inline image, a header, and a footer with page numbers, and sets the page to
 to `11906 × 16838` for A4). It also ships Word's default typography out of the
 box — Calibri 11pt body with Word's usual paragraph spacing, Calibri Light
 headings in Word's blue accent, and a black 28pt title — driven by the `styles`
-block and the `FONT` constant at the top of the script; edit the constant to
-restyle a document. Tables use fixed DXA widths, set on both the table and each
+block and the `FONT` / `SIZE` / `COLOR` constants at the top of the script;
+edit those constants to restyle a document. `SIZE` uses points (converted to
+half-points for docx-js). Tables use fixed DXA widths, set on both the table and each
 cell, because percentage widths render unreliably in some viewers. It omits a
 table of contents by default (docx-js
 can't populate one without Word prompting to update fields on open); add one
@@ -108,7 +131,7 @@ only when the user asks. Keep the `.cjs` extension so `require` works in any
 project. For numbered lists you must declare a `numbering` config (the template
 shows the shape). docx-js needs an image's `width`/`height` in pixels (it does
 not auto-size); read them with Pillow (`kowork-python -c "from PIL import Image;
-print(Image.open('photo.png').size)"`) rather than guessing.
+print(Image.open('/absolute/path/photo.png').size)"`) rather than guessing.
 
 ## Edit (Python)
 
@@ -206,9 +229,9 @@ smaller substring in one run.
 ## Validate (always, after creating or editing)
 
 ```sh
-kowork-python scripts/validate.py out.docx                   # report only
-kowork-python scripts/validate.py work/ --fix                # repair an unpacked dir in place
-kowork-python scripts/validate.py in.docx --fix -o out.docx  # repair a packed file to a new file
+kowork-python scripts/validate.py out.docx                         # report only
+kowork-python scripts/validate.py <task-temp-dir>/work/ --fix        # repair an unpacked dir in place
+kowork-python scripts/validate.py in.docx --fix -o out.docx          # repair a packed file to a new file
 ```
 
 Checks well-formedness, package wiring (content types, root relationship,
@@ -222,6 +245,8 @@ before handing it back.
 
 - **No legacy `.doc`.** Converting old `.doc` to `.docx` needs an Office engine
   Kowork does not bundle. Ask for a `.docx`.
+- **Template and macro formats are input-only.** Read `.docm`/`.dotx`/`.dotm`
+  when needed, but write every created or edited result as `.docx`.
 - **No PDF / image export or visual preview.** Rendering needs LibreOffice +
   Poppler, which are not available.
 - **Cannot accept/flatten tracked changes.** This skill authors redlines and

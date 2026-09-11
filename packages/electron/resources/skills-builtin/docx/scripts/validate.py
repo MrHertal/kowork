@@ -41,7 +41,7 @@ from oxml import (
     qn,
     read_parts,
     refuse_inplace,
-    refuse_macro_output,
+    require_docx_output,
     serialize,
     write_parts,
 )
@@ -227,7 +227,7 @@ def main(argv: list[str]) -> int:
                 )
                 return 1
             try:
-                refuse_macro_output(args.out)
+                require_docx_output(args.out)
                 refuse_inplace(args.out, args.input)
             except DocxError as exc:
                 sys.stderr.write(f"error: {exc}\n")

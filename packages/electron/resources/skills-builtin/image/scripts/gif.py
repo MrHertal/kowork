@@ -13,7 +13,7 @@ full picture even when the file stores only per-frame diffs. A single-frame
 input is refused: it is not an animation.
 
 Usage:
-    kowork-python gif.py create <out.gif> <frames...> [--duration MS] [--loop N]
+    kowork-python gif.py create <frames...> -o <out.gif> [--duration MS] [--loop N]
     kowork-python gif.py extract <in.gif> <outdir/>
 """
 
@@ -106,9 +106,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Create an animated GIF from frames, or extract a GIF's frames.")
     sub = ap.add_subparsers(dest="command", required=True, metavar="command")
 
-    cp = sub.add_parser("create", help="create an animated GIF from 2+ still images")
-    cp.add_argument("output", help="path of the .gif to write")
-    cp.add_argument("frames", nargs="+", metavar="frame", help="input images, in play order")
+    cp = sub.add_parser(
+        "create",
+        help="create an animated GIF from 2+ still images",
+        usage="%(prog)s frame frame [frame ...] -o output.gif [options]",
+    )
+    cp.add_argument("paths", nargs="+", metavar="frame", help="input images, in play order")
+    cp.add_argument("-o", "--out", dest="output", help="path of the .gif to write")
     cp.add_argument(
         "--duration",
         type=int,
@@ -133,6 +137,21 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str]) -> int:
     args = build_parser().parse_args(argv)
+
+    if args.command == "create":
+        if args.output:
+            args.frames = args.paths
+        else:
+            if len(args.paths) < 3:
+                sys.stderr.write("error: an output path and at least 2 frames are required\n")
+                return 1
+            if os.path.exists(args.paths[0]):
+                sys.stderr.write(
+                    "error: the first positional path already exists; pass -o <out.gif> "
+                    "to distinguish the output from the frames\n"
+                )
+                return 1
+            args.output, *args.frames = args.paths
 
     try:
         if args.command == "create":

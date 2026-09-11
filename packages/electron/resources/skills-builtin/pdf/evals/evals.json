@@ -8,7 +8,8 @@
       "files": [],
       "expectations": [
         "A new .pdf file is produced",
-        "The create path was used: create_pdf.py (reportlab) run via kowork-python, copied into a temp dir and edited — not a hand-assembled or string-built PDF",
+        "The create path was used: create_pdf.py copied into a uniquely named task directory with a random suffix inside the exact pre-approved session temporary directory from the Bash tool instructions (not the user's folder), its build_story() edited for reportlab, and the copy run via kowork-python — not a hand-assembled or string-built PDF",
+        "The working script is retained for later revisions in the same session, including after app restarts",
         "The document contains the title, a table with exactly 3 rows, and a summary paragraph",
         "validate.py reports the result valid (it opens and all pages render)",
         "No OCR, LibreOffice/soffice, or external CLI tools (pdftoppm/qpdf/pdftk) were used"
@@ -32,7 +33,7 @@
       "files": ["evals/files/report.pdf", "evals/files/appendix.pdf"],
       "expectations": [
         "pages.py merge was used (pypdf) via kowork-python, in the requested order",
-        "The merged file has 3 pages (report's 2 pages then appendix's 1), confirmed via pages.py metadata or validate.py",
+        "The merged file has 3 pages (report's 2 pages then appendix's 1), and validate.py reports it valid",
         "No external tools such as qpdf, pdftk, or Ghostscript were used"
       ]
     },
@@ -54,7 +55,7 @@
       "expected_output": "application-filled.pdf with the full-name text set to Dana Lee, the subscribe checkbox checked, and the plan radio set to Pro.",
       "files": ["evals/files/application-form.pdf"],
       "expectations": [
-        "forms.py inspect (and/or fields) was used to discover the AcroForm fields before filling",
+        "forms.py info (and/or fields) was used to discover the AcroForm fields before filling",
         "forms.py fill was used with a values JSON (pypdf) via kowork-python",
         "In the output, the full-name field is 'Dana Lee', the subscribe checkbox is on, and the plan is 'Pro'",
         "The values were set as real AcroForm field values (verifiable with forms.py fields / pypdf), not stamped as overlay text",
@@ -67,10 +68,11 @@
       "expected_output": "survey-filled.pdf with the name and email stamped on their lines and an X in the Yes box.",
       "files": ["evals/files/survey-flat.pdf"],
       "expectations": [
-        "The PDF was recognized as flat (forms.py inspect reports no fillable fields) and the overlay workflow was chosen",
+        "The PDF was recognized as flat (forms.py info reports no fillable fields) and the overlay workflow was chosen",
         "forms.py structure was used to locate the lines/labels/boxes, and a fields.json of boxes+text authored",
         "forms.py check-boxes validated the boxes, then forms.py overlay stamped the text (via kowork-python)",
         "The result shows 'Dana Lee' and 'dana@example.com' near the Name/Email lines and an X on the Yes box (confirmed by rendering / preview-boxes and reading the image)",
+        "validate.py confirms the filled PDF still opens and renders",
         "The text was overlaid onto the page, with no attempt to create AcroForm fields and no OCR/LibreOffice"
       ]
     },
@@ -82,6 +84,7 @@
       "expectations": [
         "pages.py encrypt was used (pypdf) via kowork-python with the given password",
         "The output is encrypted: a PDF reader reports it as encrypted, and opening it without the password fails",
+        "validate.py --password s3cret confirms the encrypted PDF opens and renders",
         "No external tools such as qpdf or pdftk were used"
       ]
     }

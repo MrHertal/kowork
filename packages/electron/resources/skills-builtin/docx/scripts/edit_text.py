@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 
 from lxml import etree
 
-from oxml import parse_xml, qn, read_parts, refuse_inplace, refuse_macro_output, serialize, smarten_quotes, write_parts
+from oxml import parse_xml, qn, read_parts, refuse_inplace, require_docx_output, serialize, smarten_quotes, write_parts
 
 XML_SPACE = qn("xml:space")
 
@@ -144,7 +144,7 @@ def main(argv: list[str]) -> int:
     replacement = args.replace if args.no_smart_quotes else smarten_quotes(args.replace)
 
     try:
-        refuse_macro_output(args.out)
+        require_docx_output(args.out)
         refuse_inplace(args.out, args.input)
         parts = read_parts(args.input)
     except Exception as exc:

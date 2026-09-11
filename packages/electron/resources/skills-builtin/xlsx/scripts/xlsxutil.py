@@ -44,7 +44,7 @@ def load(path, *, read_only=False, data_only=False):
     ``read_only`` streams the file (bounded memory for large books); ``data_only``
     returns cached values instead of formulas. Reading an ``.xlsm`` is fine (its
     macros are simply ignored on read) -- this helper never writes, and the
-    mutating scripts refuse to *save* ``.xlsm``.
+    mutating scripts write only ``.xlsx``.
     """
     if not os.path.isfile(path):
         raise XlsxError(f"no such file: {path}")
@@ -64,23 +64,35 @@ def load(path, *, read_only=False, data_only=False):
         raise XlsxError(f"cannot open {path}: {exc}")
 
 
-def refuse_macro_output(out_path):
-    """Reject a macro-enabled output path; the mutating scripts never write one."""
+def require_xlsx_output(out_path):
+    """Require an .xlsx output; mutating scripts never author templates or macros."""
     ext = os.path.splitext(out_path)[1].lower()
+    if ext == ".xlsx":
+        return
     if ext in MACRO_EXTS:
-        raise XlsxError(
+        reason = (
             f"refusing to write a macro-enabled workbook ({ext}); openpyxl can "
-            "silently drop macros and other parts it does not model. Write a "
-            ".xlsx instead."
+            "silently drop macros and other parts it does not model"
         )
+    elif ext == ".xltx":
+        reason = "refusing to write an Excel template; template output is not authored here"
+    else:
+        reason = f"output must use the .xlsx extension: {out_path}"
+    raise XlsxError(f"{reason}. Write a .xlsx instead.")
 
 
 def refuse_inplace(out_path, source_path):
     """Block writing the result back over a file we are reading from."""
-    try:
-        same = os.path.realpath(out_path) == os.path.realpath(source_path)
-    except OSError:
-        same = os.path.abspath(out_path) == os.path.abspath(source_path)
+    same = os.path.realpath(out_path) == os.path.realpath(source_path)
+    if not same:
+        try:
+            same = (
+                os.path.isfile(out_path)
+                and os.path.isfile(source_path)
+                and os.path.samefile(out_path, source_path)
+            )
+        except OSError:
+            same = False
     if same:
         raise XlsxError(
             f"refusing to overwrite {source_path} in place; openpyxl round-trips "

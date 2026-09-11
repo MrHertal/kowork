@@ -13,7 +13,7 @@ through. Encrypted inputs that need a password cannot be read by the other
 subcommands; ``decrypt`` writes an unencrypted copy to work from.
 
 Usage:
-    kowork-python pages.py metadata <in.pdf>
+    kowork-python pages.py info <in.pdf>
     kowork-python pages.py merge <a.pdf> <b.pdf> [<c.pdf> ...] -o <out.pdf>
     kowork-python pages.py split <in.pdf> <outdir> [--pages 1-3,5]
     kowork-python pages.py extract <in.pdf> -o <out.pdf> --pages 1-3,5
@@ -280,7 +280,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Structural page operations on PDFs (pypdf).")
     sub = ap.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("metadata", help="print page count and document info")
+    p = sub.add_parser("info", aliases=["metadata"], help="print page count and document info")
     p.add_argument("input", help="path to the .pdf file")
     p.set_defaults(func=cmd_metadata)
 

@@ -5,10 +5,10 @@ description: >-
   and bridge them to and from CSV. Use whenever the user wants to build a workbook
   from data; read, summarize, or extract cell/range/sheet values; set values or
   formulas; add, format, or compute a column; insert or delete rows or columns;
-  style cells (fonts, fills, number formats, widths); add/rename/remove/move/copy
+  style cells (fonts, fills, number formats, widths); add/rename/delete/move/duplicate
   sheets; inspect a workbook's structure; make a chart; or convert between .xlsx
-  and .csv. Triggers on any mention of a spreadsheet, Excel, or a .xlsx/.xlsm/.csv
-  file, even without the word "xlsx".
+  and .csv. Triggers on any mention of a spreadsheet, Excel, or a
+  .xlsx/.xlsm/.xltx/.csv file, even without the word "xlsx".
 ---
 
 # Working with Excel (.xlsx) files
@@ -30,8 +30,8 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
-After final validation succeeds for any create or edit, including an in-place
-edit, call `present_files` exactly once with every final user-facing output path.
+After final validation succeeds for any create or edit, call `present_files`
+exactly once with every final user-facing output path.
 Never call it for read-only or summarization work, and never pass temporary files,
 scripts, previews, unpacked directories, validation artifacts, or intermediate
 versions. If validation or `present_files` fails, do not claim the workbook is
@@ -44,9 +44,23 @@ ready.
   Available libraries: `openpyxl`, `et_xmlfile`, and `Pillow` (PIL, for embedding
   images). Import nothing else (no `pandas`, no `numpy`, no other spreadsheet
   engines, no LibreOffice/`soffice`, no system tools). There is no Node path.
-- The scripts below live in this skill's `scripts/` directory; paths are relative
-  to it. They print clear errors and use non-zero exit codes, and every mutating
-  command writes a **new** file (`-o`) — it never edits in place.
+- The scripts below live in this skill's `scripts/` directory. Resolve every
+  `scripts/...` path against the skill base directory reported when this skill
+  was loaded, not against the user's working directory. They report command
+  failures as `error: ...` and exit non-zero; validators additionally end failed
+  checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
+  labels such as `note`, `warning`, `info`, or `issue` as appropriate. Every mutating
+  command writes a **new `.xlsx`** file (`-o`) — it never edits in place.
+- For raster images used in a workbook, use the image skill for standalone
+  image processing and this skill for container-level work, including embedding
+  the finished asset where supported.
+
+## Styling
+
+Preserve existing workbook styling unless asked to restyle it. For related
+artifacts, reuse the user's palette and font roles. Without a reference, keep
+the template defaults. Preserve meaningful number formats and input/formula
+colors; configure workbook themes separately from explicit cell styles.
 
 ## Choose the path
 
@@ -55,7 +69,7 @@ ready.
 | Make a new workbook                                                        | **Create**             |
 | Read / summarize / extract cell, range, or sheet values                    | **Read**               |
 | Set values/formulas, insert/delete rows or columns, style, formats, widths | **Edit**               |
-| Add/rename/remove/move/copy sheets; inspect structure; import a CSV        | **Sheets & structure** |
+| Add/rename/delete/move/duplicate sheets; inspect structure; import a CSV   | **Sheets & structure** |
 | Convert a sheet to CSV, or build a workbook from a CSV                     | **Read** / **Sheets**  |
 | Decide between a live formula and a fixed number                           | **Formulas**           |
 | Confirm a workbook is sound                                                | **Validate**           |
@@ -70,6 +84,10 @@ shown — never shorten or reconstruct it. Use that task directory
 (`<task-temp-dir>`) for every working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
+The pre-approved directory is scoped to the current task/session and remains
+available when that same task resumes after an app restart.
+Use absolute paths for any source assets referenced by the copied template so
+they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_xlsx.py` into that task directory and edit the
    copy's `build_workbook()` to build the requested content.
@@ -81,21 +99,24 @@ create a sibling directory.
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the task directory for the whole session — it
-   survives app restarts: to revise a workbook you generated in this session,
-   even days later, re-edit this script and re-run it rather than rebuilding
-   from scratch. (For a workbook you did **not** generate here, use the
-   **Edit** path.) The task directory is never beside the user's workbook, and
-   the OS reclaims it eventually.
+4. Keep that working copy in the task directory for the current task/session;
+   it remains available when that same task resumes after an app restart. To
+   revise a workbook you generated in this task, re-edit this script and re-run
+   it rather than rebuilding from scratch. (For a workbook you did **not**
+   generate here, use the **Edit** path.) The task directory is never beside
+   the user's workbook, and the OS reclaims it eventually.
 
 The template covers a styled header row (bold, filled, centred), data rows,
 number formats (currency and percent), live formulas (a per-row `=B*C` and a
 `=SUM(...)` total), frozen panes, column widths, a second sheet with a cross-sheet
 formula, a bar chart, and an embedded image — each editable in one obvious place.
-The default font is **Calibri 11** (change `DEFAULT_FONT_*`). The workbook is
+The default font is **Calibri 11** (change `DEFAULT_FONT_*`); explicit per-cell
+fonts assigned in `build_workbook()` take precedence. The workbook is
 saved with the current Office theme, so charts and theme-colored elements render
-in the same colors a new Excel file uses. It refuses to write
-`.xlsm`/`.xltm`. **Prefer real formulas over Python-computed constants** so the
+in the same colors a new Excel file uses. `OFFICE_THEME_REPLACEMENTS` near the
+top controls theme fonts and colors separately from the explicit cell font and
+header constants; customize both when applying a brand. It writes only `.xlsx`.
+**Prefer real formulas over Python-computed constants** so the
 workbook recalculates in Excel; only write a fixed number when the user explicitly
 needs one (see Formulas & computed values).
 
@@ -125,7 +146,7 @@ script warns). See `references/formulas.md`.
 ## Edit cells / rows / columns (openpyxl, Python)
 
 `scripts/edit_xlsx.py` has one subcommand per operation; each reads an input and
-writes a **new** file with `-o` (it never edits in place) and refuses `.xlsm`:
+writes a **new `.xlsx`** file with `-o` (it never edits in place):
 
 ```sh
 kowork-python scripts/edit_xlsx.py set in.xlsx -o out.xlsx --sheet Sales --cell B2 42
@@ -148,7 +169,10 @@ numbers, or anything with a leading zero (`007` stays `007`, not `7`). A value
 beginning with `-` is read as an option unless you separate it with `--`, e.g.
 `set in.xlsx -o out.xlsx --sheet Sales --cell A1 -- -5`. For columns, `--at` and
 `--col` accept a letter (`C`) or a 1-based index (`3`). Colors are `RRGGBB` or
-`AARRGGBB` hex (a leading `#` is fine); `style` changes only the attributes you
+`AARRGGBB` hex (a leading `#` is fine). Unlike the image skill's `#RRGGBBAA`, eight-digit
+colors put alpha **first** here; move the final pair to the front when reusing
+an image color (`#FF000080` → `80FF0000`). Six-digit `RRGGBB` avoids this
+difference for opaque colors. `style` changes only the attributes you
 pass and preserves the cell's other styling.
 
 **Formula references are not auto-adjusted.** openpyxl does not rewrite formulas
@@ -159,25 +183,29 @@ covering the wrong range; those commands print a reminder to verify the formulas
 ## Sheets & structure (openpyxl, Python)
 
 `scripts/sheets.py` owns sheet-level structure and inspection. `info` is
-read-only; the rest write a new file with `-o` and refuse `.xlsm`:
+read-only; the rest write a new `.xlsx` file with `-o`:
 
 ```sh
 kowork-python scripts/sheets.py info in.xlsx
-kowork-python scripts/sheets.py add in.xlsx -o out.xlsx --name Q3 --index 1
+kowork-python scripts/sheets.py add in.xlsx -o out.xlsx --name Q3 --to 1
 kowork-python scripts/sheets.py rename in.xlsx -o out.xlsx --sheet Sheet1 --to Summary
-kowork-python scripts/sheets.py remove in.xlsx -o out.xlsx --sheet Draft
-kowork-python scripts/sheets.py move in.xlsx -o out.xlsx --sheet Summary --to-index 0
-kowork-python scripts/sheets.py copy in.xlsx -o out.xlsx --sheet Template --to Q4
+kowork-python scripts/sheets.py delete in.xlsx -o out.xlsx --sheet Draft
+kowork-python scripts/sheets.py move in.xlsx -o out.xlsx --sheet Summary --to 1
+kowork-python scripts/sheets.py duplicate in.xlsx -o out.xlsx --sheet Template --to Q4
 kowork-python scripts/sheets.py from-csv data.csv -o out.xlsx
 kowork-python scripts/sheets.py from-csv data.csv -o out.xlsx --into book.xlsx --sheet Imported --text-columns A
 ```
+
+All sheet positions are **1-based**, including `--to` for `add`/`move` and
+numeric `--sheet` selections. Insertion at 1 prepends; omitting `--to` on `add`
+appends. For `rename`/`duplicate`, `--to` is a sheet name.
 
 `info` prints the sheet names (and which is active) and, per sheet, the used range,
 dimensions, merged ranges, freeze panes, and chart/image counts, plus any defined
 names. `from-csv` builds a new workbook from a CSV, or appends it as a sheet to an
 existing workbook with `--into`; pass `--text-columns A,C` (letters or 1-based
 indices) to keep those columns as text (IDs, zip codes, leading zeros), while the
-rest coerce to numbers. `--sheet` accepts a name or a 1-based index. `copy`
+rest coerce to numbers. `--sheet` accepts a name or a 1-based index. `duplicate`
 duplicates a sheet's cell values and styles **but not its charts, images, data
 validations, or conditional formatting** (an openpyxl limit) and warns when the
 source has any.
@@ -231,5 +259,6 @@ a soundness/error smoke test, not a content or schema checker (no XSD validation
   editor, so saving an edited workbook can drop pivot tables, slicers, form
   controls, VBA, and some chart types. The mutating scripts warn when the input
   holds such parts; edit a copy and verify with `validate.py`.
-- **`.xlsm` is read-only.** Macros are never authored or executed, and every
-  mutating command refuses to write `.xlsm`/`.xltm` (save a plain `.xlsx`).
+- **Macro and template formats are input-only.** Read `.xlsm`/`.xltx` when
+  needed, but write every created or edited result as `.xlsx`. Macros are never
+  authored or executed.

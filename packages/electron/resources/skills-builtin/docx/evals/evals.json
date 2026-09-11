@@ -9,7 +9,8 @@
       "expectations": [
         "A new .docx file is produced",
         "The file is a valid OOXML package: it opens as a zip containing word/document.xml and validate.py reports it valid",
-        "The create path was used (docx-js via node / create_docx.cjs), not a hand-assembled zip",
+        "The create path was used: create_docx.cjs copied into a uniquely named task directory with a random suffix inside the exact pre-approved session temporary directory from the Bash tool instructions (not the user's folder), edited for docx-js, and run via kowork-node — not a hand-assembled zip",
+        "The working script is retained for later revisions in the same session, including after app restarts",
         "The document contains a title, a table with exactly 3 rows, and a bulleted list with 3 items",
         "No python-docx, pandoc, LibreOffice/soffice, or other system tools were used"
       ]

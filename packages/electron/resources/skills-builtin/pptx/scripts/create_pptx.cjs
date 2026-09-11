@@ -1,17 +1,21 @@
 // Authoring template for creating a .pptx with pptxgenjs (the `pptxgenjs` npm
-// package, pre-bundled in Kowork and resolvable via NODE_PATH). Copy this into a
-// temp directory (never the user's folder), edit the copy, and run it, writing
-// the deck to the path the user wants:
+// package, pre-bundled in Kowork and resolvable via NODE_PATH).
+// Copy this into a uniquely named task directory with a random suffix inside
+// the exact pre-approved session temporary directory shown in the Bash tool
+// instructions (never the user's folder). Copy that path in full, exactly as
+// shown; do not reconstruct it or derive it from environment variables. Keep
+// every working file inside the task directory. Edit the copy and run it,
+// writing the final file to the path the user wants:
 //
 //     kowork-node create_pptx.cjs out.pptx
 //
-// It runs from a temp directory (never the user's folder); the copy is kept
-// there after a successful write so you can edit it and re-run to revise the
-// deck in the same session (the OS reclaims temp later). Use the .cjs extension
-// so `require` works even when the surrounding project is an ES module
-// ("type": "module" in package.json). This file is intentionally standalone: it
-// does NOT import the skill's Python helpers (pptxutil.py); pptxgenjs is the only
-// dependency.
+// The directory is scoped to the current task/session. The copy stays there
+// after a successful write, so you can edit and re-run it when that same task
+// resumes after an app restart (the OS reclaims temp eventually). Use the .cjs
+// extension so `require` works even when the surrounding project is an ES
+// module ("type": "module" in package.json). This file is intentionally
+// standalone: it does NOT import the skill's Python helpers (pptxutil.py);
+// pptxgenjs is the only dependency.
 //
 // Slide size: pptxgenjs ships four layouts; pick one and the whole deck scales to
 // it. Dimensions are width x height in inches:
@@ -36,13 +40,12 @@
 //   - Shadow `offset` must be non-negative.
 //
 // Image note: the tiny inline PNG below keeps this file self-contained. For a real
-// image, read the bytes with fs.readFileSync("photo.png") and pass them as a data
+// image, read the bytes from an absolute path with fs.readFileSync() and pass them as a data
 // URL: { data: "image/png;base64," + buf.toString("base64") } (or { path: "..." }).
 // pptxgenjs sizes images by width/height in INCHES and does not preserve aspect
 // ratio for you: read the pixel size first and derive one dimension from the other
-// so it isn't stretched. The bundled runtime has `image-size`
-// (require("image-size")) for Node, and Pillow for Python
-// (kowork-python -c "from PIL import Image; print(Image.open('photo.png').size)").
+// so it isn't stretched. Use Pillow through the bundled Python runtime
+// (kowork-python -c "from PIL import Image; print(Image.open('/absolute/path/photo.png').size)").
 
 const fs = require("fs");
 const path = require("path");
@@ -174,14 +177,15 @@ function bodyCell(text, rowIndex, align) {
 
 // --- Deck ------------------------------------------------------------------
 
-const outPath = process.argv[2] || "presentation.pptx";
+const outPath = process.argv[2] || "output.pptx";
 
 const outExt = path.extname(outPath).toLowerCase();
-if (outExt === ".pptm" || outExt === ".potm" || outExt === ".ppsm") {
-  console.error(
-    `error: refusing to write a macro-enabled presentation (${outExt}); macros are ` +
-      "never authored here. Write a .pptx instead.",
-  );
+if (outExt !== ".pptx") {
+  const reason =
+    outExt === ".pptm" || outExt === ".potm" || outExt === ".ppsm"
+      ? `refusing to write a macro-enabled presentation (${outExt}); macros are never authored here. Write a .pptx instead.`
+      : `output must use the .pptx extension: ${outPath}`;
+  console.error(`error: ${reason}`);
   process.exit(1);
 }
 
@@ -486,7 +490,7 @@ imageSlide.addText(
     { text: "Drop in a real image", options: { bold: true, breakLine: true } },
     {
       text:
-        'Replace PNG_BASE64 with fs.readFileSync("photo.png"), then size it by ' +
+        'Replace PNG_BASE64 with fs.readFileSync("/absolute/path/photo.png"), then size it by ' +
         "reading the pixel dimensions and keeping the aspect ratio so it is not stretched.",
       options: { color: COLOR.muted },
     },

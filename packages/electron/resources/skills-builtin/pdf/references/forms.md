@@ -1,27 +1,38 @@
 # Filling flat (non-interactive) PDF forms
 
 Reference detail deferred from `SKILL.md`. Read this before authoring a
-`fields.json`. A **flat form** has no AcroForm fields (`forms.py inspect` reports
+`fields.json`. A **flat form** has no AcroForm fields (`forms.py info` reports
 "no fillable form fields") — it is just printed labels and rule lines. To "fill"
 it you stamp text onto the page at the right positions. That is the overlay
-workflow, all via `scripts/forms.py` (plus `render.py` to look at the page).
+workflow, all via `scripts/forms.py` (plus `scripts/render.py` to look at the
+page). Create a unique task directory as described in `SKILL.md` and keep all
+JSON files and preview images inside it.
 
 ## The loop
 
-1. **Find positions.** `forms.py structure in.pdf -o structure.json` extracts,
-   per page, in **PDF points (origin bottom-left)**:
+1. **Find positions.** Run
+   `kowork-python scripts/forms.py structure in.pdf -o <task-temp-dir>/structure.json`.
+   It extracts, per page, in **PDF points (origin bottom-left)**:
    - `labels` — words with their boxes (`[x0,y0,x1,y1]`);
    - `lines` — horizontal rule lines / underlines (`x0`, `x1`, `y`, `length`);
    - `checkboxes` — small near-square rectangles (`box` + `center`).
-     Also render the page and **Read the image** to see the layout:
-     `render.py in.pdf prev/ --pages 1`, then Read `prev/page_001.png`.
-2. **Author `fields.json`** describing the text to stamp and where (schema below).
-3. **Validate the boxes.** `forms.py check-boxes fields.json` flags overlapping
-   boxes and boxes too small for their font. Fix and re-run until it prints `OK`.
-4. **Stamp.** `forms.py overlay in.pdf fields.json -o out.pdf`.
-5. **Verify.** `forms.py preview-boxes in.pdf fields.json prev/` draws each box on
-   a render so you can Read it and confirm placement; and/or `render.py out.pdf`
-   - Read to see the stamped result. Then `validate.py out.pdf`.
+     Also render the page and **Read the image** to see the layout with
+     `kowork-python scripts/render.py in.pdf <task-temp-dir>/preview/ --pages 1`,
+     then Read `<task-temp-dir>/preview/page_001.png`.
+2. **Author `<task-temp-dir>/fields.json`** describing the text to stamp and where
+   (schema below).
+3. **Validate the boxes.** Run
+   `kowork-python scripts/forms.py check-boxes <task-temp-dir>/fields.json` to flag
+   overlapping boxes and boxes too small for their font. Fix and re-run until it
+   prints `OK`.
+4. **Stamp.** Run
+   `kowork-python scripts/forms.py overlay in.pdf <task-temp-dir>/fields.json -o out.pdf`.
+5. **Verify.** Run
+   `kowork-python scripts/forms.py preview-boxes in.pdf <task-temp-dir>/fields.json <task-temp-dir>/preview/`
+   to draw each box on a render so you can Read it and confirm placement. Then
+   render the final output with
+   `kowork-python scripts/render.py out.pdf <task-temp-dir>/final-preview/`, Read
+   the result, and run `kowork-python scripts/validate.py out.pdf`.
 
 ## Coordinate systems
 
