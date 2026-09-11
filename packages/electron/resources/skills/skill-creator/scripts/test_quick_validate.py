@@ -45,6 +45,15 @@ class QuickValidateTests(TestCase):
             "referenced package path does not exist: scripts/format_notes.py", errors
         )
 
+    def test_rejects_values_over_kowork_limits(self) -> None:
+        name = "a" * 65
+        errors = self.validate(
+            name,
+            f"---\nname: {name}\ndescription: {'x' * 1025}\n---\n",
+        )
+        self.assertIn("name must be no more than 64 characters", errors)
+        self.assertIn("description must be no more than 1024 characters", errors)
+
 
 if __name__ == "__main__":
     main()

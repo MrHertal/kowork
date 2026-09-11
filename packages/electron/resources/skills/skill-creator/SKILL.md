@@ -80,7 +80,7 @@ in prose instead of inventing a filename.
 `meeting-notes-formatter`. Kowork treats this identifier as exact and
 case-sensitive: use only lowercase letters and digits separated by single
 hyphens, with no leading, trailing, or repeated hyphens. It must exactly match
-the folder containing `SKILL.md`. Keep an existing valid name unchanged unless
+the folder containing `SKILL.md` and may be at most 64 characters. Keep an existing valid name unchanged unless
 the user explicitly asks to rename the skill.
 
 **The description is the most important line you'll write.** Here's why: up front, Kowork only shows the agent the name and description — not the body. The agent reads that description to decide whether to open the skill and follow it at all. So the description has to do two jobs at once: (1) say plainly what the skill does, and (2) name the concrete situations, request types, and phrasings that should switch it on. Put **all** the "when to use this" cues here — never bury them in the body, because the body isn't seen until the skill has already been chosen.
@@ -90,6 +90,11 @@ the user explicitly asks to rename the skill.
 implicit-invocation policy from a custom skill package. Do not create or copy
 those fields when building a Kowork skill. The `name` and `description` in
 `SKILL.md` are the discovery interface Kowork uses.
+
+Kowork requires the description to contain 1–1024 characters. There is no
+separate UI-description length rule for custom skills. Prefer the shortest
+description that still distinguishes the skill and includes the trigger cues
+needed for reliable discovery.
 
 **Lean toward getting used.** A skill that never activates is useless, and the more common mistake is a skill sitting idle when it should have helped. So make the description a little assertive about when to apply, and name the trigger situations generously.
 

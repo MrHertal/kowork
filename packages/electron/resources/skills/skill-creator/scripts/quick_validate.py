@@ -81,8 +81,12 @@ def validate_skill(skill_dir: Path) -> list[str]:
             errors.append(
                 f"name must match its folder ({skill_dir.name!r})"
             )
+        if len(fields["name"]) > 64:
+            errors.append("name must be no more than 64 characters")
     if not fields.get("description", "").strip():
         errors.append("frontmatter description must not be empty")
+    elif len(fields["description"]) > 1024:
+        errors.append("description must be no more than 1024 characters")
 
     referenced_paths = set(PACKAGE_PATH.findall(body))
     for target in MARKDOWN_LINK.findall(body):
