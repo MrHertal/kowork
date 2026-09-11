@@ -48,7 +48,7 @@ You don't need everything perfect up front. Gather enough to write a solid first
 
 **The shape of a SKILL.md.** It has two parts:
 
-1. A small header block at the very top, written in YAML (a simple `field: value` format) between `---` fences. It requires `name` and `description`. Kowork also recognizes optional `license`, `compatibility`, and `metadata` fields. `metadata` must be a map of string keys to string values. Use these optional fields only when they carry information another tool or person will actually use; they do not replace the required description or configure Kowork's UI.
+1. A small header block at the very top, written in YAML (a simple `field: value` format) between `---` fences. It requires `name` and `description`. For portability, a skill may also include the Agent Skills fields `license`, `compatibility`, and `metadata`; `metadata` must be a map of string keys to string values. Kowork tolerates but does not use these optional fields. Include them only when another compatible tool or person will use them; they do not replace the required description or configure Kowork's UI.
 2. Below the header, the body — plain Markdown instructions written to the agent, telling it how to do the task.
 
 **The skill folder can contain supporting material.** `SKILL.md` is the only
