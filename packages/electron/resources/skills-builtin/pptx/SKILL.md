@@ -29,6 +29,13 @@ give at most one brief progress update in user-facing terms. By default, the
 final response should state the outcome first, identify any delivered file, and
 summarize only useful results without an unsolicited offer or follow-up question.
 
+The current working directory is the task's output location. Unless the user
+explicitly requests another directory, write every final deliverable there; a
+requested filename without a directory is relative to the current working
+directory. Use the pre-approved temporary directory only for helper scripts,
+intermediate files, previews, unpacked content, and validation artifacts. Never
+write a final deliverable there.
+
 After final validation succeeds for any create or edit, call `present_files`
 exactly once with every final user-facing output path.
 Never call it for read-only or summarization work, and never pass temporary files,
@@ -85,25 +92,27 @@ script. Create a **uniquely named task directory with a random suffix inside the
 exact pre-approved temporary directory shown in the Bash tool instructions —
 never in the user's folder**. Copy that pre-approved path in full, exactly as
 shown — never shorten or reconstruct it. Use that task directory
-(`<task-temp-dir>`) for every working file. Do not work directly in the
+(`<task-temp-dir>`) for every temporary working file. Do not work directly in the
 pre-approved directory, derive another path from environment variables, or
 create a sibling directory.
-The pre-approved directory is scoped to the current task/session and remains
+The pre-approved directory is scoped to the current task and remains
 available when that same task resumes after an app restart.
 Use absolute paths for any source assets referenced by the copied template so
 they do not resolve against the user's working directory.
 
 1. Copy `scripts/create_pptx.cjs` into that task directory and edit the
    copy to build the requested slides.
-2. Run the copy, writing the deck to the path the user asked for:
+2. Run the copy, writing the final deck to the path the user asked for, or to
+   the current working directory when the user gave only a filename or no
+   output path:
 
    ```sh
-   kowork-node <task-temp-dir>/create_pptx.cjs "/path/the/user/wants/out.pptx"
+   kowork-node <task-temp-dir>/create_pptx.cjs <current-working-directory>/out.pptx
    ```
 
 3. Validate the result (see Validate). If it fails, fix and re-run; do not hand
    back an unvalidated file.
-4. Keep that working copy in the task directory for the current task/session;
+4. Keep that working copy in the task directory for the current task;
    it remains available when that same task resumes after an app restart. To
    revise a deck you generated in this task, re-edit this script and re-run it
    rather than rebuilding from scratch. (For a deck you did **not** generate
