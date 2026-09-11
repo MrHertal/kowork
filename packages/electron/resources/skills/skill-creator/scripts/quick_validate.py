@@ -66,9 +66,9 @@ def validate_skill(skill_dir: Path) -> list[str]:
     except (OSError, UnicodeError, ValueError) as error:
         return [str(error)]
 
-    if "name" not in fields:
-        errors.append("frontmatter is missing name")
-    elif fields["name"]:
+    if not fields.get("name", "").strip():
+        errors.append("frontmatter name must not be empty")
+    else:
         if not SKILL_NAME.fullmatch(fields["name"]):
             errors.append(
                 "name must use lowercase letters or digits separated by single hyphens"
@@ -77,8 +77,8 @@ def validate_skill(skill_dir: Path) -> list[str]:
             errors.append(
                 f"name must match its folder ({skill_dir.name!r})"
             )
-    if "description" not in fields:
-        errors.append("frontmatter is missing description")
+    if not fields.get("description", "").strip():
+        errors.append("frontmatter description must not be empty")
     return errors
 
 
