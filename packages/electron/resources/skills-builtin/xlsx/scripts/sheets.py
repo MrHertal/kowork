@@ -2,9 +2,9 @@
 """Workbook and sheet structure + metadata for .xlsx files, with openpyxl.
 
 One tool with a subcommand per operation. ``info`` is a read-only structural
-summary; the rest add, rename, remove, move, copy, or import-from-CSV a sheet and
-write the result to a new file. This script owns sheet-level structure only --
-editing cell values, rows/columns, and styles lives in edit_xlsx.py.
+summary; the rest add, rename, delete, move, duplicate, or import-from-CSV a
+sheet and write the result to a new file. This script owns sheet-level structure
+only -- editing cell values, rows/columns, and styles lives in edit_xlsx.py.
 
 Rules (consistent across the xlsx skill):
   * Mutating subcommands always write to -o; they never edit in place, and they
@@ -19,13 +19,12 @@ Usage:
     kowork-python sheets.py info <in.xlsx>
     kowork-python sheets.py add <in.xlsx> -o <out.xlsx> --name NAME [--to N]
     kowork-python sheets.py rename <in.xlsx> -o <out.xlsx> --sheet OLD --to NEW
-    kowork-python sheets.py remove <in.xlsx> -o <out.xlsx> --sheet NAME
+    kowork-python sheets.py delete <in.xlsx> -o <out.xlsx> --sheet NAME
     kowork-python sheets.py move <in.xlsx> -o <out.xlsx> --sheet NAME --to N
-    kowork-python sheets.py copy <in.xlsx> -o <out.xlsx> --sheet NAME [--to NEWNAME]
+    kowork-python sheets.py duplicate <in.xlsx> -o <out.xlsx> --sheet NAME [--to NEWNAME]
     kowork-python sheets.py from-csv <in.csv> -o <out.xlsx> [--into existing.xlsx] [--sheet NAME] [--delimiter ,] [--text-columns A,C]
 
-Sheet positions passed with --to are 1-based. Legacy --index and --to-index
-remain available with their original 0-based semantics.
+Sheet positions passed with --to are 1-based.
 """
 
 from __future__ import annotations

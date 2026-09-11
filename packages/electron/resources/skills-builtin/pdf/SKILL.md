@@ -154,12 +154,13 @@ kowork-python scripts/pages.py decrypt in.pdf -o out.pdf --password PW
 `--pages` selections use `1-3,5` (1-based). `reorder --order` is an explicit
 sequence and may repeat or omit pages. `rotate --degrees` is a multiple of 90,
 applied clockwise relative to the page's current rotation (negative for
-counter-clockwise), matching the image skill. `crop --box` is `L,B,R,T` in
-PDF points (origin bottom-left). `watermark` overlays the stamp PDF's first page
-on top of each page (`--under` puts it behind); transparency comes from the
-stamp itself, so make a see-through stamp with `create_pdf.py`. `encrypt` uses
-AES-256 and `--owner` defaults to the user password. **An encrypted input to any
-other operation fails** — run `decrypt` first.
+counter-clockwise). This is the opposite sign convention from the image skill,
+where positive angles rotate counter-clockwise. `crop --box` is `L,B,R,T` in PDF
+points (origin bottom-left). `watermark` overlays the stamp PDF's first page on
+top of each page (`--under` puts it behind); transparency comes from the stamp
+itself, so make a see-through stamp with `create_pdf.py`. `encrypt` uses AES-256
+and `--owner` defaults to the user password. **An encrypted input to any other
+operation fails** — run `decrypt` first.
 
 Validate every output PDF after a page operation. For `split`, validate each
 generated PDF. For an encrypted output, pass its user password:

@@ -5,10 +5,10 @@ description: >-
   and bridge them to and from CSV. Use whenever the user wants to build a workbook
   from data; read, summarize, or extract cell/range/sheet values; set values or
   formulas; add, format, or compute a column; insert or delete rows or columns;
-  style cells (fonts, fills, number formats, widths); add/rename/remove/move/copy
+  style cells (fonts, fills, number formats, widths); add/rename/delete/move/duplicate
   sheets; inspect a workbook's structure; make a chart; or convert between .xlsx
   and .csv. Triggers on any mention of a spreadsheet, Excel, or a
-  .xlsx/.xlsm/.xltx/.xltm/.csv file, even without the word "xlsx".
+  .xlsx/.xlsm/.xltx/.csv file, even without the word "xlsx".
 ---
 
 # Working with Excel (.xlsx) files
@@ -69,7 +69,7 @@ colors; configure workbook themes separately from explicit cell styles.
 | Make a new workbook                                                        | **Create**             |
 | Read / summarize / extract cell, range, or sheet values                    | **Read**               |
 | Set values/formulas, insert/delete rows or columns, style, formats, widths | **Edit**               |
-| Add/rename/remove/move/copy sheets; inspect structure; import a CSV        | **Sheets & structure** |
+| Add/rename/delete/move/duplicate sheets; inspect structure; import a CSV  | **Sheets & structure** |
 | Convert a sheet to CSV, or build a workbook from a CSV                     | **Read** / **Sheets**  |
 | Decide between a live formula and a fixed number                           | **Formulas**           |
 | Confirm a workbook is sound                                                | **Validate**           |
@@ -198,10 +198,7 @@ kowork-python scripts/sheets.py from-csv data.csv -o out.xlsx --into book.xlsx -
 
 All sheet positions are **1-based**, including `--to` for `add`/`move` and
 numeric `--sheet` selections. Insertion at 1 prepends; omitting `--to` on `add`
-appends. For `rename`/`duplicate`, `--to` is a sheet name. Legacy aliases remain
-available: `remove` for `delete` and `copy` for `duplicate`. Legacy `--index`
-and `--to-index` remain **0-based**; use the new 1-based `--to` forms for
-consistent sheet positions.
+appends. For `rename`/`duplicate`, `--to` is a sheet name.
 
 `info` prints the sheet names (and which is active) and, per sheet, the used range,
 dimensions, merged ranges, freeze panes, and chart/image counts, plus any defined

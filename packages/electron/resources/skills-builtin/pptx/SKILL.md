@@ -6,8 +6,8 @@ description: >-
   summarize, or extract slide titles, body text, tables, or speaker notes; edit
   a slide template by hand; reorder, duplicate, delete, add, or clean up whole
   slides; or check a deck's layout. Triggers on any mention of a presentation,
-  deck, slides, slideshow, or a .pptx/.pptm/.potx/.potm/.ppsx/.ppsm file, even
-  without the word "pptx".
+  deck, slides, slideshow, or a .pptx/.pptm/.potx/.ppsx file, even without the
+  word "pptx".
 ---
 
 # Working with PowerPoint (.pptx) presentations
@@ -196,9 +196,10 @@ failures; **unresolved geometry** and **tight margins** (content within 0.25" of
 an edge) are reported as info and never fail on their own. It prints `OK: ...` or
 `FAILED: ...` and exits non-zero on failure. There is no XSD validation (schemas
 are not bundled) and no recalculation or rendering — run it on the final file,
-then deliver it after validation succeeds. Visual review in PowerPoint or
-Keynote is optional user review, not a prerequisite for delivery. Do not claim
-that structural validation verifies the rendered appearance.
+then open the deck in PowerPoint or Keynote for visual QA when a viewer is
+available. If no viewer is available, state plainly when delivering the deck
+that its appearance was not visually verified. Never imply that structural
+validation verifies the rendered appearance.
 
 ## Limitations (state plainly to the user)
 
