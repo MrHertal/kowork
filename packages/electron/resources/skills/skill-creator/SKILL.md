@@ -119,6 +119,11 @@ dependencies and works with `kowork-python`:
 kowork-python scripts/quick_validate.py /absolute/path/to/skill-folder
 ```
 
+This checks the required frontmatter, the skill name and folder, and local
+package paths mentioned by the instructions. Also run every new or changed
+helper on a representative safe input. Validation confirms that the package is
+coherent; it does not prove that the instructions produce a useful result.
+
 ## Improve an existing skill
 
 Sometimes the user doesn't want a new skill — they want to fix or upgrade one they already have.

@@ -10,6 +10,10 @@ from pathlib import Path
 
 FRONTMATTER_BOUNDARY = "---"
 SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+PACKAGE_PATH = re.compile(
+    r"`((?:scripts|references|assets|tasks|workflows|routing|features|troubleshooting)/[A-Za-z0-9._/-]+)`"
+)
 
 
 def read_frontmatter(skill_md: Path) -> tuple[dict[str, str], str]:
@@ -62,7 +66,7 @@ def validate_skill(skill_dir: Path) -> list[str]:
         return ["SKILL.md not found"]
 
     try:
-        fields, _body = read_frontmatter(skill_md)
+        fields, body = read_frontmatter(skill_md)
     except (OSError, UnicodeError, ValueError) as error:
         return [str(error)]
 
@@ -79,6 +83,17 @@ def validate_skill(skill_dir: Path) -> list[str]:
             )
     if not fields.get("description", "").strip():
         errors.append("frontmatter description must not be empty")
+
+    referenced_paths = set(PACKAGE_PATH.findall(body))
+    for target in MARKDOWN_LINK.findall(body):
+        path_text = target.split("#", 1)[0].strip()
+        if not path_text or "://" in path_text or path_text.startswith(("#", "/")):
+            continue
+        referenced_paths.add(path_text)
+
+    for relative_path in sorted(referenced_paths):
+        if not (skill_dir / relative_path).exists():
+            errors.append(f"referenced package path does not exist: {relative_path}")
     return errors
 
 

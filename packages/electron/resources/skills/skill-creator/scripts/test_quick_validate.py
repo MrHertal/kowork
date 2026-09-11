@@ -31,6 +31,20 @@ class QuickValidateTests(TestCase):
         self.assertIn("frontmatter name must not be empty", errors)
         self.assertIn("frontmatter description must not be empty", errors)
 
+    def test_rejects_missing_package_references(self) -> None:
+        errors = self.validate(
+            "meeting-notes",
+            "---\nname: meeting-notes\ndescription: Format notes\n---\n"
+            "Run `scripts/format_notes.py` and read "
+            "[the rules](references/rules.md).\n",
+        )
+        self.assertIn(
+            "referenced package path does not exist: references/rules.md", errors
+        )
+        self.assertIn(
+            "referenced package path does not exist: scripts/format_notes.py", errors
+        )
+
 
 if __name__ == "__main__":
     main()
