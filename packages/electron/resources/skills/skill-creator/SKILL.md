@@ -59,10 +59,8 @@ include:
 - `scripts/` for reusable, deterministic helpers.
 - `references/` for details the agent reads only when relevant.
 - `assets/` for non-instruction files consumed by the skill or copied into its
-  output, such as templates, images, fonts, icons, and starter files. Keep UI
-  artwork here too when the environment has metadata that refers to an icon.
-  Do not read assets into context as instructions unless the task requires
-  inspecting them.
+  output, such as templates, images, fonts, and starter files. Do not read
+  assets into context as instructions unless the task requires inspecting them.
 
 Those names are conventions, not an exhaustive schema. A larger skill may use
 clear purpose-specific folders such as `tasks/`, `workflows/`, `routing/`,
