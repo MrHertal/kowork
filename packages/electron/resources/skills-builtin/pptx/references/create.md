@@ -173,7 +173,7 @@ slide.addImage({
 
 // Fit inside a box without distortion:
 slide.addImage({
-  path: "logo.png",
+  path: "/absolute/path/logo.png",
   x: 0.6,
   y: 2,
   w: 3,
@@ -283,7 +283,7 @@ so use one of:
 
 1. **Native shapes** — draw the motif with pptxgenjs (a filled `ellipse` plus a
    glyph, a small `rect` accent). Always works; the template does this.
-2. **Embed an SVG** — `addImage({ path: "icon.svg", ... })` renders in Microsoft
+2. **Embed an SVG** — `addImage({ path: "/absolute/path/icon.svg", ... })` renders in Microsoft
    365 / current PowerPoint / Keynote. Legacy PowerPoint may not show it, so a PNG
    is the universal fallback.
 3. **Bring a PNG** — size it from its pixel dimensions (above) so it isn't

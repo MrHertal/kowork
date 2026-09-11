@@ -38,6 +38,8 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 WIDTH, HEIGHT = 1200, 630  # standard social-card size
+FONT = {"head": None, "body": None}  # absolute TrueType paths; None uses the bundled font
+SIZE = {"title": 64, "subtitle": 28}  # pixels
 
 TOP_COLOR = (26, 34, 64)
 BOTTOM_COLOR = (74, 108, 178)
@@ -141,8 +143,8 @@ def build_image() -> Image.Image:
 
     # The default font scales with size (Pillow bundles freetype); for a
     # specific look use ImageFont.truetype("/path/to/font.ttf", size) instead.
-    title_font = ImageFont.load_default(64)
-    subtitle_font = ImageFont.load_default(28)
+    title_font = ImageFont.truetype(FONT["head"], SIZE["title"]) if FONT["head"] else ImageFont.load_default(SIZE["title"])
+    subtitle_font = ImageFont.truetype(FONT["body"], SIZE["subtitle"]) if FONT["body"] else ImageFont.load_default(SIZE["subtitle"])
     draw.text((cx, 405), "Your Title Here", font=title_font, fill=TITLE_COLOR, anchor="mm")
     draw.text(
         (cx, 465),

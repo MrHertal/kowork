@@ -46,6 +46,19 @@ versions. If validation or `present_files` fails, do not claim the PDF is ready.
   and use non-zero exit codes. File-editing commands write a **new** output with
   `-o`; directory-producing commands take an explicit output directory.
 
+## Styling
+
+For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
+brand or reference styling: the same palette, heading/body font roles, and
+visual hierarchy. Preserve existing styling when editing unless asked to restyle.
+When no reference is supplied, choose a readable, restrained style suited to the
+content; template defaults are fallbacks, not a required brand. Keep text
+legible, contrast strong, spacing consistent, and emphasis selective.
+Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
+number formats and input/formula colors. Configure reusable colors, fonts, and
+sizes near the top of the creation script. Use fonts the runtime can access;
+when an exact font is unavailable, use a consistent available substitute.
+
 ## Choose the path
 
 | Request                                                                   | Path                                  |
@@ -87,6 +100,9 @@ they do not resolve against the user's working directory.
    days later, re-edit this script and re-run it rather than rebuilding from
    scratch. The task directory is never beside the user's file, and the OS
    reclaims it eventually.
+
+Set `FONT`, `SIZE`, and the color constants at the top to restyle the PDF.
+Custom fonts must be registered with reportlab before use.
 
 The template covers a document title, two heading levels, paragraphs, a bulleted
 and a numbered list, a styled table, an inline image, and a "Page N of M"
@@ -133,7 +149,8 @@ kowork-python scripts/pages.py decrypt in.pdf -o out.pdf --password PW
 
 `--pages` selections use `1-3,5` (1-based). `reorder --order` is an explicit
 sequence and may repeat or omit pages. `rotate --degrees` is a multiple of 90,
-applied relative to the page's current rotation. `crop --box` is `L,B,R,T` in
+applied clockwise relative to the page's current rotation (negative for
+counter-clockwise), matching the image skill. `crop --box` is `L,B,R,T` in
 PDF points (origin bottom-left). `watermark` overlays the stamp PDF's first page
 on top of each page (`--under` puts it behind); transparency comes from the
 stamp itself, so make a see-through stamp with `create_pdf.py`. `encrypt` uses

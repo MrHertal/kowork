@@ -56,6 +56,8 @@ from reportlab.platypus import (
 HEADER_FILL = colors.HexColor("#34507a")
 ROW_STRIPE = colors.HexColor("#eef1f6")
 BULLET_FONT = "Vera"
+FONT = {"head": "Helvetica-Bold", "body": "Helvetica"}  # register custom fonts before use
+SIZE = {"title": 18, "heading1": 18, "heading2": 14, "body": 10, "caption": 9}
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -83,7 +85,7 @@ class NumberedCanvas(canvas.Canvas):
         super().save()
 
     def _draw_footer(self, total: int) -> None:
-        self.setFont("Helvetica", 9)
+        self.setFont(FONT["body"], SIZE["caption"])
         self.setFillColor(colors.grey)
         self.drawCentredString(
             self._pagesize[0] / 2.0,
@@ -121,6 +123,15 @@ def register_bullet_font() -> str:
 def build_story() -> list:
     """The document content. Edit this list to change what the PDF contains."""
     styles = getSampleStyleSheet()
+    for name, role, size in (
+        ("Title", "head", "title"),
+        ("Heading1", "head", "heading1"),
+        ("Heading2", "head", "heading2"),
+        ("BodyText", "body", "body"),
+    ):
+        styles[name].fontName = FONT[role]
+        styles[name].fontSize = SIZE[size]
+        styles[name].leading = SIZE[size] * 1.2
     body = styles["BodyText"]
     bullet_font = register_bullet_font()
 
@@ -135,7 +146,9 @@ def build_story() -> list:
             [
                 ("BACKGROUND", (0, 0), (-1, 0), HEADER_FILL),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTNAME", (0, 0), (-1, -1), FONT["body"]),
+                ("FONTSIZE", (0, 0), (-1, -1), SIZE["body"]),
+                ("FONTNAME", (0, 0), (-1, 0), FONT["head"]),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, ROW_STRIPE]),
                 ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
                 ("ALIGN", (1, 0), (-1, -1), "RIGHT"),

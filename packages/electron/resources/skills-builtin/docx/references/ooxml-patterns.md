@@ -66,8 +66,9 @@ space is lost on the next save. Easy to forget when splitting runs.
 
 - Escape `&`, `<`, `>` as `&amp;`, `&lt;`, `&gt;` in text (lxml does this for
   you when you set `.text`; only matters if you assemble XML by hand).
-- Word stores curly quotes/dashes as literal Unicode characters (U+2018/2019,
-  U+201C/201D, U+2013/2014), not entities. Write them directly as UTF-8.
+- Write curly quotes/dashes directly as UTF-8 (U+2018/2019, U+201C/201D,
+  U+2013/2014). XML numeric entities are also accepted and represent the same
+  characters, as in the PPTX skill.
 - A line break inside a paragraph is `<w:br/>`; a tab is `<w:tab/>`. A new
   paragraph is a new `w:p`, never `\n` inside a `w:t`.
 

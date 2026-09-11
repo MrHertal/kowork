@@ -156,7 +156,8 @@ def do_rotate(im: Image.Image, args: argparse.Namespace) -> tuple[Image.Image, s
             math.ceil(im.width * cos + im.height * sin),
             math.ceil(im.width * sin + im.height * cos),
         )
-    out = im.rotate(degrees, resample=Image.Resampling.BICUBIC, expand=args.expand, fillcolor=fill)
+    # Pillow uses counter-clockwise angles; the skill CLI matches PDF's clockwise convention.
+    out = im.rotate(-degrees, resample=Image.Resampling.BICUBIC, expand=args.expand, fillcolor=fill)
     expanded = " (canvas expanded)" if args.expand else ""
     return out, note, f"rotated {degrees:g} degrees{expanded}, {im.width}x{im.height} -> {out.width}x{out.height}"
 
@@ -196,7 +197,7 @@ def build_parser() -> argparse.ArgumentParser:
     rotp = sub.add_parser("rotate", help="rotate by an arbitrary angle (multiples of 90 are exact)")
     rotp.add_argument("input", help="path to the input image")
     rotp.add_argument("-o", "--out", dest="output", required=True, help="path to write to; the extension picks the format")
-    rotp.add_argument("--degrees", type=float, required=True, metavar="D", help="counter-clockwise angle")
+    rotp.add_argument("--degrees", type=float, required=True, metavar="D", help="clockwise angle (negative for counter-clockwise)")
     rotp.add_argument(
         "--expand",
         action="store_true",

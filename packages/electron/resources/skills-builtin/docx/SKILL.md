@@ -50,6 +50,19 @@ ready.
   every mutating command writes to a **new** output (never editing the input
   in place) and refuses a macro-enabled (`.docm`/`.dotm`) output.
 
+## Styling
+
+For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
+brand or reference styling: the same palette, heading/body font roles, and
+visual hierarchy. Preserve existing styling when editing unless asked to restyle.
+When no reference is supplied, choose a readable, restrained style suited to the
+content; template defaults are fallbacks, not a required brand. Keep text
+legible, contrast strong, spacing consistent, and emphasis selective.
+Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
+number formats and input/formula colors. Configure reusable colors, fonts, and
+sizes near the top of the creation script. Use fonts the runtime can access;
+when an exact font is unavailable, use a consistent available substitute.
+
 ## Choose the path
 
 | Request                                                     | Path                                 |
@@ -87,8 +100,9 @@ they do not resolve against the user's working directory.
    kowork-python scripts/validate.py "/path/the/user/wants/output.docx"
    ```
 
-   If validation fails, repair via the Edit path (unpack → fix XML → validate →
-   pack) — do not hand back an unvalidated file.
+   If validation fails, fix the copied creation script and re-run it, then
+   validate again — do not hand back an unvalidated file. Keep the script as
+   the source of truth so later revisions preserve the repairs.
 
 4. Keep that working copy in the task directory for the whole session — it
    survives app restarts: to revise a document you generated in this session,

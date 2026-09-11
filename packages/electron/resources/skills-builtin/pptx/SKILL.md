@@ -54,6 +54,19 @@ is ready.
   command writes a **new** file (`-o`) — it never edits in place — and refuses to
   write a macro-enabled (`.pptm`/`.potm`/`.ppsm`) output.
 
+## Styling
+
+For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
+brand or reference styling: the same palette, heading/body font roles, and
+visual hierarchy. Preserve existing styling when editing unless asked to restyle.
+When no reference is supplied, choose a readable, restrained style suited to the
+content; template defaults are fallbacks, not a required brand. Keep text
+legible, contrast strong, spacing consistent, and emphasis selective.
+Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
+number formats and input/formula colors. Configure reusable colors, fonts, and
+sizes near the top of the creation script. Use fonts the runtime can access;
+when an exact font is unavailable, use a consistent available substitute.
+
 ## Choose the path
 
 | Request                                                   | Path                 |
@@ -135,7 +148,7 @@ kowork-python scripts/validate.py "/path/the/user/wants/out.pptx"
 the shared `scripts/pptxutil.py` helpers (`parse_xml`, `serialize`,
 `qn("a:t")`). Mind the gotchas — bold a header with `b="1"`, one `<a:p>` per line
 or list item, edge whitespace needs `xml:space="preserve"`, and write typographic
-quotes/dashes as XML numeric entities. See `references/ooxml-patterns.md`. Adding,
+quotes/dashes directly as UTF-8 (XML numeric entities are also accepted). See `references/ooxml-patterns.md`. Adding,
 removing, or reordering **whole slides** is `slides.py`'s job (below), not hand
 editing.
 

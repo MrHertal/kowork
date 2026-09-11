@@ -34,6 +34,18 @@ class ImageScriptsTest(unittest.TestCase):
             append_images=[Image.new("RGB", (20, 20), "blue")], duration=[100, 300],
         )
 
+    def test_rotation_uses_clockwise_positive_angles(self):
+        source = self.root / "corners.png"
+        im = Image.new("RGB", (3, 2), "white")
+        im.putpixel((0, 0), (255, 0, 0))
+        im.save(source)
+        for degrees, corner in ((90, (1, 0)), (-90, (0, 2))):
+            output = self.root / f"rotated-{degrees}.png"
+            self.run_script("transform", "rotate", source, "-o", output, "--degrees", degrees, "--expand")
+            with Image.open(output) as result:
+                self.assertEqual(result.size, (2, 3))
+                self.assertEqual(result.getpixel(corner), (255, 0, 0))
+
     def test_extract_protects_source_and_later_aliases(self):
         for alias in ("direct", "symlink", "hardlink"):
             with self.subTest(alias=alias):

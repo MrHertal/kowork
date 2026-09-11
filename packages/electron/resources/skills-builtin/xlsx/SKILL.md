@@ -50,6 +50,19 @@ ready.
   and use non-zero exit codes, and every mutating
   command writes a **new** file (`-o`) — it never edits in place.
 
+## Styling
+
+For related images, documents, slides, spreadsheets, and PDFs, reuse the user's
+brand or reference styling: the same palette, heading/body font roles, and
+visual hierarchy. Preserve existing styling when editing unless asked to restyle.
+When no reference is supplied, choose a readable, restrained style suited to the
+content; template defaults are fallbacks, not a required brand. Keep text
+legible, contrast strong, spacing consistent, and emphasis selective.
+Adapt sizes and layout to the medium, and preserve meaningful spreadsheet
+number formats and input/formula colors. Configure reusable colors, fonts, and
+sizes near the top of the creation script. Use fonts the runtime can access;
+when an exact font is unavailable, use a consistent available substitute.
+
 ## Choose the path
 
 | Request                                                                    | Path                   |
@@ -170,11 +183,14 @@ kowork-python scripts/sheets.py info in.xlsx
 kowork-python scripts/sheets.py add in.xlsx -o out.xlsx --name Q3 --index 1
 kowork-python scripts/sheets.py rename in.xlsx -o out.xlsx --sheet Sheet1 --to Summary
 kowork-python scripts/sheets.py remove in.xlsx -o out.xlsx --sheet Draft
-kowork-python scripts/sheets.py move in.xlsx -o out.xlsx --sheet Summary --to-index 0
+kowork-python scripts/sheets.py move in.xlsx -o out.xlsx --sheet Summary --to-index 1
 kowork-python scripts/sheets.py copy in.xlsx -o out.xlsx --sheet Template --to Q4
 kowork-python scripts/sheets.py from-csv data.csv -o out.xlsx
 kowork-python scripts/sheets.py from-csv data.csv -o out.xlsx --into book.xlsx --sheet Imported --text-columns A
 ```
+
+All sheet positions are **1-based**, including `--index`, `--to-index`, and
+numeric `--sheet` selections. Insertion at 1 prepends; omitting `--index` appends.
 
 `info` prints the sheet names (and which is active) and, per sheet, the used range,
 dimensions, merged ranges, freeze panes, and chart/image counts, plus any defined

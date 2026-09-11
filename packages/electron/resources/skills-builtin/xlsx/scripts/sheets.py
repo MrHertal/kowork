@@ -145,10 +145,10 @@ def cmd_add(args: argparse.Namespace) -> int:
     wb = load(args.input)
     if args.name in wb.sheetnames:
         raise SheetsError(f"a sheet named {args.name!r} already exists")
-    if args.index is not None and not (0 <= args.index <= len(wb.sheetnames)):
-        raise SheetsError(f"--index {args.index} out of range 0-{len(wb.sheetnames)}")
+    if args.index is not None and not (1 <= args.index <= len(wb.sheetnames) + 1):
+        raise SheetsError(f"--index {args.index} out of range 1-{len(wb.sheetnames) + 1}")
     active_title = wb.active.title
-    wb.create_sheet(title=args.name, index=args.index)
+    wb.create_sheet(title=args.name, index=None if args.index is None else args.index - 1)
     # openpyxl tracks the active sheet by position, so inserting at or before it
     # would silently make the new sheet active; keep the original active sheet.
     keep_active(wb, active_title)
@@ -197,11 +197,11 @@ def cmd_move(args: argparse.Namespace) -> int:
     wb = load(args.input)
     ws = resolve_sheet(wb, args.sheet)
     count = len(wb.sheetnames)
-    if not (0 <= args.to_index < count):
-        raise SheetsError(f"--to-index {args.to_index} out of range 0-{count - 1}")
+    if not (1 <= args.to_index <= count):
+        raise SheetsError(f"--to-index {args.to_index} out of range 1-{count}")
     active_title = wb.active.title
     # openpyxl moves by a relative offset, so translate the absolute target.
-    offset = args.to_index - wb.sheetnames.index(ws.title)
+    offset = args.to_index - 1 - wb.sheetnames.index(ws.title)
     wb.move_sheet(ws.title, offset=offset)
     keep_active(wb, active_title)
     warn_lossy_parts(args.input)
@@ -299,7 +299,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("input", help="path to the .xlsx/.xlsm file")
     p.add_argument("-o", "--out", required=True, help="path to write the result")
     p.add_argument("--name", required=True, help="name of the new sheet")
-    p.add_argument("--index", type=int, help="0-based position (default: append at the end)")
+    p.add_argument("--index", type=int, help="1-based position (default: append at the end)")
     p.set_defaults(func=cmd_add)
 
     p = sub.add_parser("rename", help="rename a sheet")
@@ -319,7 +319,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("input", help="path to the .xlsx/.xlsm file")
     p.add_argument("-o", "--out", required=True, help="path to write the result")
     p.add_argument("--sheet", required=True, help="sheet to move (name or 1-based index)")
-    p.add_argument("--to-index", dest="to_index", type=int, required=True, help="0-based destination position")
+    p.add_argument("--to-index", dest="to_index", type=int, required=True, help="1-based destination position")
     p.set_defaults(func=cmd_move)
 
     p = sub.add_parser("copy", help="duplicate a sheet within the workbook")
