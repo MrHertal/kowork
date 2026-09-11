@@ -180,18 +180,22 @@ slide.addImage({
   h: 2,
   sizing: { type: "contain", w: 3, h: 2 },
 });
+```
 
-// Or keep the ratio yourself by reading the pixel size first:
-const { width, height } = require("image-size")(
-  require("fs").readFileSync("/absolute/path/photo.png"),
-);
+Or read the pixel size with Pillow, matching the DOCX workflow:
+
+```sh
+kowork-python -c "from PIL import Image; print(Image.open('/absolute/path/photo.png').size)"
+```
+
+Use the returned width and height to preserve the aspect ratio:
+
+```js
+const [width, height] = [1200, 800]; // replace with Pillow's actual result
 const w = 4,
   h = w * (height / width);
 slide.addImage({ path: "/absolute/path/photo.png", x: 0.6, y: 2, w, h });
 ```
-
-(Pillow via `kowork-python -c "from PIL import Image; print(Image.open('/absolute/path/photo.png').size)"`
-gives the pixel size too.)
 
 ### Background, table, chart, notes
 

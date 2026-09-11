@@ -3,8 +3,9 @@
 
 Copy this into a uniquely named task directory with a random suffix inside the
 exact pre-approved session temporary directory shown in the Bash tool
-instructions (never the user's folder), edit
-``build_image()`` to build the requested image, then run it to write the image
+instructions (never the user's folder). Copy that path in full, exactly as
+shown; do not reconstruct it or derive it from environment variables. Keep
+every working file inside the task directory. Edit ``build_image()`` to build the requested image, then run it to write the image
 to the path the user wants:
 
     kowork-python create_image.py out.png

@@ -245,7 +245,10 @@ kowork-python scripts/annotate.py text in.png -o out.png --text "SALE" --font /p
 - `text --text` draws a label (a newline draws multiple lines). The default
   font is Pillow's embedded scalable sans at 4% of the smaller dimension (min
   12 px); brand fonts need `--font /path/font.ttf` and `--size N`. `--color`
-  takes `#RRGGBB[AA]` or a named color (default white).
+  takes `#RRGGBB[AA]` or a named color (default white). Alpha goes **last**,
+  unlike XLSX's `AARRGGBB`: move its first pair to the end when reusing an
+  eight-digit spreadsheet color (`80FF0000` → `#FF000080`). Use six-digit
+  `#RRGGBB` for opaque colors.
 - Compositing happens on an RGBA copy, so semi-transparent marks and text blend
   correctly; saving to JPEG/BMP flattens onto white. EXIF orientation is baked
   in; the output gets fresh metadata. An animated input annotates as its first
@@ -314,7 +317,9 @@ image before handing it back.
 - **No SVG (vector).** Vector files can be neither read nor written.
 - **No AI image work.** No generation, background removal, inpainting, or
   upscaling beyond resampling.
-- **No OCR.** Text inside a picture cannot be extracted.
+- **No OCR.** There is no programmatic text extraction. With a vision-capable
+  model, Read the image to read or transcribe text visually, as with a scanned
+  PDF; this does not add a searchable text layer.
 - **No RAW camera formats** (.cr2, .nef, .dng, ...).
 - **Color profiles pass through unchanged** — convert.py preserves the ICC
   profile, but nothing converts between color spaces.

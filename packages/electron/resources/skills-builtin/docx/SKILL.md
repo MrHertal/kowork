@@ -117,8 +117,9 @@ an inline image, a header, and a footer with page numbers, and sets the page to
 to `11906 × 16838` for A4). It also ships Word's default typography out of the
 box — Calibri 11pt body with Word's usual paragraph spacing, Calibri Light
 headings in Word's blue accent, and a black 28pt title — driven by the `styles`
-block and the `FONT` constant at the top of the script; edit the constant to
-restyle a document. Tables use fixed DXA widths, set on both the table and each
+block and the `FONT` / `SIZE` / `COLOR` constants at the top of the script;
+edit those constants to restyle a document. `SIZE` uses points (converted to
+half-points for docx-js). Tables use fixed DXA widths, set on both the table and each
 cell, because percentage widths render unreliably in some viewers. It omits a
 table of contents by default (docx-js
 can't populate one without Word prompting to update fields on open); add one

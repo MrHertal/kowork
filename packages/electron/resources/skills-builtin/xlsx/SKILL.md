@@ -109,7 +109,9 @@ The template covers a styled header row (bold, filled, centred), data rows,
 number formats (currency and percent), live formulas (a per-row `=B*C` and a
 `=SUM(...)` total), frozen panes, column widths, a second sheet with a cross-sheet
 formula, a bar chart, and an embedded image — each editable in one obvious place.
-The default font is **Calibri 11** (change `DEFAULT_FONT_*`). The workbook is
+The default font is **Calibri 11** (change `DEFAULT_FONT_*`); the creation
+script applies it to every populated cell while preserving emphasis and colors.
+Set deliberate per-cell font exceptions after that font pass. The workbook is
 saved with the current Office theme, so charts and theme-colored elements render
 in the same colors a new Excel file uses. It refuses to write
 `.xlsm`/`.xltm`. **Prefer real formulas over Python-computed constants** so the
@@ -165,7 +167,10 @@ numbers, or anything with a leading zero (`007` stays `007`, not `7`). A value
 beginning with `-` is read as an option unless you separate it with `--`, e.g.
 `set in.xlsx -o out.xlsx --sheet Sales --cell A1 -- -5`. For columns, `--at` and
 `--col` accept a letter (`C`) or a 1-based index (`3`). Colors are `RRGGBB` or
-`AARRGGBB` hex (a leading `#` is fine); `style` changes only the attributes you
+`AARRGGBB` hex (a leading `#` is fine). Unlike the image skill's `#RRGGBBAA`, eight-digit
+colors put alpha **first** here; move the final pair to the front when reusing
+an image color (`#FF000080` → `80FF0000`). Six-digit `RRGGBB` avoids this
+difference for opaque colors. `style` changes only the attributes you
 pass and preserves the cell's other styling.
 
 **Formula references are not auto-adjusted.** openpyxl does not rewrite formulas

@@ -1,7 +1,11 @@
 // Authoring template for creating a .docx with docx-js (the `docx` npm package,
-// pre-bundled in Kowork and resolvable via NODE_PATH). Copy this into a temp
-// directory (never the user's folder), edit the copy's `children` array, and run
-// it, writing the document to the path the user wants:
+// pre-bundled in Kowork and resolvable via NODE_PATH).
+// Copy this into a uniquely named task directory with a random suffix inside
+// the exact pre-approved session temporary directory shown in the Bash tool
+// instructions (never the user's folder). Copy that path in full, exactly as
+// shown; do not reconstruct it or derive it from environment variables. Keep
+// every working file inside the task directory. Edit the copy's `children`
+// array and run it, writing the final file to the path the user wants:
 //
 //     kowork-node create_docx.cjs out.docx
 //
@@ -16,7 +20,7 @@
 // inline image, a running header, a footer with page numbers, and an explicit
 // US Letter page size (docx-js otherwise defaults to A4). The `styles` block
 // replicates Word's default typography (Calibri body, Calibri Light headings);
-// adjust it through the FONT constant.
+// adjust it through the FONT / SIZE / COLOR constants.
 //
 // Image note: docx-js needs explicit width/height in `transformation` (EMUs are
 // derived for you from these pixel values); it does not auto-size. Read a real
@@ -46,6 +50,9 @@ const {
 } = require("docx");
 
 const FONT = { head: "Calibri Light", body: "Calibri" };
+// Point sizes; docx-js takes half-points, converted at each use below.
+const SIZE = { title: 28, heading1: 16, heading2: 13, heading3: 12, body: 11 };
+const COLOR = { ink: "000000", heading: "2E74B5", subheading: "1F4D78" };
 
 // Pin only the Latin font attributes: leaving eastAsia/cs unset lets Word pick
 // the script-appropriate font for CJK and complex-script text.
@@ -71,17 +78,21 @@ const doc = new Document({
   styles: {
     default: {
       document: {
-        run: { font: latin(FONT.body), size: 22 }, // 11pt body
+        run: { font: latin(FONT.body), size: SIZE.body * 2, color: COLOR.ink },
         paragraph: {
           spacing: { after: 160, line: 259, lineRule: LineRuleType.AUTO },
         }, // 8pt after, 1.08 lines
       },
       title: {
-        run: { font: latin(FONT.head), size: 56 }, // 28pt, black (no color)
+        run: { font: latin(FONT.head), size: SIZE.title * 2, color: COLOR.ink },
         paragraph: { spacing: { after: 0 } },
       },
       heading1: {
-        run: { font: latin(FONT.head), size: 32, color: "2E74B5" }, // 16pt
+        run: {
+          font: latin(FONT.head),
+          size: SIZE.heading1 * 2,
+          color: COLOR.heading,
+        },
         paragraph: {
           keepNext: true,
           keepLines: true,
@@ -90,7 +101,11 @@ const doc = new Document({
         },
       },
       heading2: {
-        run: { font: latin(FONT.head), size: 26, color: "2E74B5" }, // 13pt
+        run: {
+          font: latin(FONT.head),
+          size: SIZE.heading2 * 2,
+          color: COLOR.heading,
+        },
         paragraph: {
           keepNext: true,
           keepLines: true,
@@ -99,7 +114,11 @@ const doc = new Document({
         },
       },
       heading3: {
-        run: { font: latin(FONT.head), size: 24, color: "1F4D78" }, // 12pt
+        run: {
+          font: latin(FONT.head),
+          size: SIZE.heading3 * 2,
+          color: COLOR.subheading,
+        },
         paragraph: {
           keepNext: true,
           keepLines: true,

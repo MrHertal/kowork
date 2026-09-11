@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Authoring template for creating a PDF with reportlab (Platypus).
 
-Copy this into a temp directory (never the user's folder), edit the ``story``
-list to build the requested content, then run it to write the PDF to the path
-the user wants:
+Copy this into a uniquely named task directory with a random suffix inside the
+exact pre-approved session temporary directory shown in the Bash tool
+instructions (never the user's folder). Copy that path in full, exactly as
+shown; do not reconstruct it or derive it from environment variables. Keep
+every working file inside the task directory. Edit ``build_story()``
+to build the requested content, then run the copy to write the final file to
+the path the user wants:
 
     kowork-python create_pdf.py out.pdf
 

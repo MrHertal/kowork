@@ -1,7 +1,11 @@
 // Authoring template for creating a .pptx with pptxgenjs (the `pptxgenjs` npm
-// package, pre-bundled in Kowork and resolvable via NODE_PATH). Copy this into a
-// temp directory (never the user's folder), edit the copy, and run it, writing
-// the deck to the path the user wants:
+// package, pre-bundled in Kowork and resolvable via NODE_PATH).
+// Copy this into a uniquely named task directory with a random suffix inside
+// the exact pre-approved session temporary directory shown in the Bash tool
+// instructions (never the user's folder). Copy that path in full, exactly as
+// shown; do not reconstruct it or derive it from environment variables. Keep
+// every working file inside the task directory. Edit the copy and run it,
+// writing the final file to the path the user wants:
 //
 //     kowork-node create_pptx.cjs out.pptx
 //
@@ -40,8 +44,7 @@
 // URL: { data: "image/png;base64," + buf.toString("base64") } (or { path: "..." }).
 // pptxgenjs sizes images by width/height in INCHES and does not preserve aspect
 // ratio for you: read the pixel size first and derive one dimension from the other
-// so it isn't stretched. The bundled runtime has `image-size`
-// (require("image-size")) for Node, and Pillow for Python
+// so it isn't stretched. Use Pillow through the bundled Python runtime
 // (kowork-python -c "from PIL import Image; print(Image.open('/absolute/path/photo.png').size)").
 
 const fs = require("fs");

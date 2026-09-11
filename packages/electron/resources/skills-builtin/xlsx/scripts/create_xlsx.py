@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Authoring template for creating an Excel workbook with openpyxl.
 
-Copy this into a temp directory (never the user's folder), edit the
-``build_workbook()`` function to build the requested content, then run it to
-write the .xlsx to the path the user wants:
+Copy this into a uniquely named task directory with a random suffix inside the
+exact pre-approved session temporary directory shown in the Bash tool
+instructions (never the user's folder). Copy that path in full, exactly as
+shown; do not reconstruct it or derive it from environment variables. Keep
+every working file inside the task directory. Edit ``build_workbook()``
+to build the requested content, then run the copy to write the final file to
+the path the user wants:
 
     kowork-python create_xlsx.py out.xlsx
 
@@ -46,6 +50,7 @@ import argparse
 import io
 import os
 import sys
+from copy import copy
 
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
@@ -74,11 +79,6 @@ def demo_image() -> XLImage:
 
 def build_workbook(wb: Workbook) -> None:
     """The workbook content. Edit this function to change what the file holds."""
-    # Unstyled cells inherit openpyxl's built-in default font, which is already
-    # Calibri 11 (matching DEFAULT_FONT_*). openpyxl has no public default-font
-    # setter, so to restyle the sheet you set Font(...) on the cells you create
-    # -- as the header and total below do with the DEFAULT_FONT_* constants.
-
     ws = wb.active
     ws.title = "Sales"
 
@@ -192,6 +192,17 @@ def modern_office_theme() -> str:
 def build_xlsx(out_path: str) -> None:
     wb = Workbook()
     build_workbook(wb)
+    # Apply the shared font to every populated cell, keeping emphasis, colors,
+    # number formats, and other cell styling intact. Set per-cell font exceptions
+    # after this loop if the requested design needs them.
+    for sheet in wb:
+        for row in sheet:
+            for cell in row:
+                if cell.value is not None:
+                    font = copy(cell.font)
+                    font.name = DEFAULT_FONT_NAME
+                    font.sz = DEFAULT_FONT_SIZE
+                    cell.font = font
     wb.loaded_theme = modern_office_theme()
     wb.save(out_path)
 
