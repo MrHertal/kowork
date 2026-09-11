@@ -49,10 +49,10 @@ ready.
   failures as `error: ...` and exit non-zero; validators additionally end failed
   checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
   labels such as `note`, `warning`, `info`, or `issue` as appropriate. In addition,
-  every command that mutates a packed document writes to a **new** output
-  (never editing the input in place) and refuses a macro-enabled
-  (`.docm`/`.dotm`) output. `validate.py --fix` may repair an unpacked working
-  directory in place inside the task temporary directory.
+  every command that mutates a packed document writes to a **new `.docx`** output
+  (never editing the input in place). `.docm`/`.dotx`/`.dotm` may be inputs, but
+  are never outputs. `validate.py --fix` may repair an unpacked working directory
+  in place inside the task temporary directory.
 - For raster images used in a document, use the image skill for standalone
   image processing and this skill for container-level work, including embedding
   the finished asset where supported.
@@ -245,6 +245,8 @@ before handing it back.
 
 - **No legacy `.doc`.** Converting old `.doc` to `.docx` needs an Office engine
   Kowork does not bundle. Ask for a `.docx`.
+- **Template and macro formats are input-only.** Read `.docm`/`.dotx`/`.dotm`
+  when needed, but write every created or edited result as `.docx`.
 - **No PDF / image export or visual preview.** Rendering needs LibreOffice +
   Poppler, which are not available.
 - **Cannot accept/flatten tracked changes.** This skill authors redlines and

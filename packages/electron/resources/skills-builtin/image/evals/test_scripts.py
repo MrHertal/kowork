@@ -88,6 +88,26 @@ class ImageScriptsTest(unittest.TestCase):
         self.assertIn("pass -o", result.stderr)
         self.assertEqual(animation.read_bytes(), original)
 
+    def test_help_shows_canonical_output_as_required(self):
+        commands = (
+            ("convert", "--help"),
+            ("adjust", "--help"),
+            ("annotate", "watermark", "--help"),
+            ("annotate", "text", "--help"),
+            ("combine", "--help"),
+            ("gif", "create", "--help"),
+            ("transform", "resize", "--help"),
+            ("transform", "crop", "--help"),
+            ("transform", "rotate", "--help"),
+            ("transform", "flip", "--help"),
+        )
+        for script, *args in commands:
+            with self.subTest(script=script, args=args):
+                result = self.run_script(script, *args)
+                usage = result.stdout.split("\n\n", 1)[0]
+                self.assertIn("-o output", usage)
+                self.assertNotIn("[-o", usage)
+
     def test_extract_protects_source_and_later_aliases(self):
         for alias in ("direct", "symlink", "hardlink"):
             with self.subTest(alias=alias):

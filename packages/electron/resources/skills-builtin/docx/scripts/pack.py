@@ -24,7 +24,7 @@ import sys
 import tempfile
 import zipfile
 
-from oxml import DocxError, refuse_macro_output
+from oxml import DocxError, require_docx_output
 
 SKIP_NAMES = {".DS_Store", "Thumbs.db"}
 
@@ -70,7 +70,7 @@ def main(argv: list[str]) -> int:
     src_dir, out_path = args.source_dir, args.output
 
     try:
-        refuse_macro_output(out_path)
+        require_docx_output(out_path)
     except DocxError as exc:
         sys.stderr.write(f"error: {exc}\n")
         return 1

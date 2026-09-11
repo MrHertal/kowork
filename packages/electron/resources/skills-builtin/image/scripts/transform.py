@@ -171,7 +171,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Resize, crop, rotate, or flip an image.")
     sub = ap.add_subparsers(dest="command", required=True, metavar="command")
 
-    rp = sub.add_parser("resize", help="resize with LANCZOS resampling")
+    rp = sub.add_parser(
+        "resize",
+        help="resize with LANCZOS resampling",
+        usage="%(prog)s input -o output (--size WxH | --width W | --height H | --percent P | --max WxH)",
+    )
     rp.add_argument("input", help="path to the input image")
     rp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
     rp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
@@ -188,14 +192,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rp.set_defaults(func=do_resize)
 
-    cp = sub.add_parser("crop", help="crop to a pixel box, origin top-left")
+    cp = sub.add_parser(
+        "crop",
+        help="crop to a pixel box, origin top-left",
+        usage="%(prog)s input -o output --box L,T,R,B",
+    )
     cp.add_argument("input", help="path to the input image")
     cp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
     cp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     cp.add_argument("--box", required=True, metavar="L,T,R,B", help="crop box in pixels, e.g. 10,10,100,80")
     cp.set_defaults(func=do_crop)
 
-    rotp = sub.add_parser("rotate", help="rotate by an arbitrary angle (multiples of 90 are exact)")
+    rotp = sub.add_parser(
+        "rotate",
+        help="rotate by an arbitrary angle (multiples of 90 are exact)",
+        usage="%(prog)s input -o output --degrees D [--expand]",
+    )
     rotp.add_argument("input", help="path to the input image")
     rotp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
     rotp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
@@ -207,7 +219,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     rotp.set_defaults(func=do_rotate)
 
-    fp = sub.add_parser("flip", help="mirror an image horizontally or vertically")
+    fp = sub.add_parser(
+        "flip",
+        help="mirror an image horizontally or vertically",
+        usage="%(prog)s input -o output (--horizontal | --vertical)",
+    )
     fp.add_argument("input", help="path to the input image")
     fp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
     fp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")

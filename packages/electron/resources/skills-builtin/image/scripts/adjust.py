@@ -70,7 +70,10 @@ def apply_adjustments(im: Image.Image, args: argparse.Namespace) -> tuple[Image.
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(description="Adjust an image's brightness, contrast, color, or sharpness.")
+    ap = argparse.ArgumentParser(
+        description="Adjust an image's brightness, contrast, color, or sharpness.",
+        usage="%(prog)s input -o output [adjustments]",
+    )
     ap.add_argument("input", help="path to the input image")
     ap.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
     ap.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")

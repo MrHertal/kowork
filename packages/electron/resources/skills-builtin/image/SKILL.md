@@ -9,12 +9,11 @@ description: >-
   caption; build a collage or side-by-side; create or extract an animated GIF;
   or answer questions about an image's format, dimensions, or metadata.
   Triggers on any mention of an image, photo, picture, logo, watermark,
-  thumbnail, banner, or screenshot, or a
-  .png/.jpg/.jpeg/.webp/.gif/.bmp/.tiff/.tif/.ico/.avif file, even without the
-  word "image". For raster images used inside an Office document or PDF, use
-  this skill for standalone image processing and the relevant document skill
-  for container-level work, including embedding the finished asset where
-  supported.
+  thumbnail, banner, screenshot, or a
+  .png/.jpg/.jpeg/.webp/.gif/.bmp/.tiff/.tif/.ico/.avif file, except when an
+  existing image only needs to be embedded unchanged in an Office document or
+  PDF. For embedded images that need standalone processing first, use this
+  skill for that processing and the relevant document skill for embedding.
 ---
 
 # Working with image files

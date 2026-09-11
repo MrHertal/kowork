@@ -81,7 +81,8 @@ def save_with_metadata(
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
-        description="Re-encode an image into the format implied by the output extension."
+        description="Re-encode an image into the format implied by the output extension.",
+        usage="%(prog)s input -o output [options]",
     )
     ap.add_argument("input", help="path to the input image")
     ap.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)

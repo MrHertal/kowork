@@ -48,7 +48,7 @@ from oxml import (
     qn,
     read_parts,
     refuse_inplace,
-    refuse_macro_output,
+    require_docx_output,
     serialize,
     smarten_quotes,
     write_parts,
@@ -257,7 +257,7 @@ def main(argv: list[str]) -> int:
     body = args.comment if args.no_smart_quotes else smarten_quotes(args.comment)
 
     try:
-        refuse_macro_output(args.out)
+        require_docx_output(args.out)
         refuse_inplace(args.out, args.input)
         parts = read_parts(args.input)
     except Exception as exc:

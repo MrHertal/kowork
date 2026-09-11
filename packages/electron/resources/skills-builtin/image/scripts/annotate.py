@@ -167,7 +167,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Annotate an image with a watermark logo or a text label.")
     sub = ap.add_subparsers(dest="command", required=True, metavar="command")
 
-    wp = sub.add_parser("watermark", help="paste a logo at a position, or tiled across the image")
+    wp = sub.add_parser(
+        "watermark",
+        help="paste a logo at a position, or tiled across the image",
+        usage="%(prog)s input -o output --mark PATH [options]",
+    )
     wp.add_argument("input", help="path to the input image")
     wp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
     wp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
@@ -193,7 +197,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     wp.set_defaults(func=do_watermark)
 
-    tp = sub.add_parser("text", help="draw a text label")
+    tp = sub.add_parser(
+        "text",
+        help="draw a text label",
+        usage='%(prog)s input -o output --text "..." [options]',
+    )
     tp.add_argument("input", help="path to the input image")
     tp.add_argument("legacy_output", nargs="?", help=argparse.SUPPRESS)
     tp.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")

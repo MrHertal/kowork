@@ -25,13 +25,14 @@ class DocxScriptsTest(unittest.TestCase):
         return result
 
     def run_create_template(self, output, *, success=True):
+        launcher = shutil.which("kowork-node")
         node = shutil.which("node")
-        if node is None or not NODE_LIBS.is_dir():
+        if launcher is None or node is None or not NODE_LIBS.is_dir():
             self.skipTest("Node runtime dependencies are unavailable")
         env = os.environ.copy()
-        env["NODE_PATH"] = str(NODE_LIBS)
+        env["KOWORK_ELECTRON_BIN"] = node
         result = subprocess.run(
-            [node, str(SCRIPTS / "create_docx.cjs"), str(output)],
+            [launcher, str(SCRIPTS / "create_docx.cjs"), str(output)],
             capture_output=True,
             text=True,
             env=env,
@@ -109,6 +110,23 @@ class DocxScriptsTest(unittest.TestCase):
             output = Path(temp) / "document.word"
             result = self.run_create_template(output, success=False)
             self.assertIn(".docx extension", result.stderr)
+            self.assertFalse(output.exists())
+
+    def test_edit_requires_docx_extension(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "document.dotx"
+            result = self.run_script(
+                "edit_text",
+                FIXTURES / "contract.docx",
+                "--find",
+                "twelve months",
+                "--replace",
+                "twenty-four months",
+                "-o",
+                output,
+                success=False,
+            )
+            self.assertIn("template output", result.stderr)
             self.assertFalse(output.exists())
 
 

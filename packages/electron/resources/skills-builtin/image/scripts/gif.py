@@ -106,7 +106,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Create an animated GIF from frames, or extract a GIF's frames.")
     sub = ap.add_subparsers(dest="command", required=True, metavar="command")
 
-    cp = sub.add_parser("create", help="create an animated GIF from 2+ still images")
+    cp = sub.add_parser(
+        "create",
+        help="create an animated GIF from 2+ still images",
+        usage="%(prog)s frame frame [frame ...] -o output.gif [options]",
+    )
     cp.add_argument("paths", nargs="+", metavar="frame", help="input images, in play order")
     cp.add_argument("-o", "--out", dest="output", help="path of the .gif to write")
     cp.add_argument(

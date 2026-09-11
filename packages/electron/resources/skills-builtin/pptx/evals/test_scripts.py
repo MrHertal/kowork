@@ -25,13 +25,14 @@ class PptxScriptsTest(unittest.TestCase):
         return result
 
     def run_create_template(self, output, *, success=True):
+        launcher = shutil.which("kowork-node")
         node = shutil.which("node")
-        if node is None or not NODE_LIBS.is_dir():
+        if launcher is None or node is None or not NODE_LIBS.is_dir():
             self.skipTest("Node runtime dependencies are unavailable")
         env = os.environ.copy()
-        env["NODE_PATH"] = str(NODE_LIBS)
+        env["KOWORK_ELECTRON_BIN"] = node
         result = subprocess.run(
-            [node, str(SCRIPTS / "create_pptx.cjs"), str(output)],
+            [launcher, str(SCRIPTS / "create_pptx.cjs"), str(output)],
             capture_output=True,
             text=True,
             env=env,

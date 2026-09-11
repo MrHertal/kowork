@@ -133,3 +133,26 @@ class SheetPositionsTest(unittest.TestCase):
             result = self.run_script("create_xlsx", output, success=False)
             self.assertIn(".xlsx extension", result.stderr)
             self.assertFalse(output.exists())
+
+    def test_edit_requires_xlsx_extension(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "book.xlsx"
+            output = Path(temp) / "book.xltx"
+            wb = Workbook()
+            wb.save(source)
+            wb.close()
+            result = self.run_script(
+                "edit_xlsx",
+                "set",
+                source,
+                "-o",
+                output,
+                "--sheet",
+                "Sheet",
+                "--cell",
+                "A2",
+                "changed",
+                success=False,
+            )
+            self.assertIn("template output", result.stderr)
+            self.assertFalse(output.exists())

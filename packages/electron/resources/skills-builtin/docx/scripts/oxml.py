@@ -192,14 +192,18 @@ def write_parts(path: str, parts: "OrderedDict[str, bytes]") -> None:
             zf.writestr(name, data)
 
 
-def refuse_macro_output(out_path: str) -> None:
-    """Reject a macro-enabled output path; the mutating scripts never author macros."""
+def require_docx_output(out_path: str) -> None:
+    """Require a .docx output; mutating scripts never author templates or macros."""
     ext = os.path.splitext(out_path)[1].lower()
+    if ext == ".docx":
+        return
     if ext in MACRO_EXTS:
-        raise DocxError(
-            f"refusing to write a macro-enabled document ({ext}); macros are read "
-            "but never authored here. Write a .docx instead."
-        )
+        reason = f"refusing to write a macro-enabled document ({ext}); macros are read but never authored here"
+    elif ext == ".dotx":
+        reason = "refusing to write a Word template; template output is not authored here"
+    else:
+        reason = f"output must use the .docx extension: {out_path}"
+    raise DocxError(f"{reason}. Write a .docx instead.")
 
 
 def refuse_inplace(out_path: str, source_path: str) -> None:

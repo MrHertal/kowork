@@ -63,7 +63,10 @@ def combine(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(description="Combine multiple images into a grid, a row, or a column.")
+    ap = argparse.ArgumentParser(
+        description="Combine multiple images into a grid, a row, or a column.",
+        usage="%(prog)s input [input ...] -o output (--grid CxR | --hstack | --vstack) [options]",
+    )
     ap.add_argument("paths", nargs="+", metavar="in", help="input images, in row-major order")
     ap.add_argument("-o", "--out", dest="output", help="path to write to; the extension picks the format")
     layout = ap.add_mutually_exclusive_group(required=True)

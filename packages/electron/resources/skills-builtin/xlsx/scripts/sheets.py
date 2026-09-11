@@ -9,8 +9,8 @@ only -- editing cell values, rows/columns, and styles lives in edit_xlsx.py.
 Rules (consistent across the xlsx skill):
   * Mutating subcommands always write to -o; they never edit in place, and they
     refuse to overwrite the input (openpyxl round-trips can be lossy).
-  * Mutating subcommands refuse to write .xlsm/.xltm: openpyxl can silently drop
-    macros and other parts it does not model. Save a plain .xlsx instead.
+  * Mutating subcommands write only .xlsx; template and macro formats are
+    input-only because openpyxl can silently drop parts it does not model.
   * Before saving a result derived from an existing workbook, the input is
     scanned for parts openpyxl may drop (pivots/slicers/form-controls/VBA) and a
     non-fatal warning is printed.
@@ -42,7 +42,7 @@ from xlsxutil import (
     format_table,
     load,
     refuse_inplace,
-    refuse_macro_output,
+    require_xlsx_output,
     resolve_sheet,
     warn_lossy_parts,
 )
@@ -142,7 +142,7 @@ def cmd_info(args: argparse.Namespace) -> int:
 
 
 def cmd_add(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     wb = load(args.input)
     if args.name in wb.sheetnames:
@@ -169,7 +169,7 @@ def cmd_add(args: argparse.Namespace) -> int:
 
 
 def cmd_rename(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     wb = load(args.input)
     ws = resolve_sheet(wb, args.sheet)
@@ -184,7 +184,7 @@ def cmd_rename(args: argparse.Namespace) -> int:
 
 
 def cmd_remove(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     wb = load(args.input)
     ws = resolve_sheet(wb, args.sheet)
@@ -201,7 +201,7 @@ def cmd_remove(args: argparse.Namespace) -> int:
 
 
 def cmd_move(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     wb = load(args.input)
     ws = resolve_sheet(wb, args.sheet)
@@ -226,7 +226,7 @@ def cmd_move(args: argparse.Namespace) -> int:
 
 
 def cmd_copy(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     refuse_inplace(args.out, args.input)
     wb = load(args.input)
     ws = resolve_sheet(wb, args.sheet)
@@ -260,7 +260,7 @@ def cmd_copy(args: argparse.Namespace) -> int:
 
 
 def cmd_from_csv(args: argparse.Namespace) -> int:
-    refuse_macro_output(args.out)
+    require_xlsx_output(args.out)
     if not os.path.isfile(args.input):
         raise SheetsError(f"no such file: {args.input}")
     refuse_inplace(args.out, args.input)

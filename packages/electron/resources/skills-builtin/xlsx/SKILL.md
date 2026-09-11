@@ -50,7 +50,7 @@ ready.
   failures as `error: ...` and exit non-zero; validators additionally end failed
   checks with `FAILED: ...`. Non-fatal and item-level diagnostics use descriptive
   labels such as `note`, `warning`, `info`, or `issue` as appropriate. Every mutating
-  command writes a **new** file (`-o`) — it never edits in place.
+  command writes a **new `.xlsx`** file (`-o`) — it never edits in place.
 - For raster images used in a workbook, use the image skill for standalone
   image processing and this skill for container-level work, including embedding
   the finished asset where supported.
@@ -69,7 +69,7 @@ colors; configure workbook themes separately from explicit cell styles.
 | Make a new workbook                                                        | **Create**             |
 | Read / summarize / extract cell, range, or sheet values                    | **Read**               |
 | Set values/formulas, insert/delete rows or columns, style, formats, widths | **Edit**               |
-| Add/rename/delete/move/duplicate sheets; inspect structure; import a CSV  | **Sheets & structure** |
+| Add/rename/delete/move/duplicate sheets; inspect structure; import a CSV   | **Sheets & structure** |
 | Convert a sheet to CSV, or build a workbook from a CSV                     | **Read** / **Sheets**  |
 | Decide between a live formula and a fixed number                           | **Formulas**           |
 | Confirm a workbook is sound                                                | **Validate**           |
@@ -115,8 +115,8 @@ fonts assigned in `build_workbook()` take precedence. The workbook is
 saved with the current Office theme, so charts and theme-colored elements render
 in the same colors a new Excel file uses. `OFFICE_THEME_REPLACEMENTS` near the
 top controls theme fonts and colors separately from the explicit cell font and
-header constants; customize both when applying a brand. It refuses to write
-`.xlsm`/`.xltm`. **Prefer real formulas over Python-computed constants** so the
+header constants; customize both when applying a brand. It writes only `.xlsx`.
+**Prefer real formulas over Python-computed constants** so the
 workbook recalculates in Excel; only write a fixed number when the user explicitly
 needs one (see Formulas & computed values).
 
@@ -146,7 +146,7 @@ script warns). See `references/formulas.md`.
 ## Edit cells / rows / columns (openpyxl, Python)
 
 `scripts/edit_xlsx.py` has one subcommand per operation; each reads an input and
-writes a **new** file with `-o` (it never edits in place) and refuses `.xlsm`:
+writes a **new `.xlsx`** file with `-o` (it never edits in place):
 
 ```sh
 kowork-python scripts/edit_xlsx.py set in.xlsx -o out.xlsx --sheet Sales --cell B2 42
@@ -183,7 +183,7 @@ covering the wrong range; those commands print a reminder to verify the formulas
 ## Sheets & structure (openpyxl, Python)
 
 `scripts/sheets.py` owns sheet-level structure and inspection. `info` is
-read-only; the rest write a new file with `-o` and refuse `.xlsm`:
+read-only; the rest write a new `.xlsx` file with `-o`:
 
 ```sh
 kowork-python scripts/sheets.py info in.xlsx
@@ -259,5 +259,6 @@ a soundness/error smoke test, not a content or schema checker (no XSD validation
   editor, so saving an edited workbook can drop pivot tables, slicers, form
   controls, VBA, and some chart types. The mutating scripts warn when the input
   holds such parts; edit a copy and verify with `validate.py`.
-- **`.xlsm` is read-only.** Macros are never authored or executed, and every
-  mutating command refuses to write `.xlsm`/`.xltm` (save a plain `.xlsx`).
+- **Macro and template formats are input-only.** Read `.xlsm`/`.xltx` when
+  needed, but write every created or edited result as `.xlsx`. Macros are never
+  authored or executed.
