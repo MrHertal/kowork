@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 FRONTMATTER_BOUNDARY = "---"
+SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 def read_frontmatter(skill_md: Path) -> tuple[dict[str, str], str]:
@@ -67,6 +68,15 @@ def validate_skill(skill_dir: Path) -> list[str]:
 
     if "name" not in fields:
         errors.append("frontmatter is missing name")
+    elif fields["name"]:
+        if not SKILL_NAME.fullmatch(fields["name"]):
+            errors.append(
+                "name must use lowercase letters or digits separated by single hyphens"
+            )
+        if fields["name"] != skill_dir.name:
+            errors.append(
+                f"name must match its folder ({skill_dir.name!r})"
+            )
     if "description" not in fields:
         errors.append("frontmatter is missing description")
     return errors

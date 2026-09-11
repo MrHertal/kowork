@@ -51,7 +51,12 @@ You don't need everything perfect up front. Gather enough to write a solid first
 1. A small header block at the very top, written in YAML (a simple `field: value` format) between `---` fences. It has exactly two fields: `name` and `description`.
 2. Below the header, the body — plain Markdown instructions written to the agent, telling it how to do the task.
 
-**The name.** A short, lowercase, hyphenated label of a few words, like `meeting-notes-formatter`. Make it match the skill's folder name. It's just an identifier, so keep it simple.
+**The name.** A short, lowercase, hyphenated label of a few words, like
+`meeting-notes-formatter`. Kowork treats this identifier as exact and
+case-sensitive: use only lowercase letters and digits separated by single
+hyphens, with no leading, trailing, or repeated hyphens. It must exactly match
+the folder containing `SKILL.md`. Keep an existing valid name unchanged unless
+the user explicitly asks to rename the skill.
 
 **The description is the most important line you'll write.** Here's why: up front, Kowork only shows the agent the name and description — not the body. The agent reads that description to decide whether to open the skill and follow it at all. So the description has to do two jobs at once: (1) say plainly what the skill does, and (2) name the concrete situations, request types, and phrasings that should switch it on. Put **all** the "when to use this" cues here — never bury them in the body, because the body isn't seen until the skill has already been chosen.
 
