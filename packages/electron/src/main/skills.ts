@@ -21,7 +21,7 @@ function builtinSkillsDir(): string {
     : path.join(root, "../../resources/skills-builtin");
 }
 
-// Builtin document/image skills (docx/pdf/xlsx/pptx/image) ship bundled and are
+// Built-in file skills (docx/pdf/xlsx/pptx/image) ship bundled and are
 // always on: no install step, and hidden from the UI. Register their dir on
 // each startup so a moved or updated install self-heals (see
 // registerBuiltinSkillsPath).

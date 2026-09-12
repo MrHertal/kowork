@@ -7,7 +7,7 @@ Electron desktop shell — spawns the OpenCode sidecar and hosts the `@kowork/ap
 - `src/main/` — Electron main process: window lifecycle (`windows.ts`), sidecar (`sidecar.ts`), persistence (`store.ts`), auto-updates (`updater.ts`), IPC handlers (`ipc.ts`).
 - `src/preload/` — the typed bridge exposed to the renderer as `window.api`.
 - `src/renderer/` — desktop entry point hosting `@kowork/app`.
-- `scripts/` — build/dev tooling for the sidecar and the document-skill runtime.
+- `scripts/` — build/dev tooling for the sidecar and the shared skill runtime.
 
 ## Rules
 
