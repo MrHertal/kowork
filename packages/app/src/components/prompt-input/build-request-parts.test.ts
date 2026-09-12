@@ -171,9 +171,10 @@ describe("buildRequestParts", () => {
       synthetic: true,
       metadata: {
         koworkAttachments: {
-          version: 1,
+          version: 2,
           items: [
             {
+              id: "office_1",
               filename: "contract.docx",
               path: "/Users/example/contract.docx",
               format: "docx",

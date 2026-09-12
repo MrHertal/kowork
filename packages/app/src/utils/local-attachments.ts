@@ -8,19 +8,29 @@ import type {
 
 export const LOCAL_ATTACHMENTS_METADATA_KEY = "koworkAttachments";
 
+type LocalAttachmentMetadataBase = {
+  filename: string;
+  path: string;
+  mime: string;
+  format: LocalAttachmentFormat;
+  position: number;
+};
+
 export type LocalAttachmentsMetadata = {
-  version: 1;
-  items: Array<{
-    filename: string;
-    path: string;
-    mime: string;
-    format: LocalAttachmentFormat;
-    position: number;
-  }>;
+  version: 2;
+  items: Array<
+    LocalAttachmentMetadataBase & {
+      id: string;
+      modelPartID?: string;
+    }
+  >;
 };
 
 export type LocalAttachmentMetadataItem =
-  LocalAttachmentsMetadata["items"][number];
+  LocalAttachmentMetadataBase & {
+    id?: string;
+    modelPartID?: string;
+  };
 
 export function localAttachmentMatchesServer(
   attachment: { serverKey: string },
@@ -57,7 +67,11 @@ export function localAttachmentsFromMetadata(
 ): LocalAttachmentMetadataItem[] {
   if (!record(metadata)) return [];
   const value = metadata[LOCAL_ATTACHMENTS_METADATA_KEY];
-  if (!record(value) || value.version !== 1 || !Array.isArray(value.items))
+  if (
+    !record(value) ||
+    (value.version !== 1 && value.version !== 2) ||
+    !Array.isArray(value.items)
+  )
     return [];
   return value.items.flatMap((item) => {
     if (!record(item)) return [];
@@ -69,7 +83,9 @@ export function localAttachmentsFromMetadata(
       typeof item.position !== "number" ||
       !Number.isSafeInteger(item.position) ||
       item.position < 1 ||
-      item.mime !== LOCAL_ATTACHMENT_MIMES[item.format]
+      item.mime !== LOCAL_ATTACHMENT_MIMES[item.format] ||
+      (value.version === 2 && typeof item.id !== "string") ||
+      (item.modelPartID !== undefined && typeof item.modelPartID !== "string")
     )
       return [];
     return [
@@ -79,6 +95,10 @@ export function localAttachmentsFromMetadata(
         mime: item.mime,
         format: item.format,
         position: item.position,
+        ...(typeof item.id === "string" ? { id: item.id } : {}),
+        ...(typeof item.modelPartID === "string"
+          ? { modelPartID: item.modelPartID }
+          : {}),
       },
     ];
   });
@@ -95,20 +115,24 @@ function escapeXml(value: string) {
 
 export function localAttachmentsPrompt(
   attachments: Array<{
+    id: string;
     filename: string;
     path: string;
     mime: string;
     format: LocalAttachmentFormat;
     position: number;
+    modelPartID?: string;
   }>,
 ) {
   const items: LocalAttachmentsMetadata["items"] = attachments.map(
-    ({ filename, path, mime, format, position }) => ({
+    ({ id, filename, path, mime, format, position, modelPartID }) => ({
+      id,
       filename,
       path,
       mime,
       format,
       position,
+      ...(modelPartID ? { modelPartID } : {}),
     }),
   );
   const text = [
@@ -128,7 +152,7 @@ export function localAttachmentsPrompt(
     text,
     metadata: {
       [LOCAL_ATTACHMENTS_METADATA_KEY]: {
-        version: 1,
+        version: 2,
         items,
       } satisfies LocalAttachmentsMetadata,
     },

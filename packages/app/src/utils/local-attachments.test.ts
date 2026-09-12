@@ -27,6 +27,7 @@ type LocalAttachmentInput = Parameters<typeof localAttachmentsPrompt>[0][number]
 const attachment = (
   input: Partial<LocalAttachmentInput> = {},
 ): LocalAttachmentInput => ({
+  id: "office_1",
   filename: "contract.docx",
   path: "/Users/example/contract.docx",
   mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -139,9 +140,10 @@ describe("localAttachmentsPrompt", () => {
   </attachment>
 </kowork_attachments>`);
     expect(result.metadata[LOCAL_ATTACHMENTS_METADATA_KEY]).toEqual({
-      version: 1,
+      version: 2,
       items: [
         {
+          id: "office_1",
           filename: "contract.docx",
           path: "/Users/example/contract.docx",
           mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -149,6 +151,7 @@ describe("localAttachmentsPrompt", () => {
           position: 1,
         },
         {
+          id: "office_1",
           filename: "budget.xlsx",
           path: "/Users/example/budget.xlsx",
           mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -180,10 +183,38 @@ describe("localAttachmentsPrompt", () => {
 });
 
 describe("localAttachmentsFromMetadata", () => {
-  test("returns validated version 1 attachment metadata", () => {
+  test("returns validated version 2 attachment metadata", () => {
     const prompt = localAttachmentsPrompt([{ ...attachment(), position: 1 }]);
 
     expect(localAttachmentsFromMetadata(prompt.metadata)).toEqual([
+      {
+        id: "office_1",
+        filename: "contract.docx",
+        path: "/Users/example/contract.docx",
+        mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        format: "docx",
+        position: 1,
+      },
+    ]);
+  });
+
+  test("continues to read version 1 attachment metadata", () => {
+    expect(
+      localAttachmentsFromMetadata({
+        koworkAttachments: {
+          version: 1,
+          items: [
+            {
+              filename: "contract.docx",
+              path: "/Users/example/contract.docx",
+              mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              format: "docx",
+              position: 1,
+            },
+          ],
+        },
+      }),
+    ).toEqual([
       {
         filename: "contract.docx",
         path: "/Users/example/contract.docx",
@@ -198,7 +229,7 @@ describe("localAttachmentsFromMetadata", () => {
     undefined,
     {},
     { koworkAttachments: null },
-    { koworkAttachments: { version: 2, items: [] } },
+    { koworkAttachments: { version: 3, items: [] } },
     { koworkAttachments: { version: 1, items: "invalid" } },
   ])("ignores malformed metadata %#", (metadata) => {
     expect(localAttachmentsFromMetadata(metadata)).toEqual([]);
@@ -240,6 +271,7 @@ describe("localAttachmentsFromMetadata", () => {
     expect(prompt.text).toContain("<format>pdf</format>");
     expect(localAttachmentsFromMetadata(prompt.metadata)).toEqual([
       {
+        id: "office_1",
         filename: "guide.pdf",
         path: "/Users/example/guide.pdf",
         mime: "application/pdf",
