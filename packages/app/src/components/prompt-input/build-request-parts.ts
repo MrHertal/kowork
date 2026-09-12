@@ -68,13 +68,12 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
       ? [
           {
             attachmentID: delivery.attachment.id,
-            position: delivery.position,
             part: {
-            id: ascending("part"),
-            type: "file" as const,
-            mime: delivery.attachment.mime,
-            url: delivery.dataUrl,
-            filename: delivery.attachment.filename,
+              id: ascending("part"),
+              type: "file" as const,
+              mime: delivery.attachment.mime,
+              url: delivery.dataUrl,
+              filename: delivery.attachment.filename,
             } satisfies PromptRequestPart,
           },
         ]
@@ -84,18 +83,16 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
     modelAttachments.map(({ attachmentID, part }) => [attachmentID, part.id]),
   );
 
-  const locals = input.deliveries.flatMap((delivery) =>
-    delivery.local
-      ? [
-          {
-            ...delivery.local,
-            ...(modelPartIDs.has(delivery.attachment.id)
-              ? { modelPartID: modelPartIDs.get(delivery.attachment.id) }
-              : {}),
-          },
-        ]
-      : [],
-  );
+  const locals = input.deliveries.flatMap((delivery) => {
+    if (!delivery.local) return [];
+    const modelPartID = modelPartIDs.get(delivery.attachment.id);
+    return [
+      {
+        ...delivery.local,
+        ...(modelPartID ? { modelPartID } : {}),
+      },
+    ];
+  });
   if (locals.length > 0) {
     const attachmentContext = localAttachmentsPrompt(locals);
     requestParts.push({

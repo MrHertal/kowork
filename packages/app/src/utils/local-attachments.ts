@@ -2,6 +2,7 @@ import {
   LOCAL_ATTACHMENT_MIMES,
   type LocalAttachmentFormat,
 } from "@/constants/file-picker";
+
 export const LOCAL_ATTACHMENTS_METADATA_KEY = "koworkAttachments";
 
 type LocalAttachmentMetadataBase = {
@@ -22,11 +23,10 @@ export type LocalAttachmentsMetadata = {
   >;
 };
 
-export type LocalAttachmentMetadataItem =
-  LocalAttachmentMetadataBase & {
-    id?: string;
-    modelPartID?: string;
-  };
+export type LocalAttachmentMetadataItem = LocalAttachmentMetadataBase & {
+  id?: string;
+  modelPartID?: string;
+};
 
 export type LocalAttachmentPromptItem =
   LocalAttachmentsMetadata["items"][number];

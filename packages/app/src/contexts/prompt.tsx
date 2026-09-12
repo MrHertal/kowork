@@ -146,7 +146,8 @@ function normalizeLocalAttachment(value: unknown) {
 function normalizeAttachment(
   part: PromptAttachmentPart | LegacyAttachmentPart,
 ): PromptAttachmentPart | undefined {
-  const blob = part.blob && isLiveBlobReference(part.blob) ? part.blob : undefined;
+  const blob =
+    part.blob && isLiveBlobReference(part.blob) ? part.blob : undefined;
   const candidateLocal = normalizeLocalAttachment(
     part.type === "attachment"
       ? part.local

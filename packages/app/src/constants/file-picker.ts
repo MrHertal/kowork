@@ -8,8 +8,7 @@ export const ACCEPTED_IMAGE_TYPES = [
 ];
 
 export const PATH_ONLY_FILE_TYPES = [".docx", ".xlsx", ".pptx"];
-// pdf is a submit-time path fallback only, so it stays out of
-// PATH_ONLY_FILE_TYPES.
+// PDFs can use both model input and a local path, so they are not path-only.
 export type LocalAttachmentFormat = "docx" | "xlsx" | "pptx" | "pdf";
 export const LOCAL_ATTACHMENT_MIMES: Record<LocalAttachmentFormat, string> = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

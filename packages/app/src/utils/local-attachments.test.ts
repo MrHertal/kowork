@@ -149,6 +149,24 @@ describe("localAttachmentsFromMetadata", () => {
     ]);
   });
 
+  test("requires identity fields in version 2 metadata", () => {
+    const valid = localAttachmentsPrompt([attachment()]).metadata[
+      LOCAL_ATTACHMENTS_METADATA_KEY
+    ].items[0];
+
+    expect(
+      localAttachmentsFromMetadata({
+        koworkAttachments: {
+          version: 2,
+          items: [
+            { ...valid, id: undefined },
+            { ...valid, modelPartID: 42 },
+          ],
+        },
+      }),
+    ).toEqual([]);
+  });
+
   test.each([
     undefined,
     {},
@@ -179,7 +197,7 @@ describe("localAttachmentsFromMetadata", () => {
     ).toEqual([{ ...valid, position: 1 }]);
   });
 
-  test("round-trips pdf attachments from the PDF fallback", () => {
+  test("round-trips a local PDF attachment", () => {
     const prompt = localAttachmentsPrompt([
       {
         ...attachment({

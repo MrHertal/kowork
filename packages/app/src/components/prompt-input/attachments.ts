@@ -80,7 +80,7 @@ export function usePromptAttachments() {
       const mime = await attachmentMime(file);
       if (!mime) return "unsupported";
 
-      // Best-effort local path for the submit-time PDF fallback.
+      // Best-effort local representation for PDF tools.
       const pdfPath =
         mime === "application/pdf" && platform.getPathForFile && sidecar
           ? await platform.getPathForFile(file, {
