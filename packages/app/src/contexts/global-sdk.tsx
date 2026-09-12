@@ -118,12 +118,12 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
   const [stable] = useState<{
     value: GlobalSDKContextValue;
     stop: () => void;
-    abort: AbortController;
+    abort: () => void;
     flush: () => void;
     onPageHide: () => void;
     onPageShow: (event: PageTransitionEvent) => void;
   }>(() => {
-    const abort = new AbortController();
+    let abort = new AbortController();
 
     // Platform fetch bypasses mixed-content for plain HTTP to remote hosts
     const eventFetch = (() => {
@@ -199,6 +199,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
 
     const start = () => {
       if (started) return run;
+      if (abort.signal.aborted) abort = new AbortController();
       started = true;
       const active = ++generation;
       const previous = run;
@@ -299,7 +300,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
         },
       },
       stop,
-      abort,
+      abort: () => abort.abort(),
       flush,
       onPageHide,
       onPageShow,
@@ -311,7 +312,7 @@ export function GlobalSDKProvider({ children }: GlobalSDKProviderProps) {
     window.addEventListener("pageshow", stable.onPageShow);
     return () => {
       stable.stop();
-      stable.abort.abort();
+      stable.abort();
       stable.flush();
       window.removeEventListener("pagehide", stable.onPageHide);
       window.removeEventListener("pageshow", stable.onPageShow);
