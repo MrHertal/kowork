@@ -384,6 +384,26 @@ describe("usePromptAttachments", () => {
     expect(toast.error).not.toHaveBeenCalled();
   });
 
+  test("keeps PDFs when the path lookup rejects", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() =>
+      Promise.reject(new Error("path lookup failed")),
+    );
+    currentServer = {
+      type: "sidecar",
+      variant: "base",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    const added = await attachments.addAttachment(pdf());
+
+    expect(added).toBe(true);
+    await waitFor(() => expect(images()).toHaveLength(1));
+    expect(images()[0]?.local).toBeUndefined();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
   test("does not capture paths for image attachments", async () => {
     const getPathForFile = vi.fn(() => Promise.resolve("/tmp/a.png"));
     platform.platform = "desktop";

@@ -78,13 +78,20 @@ export function usePromptAttachments() {
       if (!mime) return "unsupported";
 
       // Best-effort local representation for PDF tools.
-      const pdfPath =
-        mime === "application/pdf" && platform.getPathForFile && sidecar
-          ? await platform.getPathForFile(file, {
-              target: sidecar.variant === "wsl" ? "wsl" : "native",
-              wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
-            })
-          : null;
+      const pdfPath = await (async () => {
+        if (
+          mime !== "application/pdf" ||
+          !platform.getPathForFile ||
+          !sidecar
+        )
+          return null;
+        return platform
+          .getPathForFile(file, {
+            target: sidecar.variant === "wsl" ? "wsl" : "native",
+            wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
+          })
+          .catch(() => null);
+      })();
       const attachment: PromptAttachmentPart = {
         type: "attachment",
         id: nanoid(),
