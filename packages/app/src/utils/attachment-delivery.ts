@@ -31,11 +31,7 @@ export function planAttachmentDelivery(
         : undefined;
     const pdf = attachment.mime === "application/pdf";
     const image = attachment.mime.startsWith("image/");
-    const nativeInput = pdf
-      ? input.pdfInput
-      : image
-        ? input.imageInput
-        : true;
+    const nativeInput = pdf ? input.pdfInput : image ? input.imageInput : true;
     return {
       attachment,
       position,

@@ -108,14 +108,11 @@ describe("planAttachmentDelivery", () => {
   });
 
   test("keeps the blob fallback when no local image path is available", () => {
-    const [delivery] = planAttachmentDelivery(
-      [image({ local: undefined })],
-      {
-        pdfInput: false,
-        imageInput: false,
-        serverKey: "sidecar",
-      },
-    );
+    const [delivery] = planAttachmentDelivery([image({ local: undefined })], {
+      pdfInput: false,
+      imageInput: false,
+      serverKey: "sidecar",
+    });
 
     expect(delivery?.includeModelPayload).toBe(true);
     expect(delivery?.local).toBeUndefined();
