@@ -16,6 +16,7 @@ Kowork helps you complete work with AI using everyday language. Choose a folder,
 - [Folders and Files](/docs/using-kowork/folders-and-files/) explains how Kowork works with your files.
 - [Tasks and Subtasks](/docs/using-kowork/tasks-and-subtasks/) covers starting work and breaking larger jobs into smaller parts.
 - [Create Office Documents](/docs/using-kowork/office-documents/) shows how to make documents, spreadsheets, presentations, and PDFs.
+- [Create and Edit Images](/docs/using-kowork/images/) covers creating, converting, and revising raster images.
 - [Permissions and Safety](/docs/using-kowork/permissions/) explains how to review and control requested actions.
 
 ## Make Kowork yours

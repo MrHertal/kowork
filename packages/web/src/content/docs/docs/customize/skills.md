@@ -5,6 +5,8 @@ description: Add reusable skills that give Kowork specialized instructions for a
 
 A **skill** is a set of reusable instructions for a particular kind of work. Skills can help Kowork follow a specialized process or create a specific kind of result.
 
+Kowork's built-in file capabilities for documents, spreadsheets, presentations, PDFs, and raster images are always available. They do not appear under **Added** and do not need to be installed or managed.
+
 ## Add a popular skill
 
 1. Select **Settings** in the sidebar.

@@ -21,6 +21,7 @@ const sections: Array<{ heading: string; prefix: string; ids: string[] }> = [
       "docs/using-kowork/folders-and-files",
       "docs/using-kowork/tasks-and-subtasks",
       "docs/using-kowork/office-documents",
+      "docs/using-kowork/images",
       "docs/using-kowork/permissions",
     ],
   },

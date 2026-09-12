@@ -117,6 +117,10 @@ export default defineConfig({
               link: "/docs/using-kowork/office-documents/",
             },
             {
+              label: "Create and Edit Images",
+              link: "/docs/using-kowork/images/",
+            },
+            {
               label: "Permissions and Safety",
               link: "/docs/using-kowork/permissions/",
             },
