@@ -1,6 +1,6 @@
 /**
- * Builds the Kowork office runtime pack for the current platform — one shared,
- * relocatable runtime used by all document skills, never duplicated per skill.
+ * Builds the Kowork skill runtime pack for the current platform — one shared,
+ * relocatable runtime used by built-in skills, never duplicated per skill.
  *
  * Layout produced (relocatable — no venv; libs live in the Python tree's own
  * site-packages so the whole tree can be moved/installed anywhere):
@@ -358,7 +358,7 @@ exec "$pack/${pythonRel}" "$@"
   );
   const sizeBytes = dirSize(outDir);
   const manifest = {
-    runtime: "office",
+    runtime: "skills",
     schemaVersion: RUNTIME_SCHEMA_VERSION,
     platform: process.platform,
     arch: process.arch,

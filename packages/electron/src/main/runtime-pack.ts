@@ -20,7 +20,7 @@ export type RuntimePack = {
 };
 
 export type RuntimeManifest = {
-  runtime: "office";
+  runtime: "skills";
   schemaVersion: number;
   platform: NodeJS.Platform;
   arch: string;
@@ -105,10 +105,10 @@ export function validateRuntimePack(
   }
 
   const issues: RuntimeValidationIssue[] = [];
-  if (value.runtime !== "office") {
+  if (value.runtime !== "skills") {
     issues.push({
       code: "invalid-manifest",
-      message: `Runtime identity must be "office"`,
+      message: `Runtime identity must be "skills"`,
     });
   }
   if (value.schemaVersion !== RUNTIME_SCHEMA_VERSION) {
@@ -222,7 +222,7 @@ export function formatRuntimeValidationIssues(
   issues: RuntimeValidationIssue[],
 ): string {
   return [
-    "Office runtime pack is invalid:",
+    "Skill runtime pack is invalid:",
     ...issues.map((issue) => `- ${issue.message}`),
   ].join("\n");
 }

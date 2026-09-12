@@ -6,7 +6,7 @@ Electron desktop shell for Kowork. Spawns the OpenCode sidecar server and hosts 
 
 | Command          | Action                                                                                                  |
 | ---------------- | ------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`       | Build the sidecar (and the document-skill runtime on first run), then start the desktop app in dev mode |
+| `pnpm dev`       | Build the sidecar (and the skill runtime on first run), then start the desktop app in dev mode |
 | `pnpm build`     | Build the main, preload, and renderer bundles                                                           |
 | `pnpm test`      | Run the Vitest suite                                                                                    |
 | `pnpm typecheck` | Run `tsc -b`                                                                                            |
@@ -19,4 +19,4 @@ Run them from this directory or from the repo root with `pnpm --filter @kowork/e
 - `src/main/` — Electron main process: window lifecycle, sidecar spawn, IPC.
 - `src/preload/` — preload bridge exposed to the renderer.
 - `src/renderer/` — desktop entry point hosting `@kowork/app`.
-- `scripts/` — build tooling for the sidecar and document-skill runtime, plus dev/build orchestration.
+- `scripts/` — build tooling for the sidecar and shared skill runtime, plus dev/build orchestration.

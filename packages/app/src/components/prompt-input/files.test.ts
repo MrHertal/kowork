@@ -36,7 +36,7 @@ describe("pathOnlyAttachmentInfo", () => {
     expect(pathOnlyAttachmentInfo({ name: "guide.pdf" })).toBeUndefined();
   });
 
-  test("adds Office extensions only when path attachments are available", () => {
+  test("adds path-only extensions when local paths are available", () => {
     expect(acceptedFileTypes(false)).toBe(ACCEPTED_FILE_TYPES);
     expect(acceptedFileTypes(true)).toEqual([
       ...ACCEPTED_FILE_TYPES,

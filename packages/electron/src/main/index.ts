@@ -161,7 +161,7 @@ function setupApp() {
         const detail = error instanceof Error ? `\n\n${error.message}` : "";
         dialog.showErrorBox(
           "Unable to start Kowork",
-          `Kowork's built-in document runtime is missing or invalid. Reinstall Kowork and try again.${detail}`,
+          `Kowork's built-in skill runtime is missing or invalid. Reinstall Kowork and try again.${detail}`,
         );
         app.exit(1);
         return;

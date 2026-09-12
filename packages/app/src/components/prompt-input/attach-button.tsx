@@ -19,7 +19,7 @@ import { m } from "@/paraglide/messages";
 import { usePromptAttachments } from "./attachments";
 
 export function PromptAttachButton() {
-  const { addAttachments, canAttachOffice } = usePromptAttachments();
+  const { addAttachments, canResolveLocalPaths } = usePromptAttachments();
   const dialog = useDialog();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +71,7 @@ export function PromptAttachButton() {
         ref={inputRef}
         type="file"
         multiple
-        accept={acceptedFileTypes(canAttachOffice).join(",")}
+        accept={acceptedFileTypes(canResolveLocalPaths).join(",")}
         className="hidden"
         onChange={handleChange}
       />

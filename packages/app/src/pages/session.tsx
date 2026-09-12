@@ -248,8 +248,8 @@ export function Page({
           !localAttachmentMatchesServer(part.local, server.key),
       );
       if (unavailableLocalOnly) {
-        toast.error(m.toast_prompt_attachDocumentMoved_title(), {
-          description: m.toast_prompt_attachDocumentMoved_description(),
+        toast.error(m.toast_prompt_attachFileMoved_title(), {
+          description: m.toast_prompt_attachFileMoved_description(),
         });
         return;
       }

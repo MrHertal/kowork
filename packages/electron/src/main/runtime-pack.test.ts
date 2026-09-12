@@ -34,7 +34,7 @@ afterEach(() => {
 const FINGERPRINT = `sha256:${"0".repeat(64)}`;
 
 const manifest = (overrides: Record<string, unknown> = {}) => ({
-  runtime: "office",
+  runtime: "skills",
   schemaVersion: RUNTIME_SCHEMA_VERSION,
   platform: "darwin",
   arch: "arm64",
@@ -151,7 +151,7 @@ describe("validateRuntimePack", () => {
       binDir: join(dir, "bin"),
       nodeModules: join(dir, "node_modules"),
     });
-    expect(result.manifest.runtime).toBe("office");
+    expect(result.manifest.runtime).toBe("skills");
   });
 
   test("accepts a valid windows pack with .cmd launchers", () => {
@@ -338,7 +338,7 @@ describe("assertRuntimePack", () => {
 
     expect(() =>
       assertRuntimePack({ dir, platform: "darwin", arch: "arm64" }),
-    ).toThrow(/Office runtime pack is invalid:\n- Runtime manifest is missing/);
+    ).toThrow(/Skill runtime pack is invalid:\n- Runtime manifest is missing/);
   });
 });
 
@@ -349,6 +349,6 @@ describe("formatRuntimeValidationIssues", () => {
         { code: "missing-runtime", message: "first" },
         { code: "unsafe-path", message: "second" },
       ]),
-    ).toBe("Office runtime pack is invalid:\n- first\n- second");
+    ).toBe("Skill runtime pack is invalid:\n- first\n- second");
   });
 });
