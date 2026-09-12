@@ -49,4 +49,4 @@ An attachment does not change the task's folder. For work that creates or edits 
 Name the exact input and desired output in your request. For example: “Read `survey.csv` and save a chart and summary in this folder.”
 :::
 
-For document-specific workflows, see [Create Office Documents](/docs/using-kowork/office-documents/).
+For format-specific workflows, see [Create Office Documents](/docs/using-kowork/office-documents/) and [Create and Edit Images](/docs/using-kowork/images/).

@@ -7,7 +7,7 @@ Thanks for your interest! Bug fixes, documentation, and translations are always 
 Follow the [Development section of the README](README.md#development). Two extras:
 
 - `pnpm dev` builds the OpenCode sidecar automatically; build it alone with `pnpm build:sidecar`.
-- The built-in document skills (docx, pdf, xlsx, pptx) embed a Python/Node runtime that builds automatically on first run. Prepare it with `pnpm --filter @kowork/electron ensure:runtime` and smoke-test it with `pnpm --filter @kowork/electron smoke:runtime`.
+- The built-in file skills (docx, image, pdf, pptx, xlsx) share an embedded Python/Node runtime that builds automatically on first run. Prepare it with `pnpm --filter @kowork/electron ensure:runtime` and smoke-test it with `pnpm --filter @kowork/electron smoke:runtime`.
 
 Each package under `packages/` has its own README with commands and structure notes.
 
