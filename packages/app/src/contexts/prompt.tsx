@@ -7,7 +7,7 @@ import {
   useMemo,
 } from "react";
 import type { FileSelection } from "@/contexts/file";
-import type { OfficeAttachmentFormat } from "@/constants/file-picker";
+import type { LocalAttachmentFormat } from "@/constants/file-picker";
 import { useSDK } from "@/contexts/sdk";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { type BlobReference, isLiveBlobReference } from "@/utils/blob";
@@ -40,13 +40,13 @@ export interface ImageAttachmentPart {
   serverKey?: string;
 }
 
-export interface OfficeAttachmentPart {
+export interface LocalAttachmentPart {
   type: "office";
   id: string;
   filename: string;
   mime: string;
   path: string;
-  format: OfficeAttachmentFormat;
+  format: LocalAttachmentFormat;
   serverKey: string;
 }
 
@@ -54,7 +54,7 @@ export type ContentPart =
   | TextPart
   | FileAttachmentPart
   | ImageAttachmentPart
-  | OfficeAttachmentPart;
+  | LocalAttachmentPart;
 export type Prompt = ContentPart[];
 
 export const DEFAULT_PROMPT: Prompt = [

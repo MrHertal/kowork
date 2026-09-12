@@ -1,6 +1,6 @@
 // @opencode-ref: opencode/packages/app/src/components/prompt-input/build-request-parts.test.ts
 import { describe, expect, test } from "vitest";
-import type { OfficeAttachmentPart } from "@/contexts/prompt";
+import type { LocalAttachmentPart } from "@/contexts/prompt";
 import {
   buildRequestParts,
   type EncodedImageAttachmentPart,
@@ -23,9 +23,9 @@ const office = (input: {
   id: string;
   filename: string;
   path: string;
-  format?: OfficeAttachmentPart["format"];
+  format?: LocalAttachmentPart["format"];
   mime?: string;
-}): OfficeAttachmentPart => ({
+}): LocalAttachmentPart => ({
   type: "office",
   id: input.id,
   filename: input.filename,

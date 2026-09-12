@@ -7,10 +7,10 @@ import type {
 } from "@opencode-ai/sdk/v2/client";
 import type {
   ImageAttachmentPart,
-  OfficeAttachmentPart,
+  LocalAttachmentPart,
 } from "@/contexts/prompt";
 import { ascending } from "@/utils/id";
-import { officeAttachmentsPrompt } from "@/utils/office-attachments";
+import { localAttachmentsPrompt } from "@/utils/local-attachments";
 
 type PromptRequestPart = (TextPartInput | FilePartInput) & { id: string };
 
@@ -20,7 +20,7 @@ export type EncodedImageAttachmentPart = Omit<ImageAttachmentPart, "blob"> & {
 
 type BuildRequestPartsInput = {
   text: string;
-  attachments: Array<EncodedImageAttachmentPart | OfficeAttachmentPart>;
+  attachments: Array<EncodedImageAttachmentPart | LocalAttachmentPart>;
   messageID: string;
   sessionID: string;
 };
@@ -86,7 +86,7 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
       : [],
   );
   if (office.length > 0) {
-    const attachmentContext = officeAttachmentsPrompt(office);
+    const attachmentContext = localAttachmentsPrompt(office);
     requestParts.push({
       id: ascending("part"),
       type: "text",

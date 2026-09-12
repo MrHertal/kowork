@@ -1,29 +1,29 @@
 import {
-  OFFICE_FILE_MIMES,
-  type OfficeAttachmentFormat,
+  LOCAL_ATTACHMENT_MIMES,
+  type LocalAttachmentFormat,
 } from "@/constants/file-picker";
 import type {
   ImageAttachmentPart,
-  OfficeAttachmentPart,
+  LocalAttachmentPart,
 } from "@/contexts/prompt";
 
-export const OFFICE_ATTACHMENTS_METADATA_KEY = "koworkAttachments";
+export const LOCAL_ATTACHMENTS_METADATA_KEY = "koworkAttachments";
 
-export type OfficeAttachmentsMetadata = {
+export type LocalAttachmentsMetadata = {
   version: 1;
   items: Array<{
     filename: string;
     path: string;
     mime: string;
-    format: OfficeAttachmentFormat;
+    format: LocalAttachmentFormat;
     position: number;
   }>;
 };
 
-export type OfficeAttachmentMetadataItem =
-  OfficeAttachmentsMetadata["items"][number];
+export type LocalAttachmentMetadataItem =
+  LocalAttachmentsMetadata["items"][number];
 
-export function officeAttachmentMatchesServer(
+export function localAttachmentMatchesServer(
   attachment: { serverKey: string },
   serverKey: string,
 ) {
@@ -35,7 +35,7 @@ export function officeAttachmentMatchesServer(
 export function pdfFallbackOfficePart(
   part: ImageAttachmentPart,
   input: { pdfInput: boolean; serverKey: string },
-): OfficeAttachmentPart | undefined {
+): LocalAttachmentPart | undefined {
   if (part.mime !== "application/pdf") return undefined;
   if (input.pdfInput) return undefined;
   if (!part.path || part.serverKey !== input.serverKey) return undefined;
@@ -54,15 +54,15 @@ function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
-function format(value: unknown): value is OfficeAttachmentFormat {
-  return typeof value === "string" && value in OFFICE_FILE_MIMES;
+function format(value: unknown): value is LocalAttachmentFormat {
+  return typeof value === "string" && value in LOCAL_ATTACHMENT_MIMES;
 }
 
-export function officeAttachmentsFromMetadata(
+export function localAttachmentsFromMetadata(
   metadata: unknown,
-): OfficeAttachmentMetadataItem[] {
+): LocalAttachmentMetadataItem[] {
   if (!record(metadata)) return [];
-  const value = metadata[OFFICE_ATTACHMENTS_METADATA_KEY];
+  const value = metadata[LOCAL_ATTACHMENTS_METADATA_KEY];
   if (!record(value) || value.version !== 1 || !Array.isArray(value.items))
     return [];
   return value.items.flatMap((item) => {
@@ -75,7 +75,7 @@ export function officeAttachmentsFromMetadata(
       typeof item.position !== "number" ||
       !Number.isSafeInteger(item.position) ||
       item.position < 1 ||
-      item.mime !== OFFICE_FILE_MIMES[item.format]
+      item.mime !== LOCAL_ATTACHMENT_MIMES[item.format]
     )
       return [];
     return [
@@ -99,16 +99,16 @@ function escapeXml(value: string) {
     .replaceAll("'", "&apos;");
 }
 
-export function officeAttachmentsPrompt(
+export function localAttachmentsPrompt(
   attachments: Array<{
     filename: string;
     path: string;
     mime: string;
-    format: OfficeAttachmentFormat;
+    format: LocalAttachmentFormat;
     position: number;
   }>,
 ) {
-  const items: OfficeAttachmentsMetadata["items"] = attachments.map(
+  const items: LocalAttachmentsMetadata["items"] = attachments.map(
     ({ filename, path, mime, format, position }) => ({
       filename,
       path,
@@ -133,10 +133,10 @@ export function officeAttachmentsPrompt(
   return {
     text,
     metadata: {
-      [OFFICE_ATTACHMENTS_METADATA_KEY]: {
+      [LOCAL_ATTACHMENTS_METADATA_KEY]: {
         version: 1,
         items,
-      } satisfies OfficeAttachmentsMetadata,
+      } satisfies LocalAttachmentsMetadata,
     },
   };
 }

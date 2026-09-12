@@ -44,7 +44,7 @@ import { usePlatform } from "@/contexts/platform";
 import {
   usePrompt,
   type ImageAttachmentPart,
-  type OfficeAttachmentPart,
+  type LocalAttachmentPart,
 } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useServer } from "@/contexts/server";
@@ -65,9 +65,9 @@ import { blobDataUrl } from "@/utils/blob";
 import { ascending } from "@/utils/id";
 import { buildKoworkConfiguration } from "@/utils/kowork-configuration";
 import {
-  officeAttachmentMatchesServer,
+  localAttachmentMatchesServer,
   pdfFallbackOfficePart,
-} from "@/utils/office-attachments";
+} from "@/utils/local-attachments";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
 import {
@@ -235,15 +235,15 @@ export function Page({
       const input = message.text?.trim();
       const promptSnapshot = prompt.current;
       const attachments = promptSnapshot.filter(
-        (part): part is ImageAttachmentPart | OfficeAttachmentPart =>
+        (part): part is ImageAttachmentPart | LocalAttachmentPart =>
           part.type === "image" ||
           (part.type === "office" &&
-            officeAttachmentMatchesServer(part, server.key)),
+            localAttachmentMatchesServer(part, server.key)),
       );
       const unavailableOffice = promptSnapshot.some(
         (part) =>
           part.type === "office" &&
-          !officeAttachmentMatchesServer(part, server.key),
+          !localAttachmentMatchesServer(part, server.key),
       );
       if (unavailableOffice) {
         toast.error(m.toast_prompt_attachDocumentMoved_title(), {
@@ -274,7 +274,7 @@ export function Page({
       }
 
       const resolvedAttachments = attachments.map(
-        (part): ImageAttachmentPart | OfficeAttachmentPart =>
+        (part): ImageAttachmentPart | LocalAttachmentPart =>
           part.type === "image"
             ? (pdfFallbackOfficePart(part, {
                 pdfInput: currentModelVal.capabilities.input.pdf,
@@ -418,7 +418,7 @@ export function Page({
   const hasUnavailableOffice = prompt.current.some(
     (part) =>
       part.type === "office" &&
-      !officeAttachmentMatchesServer(part, server.key),
+      !localAttachmentMatchesServer(part, server.key),
   );
   const canSubmit =
     (hasText || hasImages || hasOffice) &&

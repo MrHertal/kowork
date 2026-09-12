@@ -21,7 +21,7 @@ import {
 } from "@/components/ai-elements/attachments";
 import {
   type ImageAttachmentPart,
-  type OfficeAttachmentPart,
+  type LocalAttachmentPart,
   usePrompt,
 } from "@/contexts/prompt";
 import { usePromptAttachments } from "./attachments";
@@ -95,13 +95,13 @@ const ImageAttachmentItem = memo(
 );
 ImageAttachmentItem.displayName = "ImageAttachmentItem";
 
-interface OfficeAttachmentItemProps {
-  attachment: OfficeAttachmentPart;
+interface LocalAttachmentItemProps {
+  attachment: LocalAttachmentPart;
   onRemove: (id: string) => void;
 }
 
-const OfficeAttachmentItem = memo(
-  ({ attachment, onRemove }: OfficeAttachmentItemProps) => {
+const LocalAttachmentItem = memo(
+  ({ attachment, onRemove }: LocalAttachmentItemProps) => {
     const data = useMemo<AttachmentData>(
       () => ({
         id: attachment.id,
@@ -139,7 +139,7 @@ const OfficeAttachmentItem = memo(
     );
   },
 );
-OfficeAttachmentItem.displayName = "OfficeAttachmentItem";
+LocalAttachmentItem.displayName = "LocalAttachmentItem";
 
 export function PromptAttachments() {
   const { current } = usePrompt();
@@ -148,7 +148,7 @@ export function PromptAttachments() {
   const attachments = useMemo(
     () =>
       current.filter(
-        (part): part is ImageAttachmentPart | OfficeAttachmentPart =>
+        (part): part is ImageAttachmentPart | LocalAttachmentPart =>
           part.type === "image" || part.type === "office",
       ),
     [current],
@@ -166,7 +166,7 @@ export function PromptAttachments() {
             onRemove={removeAttachment}
           />
         ) : (
-          <OfficeAttachmentItem
+          <LocalAttachmentItem
             key={attachment.id}
             attachment={attachment}
             onRemove={removeAttachment}

@@ -43,7 +43,7 @@ import {
 import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useSDK } from "@/contexts/sdk";
 import { m } from "@/paraglide/messages";
-import { officeAttachmentsFromMetadata } from "@/utils/office-attachments";
+import { localAttachmentsFromMetadata } from "@/utils/local-attachments";
 
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -185,7 +185,7 @@ export function UserMessage({ parts }: { parts: Part[] }) {
   );
   const office = parts.flatMap((part) => {
     if (part.type !== "text" || !part.synthetic) return [];
-    return officeAttachmentsFromMetadata(part.metadata).map(
+    return localAttachmentsFromMetadata(part.metadata).map(
       (attachment, index) => ({
         ...attachment,
         id: `${part.id}-${index}`,

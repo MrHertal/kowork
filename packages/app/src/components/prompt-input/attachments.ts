@@ -7,12 +7,12 @@ import { usePlatform } from "@/contexts/platform";
 import {
   usePrompt,
   type ImageAttachmentPart,
-  type OfficeAttachmentPart,
+  type LocalAttachmentPart,
 } from "@/contexts/prompt";
 import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
 import { createBlobReference } from "@/utils/blob";
-import { attachmentMime, officeAttachmentInfo } from "./files";
+import { attachmentMime, pathOnlyAttachmentInfo } from "./files";
 
 const OVERLAY_SELECTOR =
   '[data-slot="dialog-overlay"],[data-slot="alert-dialog-overlay"]';
@@ -54,8 +54,8 @@ export function usePromptAttachments() {
     ): Promise<
       "added" | "unsupported" | "office-unavailable" | "office-path"
     > => {
-      const office = officeAttachmentInfo(file);
-      if (office) {
+      const local = pathOnlyAttachmentInfo(file);
+      if (local) {
         if (!allowOffice) return "office-path";
         if (!platform.getPathForFile || !sidecar) return "office-unavailable";
         const path = await platform.getPathForFile(file, {
@@ -63,13 +63,13 @@ export function usePromptAttachments() {
           wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
         });
         if (!path) return "office-path";
-        const attachment: OfficeAttachmentPart = {
+        const attachment: LocalAttachmentPart = {
           type: "office",
           id: nanoid(),
           filename: file.name,
           path,
           serverKey: server.key,
-          ...office,
+          ...local,
         };
         update((prev) => [...prev, attachment]);
         return "added";

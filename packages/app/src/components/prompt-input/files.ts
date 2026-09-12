@@ -3,9 +3,9 @@
 import {
   ACCEPTED_FILE_TYPES,
   ACCEPTED_IMAGE_TYPES,
-  ACCEPTED_OFFICE_FILE_TYPES,
-  OFFICE_FILE_MIMES,
-  type OfficeAttachmentFormat,
+  LOCAL_ATTACHMENT_MIMES,
+  PATH_ONLY_FILE_TYPES,
+  type LocalAttachmentFormat,
 } from "@/constants/file-picker";
 
 export { ACCEPTED_FILE_TYPES };
@@ -39,16 +39,16 @@ function ext(name: string) {
   return name.slice(idx + 1).toLowerCase();
 }
 
-export function officeAttachmentInfo(
+export function pathOnlyAttachmentInfo(
   file: Pick<File, "name">,
-): { format: OfficeAttachmentFormat; mime: string } | undefined {
+): { format: LocalAttachmentFormat; mime: string } | undefined {
   const format = ext(file.name);
-  // OFFICE_FILE_MIMES covers pdf, but PDFs only become path attachments at
+  // LOCAL_ATTACHMENT_MIMES covers pdf, but PDFs only become path attachments at
   // submit time; at attach time they go through attachmentMime.
-  if (!ACCEPTED_OFFICE_FILE_TYPES.includes(`.${format}`)) return;
+  if (!PATH_ONLY_FILE_TYPES.includes(`.${format}`)) return;
   return {
-    format: format as OfficeAttachmentFormat,
-    mime: OFFICE_FILE_MIMES[format as OfficeAttachmentFormat],
+    format: format as LocalAttachmentFormat,
+    mime: LOCAL_ATTACHMENT_MIMES[format as LocalAttachmentFormat],
   };
 }
 

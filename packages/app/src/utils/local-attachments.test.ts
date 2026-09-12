@@ -1,33 +1,33 @@
 import { describe, expect, test } from "vitest";
 import type {
   ImageAttachmentPart,
-  OfficeAttachmentPart,
+  LocalAttachmentPart,
 } from "@/contexts/prompt";
 import {
-  OFFICE_ATTACHMENTS_METADATA_KEY,
-  officeAttachmentMatchesServer,
-  officeAttachmentsFromMetadata,
-  officeAttachmentsPrompt,
+  LOCAL_ATTACHMENTS_METADATA_KEY,
+  localAttachmentMatchesServer,
+  localAttachmentsFromMetadata,
+  localAttachmentsPrompt,
   pdfFallbackOfficePart,
-} from "./office-attachments";
+} from "./local-attachments";
 
-describe("officeAttachmentMatchesServer", () => {
+describe("localAttachmentMatchesServer", () => {
   test("matches only the sidecar where the document was attached", () => {
     expect(
-      officeAttachmentMatchesServer({ serverKey: "sidecar" }, "sidecar"),
+      localAttachmentMatchesServer({ serverKey: "sidecar" }, "sidecar"),
     ).toBe(true);
     expect(
-      officeAttachmentMatchesServer({ serverKey: "sidecar" }, "wsl:Ubuntu"),
+      localAttachmentMatchesServer({ serverKey: "sidecar" }, "wsl:Ubuntu"),
     ).toBe(false);
     expect(
-      officeAttachmentMatchesServer({ serverKey: "wsl:Ubuntu" }, "wsl:Debian"),
+      localAttachmentMatchesServer({ serverKey: "wsl:Ubuntu" }, "wsl:Debian"),
     ).toBe(false);
   });
 });
 
 const attachment = (
-  input: Partial<OfficeAttachmentPart> = {},
-): OfficeAttachmentPart => ({
+  input: Partial<LocalAttachmentPart> = {},
+): LocalAttachmentPart => ({
   type: "office",
   id: "office_1",
   filename: "contract.docx",
@@ -106,9 +106,9 @@ describe("pdfFallbackOfficePart", () => {
   });
 });
 
-describe("officeAttachmentsPrompt", () => {
+describe("localAttachmentsPrompt", () => {
   test("builds model context and versioned metadata", () => {
-    const result = officeAttachmentsPrompt([
+    const result = localAttachmentsPrompt([
       { ...attachment(), position: 1 },
       {
         ...attachment({
@@ -136,7 +136,7 @@ describe("officeAttachmentsPrompt", () => {
     <position>2</position>
   </attachment>
 </kowork_attachments>`);
-    expect(result.metadata[OFFICE_ATTACHMENTS_METADATA_KEY]).toEqual({
+    expect(result.metadata[LOCAL_ATTACHMENTS_METADATA_KEY]).toEqual({
       version: 1,
       items: [
         {
@@ -158,7 +158,7 @@ describe("officeAttachmentsPrompt", () => {
   });
 
   test("escapes filenames and paths as untrusted XML values", () => {
-    const result = officeAttachmentsPrompt([
+    const result = localAttachmentsPrompt([
       {
         ...attachment({
           filename: `terms<&>"'.docx`,
@@ -177,11 +177,11 @@ describe("officeAttachmentsPrompt", () => {
   });
 });
 
-describe("officeAttachmentsFromMetadata", () => {
+describe("localAttachmentsFromMetadata", () => {
   test("returns validated version 1 attachment metadata", () => {
-    const prompt = officeAttachmentsPrompt([{ ...attachment(), position: 1 }]);
+    const prompt = localAttachmentsPrompt([{ ...attachment(), position: 1 }]);
 
-    expect(officeAttachmentsFromMetadata(prompt.metadata)).toEqual([
+    expect(localAttachmentsFromMetadata(prompt.metadata)).toEqual([
       {
         filename: "contract.docx",
         path: "/Users/example/contract.docx",
@@ -199,16 +199,16 @@ describe("officeAttachmentsFromMetadata", () => {
     { koworkAttachments: { version: 2, items: [] } },
     { koworkAttachments: { version: 1, items: "invalid" } },
   ])("ignores malformed metadata %#", (metadata) => {
-    expect(officeAttachmentsFromMetadata(metadata)).toEqual([]);
+    expect(localAttachmentsFromMetadata(metadata)).toEqual([]);
   });
 
   test("keeps valid items and ignores malformed entries", () => {
-    const valid = officeAttachmentsPrompt([{ ...attachment(), position: 1 }])
-      .metadata[OFFICE_ATTACHMENTS_METADATA_KEY].items[0];
+    const valid = localAttachmentsPrompt([{ ...attachment(), position: 1 }])
+      .metadata[LOCAL_ATTACHMENTS_METADATA_KEY].items[0];
 
     expect(
-      officeAttachmentsFromMetadata({
-        [OFFICE_ATTACHMENTS_METADATA_KEY]: {
+      localAttachmentsFromMetadata({
+        [LOCAL_ATTACHMENTS_METADATA_KEY]: {
           version: 1,
           items: [
             valid,
@@ -223,7 +223,7 @@ describe("officeAttachmentsFromMetadata", () => {
   });
 
   test("round-trips pdf attachments from the PDF fallback", () => {
-    const prompt = officeAttachmentsPrompt([
+    const prompt = localAttachmentsPrompt([
       {
         ...attachment({
           filename: "guide.pdf",
@@ -236,7 +236,7 @@ describe("officeAttachmentsFromMetadata", () => {
     ]);
 
     expect(prompt.text).toContain("<format>pdf</format>");
-    expect(officeAttachmentsFromMetadata(prompt.metadata)).toEqual([
+    expect(localAttachmentsFromMetadata(prompt.metadata)).toEqual([
       {
         filename: "guide.pdf",
         path: "/Users/example/guide.pdf",

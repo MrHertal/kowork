@@ -7,11 +7,11 @@ export const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-export const ACCEPTED_OFFICE_FILE_TYPES = [".docx", ".xlsx", ".pptx"];
+export const PATH_ONLY_FILE_TYPES = [".docx", ".xlsx", ".pptx"];
 // pdf is a submit-time path fallback only, so it stays out of
-// ACCEPTED_OFFICE_FILE_TYPES.
-export type OfficeAttachmentFormat = "docx" | "xlsx" | "pptx" | "pdf";
-export const OFFICE_FILE_MIMES: Record<OfficeAttachmentFormat, string> = {
+// PATH_ONLY_FILE_TYPES.
+export type LocalAttachmentFormat = "docx" | "xlsx" | "pptx" | "pdf";
+export const LOCAL_ATTACHMENT_MIMES: Record<LocalAttachmentFormat, string> = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -101,9 +101,9 @@ export const ACCEPTED_FILE_EXTENSIONS = Array.from(
   ),
 ).sort();
 
-export function acceptedFileTypes(office: boolean) {
-  return office
-    ? [...ACCEPTED_FILE_TYPES, ...ACCEPTED_OFFICE_FILE_TYPES]
+export function acceptedFileTypes(localPaths: boolean) {
+  return localPaths
+    ? [...ACCEPTED_FILE_TYPES, ...PATH_ONLY_FILE_TYPES]
     : ACCEPTED_FILE_TYPES;
 }
 
