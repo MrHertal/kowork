@@ -202,30 +202,51 @@ test("streams an assistant response and returns to ready", async ({ page }) => {
   }
 });
 
-test("restores the draft when prompt submission fails", async ({ page }) => {
-  const opencode = await mockOpenCode(page);
+test("answers a pending permission request", async ({ page }) => {
+  const permissionID = "per_browser_smoke";
+  const opencode = await mockOpenCode(page, {
+    permissionRequests: [
+      {
+        id: permissionID,
+        sessionID,
+        permission: "bash",
+        patterns: ["pnpm test"],
+        metadata: {},
+        always: [],
+      },
+    ],
+  });
 
   try {
     await page.goto(`/session/${sessionID}`);
+    await opencode.events.waitForConnection();
 
+    await expect(page.getByText("Permission required")).toBeVisible();
+    await expect(page.getByText("Run commands on your computer")).toBeVisible();
+    await expect(page.getByText("pnpm test", { exact: true })).toBeVisible();
+
+    const allowOnce = page.getByRole("button", { name: "Allow once" });
+    await allowOnce.click();
+
+    const reply = await opencode.waitForPermissionReply();
+    expect(reply).toMatchObject({
+      requestID: permissionID,
+      body: { reply: "once" },
+    });
+    await expect(allowOnce).toBeDisabled();
+    await reply.accept();
+
+    await opencode.events.send({
+      directory,
+      payload: {
+        type: "permission.replied",
+        properties: { sessionID, requestID: permissionID, reply: "once" },
+      },
+    });
+
+    await expect(page.getByText("Permission required")).toHaveCount(0);
     const composer = page.getByPlaceholder("Write a message");
-    const conversation = page.getByRole("log");
-    const promptText = "Keep this draft after an error.";
-    await composer.fill(promptText);
-    await page.getByRole("button", { name: "Submit" }).click();
-
-    const prompt = await opencode.waitForPrompt();
-    await expect(
-      conversation.getByText(promptText, { exact: true }),
-    ).toBeVisible();
-    await expect(composer).toHaveValue("");
-    await prompt.reject();
-
-    await expect(page.getByText("Request failed", { exact: true })).toBeVisible();
-    await expect(composer).toHaveValue(promptText);
-    await expect(
-      conversation.getByText(promptText, { exact: true }),
-    ).toHaveCount(0);
+    await composer.fill("Continue after allowing the command");
     await expect(page.getByRole("button", { name: "Submit" })).toBeEnabled();
   } finally {
     await opencode.close();
@@ -259,6 +280,38 @@ test("stops a busy task", async ({ page }) => {
     await expect(submit).toBeDisabled();
     await composer.fill("Continue after stopping");
     await expect(submit).toBeEnabled();
+  } finally {
+    await opencode.close();
+  }
+});
+
+test("restores the draft when prompt submission fails", async ({ page }) => {
+  const opencode = await mockOpenCode(page);
+
+  try {
+    await page.goto(`/session/${sessionID}`);
+
+    const composer = page.getByPlaceholder("Write a message");
+    const conversation = page.getByRole("log");
+    const promptText = "Keep this draft after an error.";
+    await composer.fill(promptText);
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    const prompt = await opencode.waitForPrompt();
+    await expect(
+      conversation.getByText(promptText, { exact: true }),
+    ).toBeVisible();
+    await expect(composer).toHaveValue("");
+    await prompt.reject();
+
+    await expect(
+      page.getByText("Request failed", { exact: true }),
+    ).toBeVisible();
+    await expect(composer).toHaveValue(promptText);
+    await expect(
+      conversation.getByText(promptText, { exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Submit" })).toBeEnabled();
   } finally {
     await opencode.close();
   }

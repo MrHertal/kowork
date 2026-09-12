@@ -28,6 +28,15 @@ export type OpenCodeEvent = {
   };
 };
 
+export type MockPermissionRequest = {
+  id: string;
+  sessionID: string;
+  permission: string;
+  patterns: string[];
+  metadata: Record<string, unknown>;
+  always: string[];
+};
+
 type PendingPrompt = {
   body: PromptRequest;
   sessionID: string;
@@ -40,8 +49,15 @@ type PendingSessionCreate = {
   accept: () => Promise<void>;
 };
 
+type PendingPermissionReply = {
+  requestID: string;
+  body: { reply?: "once" | "always" | "reject" };
+  accept: () => Promise<void>;
+};
+
 type MockOpenCodeOptions = {
   deferSessionStatus?: boolean;
+  permissionRequests?: MockPermissionRequest[];
   sessionStatus?: Record<string, unknown>;
 };
 
@@ -163,12 +179,20 @@ export async function mockOpenCode(
     resolveSessionCreate = resolve;
   });
   let sessionCreated = false;
+  let resolvePermissionReply:
+    | ((reply: PendingPermissionReply) => void)
+    | undefined;
+  const permissionReply = new Promise<PendingPermissionReply>((resolve) => {
+    resolvePermissionReply = resolve;
+  });
   let resolveAbort: (() => void) | undefined;
   const abort = new Promise<void>((resolve) => {
     resolveAbort = resolve;
   });
   let deferSessionStatus = options.deferSessionStatus ?? false;
-  let resolveSessionStatus: ((status: PendingSessionStatus) => void) | undefined;
+  let resolveSessionStatus:
+    | ((status: PendingSessionStatus) => void)
+    | undefined;
   const sessionStatus = new Promise<PendingSessionStatus>((resolve) => {
     resolveSessionStatus = resolve;
   });
@@ -202,6 +226,22 @@ export async function mockOpenCode(
       return;
     }
 
+    const permissionReplyMatch = path.match(/^\/permission\/([^/]+)\/reply$/);
+    if (
+      request.method() === "POST" &&
+      permissionReplyMatch &&
+      options.permissionRequests?.some(
+        (item) => item.id === permissionReplyMatch[1],
+      )
+    ) {
+      resolvePermissionReply?.({
+        requestID: permissionReplyMatch[1]!,
+        body: request.postDataJSON() as PendingPermissionReply["body"],
+        accept: () => sendJson(route, true),
+      });
+      return;
+    }
+
     const promptMatch = path.match(/^\/session\/([^/]+)\/prompt_async$/);
     if (
       request.method() === "POST" &&
@@ -229,10 +269,7 @@ export async function mockOpenCode(
       return;
     }
 
-    if (
-      request.method() === "POST" &&
-      path === `/session/${sessionID}/abort`
-    ) {
+    if (request.method() === "POST" && path === `/session/${sessionID}/abort`) {
       await sendJson(route, true);
       resolveAbort?.();
       return;
@@ -279,6 +316,9 @@ export async function mockOpenCode(
       }
       return sendJson(route, options.sessionStatus ?? {});
     }
+    if (path === "/permission") {
+      return sendJson(route, options.permissionRequests ?? []);
+    }
     if (path === "/agent") {
       return sendJson(route, [{ name: "build", mode: "primary" }]);
     }
@@ -301,6 +341,7 @@ export async function mockOpenCode(
     events,
     waitForAbort: () => abort,
     waitForPrompt: () => prompt,
+    waitForPermissionReply: () => permissionReply,
     waitForSessionCreate: () => sessionCreate,
     waitForSessionStatus: () => sessionStatus,
     close() {
