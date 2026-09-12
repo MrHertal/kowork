@@ -174,7 +174,7 @@ Sometimes the user doesn't want a new skill — they want to fix or upgrade one 
 - **Save over the same SKILL.md.** Kowork may keep an already loaded skill in
   memory. After editing an installed skill, tell the user either to remove and
   re-add its folder in Settings or to fully quit and reopen Kowork. A fresh
-  request or renderer reload alone does not guarantee that the edit is loaded.
+  Starting a new task alone does not guarantee that the edit is loaded.
   It is completely normal to go a couple of rounds: adjust, refresh, try it,
   and adjust again.
 
