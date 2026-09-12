@@ -32,6 +32,9 @@ export type LocalAttachmentMetadataItem =
     modelPartID?: string;
   };
 
+export type LocalAttachmentPromptItem =
+  LocalAttachmentsMetadata["items"][number];
+
 export function localAttachmentMatchesServer(
   attachment: { serverKey: string },
   serverKey: string,
@@ -114,15 +117,7 @@ function escapeXml(value: string) {
 }
 
 export function localAttachmentsPrompt(
-  attachments: Array<{
-    id: string;
-    filename: string;
-    path: string;
-    mime: string;
-    format: LocalAttachmentFormat;
-    position: number;
-    modelPartID?: string;
-  }>,
+  attachments: LocalAttachmentPromptItem[],
 ) {
   const items: LocalAttachmentsMetadata["items"] = attachments.map(
     ({ id, filename, path, mime, format, position, modelPartID }) => ({
