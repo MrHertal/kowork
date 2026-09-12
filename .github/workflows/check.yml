@@ -79,7 +79,7 @@ jobs:
         run: pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
 
       - name: Install Chromium
-        run: pnpm --filter @kowork/app exec playwright install --with-deps chromium
+        run: pnpm --filter @kowork/app exec playwright install --with-deps --only-shell chromium
 
       - name: Test browser smoke scenario
         run: pnpm --filter @kowork/app test:e2e

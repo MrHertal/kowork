@@ -1,10 +1,5 @@
 // @opencode-ref: opencode/packages/app/e2e/utils/mock-server.ts
-import { once } from "node:events";
-import {
-  createServer,
-  type IncomingMessage,
-  type ServerResponse,
-} from "node:http";
+import type { Page, Route } from "@playwright/test";
 
 export const sessionID = "ses_browser_smoke";
 export const directory = "/tmp/kowork-browser-smoke";
@@ -20,7 +15,7 @@ export type PromptRequest = {
 
 type PendingPrompt = {
   body: PromptRequest;
-  accept: () => void;
+  accept: () => Promise<void>;
 };
 
 const session = {
@@ -100,77 +95,76 @@ const emptyLists = new Set([
 
 const emptyObjects = new Set(["/global/config", "/config", "/mcp"]);
 
-function sendJson(response: ServerResponse, body: unknown, status = 200) {
-  response.writeHead(status, {
-    "access-control-allow-origin": "*",
-    "access-control-expose-headers": "x-next-cursor",
-    "content-type": "application/json",
+function sendJson(route: Route, body: unknown, status = 200) {
+  return route.fulfill({
+    status,
+    headers: {
+      "access-control-allow-origin": "*",
+      "access-control-expose-headers": "x-next-cursor",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(body),
   });
-  response.end(JSON.stringify(body));
 }
 
-async function readJson(request: IncomingMessage) {
-  const chunks: string[] = [];
-  for await (const chunk of request as AsyncIterable<unknown>) {
-    if (typeof chunk === "string") chunks.push(chunk);
-    else if (chunk instanceof Uint8Array) {
-      chunks.push(Buffer.from(chunk).toString("utf8"));
-    } else {
-      throw new Error("Unexpected request body chunk");
-    }
-  }
-  return JSON.parse(chunks.join("")) as PromptRequest;
-}
-
-export async function mockOpenCode() {
+export async function mockOpenCode(page: Page) {
+  const serverHost = process.env.PLAYWRIGHT_SERVER_HOST ?? "127.0.0.1";
+  const serverPort = process.env.PLAYWRIGHT_SERVER_PORT ?? "4096";
   let resolvePrompt: ((prompt: PendingPrompt) => void) | undefined;
   const prompt = new Promise<PendingPrompt>((resolve) => {
     resolvePrompt = resolve;
   });
+  const unhandledRequests: string[] = [];
 
-  const handle = async (request: IncomingMessage, response: ServerResponse) => {
-    const url = new URL(request.url ?? "/", "http://127.0.0.1:4096");
+  const handle = async (route: Route) => {
+    const request = route.request();
+    const url = new URL(request.url());
     const path = url.pathname;
 
-    if (request.method === "OPTIONS") {
-      response.writeHead(204, {
-        "access-control-allow-headers": "content-type,x-opencode-directory",
-        "access-control-allow-methods": "GET,POST,OPTIONS",
-        "access-control-allow-origin": "*",
+    if (request.method() === "OPTIONS") {
+      return route.fulfill({
+        status: 204,
+        headers: {
+          "access-control-allow-headers": "content-type,x-opencode-directory",
+          "access-control-allow-methods": "GET,POST,OPTIONS",
+          "access-control-allow-origin": "*",
+        },
       });
-      response.end();
-      return;
     }
 
     if (path === "/global/event") {
-      response.writeHead(200, {
-        "access-control-allow-origin": "*",
-        "cache-control": "no-cache",
-        "content-type": "text/event-stream",
+      return route.fulfill({
+        status: 200,
+        headers: {
+          "access-control-allow-origin": "*",
+          "cache-control": "no-cache",
+          "content-type": "text/event-stream",
+        },
+        body: ": connected\n\n",
       });
-      response.end(": connected\n\n");
-      return;
     }
 
     if (
-      request.method === "POST" &&
+      request.method() === "POST" &&
       path === `/session/${sessionID}/prompt_async`
     ) {
-      const body = await readJson(request);
+      const body = request.postDataJSON() as PromptRequest;
       resolvePrompt?.({
         body,
         accept() {
-          response.writeHead(204, { "access-control-allow-origin": "*" });
-          response.end();
+          return route.fulfill({
+            status: 204,
+            headers: { "access-control-allow-origin": "*" },
+          });
         },
       });
       return;
     }
 
-    if (path === "/global/health") return sendJson(response, { healthy: true });
-    if (path === "/provider") return sendJson(response, provider);
+    if (path === "/global/health") return sendJson(route, { healthy: true });
+    if (path === "/provider") return sendJson(route, provider);
     if (path === "/path") {
-      return sendJson(response, {
+      return sendJson(route, {
         state: directory,
         config: directory,
         worktree: directory,
@@ -178,56 +172,47 @@ export async function mockOpenCode() {
         home: "/tmp",
       });
     }
-    if (path === "/project") return sendJson(response, [project]);
-    if (path === "/project/current") return sendJson(response, project);
-    if (path === "/experimental/session") return sendJson(response, [session]);
-    if (path === "/session") return sendJson(response, [session]);
-    if (path === `/session/${sessionID}`) return sendJson(response, session);
+    if (path === "/project") return sendJson(route, [project]);
+    if (path === "/project/current") return sendJson(route, project);
+    if (path === "/experimental/session") return sendJson(route, [session]);
+    if (path === "/session") return sendJson(route, [session]);
+    if (path === `/session/${sessionID}`) return sendJson(route, session);
     if (path === `/session/${sessionID}/message`) {
-      return sendJson(response, []);
+      return sendJson(route, []);
     }
     if (/^\/session\/[^/]+\/(children|diff|todo)$/.test(path)) {
-      return sendJson(response, []);
+      return sendJson(route, []);
     }
-    if (path === "/session/status") return sendJson(response, {});
+    if (path === "/session/status") return sendJson(route, {});
     if (path === "/agent") {
-      return sendJson(response, [{ name: "build", mode: "primary" }]);
+      return sendJson(route, [{ name: "build", mode: "primary" }]);
     }
     if (path === "/vcs") {
-      return sendJson(response, {
+      return sendJson(route, {
         branch: "browser-e2e-smoke",
         default_branch: "main",
       });
     }
-    if (emptyLists.has(path)) return sendJson(response, []);
-    if (emptyObjects.has(path)) return sendJson(response, {});
+    if (emptyLists.has(path)) return sendJson(route, []);
+    if (emptyObjects.has(path)) return sendJson(route, {});
 
-    return sendJson(
-      response,
-      { error: `Unhandled mock endpoint: ${path}` },
-      404,
-    );
+    unhandledRequests.push(`${request.method()} ${path}`);
+    return sendJson(route, { error: `Unhandled mock endpoint: ${path}` }, 404);
   };
 
-  const server = createServer((request, response) => {
-    void handle(request, response).catch((error: unknown) => {
-      sendJson(
-        response,
-        { error: error instanceof Error ? error.message : String(error) },
-        500,
-      );
-    });
-  });
-  server.listen(4096, "127.0.0.1");
-  await once(server, "listening");
+  await page.route(`http://${serverHost}:${serverPort}/**`, handle);
 
   return {
     waitForPrompt: () => prompt,
-    async close() {
-      const closed = once(server, "close");
-      server.close();
-      server.closeAllConnections();
-      await closed;
+    close() {
+      if (unhandledRequests.length > 0) {
+        return Promise.reject(
+          new Error(
+            `Unhandled OpenCode mock requests:\n${unhandledRequests.join("\n")}`,
+          ),
+        );
+      }
+      return Promise.resolve();
     },
   };
 }

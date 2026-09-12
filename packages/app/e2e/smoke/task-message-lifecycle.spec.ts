@@ -8,7 +8,7 @@ import {
 } from "../utils/mock-opencode";
 
 test("submits a plain message to OpenCode", async ({ page }) => {
-  const opencode = await mockOpenCode();
+  const opencode = await mockOpenCode(page);
 
   try {
     await page.goto(`/session/${sessionID}`);
@@ -33,9 +33,8 @@ test("submits a plain message to OpenCode", async ({ page }) => {
     await expect(page.getByText(promptText, { exact: true })).toBeVisible();
     await expect(composer).toHaveValue("");
 
-    prompt.accept();
+    await prompt.accept();
   } finally {
-    await page.close();
     await opencode.close();
   }
 });

@@ -28,6 +28,17 @@ pnpm --filter @kowork/app exec playwright install chromium
 
 The initial scenario opens the standalone browser app against a local mock of the OpenCode HTTP API. It verifies that a user can enter a plain message and that Kowork sends the expected agent, model, and text parts while rendering the optimistic user message.
 
+The browser test configuration accepts the same environment overrides as OpenCode:
+
+| Variable                    | Default     | Purpose                                  |
+| --------------------------- | ----------- | ---------------------------------------- |
+| `PLAYWRIGHT_PORT`           | `4173`      | Local Vite server port                   |
+| `PLAYWRIGHT_BASE_URL`       | Derived     | App URL derived from `PLAYWRIGHT_PORT`   |
+| `PLAYWRIGHT_SERVER_HOST`    | `127.0.0.1` | Mocked OpenCode host                     |
+| `PLAYWRIGHT_SERVER_PORT`    | `4096`      | Mocked OpenCode port                     |
+| `PLAYWRIGHT_WORKERS`        | Environment | One in CI; Playwright default locally    |
+| `PLAYWRIGHT_FULLY_PARALLEL` | Unset       | Set to `1` for fully parallel test files |
+
 This first layer intentionally does not start Electron or the OpenCode sidecar, call a model, stream an assistant response, run a skill, or create a PDF. Those behaviors can be added as separate scenarios after this smoke test is stable.
 
 ## Build targets
