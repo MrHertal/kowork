@@ -1,12 +1,55 @@
 import { expect, test } from "@playwright/test";
 
 import {
+  createdSessionID,
   directory,
   modelID,
   mockOpenCode,
   providerID,
   sessionID,
 } from "../utils/mock-opencode";
+
+test("creates a task and submits its first message", async ({ page }) => {
+  const opencode = await mockOpenCode(page);
+
+  try {
+    await page.goto("/");
+
+    const composer = page.getByPlaceholder("How can I help you today?");
+    const submit = page.getByRole("button", { name: "Submit" });
+    await expect(composer).toBeVisible();
+    await expect(submit).toBeDisabled();
+
+    const promptText = "Create this task from my first message.";
+    await composer.fill(promptText);
+    await expect(submit).toBeEnabled();
+    await submit.click();
+
+    const sessionCreate = await opencode.waitForSessionCreate();
+    expect(sessionCreate.body).toMatchObject({
+      metadata: { "kowork.directoryMode": "default" },
+    });
+    await sessionCreate.accept();
+
+    const prompt = await opencode.waitForPrompt();
+    expect(prompt.sessionID).toBe(createdSessionID);
+    expect(prompt.body).toMatchObject({
+      agent: "build",
+      model: { providerID, modelID },
+      parts: [{ type: "text", text: promptText }],
+    });
+    expect(prompt.body.messageID).toEqual(expect.any(String));
+    await prompt.accept();
+
+    await expect(page).toHaveURL(`/session/${createdSessionID}`);
+    await expect(
+      page.getByRole("log").getByText(promptText, { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByPlaceholder("Write a message")).toHaveValue("");
+  } finally {
+    await opencode.close();
+  }
+});
 
 test("submits a plain message to OpenCode", async ({ page }) => {
   const opencode = await mockOpenCode(page);

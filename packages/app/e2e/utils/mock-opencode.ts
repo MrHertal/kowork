@@ -4,6 +4,7 @@ import type { Page, Route } from "@playwright/test";
 import { installSseTransport } from "./sse-transport";
 
 export const sessionID = "ses_browser_smoke";
+export const createdSessionID = "ses_browser_created";
 export const directory = "/tmp/kowork-browser-smoke";
 export const providerID = "mock-provider";
 export const modelID = "mock-small-model";
@@ -13,6 +14,10 @@ export type PromptRequest = {
   messageID?: string;
   model?: { providerID: string; modelID: string };
   parts?: Array<{ type: string; text?: string }>;
+};
+
+type SessionCreateRequest = {
+  metadata?: Record<string, unknown>;
 };
 
 export type OpenCodeEvent = {
@@ -25,8 +30,14 @@ export type OpenCodeEvent = {
 
 type PendingPrompt = {
   body: PromptRequest;
+  sessionID: string;
   accept: () => Promise<void>;
   reject: () => Promise<void>;
+};
+
+type PendingSessionCreate = {
+  body: SessionCreateRequest;
+  accept: () => Promise<void>;
 };
 
 type MockOpenCodeOptions = {
@@ -44,6 +55,14 @@ const session = {
   agent: "build",
   model: { providerID, id: modelID },
   time: { created: 1_700_000_000_000, updated: 1_700_000_000_000 },
+};
+
+const createdSession = {
+  ...session,
+  id: createdSessionID,
+  slug: "browser-created",
+  title: "New task",
+  metadata: { "kowork.directoryMode": "default" },
 };
 
 const project = {
@@ -137,6 +156,13 @@ export async function mockOpenCode(
   const prompt = new Promise<PendingPrompt>((resolve) => {
     resolvePrompt = resolve;
   });
+  let resolveSessionCreate:
+    | ((sessionCreate: PendingSessionCreate) => void)
+    | undefined;
+  const sessionCreate = new Promise<PendingSessionCreate>((resolve) => {
+    resolveSessionCreate = resolve;
+  });
+  let sessionCreated = false;
   let resolveAbort: (() => void) | undefined;
   const abort = new Promise<void>((resolve) => {
     resolveAbort = resolve;
@@ -164,13 +190,28 @@ export async function mockOpenCode(
       });
     }
 
+    if (request.method() === "POST" && path === "/session") {
+      const body = request.postDataJSON() as SessionCreateRequest;
+      resolveSessionCreate?.({
+        body,
+        async accept() {
+          sessionCreated = true;
+          await sendJson(route, createdSession);
+        },
+      });
+      return;
+    }
+
+    const promptMatch = path.match(/^\/session\/([^/]+)\/prompt_async$/);
     if (
       request.method() === "POST" &&
-      path === `/session/${sessionID}/prompt_async`
+      promptMatch &&
+      [sessionID, createdSessionID].includes(promptMatch[1] ?? "")
     ) {
       const body = request.postDataJSON() as PromptRequest;
       resolvePrompt?.({
         body,
+        sessionID: promptMatch[1]!,
         accept() {
           return route.fulfill({
             status: 204,
@@ -210,10 +251,17 @@ export async function mockOpenCode(
     }
     if (path === "/project") return sendJson(route, [project]);
     if (path === "/project/current") return sendJson(route, project);
-    if (path === "/experimental/session") return sendJson(route, [session]);
-    if (path === "/session") return sendJson(route, [session]);
+    const sessions = sessionCreated ? [createdSession, session] : [session];
+    if (path === "/experimental/session") return sendJson(route, sessions);
+    if (path === "/session") return sendJson(route, sessions);
     if (path === `/session/${sessionID}`) return sendJson(route, session);
-    if (path === `/session/${sessionID}/message`) {
+    if (sessionCreated && path === `/session/${createdSessionID}`) {
+      return sendJson(route, createdSession);
+    }
+    if (
+      path === `/session/${sessionID}/message` ||
+      (sessionCreated && path === `/session/${createdSessionID}/message`)
+    ) {
       return sendJson(route, []);
     }
     if (/^\/session\/[^/]+\/(children|diff|todo)$/.test(path)) {
@@ -253,6 +301,7 @@ export async function mockOpenCode(
     events,
     waitForAbort: () => abort,
     waitForPrompt: () => prompt,
+    waitForSessionCreate: () => sessionCreate,
     waitForSessionStatus: () => sessionStatus,
     close() {
       if (unhandledRequests.length > 0) {
