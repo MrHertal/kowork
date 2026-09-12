@@ -20,7 +20,9 @@ describe("localAttachmentMatchesServer", () => {
   });
 });
 
-type LocalAttachmentInput = Parameters<typeof localAttachmentsPrompt>[0][number];
+type LocalAttachmentInput = Parameters<
+  typeof localAttachmentsPrompt
+>[0][number];
 
 const attachment = (
   input: Partial<LocalAttachmentInput> = {},

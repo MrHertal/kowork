@@ -452,9 +452,7 @@ describe("usePromptAttachments", () => {
     };
     await setup();
     const { event } = pasteEvent({
-      items: [
-        { kind: "file", getAsFile: () => pathOnlyFile("report.docx") },
-      ],
+      items: [{ kind: "file", getAsFile: () => pathOnlyFile("report.docx") }],
     });
 
     await attachments.handlePaste(event);
