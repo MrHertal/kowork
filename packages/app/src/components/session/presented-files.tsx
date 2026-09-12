@@ -71,13 +71,13 @@ function fileKind(file: PresentedFile): FileKind {
 function fileTypeLabel(file: PresentedFile, kind: FileKind): string {
   switch (kind) {
     case "word":
-      return m.session_document_type_word();
+      return m.session_file_type_word();
     case "excel":
-      return m.session_document_type_excel();
+      return m.session_file_type_excel();
     case "powerpoint":
-      return m.session_document_type_powerpoint();
+      return m.session_file_type_powerpoint();
     case "pdf":
-      return m.session_document_type_pdf();
+      return m.session_file_type_pdf();
     case "image":
       return imageTypeLabels[fileExtension(file.filename)] ?? file.mime;
   }
@@ -109,8 +109,8 @@ function PresentedFileCard({
     try {
       await openPath(file.path);
     } catch {
-      toast.error(m.session_document_open_failed_title(), {
-        description: m.session_document_open_failed_description(),
+      toast.error(m.session_file_open_failed_title(), {
+        description: m.session_file_open_failed_description(),
       });
     } finally {
       openingRef.current = false;
@@ -164,7 +164,7 @@ function PresentedFileCard({
             ) : (
               <ExternalLinkIcon data-icon="inline-start" aria-hidden="true" />
             )}
-            {m.session_document_open()}
+            {m.session_file_open()}
           </Button>
         )}
       </CardContent>

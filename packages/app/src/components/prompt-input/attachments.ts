@@ -27,14 +27,14 @@ function warn() {
 }
 
 function warnLocalAttachmentsUnavailable() {
-  toast.error(m.toast_prompt_attachOfficeUnavailable_title(), {
-    description: m.toast_prompt_attachOfficeUnavailable_description(),
+  toast.error(m.toast_prompt_attachLocalUnavailable_title(), {
+    description: m.toast_prompt_attachLocalUnavailable_description(),
   });
 }
 
 function warnAttachmentPathUnavailable() {
-  toast.error(m.toast_prompt_attachOfficePathFailed_title(), {
-    description: m.toast_prompt_attachOfficePathFailed_description(),
+  toast.error(m.toast_prompt_attachPathFailed_title(), {
+    description: m.toast_prompt_attachPathFailed_description(),
   });
 }
 
