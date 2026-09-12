@@ -1,11 +1,9 @@
 import { describe, expect, test } from "vitest";
-import type { PromptAttachmentPart } from "@/contexts/prompt";
 import {
   LOCAL_ATTACHMENTS_METADATA_KEY,
   localAttachmentMatchesServer,
   localAttachmentsFromMetadata,
   localAttachmentsPrompt,
-  pdfFallbackLocalPart,
 } from "./local-attachments";
 
 describe("localAttachmentMatchesServer", () => {
@@ -34,80 +32,6 @@ const attachment = (
   format: "docx",
   position: 1,
   ...input,
-});
-
-const pdfImage = (
-  input: Partial<PromptAttachmentPart> = {},
-): PromptAttachmentPart => ({
-  type: "attachment",
-  id: "img_1",
-  filename: "guide.pdf",
-  mime: "application/pdf",
-  blob: { id: "abc123", url: "blob:http://localhost/abc123" },
-  local: {
-    path: "/Users/example/guide.pdf",
-    format: "pdf",
-    serverKey: "sidecar",
-  },
-  ...input,
-});
-
-describe("pdfFallbackLocalPart", () => {
-  test("converts a captured PDF when the model lacks PDF input", () => {
-    expect(
-      pdfFallbackLocalPart(pdfImage(), {
-        pdfInput: false,
-        serverKey: "sidecar",
-      }),
-    ).toEqual({
-      type: "attachment",
-      id: "img_1",
-      filename: "guide.pdf",
-      mime: "application/pdf",
-      blob: undefined,
-      local: {
-        path: "/Users/example/guide.pdf",
-        format: "pdf",
-        serverKey: "sidecar",
-      },
-    });
-  });
-
-  test("keeps the base64 flow when the model supports PDF input", () => {
-    expect(
-      pdfFallbackLocalPart(pdfImage(), {
-        pdfInput: true,
-        serverKey: "sidecar",
-      }),
-    ).toBeUndefined();
-  });
-
-  test("keeps the base64 flow without a captured path", () => {
-    expect(
-      pdfFallbackLocalPart(pdfImage({ local: undefined }), {
-        pdfInput: false,
-        serverKey: "sidecar",
-      }),
-    ).toBeUndefined();
-  });
-
-  test("keeps the base64 flow when the server changed", () => {
-    expect(
-      pdfFallbackLocalPart(pdfImage(), {
-        pdfInput: false,
-        serverKey: "wsl:Ubuntu",
-      }),
-    ).toBeUndefined();
-  });
-
-  test("ignores non-PDF attachments", () => {
-    expect(
-      pdfFallbackLocalPart(pdfImage({ mime: "image/png" }), {
-        pdfInput: false,
-        serverKey: "sidecar",
-      }),
-    ).toBeUndefined();
-  });
 });
 
 describe("localAttachmentsPrompt", () => {

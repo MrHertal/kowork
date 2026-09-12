@@ -61,11 +61,11 @@ import {
   syncSessionModel,
 } from "@/pages/session/session-model-helpers";
 import { blobDataUrl } from "@/utils/blob";
+import { planAttachmentDelivery } from "@/utils/attachment-delivery";
 import { ascending } from "@/utils/id";
 import { buildKoworkConfiguration } from "@/utils/kowork-configuration";
 import {
   localAttachmentMatchesServer,
-  pdfFallbackLocalPart,
 } from "@/utils/local-attachments";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
@@ -275,15 +275,10 @@ export function Page({
         return;
       }
 
-      const resolvedAttachments = attachments.map(
-        (part): PromptAttachmentPart =>
-          part.blob
-            ? (pdfFallbackLocalPart(part, {
-                pdfInput: currentModelVal.capabilities.input.pdf,
-                serverKey: server.key,
-              }) ?? part)
-            : part,
-      );
+      const deliveries = planAttachmentDelivery(attachments, {
+        pdfInput: currentModelVal.capabilities.input.pdf,
+        serverKey: server.key,
+      });
 
       sendingRef.current = true;
       setSending(true);
@@ -315,16 +310,22 @@ export function Page({
         }
 
         messageID = ascending("message");
-        const encodedAttachments = await Promise.all(
-          resolvedAttachments.map(async (part) =>
-            part.blob
-              ? { ...part, dataUrl: await blobDataUrl(part.blob, part.mime) }
-              : part,
+        const encodedDeliveries = await Promise.all(
+          deliveries.map(async (delivery) =>
+            delivery.includeModelPayload && delivery.attachment.blob
+              ? {
+                  ...delivery,
+                  dataUrl: await blobDataUrl(
+                    delivery.attachment.blob,
+                    delivery.attachment.mime,
+                  ),
+                }
+              : delivery,
           ),
         );
         const { requestParts, optimisticParts } = buildRequestParts({
           text: input ?? "",
-          attachments: encodedAttachments,
+          deliveries: encodedDeliveries,
           messageID,
           sessionID: sid,
         });

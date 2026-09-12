@@ -102,4 +102,98 @@ describe("UserMessage", () => {
         .map((item) => item.title),
     ).toEqual(["photo.png", "contract.docx"]);
   });
+
+  test("merges native and local projections into one PDF tile", () => {
+    render(
+      <UserMessage
+        parts={[
+          synthetic({
+            koworkAttachments: {
+              version: 2,
+              items: [
+                {
+                  id: "pdf_1",
+                  filename: "guide.pdf",
+                  path: "/secret/guide.pdf",
+                  mime: "application/pdf",
+                  format: "pdf",
+                  position: 1,
+                  modelPartID: "prt_pdf",
+                },
+              ],
+            },
+          }),
+          {
+            id: "prt_pdf",
+            type: "file",
+            filename: "guide.pdf",
+            mime: "application/pdf",
+            url: "data:application/pdf;base64,BBB",
+            sessionID: "ses_1",
+            messageID: "msg_1",
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByTitle("guide.pdf")).toHaveLength(1);
+    expect(screen.queryByText(/\/secret\/guide\.pdf/)).not.toBeInTheDocument();
+  });
+
+  test("preserves order across native, dual, and local attachments", () => {
+    render(
+      <UserMessage
+        parts={[
+          synthetic({
+            koworkAttachments: {
+              version: 2,
+              items: [
+                {
+                  id: "pdf_1",
+                  filename: "guide.pdf",
+                  path: "/secret/guide.pdf",
+                  mime: "application/pdf",
+                  format: "pdf",
+                  position: 2,
+                  modelPartID: "prt_pdf",
+                },
+                {
+                  id: "doc_1",
+                  filename: "contract.docx",
+                  path: "/secret/contract.docx",
+                  mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                  format: "docx",
+                  position: 3,
+                },
+              ],
+            },
+          }),
+          {
+            id: "prt_image",
+            type: "file",
+            filename: "photo.png",
+            mime: "image/png",
+            url: "data:image/png;base64,AAA",
+            sessionID: "ses_1",
+            messageID: "msg_1",
+          },
+          {
+            id: "prt_pdf",
+            type: "file",
+            filename: "guide.pdf",
+            mime: "application/pdf",
+            url: "data:application/pdf;base64,BBB",
+            sessionID: "ses_1",
+            messageID: "msg_1",
+          },
+        ]}
+      />,
+    );
+
+    expect(
+      screen
+        .getAllByTitle(/photo\.png|guide\.pdf|contract\.docx/)
+        .map((item) => item.title),
+    ).toEqual(["photo.png", "guide.pdf", "contract.docx"]);
+  });
 });

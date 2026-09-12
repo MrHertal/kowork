@@ -2,10 +2,6 @@ import {
   LOCAL_ATTACHMENT_MIMES,
   type LocalAttachmentFormat,
 } from "@/constants/file-picker";
-import type {
-  PromptAttachmentPart,
-} from "@/contexts/prompt";
-
 export const LOCAL_ATTACHMENTS_METADATA_KEY = "koworkAttachments";
 
 type LocalAttachmentMetadataBase = {
@@ -40,21 +36,6 @@ export function localAttachmentMatchesServer(
   serverKey: string,
 ) {
   return attachment.serverKey === serverKey;
-}
-
-// Models without PDF input only get an error text for base64 PDF parts, so
-// fall back to a path attachment when a local path was captured.
-export function pdfFallbackLocalPart(
-  part: PromptAttachmentPart,
-  input: { pdfInput: boolean; serverKey: string },
-): PromptAttachmentPart | undefined {
-  if (part.mime !== "application/pdf") return undefined;
-  if (input.pdfInput) return undefined;
-  if (!part.local || part.local.serverKey !== input.serverKey) return undefined;
-  return {
-    ...part,
-    blob: undefined,
-  };
 }
 
 function record(value: unknown): value is Record<string, unknown> {

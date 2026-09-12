@@ -5,21 +5,19 @@ import type {
   Part,
   TextPartInput,
 } from "@opencode-ai/sdk/v2/client";
-import type {
-  PromptAttachmentPart,
-} from "@/contexts/prompt";
+import type { AttachmentDeliveryPlan } from "@/utils/attachment-delivery";
 import { ascending } from "@/utils/id";
 import { localAttachmentsPrompt } from "@/utils/local-attachments";
 
 type PromptRequestPart = (TextPartInput | FilePartInput) & { id: string };
 
-export type EncodedPromptAttachmentPart = Omit<PromptAttachmentPart, "blob"> & {
+export type EncodedAttachmentDelivery = AttachmentDeliveryPlan & {
   dataUrl?: string;
 };
 
 type BuildRequestPartsInput = {
   text: string;
-  attachments: EncodedPromptAttachmentPart[];
+  deliveries: EncodedAttachmentDelivery[];
   messageID: string;
   sessionID: string;
 };
@@ -65,29 +63,35 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
       ]
     : [];
 
-  const images = input.attachments.flatMap((attachment) =>
-    attachment.dataUrl
+  const modelAttachments = input.deliveries.flatMap((delivery) =>
+    delivery.dataUrl
       ? [
           {
+            attachmentID: delivery.attachment.id,
+            position: delivery.position,
+            part: {
             id: ascending("part"),
             type: "file" as const,
-            mime: attachment.mime,
-            url: attachment.dataUrl,
-            filename: attachment.filename,
-          } satisfies PromptRequestPart,
+            mime: delivery.attachment.mime,
+            url: delivery.dataUrl,
+            filename: delivery.attachment.filename,
+            } satisfies PromptRequestPart,
+          },
         ]
       : [],
   );
+  const modelPartIDs = new Map(
+    modelAttachments.map(({ attachmentID, part }) => [attachmentID, part.id]),
+  );
 
-  const locals = input.attachments.flatMap((attachment, index) =>
-    attachment.local
+  const locals = input.deliveries.flatMap((delivery) =>
+    delivery.local
       ? [
           {
-            id: attachment.id,
-            filename: attachment.filename,
-            mime: attachment.mime,
-            ...attachment.local,
-            position: index + 1,
+            ...delivery.local,
+            ...(modelPartIDs.has(delivery.attachment.id)
+              ? { modelPartID: modelPartIDs.get(delivery.attachment.id) }
+              : {}),
           },
         ]
       : [],
@@ -103,7 +107,7 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
     });
   }
 
-  requestParts.push(...images);
+  requestParts.push(...modelAttachments.map(({ part }) => part));
 
   return {
     requestParts,
