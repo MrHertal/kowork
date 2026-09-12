@@ -29,6 +29,10 @@ type PendingPrompt = {
   reject: () => Promise<void>;
 };
 
+type MockOpenCodeOptions = {
+  sessionStatus?: Record<string, unknown>;
+};
+
 const session = {
   id: sessionID,
   slug: "browser-smoke",
@@ -118,7 +122,10 @@ function sendJson(route: Route, body: unknown, status = 200) {
   });
 }
 
-export async function mockOpenCode(page: Page) {
+export async function mockOpenCode(
+  page: Page,
+  options: MockOpenCodeOptions = {},
+) {
   const serverHost = process.env.PLAYWRIGHT_SERVER_HOST ?? "127.0.0.1";
   const serverPort = process.env.PLAYWRIGHT_SERVER_PORT ?? "4096";
   const events = await installSseTransport<OpenCodeEvent>(
@@ -128,6 +135,10 @@ export async function mockOpenCode(page: Page) {
   let resolvePrompt: ((prompt: PendingPrompt) => void) | undefined;
   const prompt = new Promise<PendingPrompt>((resolve) => {
     resolvePrompt = resolve;
+  });
+  let resolveAbort: (() => void) | undefined;
+  const abort = new Promise<void>((resolve) => {
+    resolveAbort = resolve;
   });
   const unhandledRequests: string[] = [];
 
@@ -171,6 +182,15 @@ export async function mockOpenCode(page: Page) {
       return;
     }
 
+    if (
+      request.method() === "POST" &&
+      path === `/session/${sessionID}/abort`
+    ) {
+      await sendJson(route, true);
+      resolveAbort?.();
+      return;
+    }
+
     if (path === "/global/health") return sendJson(route, { healthy: true });
     if (path === "/provider") return sendJson(route, provider);
     if (path === "/path") {
@@ -193,7 +213,9 @@ export async function mockOpenCode(page: Page) {
     if (/^\/session\/[^/]+\/(children|diff|todo)$/.test(path)) {
       return sendJson(route, []);
     }
-    if (path === "/session/status") return sendJson(route, {});
+    if (path === "/session/status") {
+      return sendJson(route, options.sessionStatus ?? {});
+    }
     if (path === "/agent") {
       return sendJson(route, [{ name: "build", mode: "primary" }]);
     }
@@ -214,6 +236,7 @@ export async function mockOpenCode(page: Page) {
 
   return {
     events,
+    waitForAbort: () => abort,
     waitForPrompt: () => prompt,
     close() {
       if (unhandledRequests.length > 0) {

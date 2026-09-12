@@ -188,3 +188,35 @@ test("restores the draft when prompt submission fails", async ({ page }) => {
     await opencode.close();
   }
 });
+
+test("stops a busy task", async ({ page }) => {
+  const opencode = await mockOpenCode(page, {
+    sessionStatus: { [sessionID]: { type: "busy" } },
+  });
+
+  try {
+    await page.goto(`/session/${sessionID}`);
+    await opencode.events.waitForConnection();
+
+    const stop = page.getByRole("button", { name: "Stop" });
+    await expect(stop).toBeVisible();
+    await stop.click();
+    await opencode.waitForAbort();
+
+    await opencode.events.send({
+      directory,
+      payload: {
+        type: "session.status",
+        properties: { sessionID, status: { type: "idle" } },
+      },
+    });
+
+    const composer = page.getByPlaceholder("Write a message");
+    const submit = page.getByRole("button", { name: "Submit" });
+    await expect(submit).toBeDisabled();
+    await composer.fill("Continue after stopping");
+    await expect(submit).toBeEnabled();
+  } finally {
+    await opencode.close();
+  }
+});
