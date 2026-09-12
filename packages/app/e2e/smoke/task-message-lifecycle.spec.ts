@@ -158,3 +158,33 @@ test("streams an assistant response and returns to ready", async ({ page }) => {
     await opencode.close();
   }
 });
+
+test("restores the draft when prompt submission fails", async ({ page }) => {
+  const opencode = await mockOpenCode(page);
+
+  try {
+    await page.goto(`/session/${sessionID}`);
+
+    const composer = page.getByPlaceholder("Write a message");
+    const conversation = page.getByRole("log");
+    const promptText = "Keep this draft after an error.";
+    await composer.fill(promptText);
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    const prompt = await opencode.waitForPrompt();
+    await expect(
+      conversation.getByText(promptText, { exact: true }),
+    ).toBeVisible();
+    await expect(composer).toHaveValue("");
+    await prompt.reject();
+
+    await expect(page.getByText("Request failed", { exact: true })).toBeVisible();
+    await expect(composer).toHaveValue(promptText);
+    await expect(
+      conversation.getByText(promptText, { exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Submit" })).toBeEnabled();
+  } finally {
+    await opencode.close();
+  }
+});

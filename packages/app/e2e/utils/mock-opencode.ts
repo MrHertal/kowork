@@ -26,6 +26,7 @@ export type OpenCodeEvent = {
 type PendingPrompt = {
   body: PromptRequest;
   accept: () => Promise<void>;
+  reject: () => Promise<void>;
 };
 
 const session = {
@@ -158,6 +159,13 @@ export async function mockOpenCode(page: Page) {
             status: 204,
             headers: { "access-control-allow-origin": "*" },
           });
+        },
+        reject() {
+          return sendJson(
+            route,
+            { error: { message: "Mock prompt failure" } },
+            500,
+          );
         },
       });
       return;
