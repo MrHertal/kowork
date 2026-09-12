@@ -46,16 +46,20 @@ export async function installSseTransport<T>(
 
     const current = () =>
       connections.findLast((connection) => connection.endedAt === undefined);
-    const frame = (payload: unknown) =>
-      `data: ${JSON.stringify(payload)}\n\n`;
+    const frame = (payload: unknown) => `data: ${JSON.stringify(payload)}\n\n`;
     const records = () =>
-      connections.map(({ controller: _controller, ...connection }) =>
-        structuredClone(connection),
+      connections.map(
+        (connection): SseConnection => ({
+          id: connection.id,
+          openedAt: connection.openedAt,
+          endedAt: connection.endedAt,
+        }),
       );
 
     const end = (mode: "close" | "disconnect") => {
       const connection = current();
-      if (!connection) throw new Error("SSE transport has no active connection");
+      if (!connection)
+        throw new Error("SSE transport has no active connection");
       connection.endedAt = performance.now();
       if (mode === "close") {
         connection.controller.close();
@@ -71,7 +75,8 @@ export async function installSseTransport<T>(
       if (input.type === "end") return end(input.mode);
 
       const connection = current();
-      if (!connection) throw new Error("SSE transport has no active connection");
+      if (!connection)
+        throw new Error("SSE transport has no active connection");
       connection.controller.enqueue(encoder.encode(frame(input.payload)));
     };
 
@@ -145,7 +150,7 @@ export async function installSseTransport<T>(
       if (!transport) {
         throw new Error("SSE transport was not installed before page load");
       }
-      return transport.command(browserCommand as BrowserCommand<unknown>);
+      return transport.command(browserCommand);
     }, input) as Promise<Result>;
 
   return {

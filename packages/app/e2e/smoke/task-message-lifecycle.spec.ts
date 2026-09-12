@@ -48,10 +48,7 @@ test("streams an assistant response and returns to ready", async ({ page }) => {
     await opencode.events.waitForConnection();
 
     const composer = page.getByPlaceholder("Write a message");
-    const sendEvent = (
-      type: string,
-      properties: Record<string, unknown>,
-    ) =>
+    const sendEvent = (type: string, properties: Record<string, unknown>) =>
       opencode.events.send({
         directory,
         payload: { type, properties },
