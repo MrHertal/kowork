@@ -35,4 +35,18 @@ export default defineConfig(
       "react-hooks/exhaustive-deps": "error",
     },
   },
+  {
+    files: ["e2e/**/*.ts", "playwright.config.ts"],
+    extends: [js.configs.recommended, tseslint.configs.recommendedTypeChecked],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+      parserOptions: {
+        project: "./e2e/tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: "error",
+    },
+  },
 );

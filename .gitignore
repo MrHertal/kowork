@@ -6,6 +6,10 @@ dist
 out
 *.tsbuildinfo
 
+# Browser test artifacts
+packages/app/e2e/playwright-report/
+packages/app/e2e/test-results/
+
 # Generated runtime packs
 packages/electron/resources/runtime/
 
