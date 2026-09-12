@@ -52,7 +52,7 @@ bun install --cwd opencode
 pnpm dev
 ```
 
-`pnpm dev` builds the OpenCode sidecar and launches the desktop app. The first run also builds the document-skill runtime, so it can take a few minutes.
+`pnpm dev` builds the OpenCode sidecar and launches the desktop app. The first run also builds the skill runtime, so it can take a few minutes.
 
 Each package under `packages/` has its own README with commands and structure notes.
 

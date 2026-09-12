@@ -45,7 +45,7 @@ jobs:
       - name: Test
         run: pnpm test
 
-      - name: Build document runtime
+      - name: Build skill runtime
         run: pnpm --filter @kowork/electron run ensure:runtime
 
       - name: Test skills
