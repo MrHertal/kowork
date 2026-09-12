@@ -10,7 +10,11 @@ import {
   type AsyncStorage,
   type Platform,
 } from "@/contexts/platform";
-import { PromptProvider, usePrompt } from "@/contexts/prompt";
+import {
+  PromptProvider,
+  type PromptAttachmentPart,
+  usePrompt,
+} from "@/contexts/prompt";
 import { SDKProvider } from "@/contexts/sdk";
 import type { ServerConnection } from "@/contexts/server";
 import { createEmitter } from "@/utils/emitter";
@@ -112,9 +116,16 @@ function Capture() {
   return null;
 }
 
-const images = () => prompt.current.filter((part) => part.type === "image");
+const images = () =>
+  prompt.current.filter(
+    (part): part is PromptAttachmentPart =>
+      part.type === "attachment" && !!part.blob,
+  );
 const officeAttachments = () =>
-  prompt.current.filter((part) => part.type === "office");
+  prompt.current.filter(
+    (part): part is PromptAttachmentPart =>
+      part.type === "attachment" && !part.blob && !!part.local,
+  );
 
 async function setup() {
   render(
@@ -164,10 +175,11 @@ describe("usePromptAttachments", () => {
     expect(added).toBe(true);
     await waitFor(() => expect(images()).toHaveLength(1));
     const added0 = images()[0];
-    if (added0?.type !== "image") throw new Error("Expected image attachment");
+    if (added0?.type !== "attachment")
+      throw new Error("Expected blob attachment");
     expect(added0).toMatchObject({ filename: "a.png", mime: "image/png" });
-    expect(added0.blob.id).toHaveLength(64);
-    expect(added0.blob.url.startsWith("blob:")).toBe(true);
+    expect(added0.blob!.id).toHaveLength(64);
+    expect(added0.blob!.url.startsWith("blob:")).toBe(true);
     expect(toast.error).not.toHaveBeenCalled();
   });
 
@@ -217,11 +229,13 @@ describe("usePromptAttachments", () => {
       expect(added).toBe(true);
       await waitFor(() => expect(officeAttachments()).toHaveLength(1));
       expect(officeAttachments()[0]).toMatchObject({
-        type: "office",
+        type: "attachment",
         filename: name,
-        format,
         mime,
-        path: `/tmp/${name}`,
+        local: {
+          format,
+          path: `/tmp/${name}`,
+        },
       });
       expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
         target: "native",
@@ -306,7 +320,10 @@ describe("usePromptAttachments", () => {
     expect(images()[0]).toMatchObject({
       filename: "guide.pdf",
       mime: "application/pdf",
-      path: "/tmp/guide.pdf",
+      local: {
+        format: "pdf",
+        path: "/tmp/guide.pdf",
+      },
     });
     expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
       target: "native",
@@ -343,7 +360,7 @@ describe("usePromptAttachments", () => {
 
     expect(added).toBe(true);
     await waitFor(() => expect(images()).toHaveLength(1));
-    expect(images()[0]?.path).toBeUndefined();
+    expect(images()[0]?.local).toBeUndefined();
     expect(platform.getPathForFile).not.toHaveBeenCalled();
   });
 
@@ -361,7 +378,7 @@ describe("usePromptAttachments", () => {
 
     expect(added).toBe(true);
     await waitFor(() => expect(images()).toHaveLength(1));
-    expect(images()[0]?.path).toBeUndefined();
+    expect(images()[0]?.local).toBeUndefined();
     expect(toast.error).not.toHaveBeenCalled();
   });
 
@@ -379,7 +396,7 @@ describe("usePromptAttachments", () => {
     await attachments.addAttachment(png());
 
     await waitFor(() => expect(images()).toHaveLength(1));
-    expect(images()[0]?.path).toBeUndefined();
+    expect(images()[0]?.local).toBeUndefined();
     expect(getPathForFile).not.toHaveBeenCalled();
   });
 

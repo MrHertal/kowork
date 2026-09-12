@@ -5,22 +5,19 @@ import type {
   Part,
   TextPartInput,
 } from "@opencode-ai/sdk/v2/client";
-import type {
-  ImageAttachmentPart,
-  OfficeAttachmentPart,
-} from "@/contexts/prompt";
+import type { AttachmentDeliveryPlan } from "@/utils/attachment-delivery";
 import { ascending } from "@/utils/id";
-import { officeAttachmentsPrompt } from "@/utils/office-attachments";
+import { localAttachmentsPrompt } from "@/utils/local-attachments";
 
 type PromptRequestPart = (TextPartInput | FilePartInput) & { id: string };
 
-export type EncodedImageAttachmentPart = Omit<ImageAttachmentPart, "blob"> & {
-  dataUrl: string;
+export type EncodedAttachmentDelivery = AttachmentDeliveryPlan & {
+  dataUrl?: string;
 };
 
 type BuildRequestPartsInput = {
   text: string;
-  attachments: Array<EncodedImageAttachmentPart | OfficeAttachmentPart>;
+  deliveries: EncodedAttachmentDelivery[];
   messageID: string;
   sessionID: string;
 };
@@ -66,27 +63,38 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
       ]
     : [];
 
-  const images = input.attachments.flatMap((attachment) =>
-    attachment.type === "image"
+  const modelAttachments = input.deliveries.flatMap((delivery) =>
+    delivery.dataUrl
       ? [
           {
-            id: ascending("part"),
-            type: "file" as const,
-            mime: attachment.mime,
-            url: attachment.dataUrl,
-            filename: attachment.filename,
-          } satisfies PromptRequestPart,
+            attachmentID: delivery.attachment.id,
+            part: {
+              id: ascending("part"),
+              type: "file" as const,
+              mime: delivery.attachment.mime,
+              url: delivery.dataUrl,
+              filename: delivery.attachment.filename,
+            } satisfies PromptRequestPart,
+          },
         ]
       : [],
   );
-
-  const office = input.attachments.flatMap((attachment, index) =>
-    attachment.type === "office"
-      ? [{ ...attachment, position: index + 1 }]
-      : [],
+  const modelPartIDs = new Map(
+    modelAttachments.map(({ attachmentID, part }) => [attachmentID, part.id]),
   );
-  if (office.length > 0) {
-    const attachmentContext = officeAttachmentsPrompt(office);
+
+  const locals = input.deliveries.flatMap((delivery) => {
+    if (!delivery.local) return [];
+    const modelPartID = modelPartIDs.get(delivery.attachment.id);
+    return [
+      {
+        ...delivery.local,
+        ...(modelPartID ? { modelPartID } : {}),
+      },
+    ];
+  });
+  if (locals.length > 0) {
+    const attachmentContext = localAttachmentsPrompt(locals);
     requestParts.push({
       id: ascending("part"),
       type: "text",
@@ -96,7 +104,7 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
     });
   }
 
-  requestParts.push(...images);
+  requestParts.push(...modelAttachments.map(({ part }) => part));
 
   return {
     requestParts,

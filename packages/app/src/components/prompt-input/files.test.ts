@@ -4,9 +4,9 @@ import {
   ACCEPTED_FILE_TYPES,
   acceptedFileTypes,
 } from "@/constants/file-picker";
-import { attachmentMime, officeAttachmentInfo } from "./files";
+import { attachmentMime, pathOnlyAttachmentInfo } from "./files";
 
-describe("officeAttachmentInfo", () => {
+describe("pathOnlyAttachmentInfo", () => {
   test.each([
     [
       "contract.docx",
@@ -24,16 +24,16 @@ describe("officeAttachmentInfo", () => {
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ],
   ])("classifies %s by extension", (name, format, mime) => {
-    expect(officeAttachmentInfo({ name })).toEqual({ format, mime });
+    expect(pathOnlyAttachmentInfo({ name })).toEqual({ format, mime });
   });
 
   test("ignores unsupported and misleading extensions", () => {
-    expect(officeAttachmentInfo({ name: "legacy.doc" })).toBeUndefined();
-    expect(officeAttachmentInfo({ name: "report.docx.exe" })).toBeUndefined();
+    expect(pathOnlyAttachmentInfo({ name: "legacy.doc" })).toBeUndefined();
+    expect(pathOnlyAttachmentInfo({ name: "report.docx.exe" })).toBeUndefined();
   });
 
   test("does not route PDFs to the path flow at attach time", () => {
-    expect(officeAttachmentInfo({ name: "guide.pdf" })).toBeUndefined();
+    expect(pathOnlyAttachmentInfo({ name: "guide.pdf" })).toBeUndefined();
   });
 
   test("adds Office extensions only when path attachments are available", () => {

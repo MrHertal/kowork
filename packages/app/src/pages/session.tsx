@@ -43,8 +43,7 @@ import { autoRespondsPermission } from "@/contexts/permission/auto-respond";
 import { usePlatform } from "@/contexts/platform";
 import {
   usePrompt,
-  type ImageAttachmentPart,
-  type OfficeAttachmentPart,
+  type PromptAttachmentPart,
 } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useServer } from "@/contexts/server";
@@ -62,12 +61,12 @@ import {
   syncSessionModel,
 } from "@/pages/session/session-model-helpers";
 import { blobDataUrl } from "@/utils/blob";
+import { planAttachmentDelivery } from "@/utils/attachment-delivery";
 import { ascending } from "@/utils/id";
 import { buildKoworkConfiguration } from "@/utils/kowork-configuration";
 import {
-  officeAttachmentMatchesServer,
-  pdfFallbackOfficePart,
-} from "@/utils/office-attachments";
+  localAttachmentMatchesServer,
+} from "@/utils/local-attachments";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
 import {
@@ -235,17 +234,20 @@ export function Page({
       const input = message.text?.trim();
       const promptSnapshot = prompt.current;
       const attachments = promptSnapshot.filter(
-        (part): part is ImageAttachmentPart | OfficeAttachmentPart =>
-          part.type === "image" ||
-          (part.type === "office" &&
-            officeAttachmentMatchesServer(part, server.key)),
+        (part): part is PromptAttachmentPart =>
+          part.type === "attachment" &&
+          (!!part.blob ||
+            (!!part.local &&
+              localAttachmentMatchesServer(part.local, server.key))),
       );
-      const unavailableOffice = promptSnapshot.some(
+      const unavailableLocalOnly = promptSnapshot.some(
         (part) =>
-          part.type === "office" &&
-          !officeAttachmentMatchesServer(part, server.key),
+          part.type === "attachment" &&
+          !part.blob &&
+          !!part.local &&
+          !localAttachmentMatchesServer(part.local, server.key),
       );
-      if (unavailableOffice) {
+      if (unavailableLocalOnly) {
         toast.error(m.toast_prompt_attachDocumentMoved_title(), {
           description: m.toast_prompt_attachDocumentMoved_description(),
         });
@@ -273,15 +275,10 @@ export function Page({
         return;
       }
 
-      const resolvedAttachments = attachments.map(
-        (part): ImageAttachmentPart | OfficeAttachmentPart =>
-          part.type === "image"
-            ? (pdfFallbackOfficePart(part, {
-                pdfInput: currentModelVal.capabilities.input.pdf,
-                serverKey: server.key,
-              }) ?? part)
-            : part,
-      );
+      const deliveries = planAttachmentDelivery(attachments, {
+        pdfInput: currentModelVal.capabilities.input.pdf,
+        serverKey: server.key,
+      });
 
       sendingRef.current = true;
       setSending(true);
@@ -313,16 +310,22 @@ export function Page({
         }
 
         messageID = ascending("message");
-        const encodedAttachments = await Promise.all(
-          resolvedAttachments.map(async (part) =>
-            part.type === "image"
-              ? { ...part, dataUrl: await blobDataUrl(part.blob, part.mime) }
-              : part,
+        const encodedDeliveries = await Promise.all(
+          deliveries.map(async (delivery) =>
+            delivery.includeModelPayload && delivery.attachment.blob
+              ? {
+                  ...delivery,
+                  dataUrl: await blobDataUrl(
+                    delivery.attachment.blob,
+                    delivery.attachment.mime,
+                  ),
+                }
+              : delivery,
           ),
         );
         const { requestParts, optimisticParts } = buildRequestParts({
           text: input ?? "",
-          attachments: encodedAttachments,
+          deliveries: encodedDeliveries,
           messageID,
           sessionID: sid,
         });
@@ -413,16 +416,19 @@ export function Page({
   }, [sessionId, sdk.client]);
 
   const hasText = !!text.trim();
-  const hasImages = prompt.current.some((part) => part.type === "image");
-  const hasOffice = prompt.current.some((part) => part.type === "office");
-  const hasUnavailableOffice = prompt.current.some(
+  const hasAttachments = prompt.current.some(
+    (part) => part.type === "attachment",
+  );
+  const hasUnavailableLocalOnly = prompt.current.some(
     (part) =>
-      part.type === "office" &&
-      !officeAttachmentMatchesServer(part, server.key),
+      part.type === "attachment" &&
+      !part.blob &&
+      !!part.local &&
+      !localAttachmentMatchesServer(part.local, server.key),
   );
   const canSubmit =
-    (hasText || hasImages || hasOffice) &&
-    !hasUnavailableOffice &&
+    (hasText || hasAttachments) &&
+    !hasUnavailableLocalOnly &&
     prompt.ready &&
     !sending &&
     !blocked &&
@@ -430,8 +436,7 @@ export function Page({
   const canStop =
     isBusy &&
     !hasText &&
-    !hasImages &&
-    !hasOffice &&
+    !hasAttachments &&
     !blocked &&
     !isChildSession;
   const status = canStop ? "streaming" : "ready";

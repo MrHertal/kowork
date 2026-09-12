@@ -6,13 +6,12 @@ import { toast } from "sonner";
 import { usePlatform } from "@/contexts/platform";
 import {
   usePrompt,
-  type ImageAttachmentPart,
-  type OfficeAttachmentPart,
+  type PromptAttachmentPart,
 } from "@/contexts/prompt";
 import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
 import { createBlobReference } from "@/utils/blob";
-import { attachmentMime, officeAttachmentInfo } from "./files";
+import { attachmentMime, pathOnlyAttachmentInfo } from "./files";
 
 const OVERLAY_SELECTOR =
   '[data-slot="dialog-overlay"],[data-slot="alert-dialog-overlay"]';
@@ -54,8 +53,8 @@ export function usePromptAttachments() {
     ): Promise<
       "added" | "unsupported" | "office-unavailable" | "office-path"
     > => {
-      const office = officeAttachmentInfo(file);
-      if (office) {
+      const local = pathOnlyAttachmentInfo(file);
+      if (local) {
         if (!allowOffice) return "office-path";
         if (!platform.getPathForFile || !sidecar) return "office-unavailable";
         const path = await platform.getPathForFile(file, {
@@ -63,13 +62,16 @@ export function usePromptAttachments() {
           wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
         });
         if (!path) return "office-path";
-        const attachment: OfficeAttachmentPart = {
-          type: "office",
+        const attachment: PromptAttachmentPart = {
+          type: "attachment",
           id: nanoid(),
           filename: file.name,
-          path,
-          serverKey: server.key,
-          ...office,
+          mime: local.mime,
+          local: {
+            path,
+            format: local.format,
+            serverKey: server.key,
+          },
         };
         update((prev) => [...prev, attachment]);
         return "added";
@@ -78,7 +80,7 @@ export function usePromptAttachments() {
       const mime = await attachmentMime(file);
       if (!mime) return "unsupported";
 
-      // Best-effort local path for the submit-time PDF fallback.
+      // Best-effort local representation for PDF tools.
       const pdfPath =
         mime === "application/pdf" && platform.getPathForFile && sidecar
           ? await platform.getPathForFile(file, {
@@ -86,13 +88,21 @@ export function usePromptAttachments() {
               wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
             })
           : null;
-      const attachment: ImageAttachmentPart = {
-        type: "image",
+      const attachment: PromptAttachmentPart = {
+        type: "attachment",
         id: nanoid(),
         filename: file.name,
         mime,
         blob: await createBlobReference(file),
-        ...(pdfPath ? { path: pdfPath, serverKey: server.key } : {}),
+        ...(pdfPath
+          ? {
+              local: {
+                path: pdfPath,
+                format: "pdf" as const,
+                serverKey: server.key,
+              },
+            }
+          : {}),
       };
       update((prev) => [...prev, attachment]);
       return "added";
@@ -139,7 +149,7 @@ export function usePromptAttachments() {
       update((prev) =>
         prev.filter(
           (part) =>
-            (part.type !== "image" && part.type !== "office") || part.id !== id,
+            part.type !== "attachment" || part.id !== id,
         ),
       );
     },

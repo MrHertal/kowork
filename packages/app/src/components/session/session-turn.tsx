@@ -43,7 +43,7 @@ import {
 import { shallowArrayEqual, useChildData } from "@/contexts/global-sync";
 import { useSDK } from "@/contexts/sdk";
 import { m } from "@/paraglide/messages";
-import { officeAttachmentsFromMetadata } from "@/utils/office-attachments";
+import { localAttachmentsFromMetadata } from "@/utils/local-attachments";
 
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -180,36 +180,60 @@ export function UserMessage({ parts }: { parts: Part[] }) {
     (p): p is TextPartType => p.type === "text" && !p.synthetic,
   );
   // file:// refs render inline in text, not as tiles.
-  const attachments = parts.filter(
+  const modelAttachments = parts.filter(
     (p): p is FilePartType => p.type === "file" && p.url.startsWith("data:"),
   );
-  const office = parts.flatMap((part) => {
+  const localAttachments = parts.flatMap((part) => {
     if (part.type !== "text" || !part.synthetic) return [];
-    return officeAttachmentsFromMetadata(part.metadata).map(
+    return localAttachmentsFromMetadata(part.metadata).map(
       (attachment, index) => ({
         ...attachment,
-        id: `${part.id}-${index}`,
+        id: attachment.id ?? `${part.id}-${index}`,
       }),
     );
   });
+  const modelByID = new Map(
+    modelAttachments.map((attachment) => [attachment.id, attachment]),
+  );
+  const linkedModelIDs = new Set(
+    localAttachments.flatMap((attachment) =>
+      attachment.modelPartID && modelByID.has(attachment.modelPartID)
+        ? [attachment.modelPartID]
+        : [],
+    ),
+  );
+  const unlinkedModelAttachments = modelAttachments.filter(
+    (attachment) => !linkedModelIDs.has(attachment.id),
+  );
   const occupiedPositions = new Set(
-    office.map((attachment) => attachment.position),
+    localAttachments.map((attachment) => attachment.position),
   );
   const modelPositions = Array.from(
-    { length: attachments.length + office.length },
+    { length: unlinkedModelAttachments.length + localAttachments.length },
     (_, index) => index + 1,
   ).filter((position) => !occupiedPositions.has(position));
   const orderedAttachments = [
-    ...attachments.map((part, index) => ({
+    ...unlinkedModelAttachments.map((part, index) => ({
       type: "model" as const,
       part,
       position: modelPositions[index] ?? Number.MAX_SAFE_INTEGER,
     })),
-    ...office.map((attachment) => ({
-      type: "office" as const,
-      attachment,
-      position: attachment.position,
-    })),
+    ...localAttachments.map((attachment) => {
+      const modelPart = attachment.modelPartID
+        ? modelByID.get(attachment.modelPartID)
+        : undefined;
+      return modelPart
+        ? {
+            type: "model" as const,
+            part: modelPart,
+            position: attachment.position,
+          }
+        : {
+            type: "local" as const,
+            attachment,
+            position: attachment.position,
+          };
+    }),
   ].sort((a, b) => a.position - b.position);
   return (
     <Message from="user">
@@ -261,7 +285,7 @@ export function UserMessage({ parts }: { parts: Part[] }) {
         <MessageContent className="gap-4">
           {textParts.length > 0 ? (
             textParts.map((part) => <span key={part.id}>{part.text}</span>)
-          ) : attachments.length === 0 && office.length === 0 ? (
+          ) : modelAttachments.length === 0 && localAttachments.length === 0 ? (
             <span className="text-muted-foreground italic">...</span>
           ) : null}
         </MessageContent>
