@@ -4,7 +4,11 @@ import {
   ACCEPTED_FILE_TYPES,
   acceptedFileTypes,
 } from "@/constants/file-picker";
-import { attachmentMime, pathOnlyAttachmentInfo } from "./files";
+import {
+  attachmentMime,
+  localMediaAttachmentInfo,
+  pathOnlyAttachmentInfo,
+} from "./files";
 
 describe("pathOnlyAttachmentInfo", () => {
   test.each([
@@ -138,5 +142,22 @@ describe("attachmentMime", () => {
       type: "application/octet-stream",
     });
     expect(await attachmentMime(file)).toBe("text/plain");
+  });
+});
+
+describe("localMediaAttachmentInfo", () => {
+  test.each([
+    ["application/pdf", "pdf"],
+    ["image/png", "png"],
+    ["image/jpeg", "jpeg"],
+    ["image/gif", "gif"],
+    ["image/webp", "webp"],
+  ])("maps %s to the canonical %s format", (mime, format) => {
+    expect(localMediaAttachmentInfo(mime)).toEqual({ mime, format });
+  });
+
+  test("ignores text and unsupported image types", () => {
+    expect(localMediaAttachmentInfo("text/plain")).toBeUndefined();
+    expect(localMediaAttachmentInfo("image/svg+xml")).toBeUndefined();
   });
 });

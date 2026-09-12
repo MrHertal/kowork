@@ -404,7 +404,7 @@ describe("usePromptAttachments", () => {
     expect(toast.error).not.toHaveBeenCalled();
   });
 
-  test("does not capture paths for image attachments", async () => {
+  test("captures the local path for image attachments on a sidecar", async () => {
     const getPathForFile = vi.fn(() => Promise.resolve("/tmp/a.png"));
     platform.platform = "desktop";
     platform.getPathForFile = getPathForFile;
@@ -418,8 +418,71 @@ describe("usePromptAttachments", () => {
     await attachments.addAttachment(png());
 
     await waitFor(() => expect(images()).toHaveLength(1));
+    expect(images()[0]).toMatchObject({
+      filename: "a.png",
+      mime: "image/png",
+      local: {
+        format: "png",
+        path: "/tmp/a.png",
+      },
+    });
+    expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
+      target: "native",
+      wslDistro: undefined,
+    });
+  });
+
+  test("requests a WSL path for image attachments on a WSL sidecar", async () => {
+    const getPathForFile = vi.fn(() => Promise.resolve("/mnt/c/a.png"));
+    platform.platform = "desktop";
+    platform.getPathForFile = getPathForFile;
+    currentServer = {
+      type: "sidecar",
+      variant: "wsl",
+      distro: "Ubuntu",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    await attachments.addAttachment(png());
+
+    expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
+      target: "wsl",
+      wslDistro: "Ubuntu",
+    });
+  });
+
+  test("keeps images without a path outside a local sidecar", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() => Promise.resolve("/tmp/a.png"));
+    await setup();
+
+    const added = await attachments.addAttachment(png());
+
+    expect(added).toBe(true);
+    await waitFor(() => expect(images()).toHaveLength(1));
     expect(images()[0]?.local).toBeUndefined();
-    expect(getPathForFile).not.toHaveBeenCalled();
+    expect(platform.getPathForFile).not.toHaveBeenCalled();
+  });
+
+  test("keeps images when the path lookup rejects", async () => {
+    platform.platform = "desktop";
+    platform.getPathForFile = vi.fn(() =>
+      Promise.reject(new Error("path lookup failed")),
+    );
+    currentServer = {
+      type: "sidecar",
+      variant: "base",
+      http: { url: "http://localhost:4096" },
+    };
+    await setup();
+
+    const added = await attachments.addAttachment(png());
+
+    expect(added).toBe(true);
+    await waitFor(() => expect(images()).toHaveLength(1));
+    expect(images()[0]?.local).toBeUndefined();
+    expect(toast.error).not.toHaveBeenCalled();
   });
 
   test("warns only when no attachment could be added", async () => {
