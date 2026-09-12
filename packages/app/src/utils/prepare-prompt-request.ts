@@ -7,12 +7,14 @@ export async function preparePromptRequest(input: {
   text: string;
   attachments: PromptAttachmentPart[];
   pdfInput: boolean;
+  imageInput: boolean;
   serverKey: string;
   messageID: string;
   sessionID: string;
 }) {
   const deliveries = planAttachmentDelivery(input.attachments, {
     pdfInput: input.pdfInput,
+    imageInput: input.imageInput,
     serverKey: input.serverKey,
   });
   const encodedDeliveries = await Promise.all(

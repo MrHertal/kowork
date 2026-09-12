@@ -302,6 +302,7 @@ export function Page({
           text: input ?? "",
           attachments,
           pdfInput: currentModelVal.capabilities.input.pdf,
+          imageInput: currentModelVal.capabilities.input.image,
           serverKey: server.key,
           messageID,
           sessionID: sid,

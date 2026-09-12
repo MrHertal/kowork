@@ -13,7 +13,7 @@ export type AttachmentDeliveryPlan = {
 
 export function planAttachmentDelivery(
   attachments: PromptAttachmentPart[],
-  input: { pdfInput: boolean; serverKey: string },
+  input: { pdfInput: boolean; imageInput: boolean; serverKey: string },
 ): AttachmentDeliveryPlan[] {
   return attachments.map((attachment, index) => {
     const position = index + 1;
@@ -30,11 +30,16 @@ export function planAttachmentDelivery(
           }
         : undefined;
     const pdf = attachment.mime === "application/pdf";
+    const image = attachment.mime.startsWith("image/");
+    const nativeInput = pdf
+      ? input.pdfInput
+      : image
+        ? input.imageInput
+        : true;
     return {
       attachment,
       position,
-      includeModelPayload:
-        !!attachment.blob && (!pdf || input.pdfInput || !local),
+      includeModelPayload: !!attachment.blob && (nativeInput || !local),
       ...(local ? { local } : {}),
     };
   });

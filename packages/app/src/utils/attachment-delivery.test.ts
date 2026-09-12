@@ -18,11 +18,28 @@ const pdf = (
   ...input,
 });
 
+const image = (
+  input: Partial<PromptAttachmentPart> = {},
+): PromptAttachmentPart => ({
+  type: "attachment",
+  id: "image_1",
+  filename: "photo.png",
+  mime: "image/png",
+  blob: { id: "blob_2", url: "blob:photo" },
+  local: {
+    path: "/tmp/photo.png",
+    format: "png",
+    serverKey: "sidecar",
+  },
+  ...input,
+});
+
 describe("planAttachmentDelivery", () => {
   test("plans native and local delivery for a PDF-capable model", () => {
     expect(
       planAttachmentDelivery([pdf()], {
         pdfInput: true,
+        imageInput: false,
         serverKey: "sidecar",
       }),
     ).toEqual([
@@ -45,6 +62,7 @@ describe("planAttachmentDelivery", () => {
   test("plans local-only delivery when the model cannot read PDFs", () => {
     const [delivery] = planAttachmentDelivery([pdf()], {
       pdfInput: false,
+      imageInput: false,
       serverKey: "sidecar",
     });
 
@@ -55,8 +73,49 @@ describe("planAttachmentDelivery", () => {
   test("keeps the blob fallback when no local PDF path is available", () => {
     const [delivery] = planAttachmentDelivery([pdf({ local: undefined })], {
       pdfInput: false,
+      imageInput: false,
       serverKey: "sidecar",
     });
+
+    expect(delivery?.includeModelPayload).toBe(true);
+    expect(delivery?.local).toBeUndefined();
+  });
+
+  test("plans native and local delivery for an image-capable model", () => {
+    const [delivery] = planAttachmentDelivery([image()], {
+      pdfInput: false,
+      imageInput: true,
+      serverKey: "sidecar",
+    });
+
+    expect(delivery).toMatchObject({
+      includeModelPayload: true,
+      local: { path: "/tmp/photo.png", format: "png" },
+    });
+  });
+
+  test("plans local-only delivery when the model cannot read images", () => {
+    const [delivery] = planAttachmentDelivery([image()], {
+      pdfInput: false,
+      imageInput: false,
+      serverKey: "sidecar",
+    });
+
+    expect(delivery).toMatchObject({
+      includeModelPayload: false,
+      local: { path: "/tmp/photo.png", format: "png" },
+    });
+  });
+
+  test("keeps the blob fallback when no local image path is available", () => {
+    const [delivery] = planAttachmentDelivery(
+      [image({ local: undefined })],
+      {
+        pdfInput: false,
+        imageInput: false,
+        serverKey: "sidecar",
+      },
+    );
 
     expect(delivery?.includeModelPayload).toBe(true);
     expect(delivery?.local).toBeUndefined();
@@ -65,6 +124,7 @@ describe("planAttachmentDelivery", () => {
   test("does not expose a PDF path captured for another server", () => {
     const [delivery] = planAttachmentDelivery([pdf()], {
       pdfInput: true,
+      imageInput: false,
       serverKey: "wsl:Ubuntu",
     });
 
@@ -87,7 +147,7 @@ describe("planAttachmentDelivery", () => {
 
     const deliveries = planAttachmentDelivery(
       [pdf({ local: undefined }), localAttachment],
-      { pdfInput: true, serverKey: "sidecar" },
+      { pdfInput: true, imageInput: false, serverKey: "sidecar" },
     );
 
     expect(deliveries.map((delivery) => delivery.position)).toEqual([1, 2]);
