@@ -52,6 +52,17 @@ export function pathOnlyAttachmentInfo(
   };
 }
 
+export function localMediaAttachmentInfo(
+  mime: string,
+): { format: LocalAttachmentFormat; mime: string } | undefined {
+  const entry = Object.entries(LOCAL_ATTACHMENT_MIMES).find(
+    ([format, value]) =>
+      (format === "pdf" || IMAGE_MIMES.has(value)) && value === mime,
+  );
+  if (!entry) return;
+  return { format: entry[0] as LocalAttachmentFormat, mime: entry[1] };
+}
+
 function textMime(type: string) {
   if (!type) return false;
   if (type.startsWith("text/")) return true;

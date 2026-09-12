@@ -140,6 +140,71 @@ describe("UserMessage", () => {
     expect(screen.queryByText(/\/secret\/guide\.pdf/)).not.toBeInTheDocument();
   });
 
+  test("merges native and local projections into one image tile", () => {
+    render(
+      <UserMessage
+        parts={[
+          synthetic({
+            koworkAttachments: {
+              version: 2,
+              items: [
+                {
+                  id: "image_1",
+                  filename: "photo.png",
+                  path: "/secret/photo.png",
+                  mime: "image/png",
+                  format: "png",
+                  position: 1,
+                  modelPartID: "prt_image",
+                },
+              ],
+            },
+          }),
+          {
+            id: "prt_image",
+            type: "file",
+            filename: "photo.png",
+            mime: "image/png",
+            url: "data:image/png;base64,AAA",
+            sessionID: "ses_1",
+            messageID: "msg_1",
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByTitle("photo.png")).toHaveLength(1);
+    expect(screen.queryByText(/\/secret\/photo\.png/)).not.toBeInTheDocument();
+  });
+
+  test("renders a path-only image with an image icon", () => {
+    render(
+      <UserMessage
+        parts={[
+          synthetic({
+            koworkAttachments: {
+              version: 2,
+              items: [
+                {
+                  id: "image_1",
+                  filename: "photo.png",
+                  path: "/secret/photo.png",
+                  mime: "image/png",
+                  format: "png",
+                  position: 1,
+                },
+              ],
+            },
+          }),
+        ]}
+      />,
+    );
+
+    expect(
+      screen.getByTitle("photo.png").querySelector(".lucide-image"),
+    ).toBeInTheDocument();
+  });
+
   test("preserves order across native, dual, and local attachments", () => {
     render(
       <UserMessage

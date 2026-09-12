@@ -23,7 +23,6 @@ import {
   useGlobalAttachmentDrop,
   usePromptAttachments,
 } from "@/components/prompt-input/attachments";
-import { buildRequestParts } from "@/components/prompt-input/build-request-parts";
 import { PromptDragOverlay } from "@/components/prompt-input/drag-overlay";
 import { PromptAttachments } from "@/components/prompt-input/prompt-attachments";
 import { ComposerTray } from "@/components/session/composer-tray";
@@ -57,11 +56,10 @@ import {
   resetSessionModel,
   syncSessionModel,
 } from "@/pages/session/session-model-helpers";
-import { blobDataUrl } from "@/utils/blob";
-import { planAttachmentDelivery } from "@/utils/attachment-delivery";
 import { ascending } from "@/utils/id";
 import { buildKoworkConfiguration } from "@/utils/kowork-configuration";
 import { localAttachmentMatchesServer } from "@/utils/local-attachments";
+import { preparePromptRequest } from "@/utils/prepare-prompt-request";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
 import {
@@ -270,11 +268,6 @@ export function Page({
         return;
       }
 
-      const deliveries = planAttachmentDelivery(attachments, {
-        pdfInput: currentModelVal.capabilities.input.pdf,
-        serverKey: server.key,
-      });
-
       sendingRef.current = true;
       setSending(true);
 
@@ -305,22 +298,12 @@ export function Page({
         }
 
         messageID = ascending("message");
-        const encodedDeliveries = await Promise.all(
-          deliveries.map(async (delivery) =>
-            delivery.includeModelPayload && delivery.attachment.blob
-              ? {
-                  ...delivery,
-                  dataUrl: await blobDataUrl(
-                    delivery.attachment.blob,
-                    delivery.attachment.mime,
-                  ),
-                }
-              : delivery,
-          ),
-        );
-        const { requestParts, optimisticParts } = buildRequestParts({
+        const { requestParts, optimisticParts } = await preparePromptRequest({
           text: input ?? "",
-          deliveries: encodedDeliveries,
+          attachments,
+          pdfInput: currentModelVal.capabilities.input.pdf,
+          imageInput: currentModelVal.capabilities.input.image,
+          serverKey: server.key,
           messageID,
           sessionID: sid,
         });

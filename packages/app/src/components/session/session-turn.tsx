@@ -13,6 +13,7 @@ import {
   CopyIcon,
   FileSpreadsheetIcon,
   FileTextIcon,
+  ImageIcon,
   PresentationIcon,
 } from "lucide-react";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
@@ -258,8 +259,9 @@ export function UserMessage({ parts }: { parts: Part[] }) {
                   </Attachment>
                 );
               const attachment = item.attachment;
-              const Icon =
-                attachment.format === "xlsx"
+              const Icon = attachment.mime.startsWith("image/")
+                ? ImageIcon
+                : attachment.format === "xlsx"
                   ? FileSpreadsheetIcon
                   : attachment.format === "pptx"
                     ? PresentationIcon

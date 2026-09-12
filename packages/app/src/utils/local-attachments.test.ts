@@ -224,4 +224,34 @@ describe("localAttachmentsFromMetadata", () => {
       },
     ]);
   });
+
+  test.each([
+    ["photo.png", "image/png", "png"],
+    ["photo.jpg", "image/jpeg", "jpeg"],
+    ["animation.gif", "image/gif", "gif"],
+    ["photo.webp", "image/webp", "webp"],
+  ] as const)("round-trips a local %s attachment", (filename, mime, format) => {
+    const prompt = localAttachmentsPrompt([
+      {
+        ...attachment({
+          filename,
+          path: `/Users/example/${filename}`,
+          mime,
+          format,
+        }),
+        position: 1,
+      },
+    ]);
+
+    expect(localAttachmentsFromMetadata(prompt.metadata)).toEqual([
+      {
+        id: "local_1",
+        filename,
+        path: `/Users/example/${filename}`,
+        mime,
+        format,
+        position: 1,
+      },
+    ]);
+  });
 });

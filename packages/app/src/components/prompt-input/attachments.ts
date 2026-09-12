@@ -8,7 +8,11 @@ import { usePrompt, type PromptAttachmentPart } from "@/contexts/prompt";
 import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
 import { createBlobReference } from "@/utils/blob";
-import { attachmentMime, pathOnlyAttachmentInfo } from "./files";
+import {
+  attachmentMime,
+  localMediaAttachmentInfo,
+  pathOnlyAttachmentInfo,
+} from "./files";
 
 const OVERLAY_SELECTOR =
   '[data-slot="dialog-overlay"],[data-slot="alert-dialog-overlay"]';
@@ -77,25 +81,28 @@ export function usePromptAttachments() {
       const mime = await attachmentMime(file);
       if (!mime) return "unsupported";
 
-      // Best-effort local representation for PDF tools.
-      const pdfPath =
-        mime === "application/pdf" && platform.getPathForFile && sidecar
-          ? await platform.getPathForFile(file, {
-              target: sidecar.variant === "wsl" ? "wsl" : "native",
-              wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
-            })
-          : null;
+      // Best-effort local representation for file tools.
+      const localMedia = localMediaAttachmentInfo(mime);
+      const localPath = await (async () => {
+        if (!localMedia || !platform.getPathForFile || !sidecar) return null;
+        return platform
+          .getPathForFile(file, {
+            target: sidecar.variant === "wsl" ? "wsl" : "native",
+            wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
+          })
+          .catch(() => null);
+      })();
       const attachment: PromptAttachmentPart = {
         type: "attachment",
         id: nanoid(),
         filename: file.name,
         mime,
         blob: await createBlobReference(file),
-        ...(pdfPath
+        ...(localPath && localMedia
           ? {
               local: {
-                path: pdfPath,
-                format: "pdf" as const,
+                path: localPath,
+                format: localMedia.format,
                 serverKey: server.key,
               },
             }

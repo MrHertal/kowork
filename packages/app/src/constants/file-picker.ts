@@ -9,12 +9,24 @@ export const ACCEPTED_IMAGE_TYPES = [
 
 export const PATH_ONLY_FILE_TYPES = [".docx", ".xlsx", ".pptx"];
 // PDFs can use both model input and a local path, so they are not path-only.
-export type LocalAttachmentFormat = "docx" | "xlsx" | "pptx" | "pdf";
+export type LocalAttachmentFormat =
+  | "docx"
+  | "xlsx"
+  | "pptx"
+  | "pdf"
+  | "png"
+  | "jpeg"
+  | "gif"
+  | "webp";
 export const LOCAL_ATTACHMENT_MIMES: Record<LocalAttachmentFormat, string> = {
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   pdf: "application/pdf",
+  png: "image/png",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  webp: "image/webp",
 };
 
 export const ACCEPTED_FILE_TYPES = [
