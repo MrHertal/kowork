@@ -6,8 +6,7 @@ import { toast } from "sonner";
 import { usePlatform } from "@/contexts/platform";
 import {
   usePrompt,
-  type ImageAttachmentPart,
-  type LocalAttachmentPart,
+  type PromptAttachmentPart,
 } from "@/contexts/prompt";
 import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
@@ -63,13 +62,16 @@ export function usePromptAttachments() {
           wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
         });
         if (!path) return "office-path";
-        const attachment: LocalAttachmentPart = {
-          type: "office",
+        const attachment: PromptAttachmentPart = {
+          type: "attachment",
           id: nanoid(),
           filename: file.name,
-          path,
-          serverKey: server.key,
-          ...local,
+          mime: local.mime,
+          local: {
+            path,
+            format: local.format,
+            serverKey: server.key,
+          },
         };
         update((prev) => [...prev, attachment]);
         return "added";
@@ -86,13 +88,21 @@ export function usePromptAttachments() {
               wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
             })
           : null;
-      const attachment: ImageAttachmentPart = {
-        type: "image",
+      const attachment: PromptAttachmentPart = {
+        type: "attachment",
         id: nanoid(),
         filename: file.name,
         mime,
         blob: await createBlobReference(file),
-        ...(pdfPath ? { path: pdfPath, serverKey: server.key } : {}),
+        ...(pdfPath
+          ? {
+              local: {
+                path: pdfPath,
+                format: "pdf" as const,
+                serverKey: server.key,
+              },
+            }
+          : {}),
       };
       update((prev) => [...prev, attachment]);
       return "added";
@@ -139,7 +149,7 @@ export function usePromptAttachments() {
       update((prev) =>
         prev.filter(
           (part) =>
-            (part.type !== "image" && part.type !== "office") || part.id !== id,
+            part.type !== "attachment" || part.id !== id,
         ),
       );
     },

@@ -1,14 +1,11 @@
 import { describe, expect, test } from "vitest";
-import type {
-  ImageAttachmentPart,
-  LocalAttachmentPart,
-} from "@/contexts/prompt";
+import type { PromptAttachmentPart } from "@/contexts/prompt";
 import {
   LOCAL_ATTACHMENTS_METADATA_KEY,
   localAttachmentMatchesServer,
   localAttachmentsFromMetadata,
   localAttachmentsPrompt,
-  pdfFallbackOfficePart,
+  pdfFallbackLocalPart,
 } from "./local-attachments";
 
 describe("localAttachmentMatchesServer", () => {
@@ -25,53 +22,59 @@ describe("localAttachmentMatchesServer", () => {
   });
 });
 
+type LocalAttachmentInput = Parameters<typeof localAttachmentsPrompt>[0][number];
+
 const attachment = (
-  input: Partial<LocalAttachmentPart> = {},
-): LocalAttachmentPart => ({
-  type: "office",
-  id: "office_1",
+  input: Partial<LocalAttachmentInput> = {},
+): LocalAttachmentInput => ({
   filename: "contract.docx",
   path: "/Users/example/contract.docx",
   mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   format: "docx",
-  serverKey: "sidecar",
+  position: 1,
   ...input,
 });
 
 const pdfImage = (
-  input: Partial<ImageAttachmentPart> = {},
-): ImageAttachmentPart => ({
-  type: "image",
+  input: Partial<PromptAttachmentPart> = {},
+): PromptAttachmentPart => ({
+  type: "attachment",
   id: "img_1",
   filename: "guide.pdf",
   mime: "application/pdf",
   blob: { id: "abc123", url: "blob:http://localhost/abc123" },
-  path: "/Users/example/guide.pdf",
-  serverKey: "sidecar",
+  local: {
+    path: "/Users/example/guide.pdf",
+    format: "pdf",
+    serverKey: "sidecar",
+  },
   ...input,
 });
 
-describe("pdfFallbackOfficePart", () => {
+describe("pdfFallbackLocalPart", () => {
   test("converts a captured PDF when the model lacks PDF input", () => {
     expect(
-      pdfFallbackOfficePart(pdfImage(), {
+      pdfFallbackLocalPart(pdfImage(), {
         pdfInput: false,
         serverKey: "sidecar",
       }),
     ).toEqual({
-      type: "office",
+      type: "attachment",
       id: "img_1",
       filename: "guide.pdf",
       mime: "application/pdf",
-      path: "/Users/example/guide.pdf",
-      format: "pdf",
-      serverKey: "sidecar",
+      blob: undefined,
+      local: {
+        path: "/Users/example/guide.pdf",
+        format: "pdf",
+        serverKey: "sidecar",
+      },
     });
   });
 
   test("keeps the base64 flow when the model supports PDF input", () => {
     expect(
-      pdfFallbackOfficePart(pdfImage(), {
+      pdfFallbackLocalPart(pdfImage(), {
         pdfInput: true,
         serverKey: "sidecar",
       }),
@@ -80,7 +83,7 @@ describe("pdfFallbackOfficePart", () => {
 
   test("keeps the base64 flow without a captured path", () => {
     expect(
-      pdfFallbackOfficePart(pdfImage({ path: undefined }), {
+      pdfFallbackLocalPart(pdfImage({ local: undefined }), {
         pdfInput: false,
         serverKey: "sidecar",
       }),
@@ -89,7 +92,7 @@ describe("pdfFallbackOfficePart", () => {
 
   test("keeps the base64 flow when the server changed", () => {
     expect(
-      pdfFallbackOfficePart(pdfImage(), {
+      pdfFallbackLocalPart(pdfImage(), {
         pdfInput: false,
         serverKey: "wsl:Ubuntu",
       }),
@@ -98,7 +101,7 @@ describe("pdfFallbackOfficePart", () => {
 
   test("ignores non-PDF attachments", () => {
     expect(
-      pdfFallbackOfficePart(pdfImage({ mime: "image/png" }), {
+      pdfFallbackLocalPart(pdfImage({ mime: "image/png" }), {
         pdfInput: false,
         serverKey: "sidecar",
       }),
@@ -112,7 +115,6 @@ describe("localAttachmentsPrompt", () => {
       { ...attachment(), position: 1 },
       {
         ...attachment({
-          id: "office_2",
           filename: "budget.xlsx",
           path: "/Users/example/budget.xlsx",
           mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

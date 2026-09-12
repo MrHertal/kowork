@@ -6,21 +6,20 @@ import type {
   TextPartInput,
 } from "@opencode-ai/sdk/v2/client";
 import type {
-  ImageAttachmentPart,
-  LocalAttachmentPart,
+  PromptAttachmentPart,
 } from "@/contexts/prompt";
 import { ascending } from "@/utils/id";
 import { localAttachmentsPrompt } from "@/utils/local-attachments";
 
 type PromptRequestPart = (TextPartInput | FilePartInput) & { id: string };
 
-export type EncodedImageAttachmentPart = Omit<ImageAttachmentPart, "blob"> & {
-  dataUrl: string;
+export type EncodedPromptAttachmentPart = Omit<PromptAttachmentPart, "blob"> & {
+  dataUrl?: string;
 };
 
 type BuildRequestPartsInput = {
   text: string;
-  attachments: Array<EncodedImageAttachmentPart | LocalAttachmentPart>;
+  attachments: EncodedPromptAttachmentPart[];
   messageID: string;
   sessionID: string;
 };
@@ -67,7 +66,7 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
     : [];
 
   const images = input.attachments.flatMap((attachment) =>
-    attachment.type === "image"
+    attachment.dataUrl
       ? [
           {
             id: ascending("part"),
@@ -80,13 +79,21 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
       : [],
   );
 
-  const office = input.attachments.flatMap((attachment, index) =>
-    attachment.type === "office"
-      ? [{ ...attachment, position: index + 1 }]
+  const locals = input.attachments.flatMap((attachment, index) =>
+    attachment.local
+      ? [
+          {
+            id: attachment.id,
+            filename: attachment.filename,
+            mime: attachment.mime,
+            ...attachment.local,
+            position: index + 1,
+          },
+        ]
       : [],
   );
-  if (office.length > 0) {
-    const attachmentContext = localAttachmentsPrompt(office);
+  if (locals.length > 0) {
+    const attachmentContext = localAttachmentsPrompt(locals);
     requestParts.push({
       id: ascending("part"),
       type: "text",

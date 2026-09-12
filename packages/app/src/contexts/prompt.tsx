@@ -7,7 +7,10 @@ import {
   useMemo,
 } from "react";
 import type { FileSelection } from "@/contexts/file";
-import type { LocalAttachmentFormat } from "@/constants/file-picker";
+import {
+  LOCAL_ATTACHMENT_MIMES,
+  type LocalAttachmentFormat,
+} from "@/constants/file-picker";
 import { useSDK } from "@/contexts/sdk";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { type BlobReference, isLiveBlobReference } from "@/utils/blob";
@@ -29,32 +32,23 @@ export interface FileAttachmentPart extends PartBase {
   selection?: FileSelection;
 }
 
-export interface ImageAttachmentPart {
-  type: "image";
+export interface PromptAttachmentPart {
+  type: "attachment";
   id: string;
   filename: string;
   mime: string;
-  blob: BlobReference;
-  // Local path captured on a sidecar, for the submit-time PDF fallback.
-  path?: string;
-  serverKey?: string;
-}
-
-export interface LocalAttachmentPart {
-  type: "office";
-  id: string;
-  filename: string;
-  mime: string;
-  path: string;
-  format: LocalAttachmentFormat;
-  serverKey: string;
+  blob?: BlobReference;
+  local?: {
+    path: string;
+    format: LocalAttachmentFormat;
+    serverKey: string;
+  };
 }
 
 export type ContentPart =
   | TextPart
   | FileAttachmentPart
-  | ImageAttachmentPart
-  | LocalAttachmentPart;
+  | PromptAttachmentPart;
 export type Prompt = ContentPart[];
 
 export const DEFAULT_PROMPT: Prompt = [
@@ -82,10 +76,8 @@ function isPartEqual(a: ContentPart, b: ContentPart): boolean {
         a.path === b.path &&
         isSelectionEqual(a.selection, b.selection)
       );
-    case "image":
-      return b.type === "image" && a.id === b.id;
-    case "office":
-      return b.type === "office" && a.id === b.id;
+    case "attachment":
+      return b.type === "attachment" && a.id === b.id;
   }
 }
 
@@ -123,15 +115,84 @@ const createDefaultSnapshot = (): PromptSnapshot => ({
   cursor: undefined,
 });
 
-// Blob object URLs die with the document: restored image attachments are
-// only kept while their blob is still live (in-app navigation). Legacy
-// snapshots predate blob references and are always dropped.
-const sanitizeSnapshot = (value: PromptSnapshot): PromptSnapshot => ({
-  ...value,
-  prompt: value.prompt.filter(
-    (part) => part.type !== "image" || isLiveBlobReference(part.blob),
-  ),
-});
+type LegacyAttachmentPart = {
+  type: "image" | "office";
+  id: string;
+  filename: string;
+  mime: string;
+  blob?: BlobReference;
+  path?: string;
+  format?: LocalAttachmentFormat;
+  serverKey?: string;
+};
+
+function normalizeLocalAttachment(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return;
+  const local = value as Record<string, unknown>;
+  if (typeof local.path !== "string" || typeof local.serverKey !== "string")
+    return;
+  if (
+    typeof local.format !== "string" ||
+    !(local.format in LOCAL_ATTACHMENT_MIMES)
+  )
+    return;
+  return {
+    path: local.path,
+    format: local.format as LocalAttachmentFormat,
+    serverKey: local.serverKey,
+  };
+}
+
+function normalizeAttachment(
+  part: PromptAttachmentPart | LegacyAttachmentPart,
+): PromptAttachmentPart | undefined {
+  const blob = part.blob && isLiveBlobReference(part.blob) ? part.blob : undefined;
+  const candidateLocal = normalizeLocalAttachment(
+    part.type === "attachment"
+      ? part.local
+      : part.path && part.serverKey &&
+          (part.type === "office" || part.mime === "application/pdf")
+        ? {
+            path: part.path,
+            format: part.type === "office" ? part.format : "pdf",
+            serverKey: part.serverKey,
+          }
+        : undefined,
+  );
+  const local =
+    candidateLocal &&
+    part.mime === LOCAL_ATTACHMENT_MIMES[candidateLocal.format]
+      ? candidateLocal
+      : undefined;
+  if (!blob && !local) return undefined;
+  return {
+    type: "attachment",
+    id: part.id,
+    filename: part.filename,
+    mime: part.mime,
+    ...(blob ? { blob } : {}),
+    ...(local ? { local } : {}),
+  };
+}
+
+// Blob object URLs die with the document. Preserve a local representation when
+// one exists; otherwise restored blob-only attachments are dropped.
+const sanitizeSnapshot = (value: PromptSnapshot): PromptSnapshot => {
+  const prompt: Prompt = [];
+  for (const part of value.prompt as Array<ContentPart | LegacyAttachmentPart>) {
+    if (
+      part.type !== "attachment" &&
+      part.type !== "image" &&
+      part.type !== "office"
+    ) {
+      prompt.push(part as ContentPart);
+      continue;
+    }
+    const attachment = normalizeAttachment(part);
+    if (attachment) prompt.push(attachment);
+  }
+  return { ...value, prompt };
+};
 
 interface PromptContextValue {
   ready: boolean;

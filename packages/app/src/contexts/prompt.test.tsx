@@ -138,7 +138,7 @@ describe("PromptProvider persistence", () => {
       new File(["abc"], "a.png", { type: "image/png" }),
     );
     const imagePart = {
-      type: "image",
+      type: "attachment",
       id: "img_live",
       filename: "a.png",
       mime: "image/png",
@@ -149,7 +149,67 @@ describe("PromptProvider persistence", () => {
 
     const current: Prompt = prompt.current;
     expect(current).toHaveLength(2);
-    expect(current[1]).toMatchObject({ type: "image", id: "img_live", blob });
+    expect(current[1]).toMatchObject({
+      type: "attachment",
+      id: "img_live",
+      blob,
+    });
+  });
+
+  test("migrates a legacy local document attachment", async () => {
+    seed([
+      textPart,
+      {
+        type: "office",
+        id: "office_1",
+        filename: "contract.docx",
+        mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        path: "/tmp/contract.docx",
+        format: "docx",
+        serverKey: "sidecar",
+      },
+    ]);
+    await setup();
+
+    expect(prompt.current[1]).toEqual({
+      type: "attachment",
+      id: "office_1",
+      filename: "contract.docx",
+      mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      local: {
+        path: "/tmp/contract.docx",
+        format: "docx",
+        serverKey: "sidecar",
+      },
+    });
+  });
+
+  test("keeps a legacy PDF path when its blob is no longer live", async () => {
+    seed([
+      textPart,
+      {
+        type: "image",
+        id: "pdf_1",
+        filename: "guide.pdf",
+        mime: "application/pdf",
+        blob: { id: "dead", url: "blob:dead" },
+        path: "/tmp/guide.pdf",
+        serverKey: "sidecar",
+      },
+    ]);
+    await setup();
+
+    expect(prompt.current[1]).toEqual({
+      type: "attachment",
+      id: "pdf_1",
+      filename: "guide.pdf",
+      mime: "application/pdf",
+      local: {
+        path: "/tmp/guide.pdf",
+        format: "pdf",
+        serverKey: "sidecar",
+      },
+    });
   });
 
   test("starts empty when nothing is persisted", async () => {

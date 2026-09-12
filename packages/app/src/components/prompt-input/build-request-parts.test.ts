@@ -1,9 +1,9 @@
 // @opencode-ref: opencode/packages/app/src/components/prompt-input/build-request-parts.test.ts
 import { describe, expect, test } from "vitest";
-import type { LocalAttachmentPart } from "@/contexts/prompt";
+import type { LocalAttachmentFormat } from "@/constants/file-picker";
 import {
   buildRequestParts,
-  type EncodedImageAttachmentPart,
+  type EncodedPromptAttachmentPart,
 } from "./build-request-parts";
 
 const image = (input: {
@@ -11,8 +11,8 @@ const image = (input: {
   filename: string;
   mime?: string;
   dataUrl?: string;
-}): EncodedImageAttachmentPart => ({
-  type: "image",
+}): EncodedPromptAttachmentPart => ({
+  type: "attachment",
   id: input.id,
   filename: input.filename,
   mime: input.mime ?? "image/png",
@@ -23,18 +23,20 @@ const office = (input: {
   id: string;
   filename: string;
   path: string;
-  format?: LocalAttachmentPart["format"];
+  format?: LocalAttachmentFormat;
   mime?: string;
-}): LocalAttachmentPart => ({
-  type: "office",
+}): EncodedPromptAttachmentPart => ({
+  type: "attachment",
   id: input.id,
   filename: input.filename,
-  path: input.path,
-  format: input.format ?? "docx",
   mime:
     input.mime ??
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  serverKey: "sidecar",
+  local: {
+    path: input.path,
+    format: input.format ?? "docx",
+    serverKey: "sidecar",
+  },
 });
 
 describe("buildRequestParts", () => {

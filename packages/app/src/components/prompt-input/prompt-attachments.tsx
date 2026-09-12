@@ -20,28 +20,27 @@ import {
   getMediaCategory,
 } from "@/components/ai-elements/attachments";
 import {
-  type ImageAttachmentPart,
-  type LocalAttachmentPart,
+  type PromptAttachmentPart,
   usePrompt,
 } from "@/contexts/prompt";
 import { usePromptAttachments } from "./attachments";
 
-interface ImageAttachmentItemProps {
-  attachment: ImageAttachmentPart;
+interface PromptAttachmentItemProps {
+  attachment: PromptAttachmentPart;
   onRemove: (id: string) => void;
 }
 
-const ImageAttachmentItem = memo(
-  ({ attachment, onRemove }: ImageAttachmentItemProps) => {
+const PromptAttachmentItem = memo(
+  ({ attachment, onRemove }: PromptAttachmentItemProps) => {
     const data = useMemo<AttachmentData>(
       () => ({
         id: attachment.id,
         type: "file",
         filename: attachment.filename,
         mediaType: attachment.mime,
-        url: attachment.blob.url,
+        url: attachment.blob?.url ?? "",
       }),
-      [attachment.id, attachment.filename, attachment.mime, attachment.blob],
+      [attachment],
     );
     const handleRemove = useCallback(
       () => onRemove(attachment.id),
@@ -49,6 +48,13 @@ const ImageAttachmentItem = memo(
     );
     const mediaCategory = getMediaCategory(data);
     const label = getAttachmentLabel(data);
+    const format = attachment.local?.format;
+    const Icon =
+      format === "xlsx"
+        ? FileSpreadsheetIcon
+        : format === "pptx"
+          ? PresentationIcon
+          : FileTextIcon;
     return (
       <AttachmentHoverCard openDelay={200} closeDelay={300}>
         <AttachmentHoverCardTrigger asChild>
@@ -59,7 +65,7 @@ const ImageAttachmentItem = memo(
           >
             <div className="relative size-5 shrink-0">
               <div className="absolute inset-0 transition-opacity group-hover:opacity-0">
-                <AttachmentPreview />
+                <AttachmentPreview fallbackIcon={<Icon className="size-3" />} />
               </div>
               <AttachmentRemove className="absolute inset-0" />
             </div>
@@ -68,7 +74,10 @@ const ImageAttachmentItem = memo(
         </AttachmentHoverCardTrigger>
         <AttachmentHoverCardContent className="rounded-md">
           <div className="space-y-3">
-            {mediaCategory === "image" && data.type === "file" && data.url && (
+            {attachment.blob &&
+              mediaCategory === "image" &&
+              data.type === "file" &&
+              data.url && (
               <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
                 <img
                   alt={label}
@@ -78,7 +87,7 @@ const ImageAttachmentItem = memo(
                   width={320}
                 />
               </div>
-            )}
+              )}
             <div className="space-y-1 px-0.5">
               <h4 className="text-sm leading-none font-semibold">{label}</h4>
               {data.mediaType && (
@@ -93,53 +102,7 @@ const ImageAttachmentItem = memo(
     );
   },
 );
-ImageAttachmentItem.displayName = "ImageAttachmentItem";
-
-interface LocalAttachmentItemProps {
-  attachment: LocalAttachmentPart;
-  onRemove: (id: string) => void;
-}
-
-const LocalAttachmentItem = memo(
-  ({ attachment, onRemove }: LocalAttachmentItemProps) => {
-    const data = useMemo<AttachmentData>(
-      () => ({
-        id: attachment.id,
-        type: "file",
-        filename: attachment.filename,
-        mediaType: attachment.mime,
-        url: "",
-      }),
-      [attachment.id, attachment.filename, attachment.mime],
-    );
-    const handleRemove = useCallback(
-      () => onRemove(attachment.id),
-      [onRemove, attachment.id],
-    );
-    const Icon =
-      attachment.format === "xlsx"
-        ? FileSpreadsheetIcon
-        : attachment.format === "pptx"
-          ? PresentationIcon
-          : FileTextIcon;
-    return (
-      <Attachment
-        data={data}
-        onRemove={handleRemove}
-        className="cursor-default"
-      >
-        <div className="relative size-5 shrink-0">
-          <div className="absolute inset-0 transition-opacity group-hover:opacity-0">
-            <AttachmentPreview fallbackIcon={<Icon className="size-3" />} />
-          </div>
-          <AttachmentRemove className="absolute inset-0" />
-        </div>
-        <AttachmentInfo />
-      </Attachment>
-    );
-  },
-);
-LocalAttachmentItem.displayName = "LocalAttachmentItem";
+PromptAttachmentItem.displayName = "PromptAttachmentItem";
 
 export function PromptAttachments() {
   const { current } = usePrompt();
@@ -148,8 +111,7 @@ export function PromptAttachments() {
   const attachments = useMemo(
     () =>
       current.filter(
-        (part): part is ImageAttachmentPart | LocalAttachmentPart =>
-          part.type === "image" || part.type === "office",
+        (part): part is PromptAttachmentPart => part.type === "attachment",
       ),
     [current],
   );
@@ -158,21 +120,13 @@ export function PromptAttachments() {
 
   return (
     <Attachments variant="inline" className="w-full px-3 pt-3">
-      {attachments.map((attachment) =>
-        attachment.type === "image" ? (
-          <ImageAttachmentItem
-            key={attachment.id}
-            attachment={attachment}
-            onRemove={removeAttachment}
-          />
-        ) : (
-          <LocalAttachmentItem
-            key={attachment.id}
-            attachment={attachment}
-            onRemove={removeAttachment}
-          />
-        ),
-      )}
+      {attachments.map((attachment) => (
+        <PromptAttachmentItem
+          key={attachment.id}
+          attachment={attachment}
+          onRemove={removeAttachment}
+        />
+      ))}
     </Attachments>
   );
 }
