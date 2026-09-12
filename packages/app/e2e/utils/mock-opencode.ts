@@ -1,6 +1,8 @@
 // @opencode-ref: opencode/packages/app/e2e/utils/mock-server.ts
 import type { Page, Route } from "@playwright/test";
 
+import { installSseTransport } from "./sse-transport";
+
 export const sessionID = "ses_browser_smoke";
 export const directory = "/tmp/kowork-browser-smoke";
 export const providerID = "mock-provider";
@@ -11,6 +13,14 @@ export type PromptRequest = {
   messageID?: string;
   model?: { providerID: string; modelID: string };
   parts?: Array<{ type: string; text?: string }>;
+};
+
+export type OpenCodeEvent = {
+  directory: string;
+  payload: {
+    type: string;
+    properties: Record<string, unknown>;
+  };
 };
 
 type PendingPrompt = {
@@ -110,6 +120,10 @@ function sendJson(route: Route, body: unknown, status = 200) {
 export async function mockOpenCode(page: Page) {
   const serverHost = process.env.PLAYWRIGHT_SERVER_HOST ?? "127.0.0.1";
   const serverPort = process.env.PLAYWRIGHT_SERVER_PORT ?? "4096";
+  const events = await installSseTransport<OpenCodeEvent>(
+    page,
+    `http://${serverHost}:${serverPort}`,
+  );
   let resolvePrompt: ((prompt: PendingPrompt) => void) | undefined;
   const prompt = new Promise<PendingPrompt>((resolve) => {
     resolvePrompt = resolve;
@@ -129,18 +143,6 @@ export async function mockOpenCode(page: Page) {
           "access-control-allow-methods": "GET,POST,OPTIONS",
           "access-control-allow-origin": "*",
         },
-      });
-    }
-
-    if (path === "/global/event") {
-      return route.fulfill({
-        status: 200,
-        headers: {
-          "access-control-allow-origin": "*",
-          "cache-control": "no-cache",
-          "content-type": "text/event-stream",
-        },
-        body: ": connected\n\n",
       });
     }
 
@@ -203,6 +205,7 @@ export async function mockOpenCode(page: Page) {
   await page.route(`http://${serverHost}:${serverPort}/**`, handle);
 
   return {
+    events,
     waitForPrompt: () => prompt,
     close() {
       if (unhandledRequests.length > 0) {
