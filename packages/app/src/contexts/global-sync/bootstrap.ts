@@ -20,6 +20,7 @@ import { retry } from "@/utils/retry";
 import { formatServerError } from "@/utils/server-errors";
 import { toast } from "sonner";
 import { skillsQueryOptions } from "@/hooks/use-skills";
+import type { SessionStatusRevisions } from "./session-status-revisions";
 import type { State } from "./types";
 import { cmp, normalizeAgentList, normalizeProviderList } from "./utils";
 
@@ -206,6 +207,7 @@ export async function bootstrapDirectory(input: {
     provider: ProviderListResponse;
   };
   queryClient: QueryClient;
+  sessionStatusRevisions?: SessionStatusRevisions;
 }) {
   const key = providerKey(input.serverUrl, input.directory);
   const rev = ++nextProviderRev;
@@ -288,14 +290,33 @@ export async function bootstrapDirectory(input: {
             });
           }),
         ),
-      () =>
-        retry(() =>
+      () => {
+        const checkpoint = input.sessionStatusRevisions?.checkpoint() ?? 0;
+        return retry(() =>
           input.sdk.session.status().then((x) => {
+            const statuses = x.data ?? {};
             input.setState((d) => {
-              d.session_status = x.data!;
+              const sessionIDs = new Set([
+                ...Object.keys(d.session_status),
+                ...Object.keys(statuses),
+              ]);
+              for (const sessionID of sessionIDs) {
+                if (
+                  input.sessionStatusRevisions?.changedSince(
+                    sessionID,
+                    checkpoint,
+                  )
+                ) {
+                  continue;
+                }
+                const status = statuses[sessionID];
+                if (status) d.session_status[sessionID] = status;
+                else delete d.session_status[sessionID];
+              }
             });
           }),
-        ),
+        );
+      },
       () =>
         seededProject
           ? Promise.resolve()

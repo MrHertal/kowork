@@ -37,6 +37,7 @@ import {
   cleanupDroppedSessionCaches,
 } from "./global-sync/event-reducer";
 import { createRefreshQueue } from "./global-sync/queue";
+import { createSessionStatusRevisions } from "./global-sync/session-status-revisions";
 import {
   estimateRootSessionTotal,
   loadRootSessionsWithFallback,
@@ -135,6 +136,10 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
     sdkCache: new Map<string, OpencodeClient>(),
     sessionLoads: new Map<string, Promise<void>>(),
     sessionMeta: new Map<string, { limit: number }>(),
+    sessionStatusRevisions: new Map<
+      string,
+      ReturnType<typeof createSessionStatusRevisions>
+    >(),
     booting: new Map<string, Promise<void>>(),
   }));
 
@@ -188,6 +193,10 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
       if (existing) return existing;
       const store = new Store<State>(createDefaultState());
       stores.children.set(directory, store);
+      stores.sessionStatusRevisions.set(
+        directory,
+        createSessionStatusRevisions(),
+      );
       return store;
     },
     [stores],
@@ -307,6 +316,7 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
           loadSessions,
           translate,
           queryClient,
+          sessionStatusRevisions: stores.sessionStatusRevisions.get(directory),
         });
       });
 
@@ -461,6 +471,14 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
       const childStore = stores.children.get(directory);
       if (!childStore) return;
 
+      if (event.type === "session.status") {
+        const sessionID = (event.properties as { sessionID?: unknown })
+          .sessionID;
+        if (typeof sessionID === "string") {
+          stores.sessionStatusRevisions.get(directory)?.touch(sessionID);
+        }
+      }
+
       applyDirectoryEvent({
         event,
         directory,
@@ -510,6 +528,7 @@ export function GlobalSyncProvider({ children }: GlobalSyncProviderProps) {
       stores.sdkCache.clear();
       stores.sessionLoads.clear();
       stores.sessionMeta.clear();
+      stores.sessionStatusRevisions.clear();
       stores.booting.clear();
     };
   }, [globalSDK.url, stores, queue]);

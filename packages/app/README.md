@@ -26,7 +26,7 @@ Install Playwright's Chromium build once before the first local run:
 pnpm --filter @kowork/app exec playwright install chromium
 ```
 
-The initial scenario opens the standalone browser app against a local mock of the OpenCode HTTP API. It verifies that a user can enter a plain message and that Kowork sends the expected agent, model, and text parts while rendering the optimistic user message.
+The browser scenarios open the standalone app against a local mock of the OpenCode HTTP API. They verify that a user can submit a plain message, that Kowork sends the expected agent, model, and text parts, and that a streamed assistant response is rendered before the composer returns to its ready state.
 
 The browser test configuration accepts the same environment overrides as OpenCode:
 
@@ -39,7 +39,7 @@ The browser test configuration accepts the same environment overrides as OpenCod
 | `PLAYWRIGHT_WORKERS`        | Environment | One in CI; Playwright default locally    |
 | `PLAYWRIGHT_FULLY_PARALLEL` | Unset       | Set to `1` for fully parallel test files |
 
-This first layer intentionally does not start Electron or the OpenCode sidecar, call a model, stream an assistant response, run a skill, or create a PDF. Those behaviors can be added as separate scenarios after this smoke test is stable.
+This first layer intentionally does not start Electron or the OpenCode sidecar, call a real model, run a skill, or create a PDF. Those behaviors can be added as separate scenarios after the browser tests are stable.
 
 ## Build targets
 

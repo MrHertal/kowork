@@ -1,7 +1,10 @@
 // @opencode-ref: opencode/packages/app/e2e/utils/mock-server.ts
 import type { Page, Route } from "@playwright/test";
 
+import { installSseTransport } from "./sse-transport";
+
 export const sessionID = "ses_browser_smoke";
+export const createdSessionID = "ses_browser_created";
 export const directory = "/tmp/kowork-browser-smoke";
 export const providerID = "mock-provider";
 export const modelID = "mock-small-model";
@@ -13,9 +16,49 @@ export type PromptRequest = {
   parts?: Array<{ type: string; text?: string }>;
 };
 
+type SessionCreateRequest = {
+  metadata?: Record<string, unknown>;
+};
+
+export type OpenCodeEvent = {
+  directory: string;
+  payload: {
+    type: string;
+    properties: Record<string, unknown>;
+  };
+};
+
+export type MockPermissionRequest = {
+  id: string;
+  sessionID: string;
+  permission: string;
+  patterns: string[];
+  metadata: Record<string, unknown>;
+  always: string[];
+};
+
 type PendingPrompt = {
   body: PromptRequest;
+  sessionID: string;
   accept: () => Promise<void>;
+  reject: () => Promise<void>;
+};
+
+type PendingSessionCreate = {
+  body: SessionCreateRequest;
+  accept: () => Promise<void>;
+};
+
+type PendingPermissionReply = {
+  requestID: string;
+  body: { reply?: "once" | "always" | "reject" };
+  accept: () => Promise<void>;
+};
+
+type MockOpenCodeOptions = {
+  deferSessionStatus?: boolean;
+  permissionRequests?: MockPermissionRequest[];
+  sessionStatus?: Record<string, unknown>;
 };
 
 const session = {
@@ -28,6 +71,14 @@ const session = {
   agent: "build",
   model: { providerID, id: modelID },
   time: { created: 1_700_000_000_000, updated: 1_700_000_000_000 },
+};
+
+const createdSession = {
+  ...session,
+  id: createdSessionID,
+  slug: "browser-created",
+  title: "New task",
+  metadata: { "kowork.directoryMode": "default" },
 };
 
 const project = {
@@ -107,12 +158,43 @@ function sendJson(route: Route, body: unknown, status = 200) {
   });
 }
 
-export async function mockOpenCode(page: Page) {
+export async function mockOpenCode(
+  page: Page,
+  options: MockOpenCodeOptions = {},
+) {
   const serverHost = process.env.PLAYWRIGHT_SERVER_HOST ?? "127.0.0.1";
   const serverPort = process.env.PLAYWRIGHT_SERVER_PORT ?? "4096";
+  const events = await installSseTransport<OpenCodeEvent>(
+    page,
+    `http://${serverHost}:${serverPort}`,
+  );
   let resolvePrompt: ((prompt: PendingPrompt) => void) | undefined;
   const prompt = new Promise<PendingPrompt>((resolve) => {
     resolvePrompt = resolve;
+  });
+  let resolveSessionCreate:
+    | ((sessionCreate: PendingSessionCreate) => void)
+    | undefined;
+  const sessionCreate = new Promise<PendingSessionCreate>((resolve) => {
+    resolveSessionCreate = resolve;
+  });
+  let sessionCreated = false;
+  let resolvePermissionReply:
+    | ((reply: PendingPermissionReply) => void)
+    | undefined;
+  const permissionReply = new Promise<PendingPermissionReply>((resolve) => {
+    resolvePermissionReply = resolve;
+  });
+  let resolveAbort: (() => void) | undefined;
+  const abort = new Promise<void>((resolve) => {
+    resolveAbort = resolve;
+  });
+  let deferSessionStatus = options.deferSessionStatus ?? false;
+  let resolveSessionStatus:
+    | ((status: PendingSessionStatus) => void)
+    | undefined;
+  const sessionStatus = new Promise<PendingSessionStatus>((resolve) => {
+    resolveSessionStatus = resolve;
   });
   const unhandledRequests: string[] = [];
 
@@ -132,32 +214,64 @@ export async function mockOpenCode(page: Page) {
       });
     }
 
-    if (path === "/global/event") {
-      return route.fulfill({
-        status: 200,
-        headers: {
-          "access-control-allow-origin": "*",
-          "cache-control": "no-cache",
-          "content-type": "text/event-stream",
+    if (request.method() === "POST" && path === "/session") {
+      const body = request.postDataJSON() as SessionCreateRequest;
+      resolveSessionCreate?.({
+        body,
+        async accept() {
+          sessionCreated = true;
+          await sendJson(route, createdSession);
         },
-        body: ": connected\n\n",
       });
+      return;
     }
 
+    const permissionReplyMatch = path.match(/^\/permission\/([^/]+)\/reply$/);
     if (
       request.method() === "POST" &&
-      path === `/session/${sessionID}/prompt_async`
+      permissionReplyMatch &&
+      options.permissionRequests?.some(
+        (item) => item.id === permissionReplyMatch[1],
+      )
+    ) {
+      resolvePermissionReply?.({
+        requestID: permissionReplyMatch[1]!,
+        body: request.postDataJSON() as PendingPermissionReply["body"],
+        accept: () => sendJson(route, true),
+      });
+      return;
+    }
+
+    const promptMatch = path.match(/^\/session\/([^/]+)\/prompt_async$/);
+    if (
+      request.method() === "POST" &&
+      promptMatch &&
+      [sessionID, createdSessionID].includes(promptMatch[1] ?? "")
     ) {
       const body = request.postDataJSON() as PromptRequest;
       resolvePrompt?.({
         body,
+        sessionID: promptMatch[1]!,
         accept() {
           return route.fulfill({
             status: 204,
             headers: { "access-control-allow-origin": "*" },
           });
         },
+        reject() {
+          return sendJson(
+            route,
+            { error: { message: "Mock prompt failure" } },
+            500,
+          );
+        },
       });
+      return;
+    }
+
+    if (request.method() === "POST" && path === `/session/${sessionID}/abort`) {
+      await sendJson(route, true);
+      resolveAbort?.();
       return;
     }
 
@@ -174,16 +288,37 @@ export async function mockOpenCode(page: Page) {
     }
     if (path === "/project") return sendJson(route, [project]);
     if (path === "/project/current") return sendJson(route, project);
-    if (path === "/experimental/session") return sendJson(route, [session]);
-    if (path === "/session") return sendJson(route, [session]);
+    const sessions = sessionCreated ? [createdSession, session] : [session];
+    if (path === "/experimental/session") return sendJson(route, sessions);
+    if (path === "/session") return sendJson(route, sessions);
     if (path === `/session/${sessionID}`) return sendJson(route, session);
-    if (path === `/session/${sessionID}/message`) {
+    if (sessionCreated && path === `/session/${createdSessionID}`) {
+      return sendJson(route, createdSession);
+    }
+    if (
+      path === `/session/${sessionID}/message` ||
+      (sessionCreated && path === `/session/${createdSessionID}/message`)
+    ) {
       return sendJson(route, []);
     }
     if (/^\/session\/[^/]+\/(children|diff|todo)$/.test(path)) {
       return sendJson(route, []);
     }
-    if (path === "/session/status") return sendJson(route, {});
+    if (path === "/session/status") {
+      if (deferSessionStatus) {
+        deferSessionStatus = false;
+        resolveSessionStatus?.({
+          respond(status = options.sessionStatus ?? {}) {
+            return sendJson(route, status);
+          },
+        });
+        return;
+      }
+      return sendJson(route, options.sessionStatus ?? {});
+    }
+    if (path === "/permission") {
+      return sendJson(route, options.permissionRequests ?? []);
+    }
     if (path === "/agent") {
       return sendJson(route, [{ name: "build", mode: "primary" }]);
     }
@@ -203,7 +338,12 @@ export async function mockOpenCode(page: Page) {
   await page.route(`http://${serverHost}:${serverPort}/**`, handle);
 
   return {
+    events,
+    waitForAbort: () => abort,
     waitForPrompt: () => prompt,
+    waitForPermissionReply: () => permissionReply,
+    waitForSessionCreate: () => sessionCreate,
+    waitForSessionStatus: () => sessionStatus,
     close() {
       if (unhandledRequests.length > 0) {
         return Promise.reject(
@@ -216,3 +356,7 @@ export async function mockOpenCode(page: Page) {
     },
   };
 }
+
+type PendingSessionStatus = {
+  respond: (status?: Record<string, unknown>) => Promise<void>;
+};
