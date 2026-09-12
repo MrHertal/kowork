@@ -220,3 +220,30 @@ test("stops a busy task", async ({ page }) => {
     await opencode.close();
   }
 });
+
+test("keeps a newer task status over a stale bootstrap response", async ({
+  page,
+}) => {
+  const opencode = await mockOpenCode(page, { deferSessionStatus: true });
+
+  try {
+    await page.goto(`/session/${sessionID}`);
+    await opencode.events.waitForConnection();
+    const statusRequest = await opencode.waitForSessionStatus();
+
+    await opencode.events.send({
+      directory,
+      payload: {
+        type: "session.status",
+        properties: { sessionID, status: { type: "busy" } },
+      },
+    });
+
+    const stop = page.getByRole("button", { name: "Stop" });
+    await expect(stop).toBeVisible();
+    await statusRequest.respond({});
+    await expect(stop).toBeVisible();
+  } finally {
+    await opencode.close();
+  }
+});

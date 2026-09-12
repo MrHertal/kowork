@@ -30,6 +30,7 @@ type PendingPrompt = {
 };
 
 type MockOpenCodeOptions = {
+  deferSessionStatus?: boolean;
   sessionStatus?: Record<string, unknown>;
 };
 
@@ -140,6 +141,11 @@ export async function mockOpenCode(
   const abort = new Promise<void>((resolve) => {
     resolveAbort = resolve;
   });
+  let deferSessionStatus = options.deferSessionStatus ?? false;
+  let resolveSessionStatus: ((status: PendingSessionStatus) => void) | undefined;
+  const sessionStatus = new Promise<PendingSessionStatus>((resolve) => {
+    resolveSessionStatus = resolve;
+  });
   const unhandledRequests: string[] = [];
 
   const handle = async (route: Route) => {
@@ -214,6 +220,15 @@ export async function mockOpenCode(
       return sendJson(route, []);
     }
     if (path === "/session/status") {
+      if (deferSessionStatus) {
+        deferSessionStatus = false;
+        resolveSessionStatus?.({
+          respond(status = options.sessionStatus ?? {}) {
+            return sendJson(route, status);
+          },
+        });
+        return;
+      }
       return sendJson(route, options.sessionStatus ?? {});
     }
     if (path === "/agent") {
@@ -238,6 +253,7 @@ export async function mockOpenCode(
     events,
     waitForAbort: () => abort,
     waitForPrompt: () => prompt,
+    waitForSessionStatus: () => sessionStatus,
     close() {
       if (unhandledRequests.length > 0) {
         return Promise.reject(
@@ -250,3 +266,7 @@ export async function mockOpenCode(
     },
   };
 }
+
+type PendingSessionStatus = {
+  respond: (status?: Record<string, unknown>) => Promise<void>;
+};
