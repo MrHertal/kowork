@@ -79,7 +79,7 @@ const binary = () =>
     type: "application/octet-stream",
   });
 
-const office = (name: string) =>
+const pathOnlyFile = (name: string) =>
   new File([Uint8Array.of(80, 75, 3, 4)], name, {
     type: "application/octet-stream",
   });
@@ -121,7 +121,7 @@ const images = () =>
     (part): part is PromptAttachmentPart =>
       part.type === "attachment" && !!part.blob,
   );
-const officeAttachments = () =>
+const localAttachments = () =>
   prompt.current.filter(
     (part): part is PromptAttachmentPart =>
       part.type === "attachment" && !part.blob && !!part.local,
@@ -224,11 +224,11 @@ describe("usePromptAttachments", () => {
       };
       await setup();
 
-      const added = await attachments.addAttachments([office(name)]);
+      const added = await attachments.addAttachments([pathOnlyFile(name)]);
 
       expect(added).toBe(true);
-      await waitFor(() => expect(officeAttachments()).toHaveLength(1));
-      expect(officeAttachments()[0]).toMatchObject({
+      await waitFor(() => expect(localAttachments()).toHaveLength(1));
+      expect(localAttachments()[0]).toMatchObject({
         type: "attachment",
         filename: name,
         mime,
@@ -244,7 +244,7 @@ describe("usePromptAttachments", () => {
     },
   );
 
-  test("requests a WSL path for Office attachments on a WSL sidecar", async () => {
+  test("requests a WSL path for local attachments on a WSL sidecar", async () => {
     const getPathForFile = vi.fn(() => Promise.resolve("/mnt/c/report.docx"));
     platform.platform = "desktop";
     platform.getPathForFile = getPathForFile;
@@ -256,7 +256,7 @@ describe("usePromptAttachments", () => {
     };
     await setup();
 
-    await attachments.addAttachments([office("report.docx")]);
+    await attachments.addAttachments([pathOnlyFile("report.docx")]);
 
     expect(getPathForFile).toHaveBeenCalledWith(expect.any(File), {
       target: "wsl",
@@ -264,22 +264,24 @@ describe("usePromptAttachments", () => {
     });
   });
 
-  test("rejects Office attachments outside a local sidecar", async () => {
+  test("rejects path-only attachments outside a local sidecar", async () => {
     platform.platform = "desktop";
     platform.getPathForFile = vi.fn(() => Promise.resolve("/tmp/report.docx"));
     await setup();
 
-    const added = await attachments.addAttachments([office("report.docx")]);
+    const added = await attachments.addAttachments([
+      pathOnlyFile("report.docx"),
+    ]);
 
     expect(added).toBe(false);
-    expect(officeAttachments()).toHaveLength(0);
+    expect(localAttachments()).toHaveLength(0);
     expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
       description:
         "This type of document can only be attached in the Kowork desktop app.",
     });
   });
 
-  test("keeps valid files and warns when an Office path is unavailable", async () => {
+  test("keeps valid files and warns when a local path is unavailable", async () => {
     platform.platform = "desktop";
     platform.getPathForFile = vi.fn(() => Promise.resolve(null));
     currentServer = {
@@ -290,13 +292,13 @@ describe("usePromptAttachments", () => {
     await setup();
 
     const added = await attachments.addAttachments([
-      office("report.docx"),
+      pathOnlyFile("report.docx"),
       png(),
     ]);
 
     expect(added).toBe(true);
     await waitFor(() => expect(images()).toHaveLength(1));
-    expect(officeAttachments()).toHaveLength(0);
+    expect(localAttachments()).toHaveLength(0);
     expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
       description: "Kowork couldn't open this document. Try choosing it again.",
     });
@@ -440,7 +442,7 @@ describe("usePromptAttachments", () => {
     await waitFor(() => expect(images()).toHaveLength(1));
   });
 
-  test("does not accept path-based Office attachments from paste", async () => {
+  test("does not accept path-only attachments from paste", async () => {
     platform.platform = "desktop";
     platform.getPathForFile = vi.fn(() => Promise.resolve("/tmp/report.docx"));
     currentServer = {
@@ -450,12 +452,14 @@ describe("usePromptAttachments", () => {
     };
     await setup();
     const { event } = pasteEvent({
-      items: [{ kind: "file", getAsFile: () => office("report.docx") }],
+      items: [
+        { kind: "file", getAsFile: () => pathOnlyFile("report.docx") },
+      ],
     });
 
     await attachments.handlePaste(event);
 
-    expect(officeAttachments()).toHaveLength(0);
+    expect(localAttachments()).toHaveLength(0);
     expect(platform.getPathForFile).not.toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith("Can't attach document", {
       description: "Kowork couldn't open this document. Try choosing it again.",
@@ -568,7 +572,7 @@ describe("useGlobalAttachmentDrop", () => {
     await waitFor(() => expect(images()).toHaveLength(1));
   });
 
-  test("drops disk-backed Office files as attachments", async () => {
+  test("drops path-only files as local attachments", async () => {
     platform.platform = "desktop";
     platform.getPathForFile = vi.fn(() => Promise.resolve("/tmp/report.docx"));
     currentServer = {
@@ -580,11 +584,11 @@ describe("useGlobalAttachmentDrop", () => {
 
     const event = dragEvent("drop", {
       types: ["Files"],
-      files: [office("report.docx")],
+      files: [pathOnlyFile("report.docx")],
     });
     dispatch(document, event);
 
-    await waitFor(() => expect(officeAttachments()).toHaveLength(1));
+    await waitFor(() => expect(localAttachments()).toHaveLength(1));
   });
 
   test("clears dragging on a drop without files", async () => {

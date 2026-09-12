@@ -24,7 +24,7 @@ const image = (input: {
   dataUrl: input.dataUrl ?? "data:image/png;base64,AAA",
 });
 
-const office = (input: {
+const localAttachment = (input: {
   id: string;
   filename: string;
   path: string;
@@ -170,18 +170,18 @@ describe("buildRequestParts", () => {
     expect(result.optimisticParts).toHaveLength(1);
   });
 
-  test("builds a synthetic text part for Office attachments", () => {
+  test("builds a synthetic text part for local attachments", () => {
     const result = buildRequestParts({
       text: "summarize this",
       deliveries: [
-        office({
-          id: "office_1",
+        localAttachment({
+          id: "local_1",
           filename: "contract.docx",
           path: "/Users/example/contract.docx",
         }),
       ],
-      messageID: "msg_office",
-      sessionID: "ses_office",
+      messageID: "msg_local",
+      sessionID: "ses_local",
     });
 
     expect(result.requestParts).toHaveLength(2);
@@ -197,7 +197,7 @@ describe("buildRequestParts", () => {
           version: 2,
           items: [
             {
-              id: "office_1",
+              id: "local_1",
               filename: "contract.docx",
               path: "/Users/example/contract.docx",
               format: "docx",
@@ -217,20 +217,20 @@ describe("buildRequestParts", () => {
     });
   });
 
-  test("supports an Office-only prompt", () => {
+  test("supports a local-attachment-only prompt", () => {
     const result = buildRequestParts({
       text: "",
       deliveries: [
-        office({
-          id: "office_1",
+        localAttachment({
+          id: "local_1",
           filename: "budget.xlsx",
           path: "/Users/example/budget.xlsx",
           format: "xlsx",
           mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         }),
       ],
-      messageID: "msg_office",
-      sessionID: "ses_office",
+      messageID: "msg_local",
+      sessionID: "ses_local",
     });
 
     expect(result.requestParts).toHaveLength(1);
@@ -240,13 +240,13 @@ describe("buildRequestParts", () => {
     });
   });
 
-  test("places Office context before uploaded model attachments", () => {
+  test("places local context before uploaded model attachments", () => {
     const result = buildRequestParts({
       text: "check these",
       deliveries: [
         image({ id: "img_1", filename: "a.png", position: 1 }),
-        office({
-          id: "office_1",
+        localAttachment({
+          id: "local_1",
           filename: "contract.docx",
           path: "/Users/example/contract.docx",
           position: 2,

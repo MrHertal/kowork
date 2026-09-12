@@ -72,8 +72,8 @@ describe("planAttachmentDelivery", () => {
     expect(delivery?.local).toBeUndefined();
   });
 
-  test("plans local-only documents and preserves original positions", () => {
-    const document: PromptAttachmentPart = {
+  test("plans local-only attachments and preserves original positions", () => {
+    const localAttachment: PromptAttachmentPart = {
       type: "attachment",
       id: "doc_1",
       filename: "contract.docx",
@@ -86,7 +86,7 @@ describe("planAttachmentDelivery", () => {
     };
 
     const deliveries = planAttachmentDelivery(
-      [pdf({ local: undefined }), document],
+      [pdf({ local: undefined }), localAttachment],
       { pdfInput: true, serverKey: "sidecar" },
     );
 

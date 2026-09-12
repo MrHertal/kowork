@@ -7,7 +7,7 @@ import {
 } from "./local-attachments";
 
 describe("localAttachmentMatchesServer", () => {
-  test("matches only the sidecar where the document was attached", () => {
+  test("matches only the sidecar where the file was attached", () => {
     expect(
       localAttachmentMatchesServer({ serverKey: "sidecar" }, "sidecar"),
     ).toBe(true);
@@ -25,7 +25,7 @@ type LocalAttachmentInput = Parameters<typeof localAttachmentsPrompt>[0][number]
 const attachment = (
   input: Partial<LocalAttachmentInput> = {},
 ): LocalAttachmentInput => ({
-  id: "office_1",
+  id: "local_1",
   filename: "contract.docx",
   path: "/Users/example/contract.docx",
   mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -67,7 +67,7 @@ describe("localAttachmentsPrompt", () => {
       version: 2,
       items: [
         {
-          id: "office_1",
+          id: "local_1",
           filename: "contract.docx",
           path: "/Users/example/contract.docx",
           mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -75,7 +75,7 @@ describe("localAttachmentsPrompt", () => {
           position: 1,
         },
         {
-          id: "office_1",
+          id: "local_1",
           filename: "budget.xlsx",
           path: "/Users/example/budget.xlsx",
           mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -112,7 +112,7 @@ describe("localAttachmentsFromMetadata", () => {
 
     expect(localAttachmentsFromMetadata(prompt.metadata)).toEqual([
       {
-        id: "office_1",
+        id: "local_1",
         filename: "contract.docx",
         path: "/Users/example/contract.docx",
         mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -213,7 +213,7 @@ describe("localAttachmentsFromMetadata", () => {
     expect(prompt.text).toContain("<format>pdf</format>");
     expect(localAttachmentsFromMetadata(prompt.metadata)).toEqual([
       {
-        id: "office_1",
+        id: "local_1",
         filename: "guide.pdf",
         path: "/Users/example/guide.pdf",
         mime: "application/pdf",

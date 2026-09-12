@@ -26,13 +26,13 @@ function warn() {
   });
 }
 
-function warnOfficeLocal() {
+function warnLocalAttachmentsUnavailable() {
   toast.error(m.toast_prompt_attachOfficeUnavailable_title(), {
     description: m.toast_prompt_attachOfficeUnavailable_description(),
   });
 }
 
-function warnOfficePath() {
+function warnAttachmentPathUnavailable() {
   toast.error(m.toast_prompt_attachOfficePathFailed_title(), {
     description: m.toast_prompt_attachOfficePathFailed_description(),
   });
@@ -44,24 +44,24 @@ export function usePromptAttachments() {
   const server = useServer();
   const sidecar =
     server.current?.type === "sidecar" ? server.current : undefined;
-  const canAttachOffice = !!platform.getPathForFile && !!sidecar;
+  const canResolveLocalPaths = !!platform.getPathForFile && !!sidecar;
 
   const add = useCallback(
     async (
       file: File,
-      allowOffice: boolean,
+      allowPathOnlyFiles: boolean,
     ): Promise<
-      "added" | "unsupported" | "office-unavailable" | "office-path"
+      "added" | "unsupported" | "local-unavailable" | "path-unavailable"
     > => {
       const local = pathOnlyAttachmentInfo(file);
       if (local) {
-        if (!allowOffice) return "office-path";
-        if (!platform.getPathForFile || !sidecar) return "office-unavailable";
+        if (!allowPathOnlyFiles) return "path-unavailable";
+        if (!platform.getPathForFile || !sidecar) return "local-unavailable";
         const path = await platform.getPathForFile(file, {
           target: sidecar.variant === "wsl" ? "wsl" : "native",
           wslDistro: sidecar.variant === "wsl" ? sidecar.distro : undefined,
         });
-        if (!path) return "office-path";
+        if (!path) return "path-unavailable";
         const attachment: PromptAttachmentPart = {
           type: "attachment",
           id: nanoid(),
@@ -114,8 +114,8 @@ export function usePromptAttachments() {
     async (file: File): Promise<boolean> => {
       const result = await add(file, false);
       if (result === "unsupported") warn();
-      if (result === "office-unavailable") warnOfficeLocal();
-      if (result === "office-path") warnOfficePath();
+      if (result === "local-unavailable") warnLocalAttachmentsUnavailable();
+      if (result === "path-unavailable") warnAttachmentPathUnavailable();
       return result === "added";
     },
     [add],
@@ -125,19 +125,20 @@ export function usePromptAttachments() {
     async (
       files: File[],
       showToast = true,
-      allowOffice = true,
+      allowPathOnlyFiles = true,
     ): Promise<boolean> => {
       let found = false;
-      let officeUnavailable = false;
-      let officePath = false;
+      let localUnavailable = false;
+      let pathUnavailable = false;
       for (const file of files) {
-        const result = await add(file, allowOffice);
+        const result = await add(file, allowPathOnlyFiles);
         if (result === "added") found = true;
-        if (result === "office-unavailable") officeUnavailable = true;
-        if (result === "office-path") officePath = true;
+        if (result === "local-unavailable") localUnavailable = true;
+        if (result === "path-unavailable") pathUnavailable = true;
       }
-      if (showToast && officePath) warnOfficePath();
-      else if (showToast && officeUnavailable) warnOfficeLocal();
+      if (showToast && pathUnavailable) warnAttachmentPathUnavailable();
+      else if (showToast && localUnavailable)
+        warnLocalAttachmentsUnavailable();
       else if (!found && files.length > 0 && showToast) warn();
       return found;
     },
@@ -186,7 +187,7 @@ export function usePromptAttachments() {
   return {
     addAttachment,
     addAttachments,
-    canAttachOffice,
+    canResolveLocalPaths,
     removeAttachment,
     handlePaste,
   };
