@@ -35,6 +35,7 @@ Get the latest build from the [releases page](https://github.com/MrHertal/kowork
 
 - **Works where your files are** — agents read, create, and organize files directly in a folder on your computer. No uploading documents into a chat; the work happens in place.
 - **Real Office documents** — built-in skills create and edit genuine Word documents, Excel spreadsheets (formulas and charts included), PowerPoint decks, and PDFs. Polished files, not plain text.
+- **Image creation and editing** — create raster images, resize and crop photos, convert formats, add captions or watermarks, combine images, and work with animated GIFs.
 - **Your choice of AI provider** — sign in or paste an API key for Anthropic, OpenAI, Google, GitHub Copilot, OpenRouter, and more. Switch models anytime; no lock-in.
 - **Parallel work** — run several tasks at once, split big jobs into subtasks.
 - **Connectors** — plug agents into external tools and data (MCP servers).

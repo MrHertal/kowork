@@ -27,7 +27,7 @@ For example:
 
 > Create `quarterly-review.pptx` in this folder. Use the figures in `results.xlsx`, make eight slides for an executive audience, and include speaker notes with the main talking points.
 
-When Kowork delivers a Word, Excel, PowerPoint, or PDF file, the task shows a document card. In the desktop app, select **Open** to open the saved file.
+When Kowork delivers a Word, Excel, PowerPoint, or PDF file, the task shows a file card. In the desktop app, select **Open** to open the saved file.
 
 ## Work with an existing document
 
