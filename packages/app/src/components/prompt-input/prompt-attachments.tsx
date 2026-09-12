@@ -19,10 +19,7 @@ import {
   getAttachmentLabel,
   getMediaCategory,
 } from "@/components/ai-elements/attachments";
-import {
-  type PromptAttachmentPart,
-  usePrompt,
-} from "@/contexts/prompt";
+import { type PromptAttachmentPart, usePrompt } from "@/contexts/prompt";
 import { usePromptAttachments } from "./attachments";
 
 interface PromptAttachmentItemProps {
@@ -78,15 +75,15 @@ const PromptAttachmentItem = memo(
               mediaCategory === "image" &&
               data.type === "file" &&
               data.url && (
-              <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
-                <img
-                  alt={label}
-                  className="max-h-full max-w-full object-contain"
-                  height={384}
-                  src={data.url}
-                  width={320}
-                />
-              </div>
+                <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
+                  <img
+                    alt={label}
+                    className="max-h-full max-w-full object-contain"
+                    height={384}
+                    src={data.url}
+                    width={320}
+                  />
+                </div>
               )}
             <div className="space-y-1 px-0.5">
               <h4 className="text-sm leading-none font-semibold">{label}</h4>

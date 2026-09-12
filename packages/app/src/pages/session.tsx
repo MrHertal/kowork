@@ -41,10 +41,7 @@ import { useLocal } from "@/contexts/local";
 import { usePermission, usePermissionData } from "@/contexts/permission";
 import { autoRespondsPermission } from "@/contexts/permission/auto-respond";
 import { usePlatform } from "@/contexts/platform";
-import {
-  usePrompt,
-  type PromptAttachmentPart,
-} from "@/contexts/prompt";
+import { usePrompt, type PromptAttachmentPart } from "@/contexts/prompt";
 import { useSDK } from "@/contexts/sdk";
 import { useServer } from "@/contexts/server";
 import { useSettings } from "@/contexts/settings";
@@ -64,9 +61,7 @@ import { blobDataUrl } from "@/utils/blob";
 import { planAttachmentDelivery } from "@/utils/attachment-delivery";
 import { ascending } from "@/utils/id";
 import { buildKoworkConfiguration } from "@/utils/kowork-configuration";
-import {
-  localAttachmentMatchesServer,
-} from "@/utils/local-attachments";
+import { localAttachmentMatchesServer } from "@/utils/local-attachments";
 import { formatServerError, translate } from "@/utils/server-errors";
 import { SESSION_DIRECTORY_MODE_METADATA_KEY } from "@/utils/session-directory";
 import {
@@ -434,11 +429,7 @@ export function Page({
     !blocked &&
     !isChildSession;
   const canStop =
-    isBusy &&
-    !hasText &&
-    !hasAttachments &&
-    !blocked &&
-    !isChildSession;
+    isBusy && !hasText && !hasAttachments && !blocked && !isChildSession;
   const status = canStop ? "streaming" : "ready";
   const isSubmitDisabled = !canSubmit && !canStop;
 

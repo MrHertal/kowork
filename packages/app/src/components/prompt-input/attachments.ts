@@ -4,10 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import { toast } from "sonner";
 import { usePlatform } from "@/contexts/platform";
-import {
-  usePrompt,
-  type PromptAttachmentPart,
-} from "@/contexts/prompt";
+import { usePrompt, type PromptAttachmentPart } from "@/contexts/prompt";
 import { useServer } from "@/contexts/server";
 import { m } from "@/paraglide/messages";
 import { createBlobReference } from "@/utils/blob";
@@ -137,8 +134,7 @@ export function usePromptAttachments() {
         if (result === "path-unavailable") pathUnavailable = true;
       }
       if (showToast && pathUnavailable) warnAttachmentPathUnavailable();
-      else if (showToast && localUnavailable)
-        warnLocalAttachmentsUnavailable();
+      else if (showToast && localUnavailable) warnLocalAttachmentsUnavailable();
       else if (!found && files.length > 0 && showToast) warn();
       return found;
     },
@@ -148,10 +144,7 @@ export function usePromptAttachments() {
   const removeAttachment = useCallback(
     (id: string) => {
       update((prev) =>
-        prev.filter(
-          (part) =>
-            part.type !== "attachment" || part.id !== id,
-        ),
+        prev.filter((part) => part.type !== "attachment" || part.id !== id),
       );
     },
     [update],

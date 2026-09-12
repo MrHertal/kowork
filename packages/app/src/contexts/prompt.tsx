@@ -45,10 +45,7 @@ export interface PromptAttachmentPart {
   };
 }
 
-export type ContentPart =
-  | TextPart
-  | FileAttachmentPart
-  | PromptAttachmentPart;
+export type ContentPart = TextPart | FileAttachmentPart | PromptAttachmentPart;
 export type Prompt = ContentPart[];
 
 export const DEFAULT_PROMPT: Prompt = [
@@ -151,7 +148,8 @@ function normalizeAttachment(
   const candidateLocal = normalizeLocalAttachment(
     part.type === "attachment"
       ? part.local
-      : part.path && part.serverKey &&
+      : part.path &&
+          part.serverKey &&
           (part.type === "office" || part.mime === "application/pdf")
         ? {
             path: part.path,
@@ -180,7 +178,9 @@ function normalizeAttachment(
 // one exists; otherwise restored blob-only attachments are dropped.
 const sanitizeSnapshot = (value: PromptSnapshot): PromptSnapshot => {
   const prompt: Prompt = [];
-  for (const part of value.prompt as Array<ContentPart | LegacyAttachmentPart>) {
+  for (const part of value.prompt as Array<
+    ContentPart | LegacyAttachmentPart
+  >) {
     if (
       part.type !== "attachment" &&
       part.type !== "image" &&
