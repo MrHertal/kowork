@@ -12,6 +12,10 @@ export default {
       id: "opencode:sdk",
       config: {
         baseUrl,
+        // Promptfoo validates this field even though it is ignored when baseUrl
+        // points to Kowork's preconfigured sidecar. OpenCode's free model does
+        // not require a real provider key.
+        apiKey: "public",
         provider_id: "opencode",
         model: "big-pickle",
         // Promptfoo 0.123.0 still forwards custom_agent.prompt as the
@@ -32,8 +36,8 @@ export default {
       description: "Identifies as Kowork",
       assert: [
         {
-          type: "icontains-any",
-          value: ["I'm Kowork", "I am Kowork"],
+          type: "regex",
+          value: "(?:I['’]m|I am)\\s+(?:\\*\\*)?Kowork(?:\\*\\*)?",
         },
         {
           type: "not-icontains",

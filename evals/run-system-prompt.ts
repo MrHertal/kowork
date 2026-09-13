@@ -60,7 +60,14 @@ try {
       ...createIsolatedSidecarEnv(),
       ...createSidecarStorageEnv(userDataPath, tempPath),
       KOWORK_EVAL_EXPECTED_SYSTEM: evalSystemPrompt,
-      OPENCODE_CONFIG_CONTENT: JSON.stringify({ plugin: [inspector] }),
+      OPENCODE_CONFIG_CONTENT: JSON.stringify({
+        plugin: [inspector],
+        provider: {
+          opencode: {
+            options: { setCacheKey: false },
+          },
+        },
+      }),
     },
     logPath,
   });
