@@ -1,10 +1,15 @@
 packages:
   - "packages/*"
 allowBuilds:
+  "@playwright/browser-chromium@1.63.0": false
+  "@swc/core@1.16.2": false
   electron: true
   electron-winstaller: true
   esbuild: true
   msw: false
+  onnxruntime-node@1.24.3: false
+  protobufjs@7.6.6: false
+  sharp@0.34.5: false
   workerd: true
 minimumReleaseAgeExcludePrune: true
 overrides:
