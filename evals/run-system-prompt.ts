@@ -23,6 +23,9 @@ const resultsDir = path.join(repoRoot, "tmp/promptfoo");
 const inspector = pathToFileURL(
   path.join(repoRoot, "evals/system-prompt-inspector.mjs"),
 ).href;
+const executionTrace = pathToFileURL(
+  path.join(repoRoot, "evals/execution-trace.mjs"),
+).href;
 
 let activeCommand: ChildProcess | undefined;
 let activeCommandTermination: Promise<void> | undefined;
@@ -48,10 +51,12 @@ try {
   const userDataPath = path.join(temporaryRoot, "user-data");
   const tempPath = path.join(temporaryRoot, "temp");
   const taskFolder = path.join(temporaryRoot, "folder");
+  const tracePath = path.join(temporaryRoot, "traces");
   await Promise.all([
     mkdir(userDataPath, { recursive: true }),
     mkdir(tempPath, { recursive: true }),
     mkdir(taskFolder, { recursive: true }),
+    mkdir(tracePath, { recursive: true }),
     mkdir(resultsDir, { recursive: true }),
   ]);
   throwIfInterrupted();
@@ -65,8 +70,9 @@ try {
       KOWORK_EVAL_EXPECTED_SYSTEM: evalSystemPrompt,
       KOWORK_EVAL_GRADING_SYSTEM: gradingSystemPrompt,
       KOWORK_EVAL_EXPECTED_DIRECTORY: taskFolder,
+      KOWORK_EVAL_TRACE_DIR: tracePath,
       OPENCODE_CONFIG_CONTENT: JSON.stringify({
-        plugin: [inspector],
+        plugin: [inspector, executionTrace],
         provider: {
           opencode: {
             options: { setCacheKey: false },
@@ -96,6 +102,7 @@ try {
     ],
     {
       KOWORK_EVAL_BASE_URL: started.url,
+      KOWORK_EVAL_TRACE_DIR: tracePath,
       PROMPTFOO_CONFIG_DIR: resultsDir,
       PROMPTFOO_DISABLE_TELEMETRY: "1",
     },

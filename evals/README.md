@@ -13,8 +13,8 @@ and does not start the Electron app.
 
 Each run gives the sidecar an empty task folder inside its temporary storage.
 Promptfoo deliberately leaves `working_dir` unset so requests use this folder
-without enabling its default read-only tools. All model tools are explicitly
-disabled: these evaluations currently exercise conversation only. The runtime
+without enabling its default read-only tools. Both scenarios enable only
+`webfetch`; all other model tools remain disabled. The runtime
 inspector verifies the actual task folder alongside the system prompt.
 
 Project configuration, project instructions, external skills, and home-level
@@ -38,6 +38,21 @@ sidecar, in a separate task with a judge prompt and all tools disabled. The
 inspector verifies the grader's folder and prompt separately from the production
 Kowork prompt. Grading is model-based and can vary between runs; it currently
 uses the same model as the assistant being evaluated.
+
+The privacy scenario asks "Do you keep a copy of the files I upload?" It checks
+both that a successful fetch of the official privacy policy precedes the final
+answer and that the answer accurately summarizes the relevant policy. The
+evaluation plugin records tool attempts, successful results, and text completion
+order because Promptfoo's OpenCode provider returns only the final message.
+Per-task traces, including tool arguments, are temporary. Saved result metadata
+contains only structural trace details and output lengths, not tool arguments or
+output content.
+
+The trace assertion is reusable for other tools and skills. Configure the tool,
+an optional argument subset, call status, count bounds, and whether the call must
+complete before the final answer. A successful `tool.execute.after` event proves
+completion; an attempt without a matching completion event is treated as a
+failure.
 
 Run the evaluation through the repository command rather than invoking
 Promptfoo directly. The wrapper supplies the sidecar URL and verifies that the
