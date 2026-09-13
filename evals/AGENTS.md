@@ -1,0 +1,69 @@
+# Evaluation Guidelines
+
+These evaluations exercise Kowork's product behavior through its compiled
+OpenCode sidecar. Repository-wide rules also apply. Contributor commands and
+output locations live in [README.md](README.md).
+
+## Required reading
+
+- Read `README.md` before running or changing evaluations.
+- Before changing sidecar or protocol behavior, inspect Kowork's production
+  implementation and the corresponding implementation in
+  `opencode/packages/desktop/`.
+- Before changing Promptfoo provider configuration, inspect the provider
+  implementation in the pinned Promptfoo version and check its current official
+  documentation. Do not assume provider fields configure an existing server
+  when `baseUrl` is set.
+
+## Evaluation integrity
+
+- Run evaluations through the repository command, such as
+  `pnpm eval:system-prompt`; do not invoke Promptfoo directly.
+- Exercise Kowork's compiled OpenCode fork, not an independently installed
+  upstream CLI. Preserve the `present_files` check that establishes the
+  server's identity.
+- Import prompts from their production source. Never copy production prompt
+  text into an evaluation fixture.
+- Bypass Promptfoo's response cache so every evaluation makes a real model
+  request.
+- Use isolated sidecar storage and an available local port. Do not read the user's
+  OpenCode configuration, sessions, plugins, or credentials.
+- Preserve graceful shutdown and process-tree cleanup on success, evaluation
+  failure, startup failure, `SIGINT`, and `SIGTERM`.
+
+## OpenCode v1 workaround
+
+- Keep the normal `build` agent selected so OpenCode retains its model-specific
+  base prompt.
+- `custom_agent.prompt` is intentionally used to populate the v1 request-level
+  `system` field even though Promptfoo cannot register a custom agent on a
+  server supplied through `baseUrl`.
+- Keep `apiKey: "public"`: Promptfoo validates the field, but it is only a
+  placeholder and is ignored for the preconfigured local sidecar.
+- Keep `provider.opencode.options.setCacheKey` disabled in the isolated sidecar
+  configuration. The free OpenCode endpoint rejects `prompt_cache_key`.
+- Preserve the runtime diagnostic that verifies exactly one production Kowork
+  prompt follows a non-empty OpenCode base prompt.
+- Revisit these constraints when Kowork migrates to OpenCode v2 rather than
+  carrying the workaround forward automatically.
+
+## Assertions and failures
+
+- Assert product behavior, not exact prose. Allow harmless differences in
+  punctuation, whitespace, and Markdown while remaining strict about identity
+  and prohibited behavior.
+- Keep deterministic structural checks separate from stochastic model-output
+  assertions.
+- Do not weaken an assertion until the complete saved response and grading
+  reason have been inspected.
+- Distinguish model behavior failures from transport and provider failures.
+  OpenCode may return an assistant result containing an API error and no text,
+  which Promptfoo can misleadingly report as a failed output assertion.
+
+## Verification
+
+- Run the Electron typecheck and Prettier on changed evaluation files.
+- Run the relevant repository evaluation command after provider, prompt,
+  assertion, sidecar, or lifecycle changes.
+- After failure-path or lifecycle changes, verify that no `kowork-eval-*`
+  temporary directory or eval-sidecar process remains.
