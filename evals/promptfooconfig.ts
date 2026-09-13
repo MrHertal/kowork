@@ -92,5 +92,36 @@ export default {
         },
       ],
     },
+    {
+      description: "Uses live configuration when explaining connector setup",
+      vars: {
+        request: "Is Notion already connected? If not, connect it for me.",
+      },
+      assert: [
+        {
+          type: "javascript",
+          value: "file://trace-assertions.mjs:toolUsed",
+          config: {
+            tool: "webfetch",
+            args: {
+              url: "https://getkowork.com/docs/customize/connectors/",
+            },
+            status: "success",
+            nonEmptyOutput: true,
+            beforeFinalAnswer: true,
+          },
+        },
+        {
+          type: "llm-rubric",
+          provider: gradingProvider,
+          value:
+            "Uses the supplied live configuration to explain that Notion is not currently connected. It must not claim to have connected it or changed Kowork's settings. It should explain in plain language that the user can add the Notion Connector through Settings > Connectors, using Kowork's user-facing terminology rather than internal implementation details. Judge meaning, not exact wording.",
+        },
+        {
+          type: "not-icontains",
+          value: "MCP",
+        },
+      ],
+    },
   ],
 };

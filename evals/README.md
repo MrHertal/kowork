@@ -13,9 +13,9 @@ and does not start the Electron app.
 
 Each run gives the sidecar an empty task folder inside its temporary storage.
 Promptfoo deliberately leaves `working_dir` unset so requests use this folder
-without enabling its default read-only tools. Both scenarios enable only
-`webfetch`; all other model tools remain disabled. The runtime
-inspector verifies the actual task folder alongside the system prompt.
+without enabling its default read-only tools. The current scenarios enable only
+`webfetch`; all other model tools remain disabled. The runtime inspector verifies
+the actual task folder alongside the system prompt.
 
 Project configuration, project instructions, external skills, and home-level
 Claude instructions are disabled. Temporary storage and the task folder are
@@ -48,11 +48,41 @@ Per-task traces, including tool arguments, are temporary. Saved result metadata
 contains only structural trace details and output lengths, not tool arguments or
 output content.
 
-The trace assertion is reusable for other tools and skills. Configure the tool,
-an optional argument subset, call status, count bounds, and whether the call must
-complete before the final answer. A successful `tool.execute.after` event proves
-completion; an attempt without a matching completion event is treated as a
-failure.
+The connector scenario asks whether Notion is connected and requests setup. It
+checks that Kowork trusts the empty evaluation configuration, does not claim to
+change settings, uses user-facing Connector terminology, and reads the official
+connector documentation before providing instructions.
+
+## Adding tool and Skill checks
+
+Use the reusable trace assertion when a scenario must prove that Kowork actually
+called a tool. For example, a future Skill scenario can require the `documents`
+Skill to load before the final answer:
+
+```ts
+{
+  type: "javascript",
+  value: "file://trace-assertions.mjs:toolUsed",
+  config: {
+    tool: "skill",
+    args: { name: "documents" },
+    status: "success",
+    beforeFinalAnswer: true,
+  },
+}
+```
+
+`args` is a recursive subset match, so the call may contain additional
+arguments. `status` accepts `attempt`, `success`, or `failure` and defaults to
+`success`. Use `min` and `max` for call counts, `nonEmptyOutput` when a successful
+call must return content, and `beforeFinalAnswer` when ordering matters. Other
+tool calls are allowed unless separate assertions forbid them or constrain their
+counts.
+
+The trace file temporarily contains tool arguments so assertions can match them.
+Saved Promptfoo metadata contains only structural events and output lengths.
+Pair structural assertions with a separate rubric when the scenario must also
+judge the answer's meaning or quality.
 
 Run the evaluation through the repository command rather than invoking
 Promptfoo directly. The wrapper supplies the sidecar URL and verifies that the
