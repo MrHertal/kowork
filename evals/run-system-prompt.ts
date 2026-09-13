@@ -47,19 +47,23 @@ try {
   temporaryRoot = await mkdtemp(path.join(tmpdir(), "kowork-eval-"));
   const userDataPath = path.join(temporaryRoot, "user-data");
   const tempPath = path.join(temporaryRoot, "temp");
+  const taskFolder = path.join(temporaryRoot, "folder");
   await Promise.all([
     mkdir(userDataPath, { recursive: true }),
     mkdir(tempPath, { recursive: true }),
+    mkdir(taskFolder, { recursive: true }),
     mkdir(resultsDir, { recursive: true }),
   ]);
   throwIfInterrupted();
 
   const logPath = path.join(resultsDir, "sidecar.log");
   const started = await startSidecar({
+    cwd: taskFolder,
     env: {
       ...createIsolatedSidecarEnv(),
       ...createSidecarStorageEnv(userDataPath, tempPath),
       KOWORK_EVAL_EXPECTED_SYSTEM: evalSystemPrompt,
+      KOWORK_EVAL_EXPECTED_DIRECTORY: taskFolder,
       OPENCODE_CONFIG_CONTENT: JSON.stringify({
         plugin: [inspector],
         provider: {
@@ -149,15 +153,17 @@ async function runPnpm(
 }
 
 async function startSidecar({
+  cwd,
   env,
   logPath,
 }: {
+  cwd: string;
   env: NodeJS.ProcessEnv;
   logPath: string;
 }) {
   const log = createWriteStream(logPath, { flags: "w" });
   const child = fork(sidecarEntry, [], {
-    cwd: repoRoot,
+    cwd,
     env,
     stdio: ["ignore", "pipe", "pipe", "ipc"],
   });

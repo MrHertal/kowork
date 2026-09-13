@@ -24,6 +24,7 @@ export default {
         // model-specific prompt. Remove this v1 workaround when Kowork moves
         // to OpenCode v2 and adopts its replacement for per-prompt system text.
         agent: "build",
+        tools: { "*": false },
         custom_agent: {
           description: "Kowork system prompt evaluation",
           prompt: evalSystemPrompt,

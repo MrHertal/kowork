@@ -11,6 +11,17 @@ temporary storage, waits for it to become healthy, runs Promptfoo, and stops the
 sidecar. It uses an available local port, bypasses Promptfoo's response cache,
 and does not start the Electron app.
 
+Each run gives the sidecar an empty task folder inside its temporary storage.
+Promptfoo deliberately leaves `working_dir` unset so requests use this folder
+without enabling its default read-only tools. All model tools are explicitly
+disabled: these evaluations currently exercise conversation only. The runtime
+inspector verifies the actual task folder alongside the system prompt.
+
+Project configuration, project instructions, external skills, and home-level
+Claude instructions are disabled. Temporary storage and the task folder are
+removed after the run. This is not an OS-level sandbox: most host environment
+variables are inherited, and network access remains available.
+
 The evaluation currently uses OpenCode's free `big-pickle` model. It therefore
 requires network access but does not require a provider API key. Promptfoo
 results and the most recent sidecar log are written to `tmp/promptfoo/`. Inspect
