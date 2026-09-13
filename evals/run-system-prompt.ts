@@ -8,7 +8,7 @@ import {
   createIsolatedSidecarEnv,
   createSidecarStorageEnv,
 } from "../packages/electron/src/main/sidecar-storage";
-import { evalSystemPrompt } from "./system-prompt";
+import { evalSystemPrompt, gradingSystemPrompt } from "./system-prompt";
 
 type SidecarMessage =
   | { type: "ready"; url: string }
@@ -22,6 +22,9 @@ const promptfooConfig = path.join(repoRoot, "evals/promptfooconfig.ts");
 const resultsDir = path.join(repoRoot, "tmp/promptfoo");
 const inspector = pathToFileURL(
   path.join(repoRoot, "evals/system-prompt-inspector.mjs"),
+).href;
+const executionTrace = pathToFileURL(
+  path.join(repoRoot, "evals/execution-trace.mjs"),
 ).href;
 
 let activeCommand: ChildProcess | undefined;
@@ -47,21 +50,29 @@ try {
   temporaryRoot = await mkdtemp(path.join(tmpdir(), "kowork-eval-"));
   const userDataPath = path.join(temporaryRoot, "user-data");
   const tempPath = path.join(temporaryRoot, "temp");
+  const taskFolder = path.join(temporaryRoot, "folder");
+  const tracePath = path.join(temporaryRoot, "traces");
   await Promise.all([
     mkdir(userDataPath, { recursive: true }),
     mkdir(tempPath, { recursive: true }),
+    mkdir(taskFolder, { recursive: true }),
+    mkdir(tracePath, { recursive: true }),
     mkdir(resultsDir, { recursive: true }),
   ]);
   throwIfInterrupted();
 
   const logPath = path.join(resultsDir, "sidecar.log");
   const started = await startSidecar({
+    cwd: taskFolder,
     env: {
       ...createIsolatedSidecarEnv(),
       ...createSidecarStorageEnv(userDataPath, tempPath),
       KOWORK_EVAL_EXPECTED_SYSTEM: evalSystemPrompt,
+      KOWORK_EVAL_GRADING_SYSTEM: gradingSystemPrompt,
+      KOWORK_EVAL_EXPECTED_DIRECTORY: taskFolder,
+      KOWORK_EVAL_TRACE_DIR: tracePath,
       OPENCODE_CONFIG_CONTENT: JSON.stringify({
-        plugin: [inspector],
+        plugin: [inspector, executionTrace],
         provider: {
           opencode: {
             options: { setCacheKey: false },
@@ -91,6 +102,7 @@ try {
     ],
     {
       KOWORK_EVAL_BASE_URL: started.url,
+      KOWORK_EVAL_TRACE_DIR: tracePath,
       PROMPTFOO_CONFIG_DIR: resultsDir,
       PROMPTFOO_DISABLE_TELEMETRY: "1",
     },
@@ -149,15 +161,17 @@ async function runPnpm(
 }
 
 async function startSidecar({
+  cwd,
   env,
   logPath,
 }: {
+  cwd: string;
   env: NodeJS.ProcessEnv;
   logPath: string;
 }) {
   const log = createWriteStream(logPath, { flags: "w" });
   const child = fork(sidecarEntry, [], {
-    cwd: repoRoot,
+    cwd,
     env,
     stdio: ["ignore", "pipe", "pipe", "ipc"],
   });

@@ -54,6 +54,19 @@ output locations live in [README.md](README.md).
   and prohibited behavior.
 - Keep deterministic structural checks separate from stochastic model-output
   assertions.
+- Promptfoo's OpenCode provider returns only the final assistant message. Use
+  the execution trace when an assertion needs evidence from an earlier tool or
+  Skill step. Do not rely on `skill-used` for multi-step OpenCode responses
+  unless its behavior has been verified against the pinned provider version.
+- Enable only the tools required by the suite. When scenarios need materially
+  different tool sets, consider separate provider configurations rather than
+  broadening tool access for every scenario without review.
+- Tool arguments and outputs may contain user data. Keep full arguments only in
+  temporary traces, persist structural event summaries by default, and never
+  save full tool output unless a scenario explicitly requires it.
+- When testing a tool-dependent answer, use the trace for tool name, arguments,
+  success, count, and ordering, and use a separate semantic assertion for answer
+  quality.
 - Do not weaken an assertion until the complete saved response and grading
   reason have been inspected.
 - Distinguish model behavior failures from transport and provider failures.
