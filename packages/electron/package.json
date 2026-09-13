@@ -8,11 +8,13 @@
   "scripts": {
     "prebuild": "tsx ./scripts/prebuild.ts",
     "build": "tsx ./scripts/electron-vite.ts build",
+    "build:eval-sidecar": "pnpm run build:sidecar && tsx ./scripts/electron-vite.ts build --config eval-sidecar.vite.config.ts",
     "build:runtime": "tsx ./scripts/build-runtime.ts",
     "build:sidecar": "tsx ./scripts/build-sidecar.ts",
     "predev": "tsx ./scripts/predev.ts",
     "dev": "tsx ./scripts/electron-vite.ts dev",
     "ensure:runtime": "tsx ./scripts/ensure-runtime.ts",
+    "eval:system-prompt": "tsx ../../evals/run-system-prompt.ts",
     "package": "pnpm run ensure:runtime && electron-builder --config electron-builder.config.ts",
     "package:linux": "pnpm run ensure:runtime && electron-builder --linux --config electron-builder.config.ts",
     "package:mac": "pnpm run ensure:runtime && electron-builder --mac --config electron-builder.config.ts",
@@ -22,7 +24,7 @@
     "test": "vitest run",
     "test:skills": "tsx ./scripts/test-skills.ts",
     "test:watch": "vitest",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b && tsc -p ../../evals/tsconfig.json"
   },
   "dependencies": {
     "electron-context-menu": "^4.1.2",

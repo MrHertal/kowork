@@ -9,7 +9,10 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
-import { createSidecarStorageEnv } from "./sidecar-storage";
+import {
+  createIsolatedSidecarEnv,
+  createSidecarStorageEnv,
+} from "./sidecar-storage";
 
 let root: string;
 let tempPath: string;
@@ -73,5 +76,19 @@ describe("createSidecarStorageEnv", () => {
     expect(env.TMPDIR).not.toBe(
       join(tempPath, "app.kowork.desktop.dev", "sidecar"),
     );
+  });
+});
+
+describe("createIsolatedSidecarEnv", () => {
+  test("removes inherited OpenCode and storage configuration", () => {
+    const env = createIsolatedSidecarEnv({
+      PATH: "/bin",
+      OPENCODE_CONFIG: "/tmp/opencode.json",
+      opencode_db: "/tmp/opencode.db",
+      XDG_CONFIG_HOME: "/tmp/config",
+      TMPDIR: "/tmp/inherited",
+    });
+
+    expect(env).toEqual({ PATH: "/bin" });
   });
 });

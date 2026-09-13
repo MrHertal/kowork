@@ -1,12 +1,8 @@
-import { KOWORK_SYSTEM_PROMPT } from "../packages/app/src/constants/kowork-system-prompt";
+import { evalSystemPrompt } from "./system-prompt";
 
-const systemPrompt = KOWORK_SYSTEM_PROMPT.replace(
-  "{{version}}",
-  "unknown",
-).replace(
-  "{{configuration}}",
-  "No providers, connectors, or skills are configured for this evaluation.",
-);
+const baseUrl = process.env.KOWORK_EVAL_BASE_URL;
+if (!baseUrl)
+  throw new Error("Run this evaluation with `pnpm eval:system-prompt`.");
 
 export default {
   description: "Kowork system prompt",
@@ -15,8 +11,7 @@ export default {
     {
       id: "opencode:sdk",
       config: {
-        baseUrl: "http://127.0.0.1:4096",
-        apiKey: "public",
+        baseUrl,
         provider_id: "opencode",
         model: "big-pickle",
         // Promptfoo 0.123.0 still forwards custom_agent.prompt as the
@@ -27,7 +22,7 @@ export default {
         agent: "build",
         custom_agent: {
           description: "Kowork system prompt evaluation",
-          prompt: systemPrompt,
+          prompt: evalSystemPrompt,
         },
       },
     },

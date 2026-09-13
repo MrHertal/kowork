@@ -6,7 +6,10 @@ import type { Details } from "electron";
 import { DEFAULT_SERVER_URL_KEY, WSL_ENABLED_KEY } from "./constants";
 import { resolveRuntimePack } from "./runtime";
 import { getUserShell, loadShellEnv } from "./shell-env";
-import { createSidecarStorageEnv } from "./sidecar-storage";
+import {
+  createIsolatedSidecarEnv,
+  createSidecarStorageEnv,
+} from "./sidecar-storage";
 import { getStore } from "./store";
 
 export type WslConfig = { enabled: boolean };
@@ -24,22 +27,6 @@ const SIDECAR_SERVICE_NAME = "kowork server";
 const SIDECAR_START_STALL_TIMEOUT = 60_000;
 const SIDECAR_STOP_TIMEOUT = 6_000;
 const SIDECAR_KILL_TIMEOUT = 2_000;
-const ISOLATED_ENV_KEYS = new Set([
-  "OPENCODE_CONFIG",
-  "OPENCODE_CONFIG_DIR",
-  "OPENCODE_CONFIG_CONTENT",
-  "OPENCODE_DB",
-  "OPENCODE_PLUGIN_META_FILE",
-  "OPENCODE_TEST_HOME",
-  "XDG_CONFIG_HOME",
-  "XDG_DATA_HOME",
-  "XDG_CACHE_HOME",
-  "XDG_STATE_HOME",
-  "TMPDIR",
-  "TMP",
-  "TEMP",
-]);
-
 type SpawnLocalServerOptions = {
   userDataPath: string;
   tempPath: string;
@@ -274,14 +261,7 @@ function createSidecarEnv(
   userDataPath: string,
   tempPath: string,
 ): Record<string, string> {
-  const env = Object.fromEntries(
-    Object.entries(process.env).flatMap(([key, value]) =>
-      value === undefined ? [] : [[key, String(value)]],
-    ),
-  );
-  for (const key of Object.keys(env)) {
-    if (ISOLATED_ENV_KEYS.has(key.toUpperCase())) delete env[key];
-  }
+  const env = createIsolatedSidecarEnv();
   Object.assign(env, createSidecarStorageEnv(userDataPath, tempPath));
   delete env.DEBUG;
   if (process.platform === "linux") delete env.LD_PRELOAD;
