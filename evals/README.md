@@ -31,6 +31,14 @@ the results with:
 pnpm exec promptfoo view tmp/promptfoo
 ```
 
+The "What can you do?" scenario uses an `llm-rubric` assertion to judge everyday
+capabilities and plain language by meaning rather than a keyword checklist.
+The grader makes a second request to `big-pickle` through the same isolated
+sidecar, in a separate task with a judge prompt and all tools disabled. The
+inspector verifies the grader's folder and prompt separately from the production
+Kowork prompt. Grading is model-based and can vary between runs; it currently
+uses the same model as the assistant being evaluated.
+
 Run the evaluation through the repository command rather than invoking
 Promptfoo directly. The wrapper supplies the sidecar URL and verifies that the
 server is Kowork's fork by checking for its `present_files` tool.

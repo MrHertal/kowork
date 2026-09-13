@@ -8,7 +8,7 @@ import {
   createIsolatedSidecarEnv,
   createSidecarStorageEnv,
 } from "../packages/electron/src/main/sidecar-storage";
-import { evalSystemPrompt } from "./system-prompt";
+import { evalSystemPrompt, gradingSystemPrompt } from "./system-prompt";
 
 type SidecarMessage =
   | { type: "ready"; url: string }
@@ -63,6 +63,7 @@ try {
       ...createIsolatedSidecarEnv(),
       ...createSidecarStorageEnv(userDataPath, tempPath),
       KOWORK_EVAL_EXPECTED_SYSTEM: evalSystemPrompt,
+      KOWORK_EVAL_GRADING_SYSTEM: gradingSystemPrompt,
       KOWORK_EVAL_EXPECTED_DIRECTORY: taskFolder,
       OPENCODE_CONFIG_CONTENT: JSON.stringify({
         plugin: [inspector],

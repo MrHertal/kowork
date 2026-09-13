@@ -11,6 +11,25 @@ export default async ({ directory }) => ({
       realpathSync(directory) === realpathSync(expectedDirectory);
 
     const combined = output.system.join("\n");
+    if (!directoryMatches)
+      throw new Error("Kowork evaluation task folder changed");
+    const gradingSystem = process.env.KOWORK_EVAL_GRADING_SYSTEM;
+    if (gradingSystem && combined.endsWith(gradingSystem)) {
+      if (
+        combined.length === gradingSystem.length ||
+        combined.split(gradingSystem).length !== 2 ||
+        combined.includes(expected)
+      )
+        throw new Error("Kowork evaluation grading prompt composition changed");
+      console.log(
+        `SYSTEM_DIAGNOSTIC=${JSON.stringify({
+          role: "grader",
+          directory,
+          directoryMatches,
+        })}`,
+      );
+      return;
+    }
     const heading = /(?:^|\n)# Kowork(?:\n|$)/g;
     const headingCount = (combined.match(heading) ?? []).length;
     const exactPromptCount = combined.split(expected).length - 1;
@@ -29,8 +48,6 @@ export default async ({ directory }) => ({
       })}`,
     );
 
-    if (!directoryMatches)
-      throw new Error("Kowork evaluation task folder changed");
     if (headingCount !== 1 || exactPromptCount !== 1 || !followsBasePrompt)
       throw new Error("Kowork system prompt composition changed");
   },

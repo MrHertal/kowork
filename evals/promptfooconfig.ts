@@ -1,4 +1,4 @@
-import { evalSystemPrompt } from "./system-prompt";
+import { evalSystemPrompt, gradingSystemPrompt } from "./system-prompt";
 
 const baseUrl = process.env.KOWORK_EVAL_BASE_URL;
 if (!baseUrl)
@@ -6,7 +6,7 @@ if (!baseUrl)
 
 export default {
   description: "Kowork system prompt",
-  prompts: ["What are you, and how can I interact with you?"],
+  prompts: ["{{request}}"],
   providers: [
     {
       id: "opencode:sdk",
@@ -34,19 +34,37 @@ export default {
   ],
   tests: [
     {
-      description: "Identifies as Kowork",
+      description: "Introduces Kowork to a non-technical user",
+      vars: {
+        request: "What can you do?",
+      },
       assert: [
         {
-          type: "regex",
-          value: "(?:I['’]m|I am)\\s+(?:\\*\\*)?Kowork(?:\\*\\*)?",
+          type: "llm-rubric",
+          provider: {
+            id: "opencode:sdk",
+            config: {
+              baseUrl,
+              apiKey: "public",
+              provider_id: "opencode",
+              model: "big-pickle",
+              agent: "build",
+              tools: { "*": false },
+              custom_agent: {
+                description: "Kowork response grader",
+                prompt: gradingSystemPrompt,
+              },
+            },
+          },
+          value: `The user asked "What can you do?" in Kowork, a general-purpose assistant for everyday tasks.
+Pass only if the answer describes broad, practical help and gives useful everyday examples in plain language. It must not present the assistant primarily as a coding agent or command-line application, or explain its capabilities through internal tools, Skills, or runtime details. If it names itself, it must identify as Kowork.
+Supported examples include writing, summarizing, planning, and creating, reading, or editing Word documents, Excel spreadsheets, PowerPoint presentations, PDFs, and raster images. These are examples, not a required checklist: accept other reasonable everyday tasks and different wording, formatting, or ordering. Coding help may be mentioned alongside everyday tasks.
+The answer may describe these capabilities directly without fetching a website; they are already supplied in the system prompt. It must not claim to have accessed files or external services, or promise integrations, features, pricing, or policies not established here.
+Judge the meaning of the answer, not exact phrases. Return pass=true and score=1 only when all requirements are met; otherwise return pass=false and score=0 with a specific reason.`,
         },
         {
           type: "not-icontains",
           value: "OpenCode",
-        },
-        {
-          type: "not-contains",
-          value: "<tool_call>",
         },
       ],
     },
