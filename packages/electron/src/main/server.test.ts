@@ -23,6 +23,29 @@ type ForkOptions = {
 const doubles = vi.hoisted(() => {
   const appHandlers = new Map<string, (...args: unknown[]) => void>();
   const stores = new Map<string, Map<string, unknown>>();
+  const isolatedEnvKeys = new Set([
+    "OPENCODE_CONFIG",
+    "OPENCODE_CONFIG_DIR",
+    "OPENCODE_CONFIG_CONTENT",
+    "OPENCODE_DB",
+    "OPENCODE_PLUGIN_META_FILE",
+    "OPENCODE_TEST_HOME",
+    "XDG_CONFIG_HOME",
+    "XDG_DATA_HOME",
+    "XDG_CACHE_HOME",
+    "XDG_STATE_HOME",
+    "TMPDIR",
+    "TMP",
+    "TEMP",
+  ]);
+  const isolateEnv = () =>
+    Object.fromEntries(
+      Object.entries(process.env).flatMap(([key, value]) =>
+        value === undefined || isolatedEnvKeys.has(key.toUpperCase())
+          ? []
+          : [[key, String(value)]],
+      ),
+    );
   return {
     appHandlers,
     stores,
@@ -41,6 +64,8 @@ const doubles = vi.hoisted(() => {
     resolveRuntimePack: vi.fn<() => RuntimePack | null>(() => null),
     getUserShell: vi.fn<() => string>(() => "/bin/zsh"),
     loadShellEnv: vi.fn<(shell: string) => Record<string, string>>(() => ({})),
+    isolateEnv,
+    createIsolatedSidecarEnv: vi.fn(isolateEnv),
     createSidecarStorageEnv: vi.fn(() => ({
       XDG_CONFIG_HOME: "/store/config",
       XDG_DATA_HOME: "/store/data",
@@ -94,6 +119,7 @@ vi.mock("./shell-env", () => ({
 }));
 
 vi.mock("./sidecar-storage", () => ({
+  createIsolatedSidecarEnv: doubles.createIsolatedSidecarEnv,
   createSidecarStorageEnv: doubles.createSidecarStorageEnv,
 }));
 
@@ -122,6 +148,7 @@ beforeEach(() => {
   doubles.resolveRuntimePack.mockImplementation(() => null);
   doubles.getUserShell.mockImplementation(() => "/bin/zsh");
   doubles.loadShellEnv.mockImplementation(() => ({}));
+  doubles.createIsolatedSidecarEnv.mockImplementation(doubles.isolateEnv);
   doubles.createSidecarStorageEnv.mockImplementation(() => ({
     XDG_CONFIG_HOME: "/store/config",
     XDG_DATA_HOME: "/store/data",

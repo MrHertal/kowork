@@ -7,6 +7,7 @@
     "build": "pnpm --filter @kowork/electron build",
     "build:sidecar": "pnpm --filter @kowork/electron build:sidecar",
     "dev": "pnpm --filter @kowork/electron dev",
+    "eval:system-prompt": "pnpm --filter @kowork/electron eval:system-prompt",
     "format": "prettier . --write",
     "lint": "pnpm --filter @kowork/app lint",
     "lint:fix": "pnpm --filter @kowork/app lint:fix",
@@ -17,7 +18,8 @@
     "prettier": "3.8.3",
     "prettier-plugin-astro": "0.14.1",
     "prettier-plugin-packagejson": "3.0.2",
-    "prettier-plugin-tailwindcss": "0.8.1"
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "promptfoo": "0.123.0"
   },
   "packageManager": "pnpm@12.1.0",
   "engines": {
