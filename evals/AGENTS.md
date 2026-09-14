@@ -22,6 +22,10 @@ output locations live in [README.md](README.md).
 - Exercise Kowork's compiled OpenCode fork, not an independently installed
   upstream CLI. Preserve the `present_files` check that establishes the
   server's identity.
+- When an evaluation exercises scripting or a Skill that uses an embedded
+  runtime, launch the sidecar with the shared production runtime environment
+  builder and Kowork's bundled launchers. Do not fall back to the user's Python
+  or Node.js installation.
 - Import prompts from their production source. Never copy production prompt
   text into an evaluation fixture.
 - Bypass Promptfoo's response cache so every evaluation makes a real model

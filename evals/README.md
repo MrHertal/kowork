@@ -18,9 +18,10 @@ without enabling its default read-only tools. Most scenarios enable only
 enables only `bash`. All other model tools remain disabled. The runtime inspector
 verifies the actual task folder alongside the system prompt.
 
-The runner also ensures that Kowork's runtime pack is current and gives the
-sidecar the same runtime environment and development Electron executable used by
-the desktop app.
+The runner also ensures that Kowork's development runtime pack is current and
+launches the sidecar through the same runtime-environment builder as the desktop
+app. This makes Kowork's bundled `kowork-python` and `kowork-node` launchers
+available without relying on the user's Python or Node.js installation.
 
 Project configuration, project instructions, external skills, and home-level
 Claude instructions are disabled. Temporary storage and the task folder are
