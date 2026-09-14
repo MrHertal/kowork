@@ -90,6 +90,76 @@ describe("evaluateToolTrace", () => {
     expect(result.pass).toBe(true);
   });
 
+  it("matches regular expressions in nested arguments", () => {
+    const matches = (command: string) =>
+      evaluateToolTrace(
+        [
+          {
+            type: "tool-start",
+            tool: "bash",
+            callID: "call_1",
+            args: { command },
+          },
+        ],
+        {
+          tool: "bash",
+          status: "attempt",
+          argsRegex: {
+            command: String.raw`^\s*kowork-python(?:\.cmd)?(?:\s|$)`,
+          },
+        },
+      ).pass;
+
+    expect(matches("  kowork-python -c 'print(1)'")).toBe(true);
+    expect(matches("kowork-python.cmd script.py")).toBe(true);
+    expect(matches("echo kowork-python")).toBe(false);
+    expect(matches("command -v kowork-python")).toBe(false);
+  });
+
+  it("can require a zero shell exit code", () => {
+    const events = (exitCode: number) => [
+      {
+        type: "tool-start" as const,
+        tool: "bash",
+        callID: "call_1",
+        args: { command: "kowork-python script.py" },
+      },
+      {
+        type: "tool-end" as const,
+        tool: "bash",
+        callID: "call_1",
+        outputLength: 10,
+        exitCode,
+      },
+    ];
+    const config = { tool: "bash", exitCode: 0 };
+
+    expect(evaluateToolTrace(events(0), config).pass).toBe(true);
+    expect(evaluateToolTrace(events(1), config).pass).toBe(false);
+  });
+
+  it("distinguishes command output from the shell placeholder", () => {
+    const events = (commandOutput: boolean) => [
+      {
+        type: "tool-start" as const,
+        tool: "bash",
+        callID: "call_1",
+        args: { command: "kowork-python script.py" },
+      },
+      {
+        type: "tool-end" as const,
+        tool: "bash",
+        callID: "call_1",
+        outputLength: 11,
+        commandOutput,
+      },
+    ];
+    const config = { tool: "bash", commandOutput: true };
+
+    expect(evaluateToolTrace(events(true), config).pass).toBe(true);
+    expect(evaluateToolTrace(events(false), config).pass).toBe(false);
+  });
+
   it("distinguishes attempts, successes, and failures", () => {
     const events = [
       {

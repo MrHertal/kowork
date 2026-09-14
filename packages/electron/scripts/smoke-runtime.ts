@@ -1,12 +1,12 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { delimiter } from "node:path";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { assertRuntimePack } from "../src/main/runtime-pack";
+import { resolveDevelopmentElectronExecutable } from "./development-electron";
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const electronDir = path.resolve(scriptsDir, "..");
@@ -15,7 +15,9 @@ if (args[0] === "--") args.shift();
 const runtimeDir = path.resolve(
   args[0] ?? path.join(electronDir, "resources", "runtime"),
 );
-const electronBin = path.resolve(args[1] ?? localElectronBin());
+const electronBin = path.resolve(
+  args[1] ?? resolveDevelopmentElectronExecutable(),
+);
 
 if (!existsSync(electronBin)) {
   throw new Error(`Electron executable is missing: ${electronBin}`);
@@ -26,8 +28,8 @@ const pack = assertRuntimePack({
   platform: process.platform,
   arch: process.arch,
 });
-// Mirror applyRuntimeEnv in src/main/server.ts: only the kowork-* shims go on
-// PATH; isolation env is the shims' job, which the probes below exercise.
+// Only the kowork-* shims go on PATH; isolation env is the shims' job, which
+// the probes below exercise.
 const env: NodeJS.ProcessEnv = {
   ...process.env,
   KOWORK_ELECTRON_BIN: electronBin,
@@ -75,14 +77,6 @@ try {
 }
 
 console.log(`[smoke-runtime] runtime OK: ${runtimeDir}`);
-
-function localElectronBin(): string {
-  const value: unknown = createRequire(import.meta.url)("electron");
-  if (typeof value !== "string") {
-    throw new Error("Could not resolve the development Electron executable");
-  }
-  return value;
-}
 
 function run(command: string, args: string[], cwd: string): void {
   const result = spawnSync(command, args, {

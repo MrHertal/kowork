@@ -1,10 +1,11 @@
 // @opencode-ref: opencode/packages/desktop/src/main/server.ts
-import { delimiter, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { app, utilityProcess } from "electron";
 import type { Details } from "electron";
 import { DEFAULT_SERVER_URL_KEY, WSL_ENABLED_KEY } from "./constants";
 import { resolveRuntimePack } from "./runtime";
+import { createRuntimeSidecarEnv } from "./runtime-env";
 import { getUserShell, loadShellEnv } from "./shell-env";
 import {
   createIsolatedSidecarEnv,
@@ -263,24 +264,14 @@ function createSidecarEnv(
 ): Record<string, string> {
   const env = createIsolatedSidecarEnv();
   Object.assign(env, createSidecarStorageEnv(userDataPath, tempPath));
-  delete env.DEBUG;
-  if (process.platform === "linux") delete env.LD_PRELOAD;
-  applyRuntimeEnv(env);
-  return env;
-}
-
-// Only the kowork-* shims go on PATH; the embedded python/bin stays off so bare
-// python/pip/node/npm belong to the user's own toolchain. The shims carry the
-// embedded runtime's isolation env, so nothing PYTHON*/NODE_PATH is set here.
-function applyRuntimeEnv(env: Record<string, string>): void {
-  const pack = resolveRuntimePack();
-  if (!pack) return;
-
-  env.KOWORK_ELECTRON_BIN = process.execPath; // kowork-node runs this as Node
-
-  const pathKey =
-    Object.keys(env).find((k) => k.toLowerCase() === "path") ?? "PATH";
-  env[pathKey] = [pack.binDir, env[pathKey]].filter(Boolean).join(delimiter);
+  // Only the kowork-* shims go on PATH; the embedded python/bin stays off so
+  // bare runtimes remain part of the user's own toolchain.
+  return createRuntimeSidecarEnv({
+    env,
+    runtime: resolveRuntimePack(),
+    electronExecutable: process.execPath,
+    platform: process.platform,
+  });
 }
 
 function delay(ms: number) {

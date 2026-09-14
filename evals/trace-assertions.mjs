@@ -22,6 +22,25 @@ function matchesSubset(actual, expected) {
   return Object.is(actual, expected);
 }
 
+function matchesRegex(actual, expected) {
+  if (Array.isArray(expected))
+    return (
+      Array.isArray(actual) &&
+      actual.length === expected.length &&
+      expected.every((value, index) => matchesRegex(actual[index], value))
+    );
+  if (isRecord(expected))
+    return (
+      isRecord(actual) &&
+      Object.entries(expected).every(([key, value]) =>
+        matchesRegex(actual[key], value),
+      )
+    );
+  if (typeof expected !== "string")
+    throw new Error("argsRegex values must be regular expression strings");
+  return typeof actual === "string" && new RegExp(expected).test(actual);
+}
+
 function summarize(events) {
   return events.map((event) => ({
     type: event.type,
@@ -30,6 +49,8 @@ function summarize(events) {
     messageID: event.messageID,
     partID: event.partID,
     outputLength: event.outputLength,
+    exitCode: event.exitCode,
+    commandOutput: event.commandOutput,
   }));
 }
 
@@ -46,6 +67,13 @@ function parseConfig(config) {
       throw new Error(`${name} must be a non-negative integer`);
   if (max !== undefined && max < min)
     throw new Error("max must be greater than or equal to min");
+  if (config.exitCode !== undefined && !Number.isInteger(config.exitCode))
+    throw new Error("exitCode must be an integer");
+  if (
+    config.commandOutput !== undefined &&
+    typeof config.commandOutput !== "boolean"
+  )
+    throw new Error("commandOutput must be a boolean");
   return { ...config, status, min, max };
 }
 
@@ -54,7 +82,9 @@ function matchingCalls(events, config, finalAnswerIndex) {
     if (
       event.type !== "tool-start" ||
       event.tool !== config.tool ||
-      !matchesSubset(event.args, config.args ?? {})
+      !matchesSubset(event.args, config.args ?? {}) ||
+      (config.argsRegex !== undefined &&
+        !matchesRegex(event.args, config.argsRegex))
     )
       return [];
 
@@ -68,6 +98,16 @@ function matchingCalls(events, config, finalAnswerIndex) {
     const successful = endIndex >= 0;
     if (config.status === "success" && !successful) return [];
     if (config.status === "failure" && successful) return [];
+    if (
+      config.exitCode !== undefined &&
+      (!successful || events[endIndex].exitCode !== config.exitCode)
+    )
+      return [];
+    if (
+      config.commandOutput !== undefined &&
+      (!successful || events[endIndex].commandOutput !== config.commandOutput)
+    )
+      return [];
     const completionIndex = successful ? endIndex : startIndex;
     if (config.beforeFinalAnswer && completionIndex >= finalAnswerIndex)
       return [];
