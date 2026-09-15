@@ -7,6 +7,7 @@
     "build": "pnpm --filter @kowork/electron build",
     "build:sidecar": "pnpm --filter @kowork/electron build:sidecar",
     "dev": "pnpm --filter @kowork/electron dev",
+    "eval:skill:pdf": "pnpm --filter @kowork/electron eval:skill:pdf",
     "eval:system-prompt": "pnpm --filter @kowork/electron eval:system-prompt",
     "format": "prettier . --write",
     "lint": "pnpm --filter @kowork/app lint",
