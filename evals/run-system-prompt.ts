@@ -1,5 +1,5 @@
 import { spawn, fork, type ChildProcess } from "node:child_process";
-import { createWriteStream } from "node:fs";
+import { createWriteStream, existsSync } from "node:fs";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
@@ -8,6 +8,12 @@ import {
   createIsolatedSidecarEnv,
   createSidecarStorageEnv,
 } from "../packages/electron/src/main/sidecar-storage";
+import {
+  assertRuntimePack,
+  computeRuntimeSourceFingerprint,
+} from "../packages/electron/src/main/runtime-pack";
+import { createRuntimeSidecarEnv } from "../packages/electron/src/main/runtime-env";
+import { resolveDevelopmentElectronExecutable } from "../packages/electron/scripts/development-electron";
 import { evalSystemPrompt, gradingSystemPrompt } from "./system-prompt";
 
 type SidecarMessage =
@@ -26,6 +32,7 @@ const inspector = pathToFileURL(
 const executionTrace = pathToFileURL(
   path.join(repoRoot, "evals/execution-trace.mjs"),
 ).href;
+const keepTemporaryRoot = process.env.KOWORK_EVAL_KEEP_TEMP === "1";
 
 let activeCommand: ChildProcess | undefined;
 let activeCommandTermination: Promise<void> | undefined;
@@ -46,6 +53,19 @@ let temporaryRoot: string | undefined;
 
 try {
   await runPnpm(["--dir", electronRoot, "run", "build:eval-sidecar"]);
+  await runPnpm(["--dir", electronRoot, "run", "ensure:runtime"]);
+  const runtime = assertRuntimePack({
+    dir: path.join(electronRoot, "resources/runtime"),
+    platform: process.platform,
+    arch: process.arch,
+    sourceFingerprint: computeRuntimeSourceFingerprint(electronRoot),
+  });
+  const electronExecutable = path.resolve(
+    resolveDevelopmentElectronExecutable(),
+  );
+  if (!existsSync(electronExecutable)) {
+    throw new Error(`Electron executable is missing: ${electronExecutable}`);
+  }
 
   temporaryRoot = await mkdtemp(path.join(tmpdir(), "kowork-eval-"));
   const userDataPath = path.join(temporaryRoot, "user-data");
@@ -62,11 +82,20 @@ try {
   throwIfInterrupted();
 
   const logPath = path.join(resultsDir, "sidecar.log");
-  const started = await startSidecar({
-    cwd: taskFolder,
+  const sidecarEnv = createRuntimeSidecarEnv({
     env: {
       ...createIsolatedSidecarEnv(),
       ...createSidecarStorageEnv(userDataPath, tempPath),
+    },
+    runtime,
+    electronExecutable,
+    platform: process.platform,
+  });
+
+  const started = await startSidecar({
+    cwd: taskFolder,
+    env: {
+      ...sidecarEnv,
       KOWORK_EVAL_EXPECTED_SYSTEM: evalSystemPrompt,
       KOWORK_EVAL_GRADING_SYSTEM: gradingSystemPrompt,
       KOWORK_EVAL_EXPECTED_DIRECTORY: taskFolder,
@@ -117,8 +146,18 @@ try {
     try {
       await stopSidecar(sidecar);
     } finally {
-      if (temporaryRoot)
-        await rm(temporaryRoot, { recursive: true, force: true });
+      if (temporaryRoot) {
+        if (keepTemporaryRoot) {
+          console.warn(
+            `Evaluation temporary data preserved at: ${temporaryRoot}`,
+          );
+          console.warn(
+            "Warning: preserved traces may contain tool arguments and user data.",
+          );
+        } else {
+          await rm(temporaryRoot, { recursive: true, force: true });
+        }
+      }
     }
   }
 }

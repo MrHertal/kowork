@@ -25,6 +25,14 @@ export default async () => {
         callID,
         outputLength:
           typeof result.output === "string" ? result.output.length : 0,
+        ...(tool === "bash" &&
+        (Number.isInteger(result.metadata?.exit) ||
+          result.metadata?.exit === null)
+          ? {
+              exitCode: result.metadata.exit,
+              commandOutput: result.output !== "(no output)",
+            }
+          : {}),
       });
     },
     "experimental.text.complete": (

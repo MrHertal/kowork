@@ -4,13 +4,23 @@ export type TraceEvent = {
   callID?: string;
   args?: unknown;
   outputLength?: number;
+  exitCode?: number | null;
+  commandOutput?: boolean;
   messageID?: string;
   partID?: string;
 };
 
+export type RegexArgument =
+  | string
+  | RegexArgument[]
+  | { [key: string]: RegexArgument };
+
 export type ToolTraceConfig = {
   tool: string;
   args?: unknown;
+  argsRegex?: RegexArgument;
+  exitCode?: number;
+  commandOutput?: boolean;
   status?: "attempt" | "success" | "failure";
   min?: number;
   max?: number;
