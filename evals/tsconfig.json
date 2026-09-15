@@ -5,7 +5,7 @@
     "types": ["node"]
   },
   "include": [
-    "./*.ts",
+    "./**/*.ts",
     "../packages/electron/electron.vite.config.ts",
     "../packages/electron/eval-sidecar.vite.config.ts",
     "../packages/electron/scripts/opencode-server-build.ts"

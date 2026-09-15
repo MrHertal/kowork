@@ -14,6 +14,7 @@
     "predev": "tsx ./scripts/predev.ts",
     "dev": "tsx ./scripts/electron-vite.ts dev",
     "ensure:runtime": "tsx ./scripts/ensure-runtime.ts",
+    "eval:skill:pdf": "tsx ../../evals/skills/pdf/run.ts",
     "eval:system-prompt": "tsx ../../evals/run-system-prompt.ts",
     "package": "pnpm run ensure:runtime && electron-builder --config electron-builder.config.ts",
     "package:linux": "pnpm run ensure:runtime && electron-builder --linux --config electron-builder.config.ts",
