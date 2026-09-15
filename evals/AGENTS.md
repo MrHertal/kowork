@@ -34,6 +34,9 @@ output locations live in [README.md](README.md).
   OpenCode configuration, sessions, plugins, or credentials.
 - Preserve graceful shutdown and process-tree cleanup on success, evaluation
   failure, startup failure, `SIGINT`, and `SIGTERM`.
+- Keep temporary trace retention explicit and opt-in. Preserved traces contain
+  full tool arguments and may include user data; never enable retention by
+  default or in CI.
 
 ## OpenCode v1 workaround
 

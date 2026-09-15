@@ -28,6 +28,17 @@ Claude instructions are disabled. Temporary storage and the task folder are
 removed after the run. This is not an OS-level sandbox: most host environment
 variables are inherited, and network access remains available.
 
+To debug a tool or Skill assertion, preserve the isolated task and its full
+execution traces for one run:
+
+```sh
+KOWORK_EVAL_KEEP_TEMP=1 pnpm eval:system-prompt
+```
+
+The runner prints the preserved directory after stopping the sidecar. Its trace
+files may contain full tool arguments and user data, so inspect and delete it
+when finished. Without this opt-in, temporary data is always removed.
+
 The evaluation currently uses OpenCode's free `big-pickle` model. It therefore
 requires network access but does not require a provider API key. Promptfoo
 results and the most recent sidecar log are written to `tmp/promptfoo/`. Inspect

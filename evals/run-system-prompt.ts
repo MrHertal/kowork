@@ -32,6 +32,7 @@ const inspector = pathToFileURL(
 const executionTrace = pathToFileURL(
   path.join(repoRoot, "evals/execution-trace.mjs"),
 ).href;
+const keepTemporaryRoot = process.env.KOWORK_EVAL_KEEP_TEMP === "1";
 
 let activeCommand: ChildProcess | undefined;
 let activeCommandTermination: Promise<void> | undefined;
@@ -145,8 +146,18 @@ try {
     try {
       await stopSidecar(sidecar);
     } finally {
-      if (temporaryRoot)
-        await rm(temporaryRoot, { recursive: true, force: true });
+      if (temporaryRoot) {
+        if (keepTemporaryRoot) {
+          console.warn(
+            `Evaluation temporary data preserved at: ${temporaryRoot}`,
+          );
+          console.warn(
+            "Warning: preserved traces may contain tool arguments and user data.",
+          );
+        } else {
+          await rm(temporaryRoot, { recursive: true, force: true });
+        }
+      }
     }
   }
 }
