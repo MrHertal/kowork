@@ -6,12 +6,12 @@ Run the Kowork system-prompt evaluation from the repository root:
 pnpm eval:system-prompt
 ```
 
-The command builds and starts Kowork's compiled OpenCode sidecar with isolated
-temporary storage, waits for it to become healthy, runs Promptfoo, and stops the
-sidecar. It uses an available local port, bypasses Promptfoo's response cache,
-and does not start the Electron app.
+The evaluation commands build and start Kowork's compiled OpenCode sidecar with
+isolated temporary storage, wait for it to become healthy, run Promptfoo, and
+stop the sidecar. Each uses an available local port, bypasses Promptfoo's response
+cache, and does not start the Electron app.
 
-Each run gives the sidecar an empty task folder inside its temporary storage.
+Each run gives the sidecar an isolated task folder inside its temporary storage.
 Promptfoo deliberately leaves `working_dir` unset so requests use this folder.
 The evaluated assistant receives Kowork's production tool surface rather than a
 scenario-specific subset, preserving the request shape and tool context used by
@@ -42,14 +42,16 @@ The runner prints the preserved directory after stopping the sidecar. Its trace
 files may contain full tool arguments and user data, so inspect and delete it
 when finished. Without this opt-in, temporary data is always removed.
 
-The evaluation currently uses OpenCode's free `big-pickle` model. It therefore
-requires network access but does not require a provider API key. Promptfoo
+The evaluations currently use OpenCode's free `big-pickle` model. They therefore
+require network access but do not require a provider API key. Promptfoo
 results and the most recent sidecar log are written to `tmp/promptfoo/`. Inspect
 the results with:
 
 ```sh
 pnpm exec promptfoo view tmp/promptfoo
 ```
+
+## System-prompt scenarios
 
 The "What can you do?" scenario uses an `llm-rubric` assertion to judge everyday
 capabilities and plain language by meaning rather than a keyword checklist.
@@ -65,9 +67,6 @@ both that a successful fetch of the official privacy policy precedes the final
 answer and that the answer accurately summarizes the relevant policy. The
 evaluation plugin records tool attempts, successful results, and text completion
 order because Promptfoo's OpenCode provider returns only the final message.
-Per-task traces, including tool arguments, are temporary. Saved result metadata
-contains only structural trace details and output lengths, not tool arguments or
-output content.
 
 The connector scenario asks whether Notion is connected and requests setup. It
 checks that Kowork trusts the empty evaluation configuration, does not claim to
@@ -84,10 +83,18 @@ several summary statistics using a short Python script. It checks for one direct
 successful `kowork-python` shell call with output before the final answer, then
 checks that the reported results are accurate and plainly explained.
 
+## PDF Skill evaluation
+
+Run `pnpm eval:skill:pdf` to test the built-in PDF Skill. The suite covers
+reading a table from an attached PDF and creating `quarterly.pdf`. The creation
+check requires a retained working script in a child of the pre-approved session
+temporary directory, successful validation, presentation of the final PDF, and
+the requested title, table, and summary. It does not score visual layout.
+
 ## Adding tool and Skill checks
 
 Use the reusable trace assertion when a scenario must prove that Kowork actually
-called a tool. For example, a future Skill scenario can require the `documents`
+called a tool. For example, a Skill scenario can require the `documents`
 Skill to load before the final answer:
 
 ```ts
@@ -118,9 +125,9 @@ Saved Promptfoo metadata contains only structural events and output lengths.
 Pair structural assertions with a separate rubric when the scenario must also
 judge the answer's meaning or quality.
 
-Run the evaluation through the repository command rather than invoking
-Promptfoo directly. The wrapper supplies the sidecar URL and verifies that the
-server is Kowork's fork by checking for its `present_files` tool.
+Run evaluations through their repository commands rather than invoking
+Promptfoo directly. The wrapper supplies the sidecar URL and verifies Kowork's
+fork by checking for its `present_files` tool.
 
 The configuration intentionally relies on Promptfoo 0.123.0 forwarding
 `custom_agent.prompt` as OpenCode's v1 request-level system prompt while a

@@ -36,7 +36,7 @@ process.exitCode = await runSidecarEval({
   async verifySidecar({ baseUrl, taskFolder }) {
     const url = new URL("/skill", baseUrl);
     url.searchParams.set("directory", taskFolder);
-    const response = await fetch(url, { signal: AbortSignal.timeout(5_000) });
+    const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
     if (!response.ok) {
       throw new Error(
         `Unable to inspect sidecar skills: HTTP ${response.status}`,

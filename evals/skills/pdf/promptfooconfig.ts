@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 import { createKoworkEvalProvider } from "../../opencode-provider";
 import { evalSystemPrompt, pdfEvalManifestPath } from "./system-prompt";
@@ -18,10 +19,13 @@ if (!baseUrl || !reportPath || !reportSha256) {
 const manifest = JSON.parse(readFileSync(pdfEvalManifestPath, "utf8")) as {
   evals: PdfScenario[];
 };
-const scenario = manifest.evals.find(({ id }) => id === 2);
-if (!scenario) throw new Error("PDF skill scenario 2 is missing");
+const createScenario = manifest.evals.find(({ id }) => id === 1);
+const readScenario = manifest.evals.find(({ id }) => id === 2);
+if (!createScenario || !readScenario)
+  throw new Error("PDF skill creation or reading scenario is missing");
+const quarterlyPath = join(dirname(reportPath), "quarterly.pdf");
 
-const request = `${scenario.prompt}
+const readRequest = `${readScenario.prompt}
 
 <kowork_attachments>
   <attachment>
@@ -38,15 +42,42 @@ export default {
   providers: [
     createKoworkEvalProvider({
       baseUrl,
-      label: "pdf-read",
+      label: "kowork-pdf",
       description: "Kowork PDF skill evaluation",
       prompt: evalSystemPrompt,
     }),
   ],
   tests: [
     {
+      description:
+        "Creates, validates, and presents a PDF with the built-in PDF skill",
+      vars: { request: createScenario.prompt, quarterlyPath },
+      assert: [
+        {
+          type: "javascript",
+          value: "file://../../trace-assertions.mjs:toolUsed",
+          config: {
+            tool: "skill",
+            args: { name: "kowork-pdf" },
+            status: "success",
+            nonEmptyOutput: true,
+            beforeFinalAnswer: true,
+          },
+        },
+        {
+          type: "javascript",
+          value: "file://assertions.mjs:creationWorkflow",
+        },
+        {
+          type: "javascript",
+          value: "file://assertions.mjs:createdPdfHasRequestedContent",
+        },
+        { type: "icontains", value: "quarterly.pdf" },
+      ],
+    },
+    {
       description: "Extracts a real table with the built-in PDF skill",
-      vars: { request, reportPath, reportSha256 },
+      vars: { request: readRequest, reportPath, reportSha256 },
       assert: [
         {
           type: "javascript",

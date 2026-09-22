@@ -133,6 +133,8 @@ export async function runSidecarEval(options: SidecarEvalOptions) {
       electronExecutable,
       platform: process.platform,
     });
+    const approvedTemp = sidecarEnv.TMPDIR;
+    if (!approvedTemp) throw new Error("Isolated sidecar TMPDIR is missing");
 
     const started = await startSidecar({
       cwd: context.taskFolder,
@@ -182,6 +184,8 @@ export async function runSidecarEval(options: SidecarEvalOptions) {
       {
         ...preparedEnv,
         KOWORK_EVAL_BASE_URL: started.url,
+        KOWORK_EVAL_APPROVED_TEMP_ROOT: path.join(approvedTemp, "opencode"),
+        KOWORK_EVAL_PYTHON_EXE: runtime.pythonExe,
         KOWORK_EVAL_TRACE_DIR: context.tracePath,
         PROMPTFOO_CONFIG_DIR: options.resultsDir,
         PROMPTFOO_DISABLE_TELEMETRY: "1",
