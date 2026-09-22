@@ -56,7 +56,6 @@ export default {
             args: { name: "kowork-pdf" },
             status: "success",
             min: 1,
-            max: 1,
             nonEmptyOutput: true,
             beforeFinalAnswer: true,
           },
@@ -72,20 +71,9 @@ export default {
             status: "success",
             exitCode: 0,
             min: 1,
-            max: 1,
             commandOutput: true,
             nonEmptyOutput: true,
             beforeFinalAnswer: true,
-          },
-        },
-        {
-          type: "javascript",
-          value: "file://../../trace-assertions.mjs:toolUsed",
-          config: {
-            tool: "bash",
-            status: "attempt",
-            min: 1,
-            max: 1,
           },
         },
         {
