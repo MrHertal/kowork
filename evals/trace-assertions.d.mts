@@ -48,3 +48,11 @@ export function toolUsed(
     providerResponse: { sessionId?: string; raw: string };
   },
 ): TraceAssertionResult;
+
+export function readEvidence(context: {
+  providerResponse: { sessionId?: string; raw: string };
+}): {
+  events: TraceEvent[];
+  finalAnswer?: { messageID: string; partID: string };
+  error?: unknown;
+};

@@ -65,9 +65,13 @@ output locations live in [README.md](README.md).
   the execution trace when an assertion needs evidence from an earlier tool or
   Skill step. Do not rely on `skill-used` for multi-step OpenCode responses
   unless its behavior has been verified against the pinned provider version.
-- Enable only the tools required by the suite. When scenarios need materially
-  different tool sets, consider separate provider configurations rather than
-  broadening tool access for every scenario without review.
+- Preserve Kowork's production tool surface in model requests. Filtering tools
+  by scenario changes the OpenCode request shape and makes the evaluation less
+  representative of the application. Express required or prohibited tool
+  behavior with trace assertions instead.
+- Treat evaluation prompts and fixtures as trusted inputs. Isolated storage and
+  task folders prevent state reuse but are not an OS-level sandbox; tools,
+  including `bash`, run with the evaluation process's permissions.
 - Tool arguments and outputs may contain user data. Keep full arguments only in
   temporary traces, persist structural event summaries by default, and never
   save full tool output unless a scenario explicitly requires it.

@@ -154,7 +154,7 @@ export function evaluateToolTrace(events, rawConfig, finalAnswer) {
   };
 }
 
-function readEvidence(context) {
+export function readEvidence(context) {
   const directory = process.env.KOWORK_EVAL_TRACE_DIR;
   const response = context.providerResponse;
   if (!directory || !/^ses_[a-zA-Z0-9]+$/.test(response?.sessionId ?? ""))
