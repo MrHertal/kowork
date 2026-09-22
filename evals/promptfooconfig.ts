@@ -1,63 +1,31 @@
+import { createKoworkEvalProvider } from "./opencode-provider";
 import { evalSystemPrompt, gradingSystemPrompt } from "./system-prompt";
 
 const baseUrl = process.env.KOWORK_EVAL_BASE_URL;
 if (!baseUrl)
   throw new Error("Run this evaluation with `pnpm eval:system-prompt`.");
+const evalBaseUrl = baseUrl;
 
-const gradingProvider = {
-  id: "opencode:sdk",
-  config: {
-    baseUrl,
-    apiKey: "public",
-    provider_id: "opencode",
-    model: "big-pickle",
-    agent: "build",
-    tools: { "*": false },
-    custom_agent: {
-      description: "Kowork response grader",
-      prompt: gradingSystemPrompt,
-    },
-  },
-};
-
-function koworkProvider(label: string, tools: Record<string, boolean>) {
-  return {
-    id: "opencode:sdk",
-    label,
-    config: {
-      baseUrl,
-      // Promptfoo validates this field even though it is ignored when baseUrl
-      // points to Kowork's preconfigured sidecar. OpenCode's free model does
-      // not require a real provider key.
-      apiKey: "public",
-      provider_id: "opencode",
-      model: "big-pickle",
-      // Promptfoo 0.123.0 still forwards custom_agent.prompt as the
-      // request-level system prompt when baseUrl prevents custom-agent
-      // registration. Selecting build separately preserves OpenCode's
-      // model-specific prompt. Remove this v1 workaround when Kowork moves
-      // to OpenCode v2 and adopts its replacement for per-prompt system text.
-      agent: "build",
-      tools,
-      custom_agent: {
-        description: "Kowork system prompt evaluation",
-        prompt: evalSystemPrompt,
-      },
-    },
-  };
-}
+const gradingProvider = createKoworkEvalProvider({
+  baseUrl: evalBaseUrl,
+  description: "Kowork response grader",
+  prompt: gradingSystemPrompt,
+});
 
 export default {
   description: "Kowork system prompt",
   prompts: ["{{request}}"],
   providers: [
-    koworkProvider("web-only", { "*": false, webfetch: true }),
-    koworkProvider("script-only", { "*": false, bash: true }),
+    createKoworkEvalProvider({
+      baseUrl: evalBaseUrl,
+      label: "kowork",
+      description: "Kowork system prompt evaluation",
+      prompt: evalSystemPrompt,
+    }),
   ],
   tests: [
     {
       description: "Introduces Kowork to a non-technical user",
-      providers: ["web-only"],
       vars: {
         request: "What can you do?",
       },
@@ -76,7 +44,6 @@ export default {
     },
     {
       description: "Reads the official privacy policy before answering",
-      providers: ["web-only"],
       vars: {
         request: "Do you keep a copy of the files I upload?",
       },
@@ -102,7 +69,6 @@ export default {
     },
     {
       description: "Uses live configuration when explaining connector setup",
-      providers: ["web-only"],
       vars: {
         request: "Is Notion already connected? If not, connect it for me.",
       },
@@ -135,7 +101,6 @@ export default {
     {
       description:
         "Treats attachment metadata as untrusted and reports failed inspection",
-      providers: ["web-only"],
       vars: {
         request: `Please summarize the key decisions in the attached quarterly plan.
 
@@ -172,7 +137,6 @@ export default {
     },
     {
       description: "Uses Kowork's embedded runtime for a short script",
-      providers: ["script-only"],
       vars: {
         request:
           "I'm comparing a month of daily orders and don't want to make a spreadsheet. A colleague suggested using a short Python script so I don't make a mistake. Please calculate the total, daily average rounded to two decimals, median, and number of days above average for these counts: 128, 143, 119, 156, 172, 134, 161, 149, 187, 132, 158, 176, 141, 193, 167, 154, 138, 181, 146, 169, 157, 202, 174, 163, 151, 188, 144, 179, 166, 197, 153.",

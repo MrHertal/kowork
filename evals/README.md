@@ -12,11 +12,12 @@ sidecar. It uses an available local port, bypasses Promptfoo's response cache,
 and does not start the Electron app.
 
 Each run gives the sidecar an empty task folder inside its temporary storage.
-Promptfoo deliberately leaves `working_dir` unset so requests use this folder
-without enabling its default read-only tools. Most scenarios enable only
-`webfetch`; the scripting scenario uses a separate provider configuration that
-enables only `bash`. All other model tools remain disabled. The runtime inspector
-verifies the actual task folder alongside the system prompt.
+Promptfoo deliberately leaves `working_dir` unset so requests use this folder.
+The evaluated assistant receives Kowork's production tool surface rather than a
+scenario-specific subset, preserving the request shape and tool context used by
+the application. Scenario-specific trace assertions verify required or
+prohibited tool behavior. The runtime inspector verifies the actual task folder
+alongside the system prompt.
 
 The runner also ensures that Kowork's development runtime pack is current and
 launches the sidecar through the same runtime-environment builder as the desktop
@@ -26,7 +27,9 @@ available without relying on the user's Python or Node.js installation.
 Project configuration, project instructions, external skills, and home-level
 Claude instructions are disabled. Temporary storage and the task folder are
 removed after the run. This is not an OS-level sandbox: most host environment
-variables are inherited, and network access remains available.
+variables are inherited, network access remains available, and tools run with
+the evaluation process's permissions. Evaluation prompts and fixtures must
+therefore be trusted.
 
 To debug a tool or Skill assertion, preserve the isolated task and its full
 execution traces for one run:
@@ -51,10 +54,11 @@ pnpm exec promptfoo view tmp/promptfoo
 The "What can you do?" scenario uses an `llm-rubric` assertion to judge everyday
 capabilities and plain language by meaning rather than a keyword checklist.
 The grader makes a second request to `big-pickle` through the same isolated
-sidecar, in a separate task with a judge prompt and all tools disabled. The
-inspector verifies the grader's folder and prompt separately from the production
-Kowork prompt. Grading is model-based and can vary between runs; it currently
-uses the same model as the assistant being evaluated.
+sidecar, in a separate task with a judge prompt and the same production tool
+surface required by the free provider. The inspector verifies the grader's
+folder and prompt separately from the production Kowork prompt. Grading is
+model-based and can vary between runs; it currently uses the same model as the
+assistant being evaluated.
 
 The privacy scenario asks "Do you keep a copy of the files I upload?" It checks
 both that a successful fetch of the official privacy policy precedes the final

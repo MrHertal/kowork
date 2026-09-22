@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 
+import { createKoworkEvalProvider } from "../../opencode-provider";
 import { evalSystemPrompt, pdfEvalManifestPath } from "./system-prompt";
 
 type PdfScenario = {
@@ -35,27 +36,12 @@ export default {
   description: "Kowork PDF skill",
   prompts: ["{{request}}"],
   providers: [
-    {
-      id: "opencode:sdk",
+    createKoworkEvalProvider({
+      baseUrl,
       label: "pdf-read",
-      config: {
-        baseUrl,
-        apiKey: "public",
-        provider_id: "opencode",
-        model: "big-pickle",
-        agent: "build",
-        tools: {
-          "*": false,
-          skill: true,
-          bash: true,
-          present_files: true,
-        },
-        custom_agent: {
-          description: "Kowork PDF skill evaluation",
-          prompt: evalSystemPrompt,
-        },
-      },
-    },
+      description: "Kowork PDF skill evaluation",
+      prompt: evalSystemPrompt,
+    }),
   ],
   tests: [
     {
