@@ -10,6 +10,8 @@ Kowork is an open-source alternative to Claude Cowork: an Electron desktop app f
 
 ## Orientation
 
+Read [ARCHITECTURE.md](ARCHITECTURE.md) for the runtime map and cross-package boundaries. This file contains working rules; package READMEs and nested `AGENTS.md` files provide local detail.
+
 ### Repository Map
 
 | Path                 | Purpose                                                                                                   |
@@ -67,7 +69,7 @@ Files ported or derived from OpenCode must carry one `@opencode-ref` header per 
 
 ### Verification
 
-**Run the narrowest check that covers the change:**
+`./scripts/check` is the canonical local equivalent of CI's main check job. `./scripts/check browser` runs its separate browser smoke tests after Playwright Chromium is installed. During implementation, **run the narrowest check that covers the change:**
 
 - All workspaces (electron, app, web, api): `pnpm typecheck`
 - Electron and its referenced React app: `pnpm --filter @kowork/electron typecheck`
@@ -75,6 +77,8 @@ Files ported or derived from OpenCode must carry one `@opencode-ref` header per 
 - Web site: `pnpm --filter @kowork/web build`
 - Tests: `pnpm test`, or scoped to one package: `pnpm --filter @kowork/app test`
 - Lint the React app: `pnpm lint` (auto-fix: `pnpm lint:fix`)
+
+Before handing over a substantial cross-package change, run `./scripts/check` and review the complete diff. Diagnose check failures and rerun the affected checks; do not weaken checks to obtain a passing result. Report checks that could not run and why.
 
 **Before typechecking the app, regenerate affected artifacts:**
 
@@ -94,6 +98,10 @@ Tests use Vitest and are colocated as `*.test.ts(x)` next to the source.
 - Node environment by default. React component tests opt into jsdom with a `// @vitest-environment jsdom` docblock on the first line and use `@testing-library/react` with `@testing-library/user-event`.
 - Keep Vitest `globals` off; import `describe`/`it`/`expect` from `vitest`. jest-dom matchers and DOM cleanup are registered in `packages/app/src/test-setup.ts`.
 - For files with `@opencode-ref` headers: port the upstream `*.test.ts` when one exists (e.g. `contexts/global-sync/*` ↔ `opencode/packages/app/src/context/global-sync/`), adapting `bun:test` imports to `vitest`. Ported tests verify the port and protect future backports.
+
+### Task State
+
+For work large enough to span sessions or agents, keep a concise continuation note using [docs/work/README.md](docs/work/README.md). Remove the active note on completion or move lasting decisions into project documentation.
 
 ### Commits
 

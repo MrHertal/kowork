@@ -33,29 +33,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate i18n artifacts
-        run: pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Test
-        run: pnpm test
-
-      - name: Build skill runtime
-        run: pnpm --filter @kowork/electron run ensure:runtime
-
-      - name: Test skills
-        run: pnpm --filter @kowork/electron run test:skills
-
-      - name: Build app
-        run: pnpm --filter @kowork/app build
-
-      - name: Build web
-        run: pnpm --filter @kowork/web build
+      - name: Check repository
+        run: ./scripts/check
 
   browser-e2e:
     runs-on: ubuntu-latest
@@ -75,14 +54,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate i18n artifacts
-        run: pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
-
       - name: Install Chromium
         run: pnpm --filter @kowork/app exec playwright install --with-deps --only-shell chromium
 
       - name: Test browser smoke scenario
-        run: pnpm --filter @kowork/app test:e2e
+        run: ./scripts/check browser
 
       - name: Upload Playwright diagnostics
         if: ${{ failure() }}
