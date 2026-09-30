@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+cd "$(dirname "$0")/.."
+
+case "${1:-}" in
+  "")
+    pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
+    pnpm typecheck
+    pnpm lint
+    pnpm test
+    pnpm --filter @kowork/electron run ensure:runtime
+    pnpm --filter @kowork/electron run test:skills
+    pnpm --filter @kowork/app build
+    pnpm --filter @kowork/web build
+    ;;
+  browser)
+    pnpm --filter @kowork/app exec npx @inlang/paraglide-js compile --project ./project.inlang
+    pnpm --filter @kowork/app test:e2e
+    ;;
+  *)
+    echo "Usage: ./scripts/check [browser]" >&2
+    exit 2
+    ;;
+esac

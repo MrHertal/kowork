@@ -14,10 +14,14 @@ Each package under `packages/` has its own README with commands and structure no
 ## Checks
 
 ```bash
-pnpm lint       # ESLint
-pnpm typecheck  # TypeScript
-pnpm test       # Vitest
+./scripts/check         # CI's main check job: types, lint, tests, runtime, builds
+./scripts/check browser # Browser smoke tests (requires Playwright Chromium)
+pnpm lint              # ESLint
+pnpm typecheck         # TypeScript
+pnpm test              # Vitest
 ```
+
+Use the narrowest relevant command while iterating. The architecture and package boundaries are summarized in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 Regenerate artifacts before typechecking after route or translation changes:
 
