@@ -163,6 +163,11 @@ export function readEvidence(context) {
   const raw = JSON.parse(response.raw);
   const data = raw.data ?? raw;
   const message = data.info;
+  if (!message)
+    return {
+      events: [],
+      error: raw.error ?? "OpenCode response contains no assistant message",
+    };
   const finalText = data.parts?.findLast(
     (part) => part.type === "text" && part.messageID === message.id,
   );

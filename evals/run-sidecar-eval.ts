@@ -84,6 +84,7 @@ export async function runSidecarEval(options: SidecarEvalOptions) {
   const keepTemporaryRoot = process.env.KOWORK_EVAL_KEEP_TEMP === "1";
   let exitCode = 1;
   let temporaryRoot: string | undefined;
+  let removeExitListener: (() => void) | undefined;
 
   try {
     await runPnpm(["--dir", electronRoot, "run", "build:eval-sidecar"]);
@@ -159,12 +160,29 @@ export async function runSidecarEval(options: SidecarEvalOptions) {
       logPath,
     });
     sidecar = started.child;
+    let unexpectedExit: string | undefined;
+    const onUnexpectedExit = (
+      code: number | null,
+      signal: NodeJS.Signals | null,
+    ) => {
+      if (interrupted) return;
+      unexpectedExit = `Evaluation sidecar exited unexpectedly (${signal ?? `code ${code}`}). See ${logPath}`;
+      console.error(unexpectedExit);
+      if (activeCommand)
+        activeCommandTermination ??= terminateCommandTree(
+          activeCommand,
+          "SIGTERM",
+        );
+    };
+    sidecar.once("exit", onUnexpectedExit);
+    removeExitListener = () => started.child.off("exit", onUnexpectedExit);
     throwIfInterrupted();
 
     await waitForHealth(started.url);
-    await verifyKoworkSidecar(started.url);
+    await verifyKoworkSidecar(started.url, logPath);
     await options.verifySidecar?.({ ...context, baseUrl: started.url });
     throwIfInterrupted();
+    if (unexpectedExit) throw new Error(unexpectedExit);
 
     const promptfooArgs = [
       "--dir",
@@ -192,9 +210,12 @@ export async function runSidecarEval(options: SidecarEvalOptions) {
       },
       false,
     );
+    removeExitListener();
+    if (unexpectedExit) throw new Error(unexpectedExit);
   } catch (error) {
     if (!interrupted) console.error(formatError(error));
   } finally {
+    removeExitListener?.();
     try {
       await activeCommandTermination;
     } finally {
@@ -264,6 +285,9 @@ async function startSidecar({
   const child = fork(sidecarEntry, [], {
     cwd,
     env,
+    // Initial concurrent requests exceed Node's default 2 GiB heap
+    // in this harness. Limit the override to the sidecar, not builds or Promptfoo.
+    execArgv: [...process.execArgv, "--max-old-space-size=4096"],
     stdio: ["ignore", "pipe", "pipe", "ipc"],
   });
   sidecar = child;
@@ -341,17 +365,29 @@ async function waitForHealth(baseUrl: string) {
   throw new Error("Sidecar health check timed out after 30 seconds");
 }
 
-async function verifyKoworkSidecar(baseUrl: string) {
-  const response = await fetch(new URL("/experimental/tool/ids", baseUrl), {
-    signal: AbortSignal.timeout(5_000),
-  });
-  if (!response.ok)
-    throw new Error(`Unable to inspect sidecar tools: HTTP ${response.status}`);
-  const tools = await response.text();
-  if (!tools.includes("present_files"))
-    throw new Error(
-      "The evaluation server is not Kowork's compiled OpenCode sidecar",
-    );
+async function verifyKoworkSidecar(baseUrl: string, logPath: string) {
+  const signal = AbortSignal.timeout(60_000);
+  try {
+    // Health only confirms that the listener is ready. The first instance
+    // request also bootstraps configuration, plugins, and their dependencies.
+    const response = await fetch(new URL("/experimental/tool/ids", baseUrl), {
+      signal,
+    });
+    if (!response.ok)
+      throw new Error(
+        `Unable to inspect sidecar tools: HTTP ${response.status}`,
+      );
+    const tools = await response.text();
+    if (!tools.includes("present_files"))
+      throw new Error(
+        "The evaluation server is not Kowork's compiled OpenCode sidecar",
+      );
+  } catch (error) {
+    const reason = signal.aborted
+      ? "Sidecar tool verification timed out after 60 seconds during instance startup"
+      : `Sidecar tool verification failed: ${error instanceof Error ? error.message : String(error)}`;
+    throw new Error(`${reason}. See ${logPath}`, { cause: error });
+  }
 }
 
 async function stopSidecar(child: ChildProcess | undefined) {

@@ -12,7 +12,15 @@ type PdfScenario = {
 const baseUrl = process.env.KOWORK_EVAL_BASE_URL;
 const reportPath = process.env.KOWORK_EVAL_PDF_REPORT_PATH;
 const reportSha256 = process.env.KOWORK_EVAL_PDF_REPORT_SHA256;
-if (!baseUrl || !reportPath || !reportSha256) {
+const appendixPath = process.env.KOWORK_EVAL_PDF_APPENDIX_PATH;
+const appendixSha256 = process.env.KOWORK_EVAL_PDF_APPENDIX_SHA256;
+if (
+  !baseUrl ||
+  !reportPath ||
+  !reportSha256 ||
+  !appendixPath ||
+  !appendixSha256
+) {
   throw new Error("Run this evaluation with `pnpm eval:skill:pdf`.");
 }
 
@@ -21,9 +29,11 @@ const manifest = JSON.parse(readFileSync(pdfEvalManifestPath, "utf8")) as {
 };
 const createScenario = manifest.evals.find(({ id }) => id === 1);
 const readScenario = manifest.evals.find(({ id }) => id === 2);
-if (!createScenario || !readScenario)
-  throw new Error("PDF skill creation or reading scenario is missing");
+const mergeScenario = manifest.evals.find(({ id }) => id === 3);
+if (!createScenario || !readScenario || !mergeScenario)
+  throw new Error("PDF skill creation, reading, or merge scenario is missing");
 const quarterlyPath = join(dirname(reportPath), "quarterly.pdf");
+const combinedPath = join(dirname(reportPath), "combined.pdf");
 
 const readRequest = `${readScenario.prompt}
 
@@ -33,6 +43,23 @@ const readRequest = `${readScenario.prompt}
     <path>${reportPath}</path>
     <format>pdf</format>
     <position>1</position>
+  </attachment>
+</kowork_attachments>`;
+
+const mergeRequest = `${mergeScenario.prompt}
+
+<kowork_attachments>
+  <attachment>
+    <name>report.pdf</name>
+    <path>${reportPath}</path>
+    <format>pdf</format>
+    <position>1</position>
+  </attachment>
+  <attachment>
+    <name>appendix.pdf</name>
+    <path>${appendixPath}</path>
+    <format>pdf</format>
+    <position>2</position>
   </attachment>
 </kowork_attachments>`;
 
@@ -124,6 +151,39 @@ export default {
           type: "javascript",
           value: "file://assertions.mjs:reportIsUnchanged",
         },
+      ],
+    },
+    {
+      description: "Merges two PDFs in order with the built-in PDF skill",
+      vars: {
+        request: mergeRequest,
+        reportPath,
+        reportSha256,
+        appendixPath,
+        appendixSha256,
+        combinedPath,
+      },
+      assert: [
+        {
+          type: "javascript",
+          value: "file://../../trace-assertions.mjs:toolUsed",
+          config: {
+            tool: "skill",
+            args: { name: "kowork-pdf" },
+            status: "success",
+            nonEmptyOutput: true,
+            beforeFinalAnswer: true,
+          },
+        },
+        {
+          type: "javascript",
+          value: "file://assertions.mjs:mergeWorkflow",
+        },
+        {
+          type: "javascript",
+          value: "file://assertions.mjs:mergedPdfHasRequestedPages",
+        },
+        { type: "icontains", value: "combined.pdf" },
       ],
     },
   ],

@@ -11,6 +11,17 @@ isolated temporary storage, wait for it to become healthy, run Promptfoo, and
 stop the sidecar. Each uses an available local port, bypasses Promptfoo's response
 cache, and does not start the Electron app.
 
+The evaluation sidecar has a 4 GiB JavaScript heap limit: initial concurrent
+requests can exceed Node's default 2 GiB limit in the compiled runtime. This is
+a limit, not a reservation, and applies only to the evaluation sidecar. If it
+exits unexpectedly, the runner stops Promptfoo and prints the exit status and
+sidecar log path. Raising the limit allows the current suite to run; it does not
+resolve the runtime's underlying memory use.
+
+After the listener is healthy, tool verification allows up to 60 seconds for
+the first instance to initialize configuration, plugins, and their dependencies.
+A timeout at this stage is a startup failure, before any model tests run.
+
 Each run gives the sidecar an isolated task folder inside its temporary storage.
 Promptfoo deliberately leaves `working_dir` unset so requests use this folder.
 The evaluated assistant receives Kowork's production tool surface rather than a
@@ -86,10 +97,14 @@ checks that the reported results are accurate and plainly explained.
 ## PDF Skill evaluation
 
 Run `pnpm eval:skill:pdf` to test the built-in PDF Skill. The suite covers
-reading a table from an attached PDF and creating `quarterly.pdf`. The creation
+reading a table from an attached PDF, creating `quarterly.pdf`, and merging
+`report.pdf` then `appendix.pdf` into `combined.pdf`. The creation
 check requires a retained working script in a child of the pre-approved session
 temporary directory, successful validation, presentation of the final PDF, and
 the requested title, table, and summary. It does not score visual layout.
+The merge check requires the bundled `pages.py merge` path, full render validation,
+presentation of the final file, and three pages in the requested source order.
+Model outcomes are measured here and are not part of `./scripts/check` or CI.
 
 ## Adding tool and Skill checks
 
