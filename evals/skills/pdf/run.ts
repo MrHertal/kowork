@@ -7,6 +7,7 @@ import { gradingSystemPrompt } from "../../system-prompt";
 import {
   builtinSkillsDir,
   evalSystemPrompt,
+  pdfAppendixFixturePath,
   pdfFixturePath,
 } from "./system-prompt";
 
@@ -24,12 +25,21 @@ process.exitCode = await runSidecarEval({
   maxConcurrency: 1,
   async prepareTaskFolder({ taskFolder }) {
     const reportPath = path.join(taskFolder, "report.pdf");
+    const appendixPath = path.join(taskFolder, "appendix.pdf");
     await copyFile(pdfFixturePath, reportPath);
-    const fixture = await readFile(pdfFixturePath);
+    await copyFile(pdfAppendixFixturePath, appendixPath);
+    const [report, appendix] = await Promise.all([
+      readFile(pdfFixturePath),
+      readFile(pdfAppendixFixturePath),
+    ]);
     return {
       KOWORK_EVAL_PDF_REPORT_PATH: reportPath,
       KOWORK_EVAL_PDF_REPORT_SHA256: createHash("sha256")
-        .update(fixture)
+        .update(report)
+        .digest("hex"),
+      KOWORK_EVAL_PDF_APPENDIX_PATH: appendixPath,
+      KOWORK_EVAL_PDF_APPENDIX_SHA256: createHash("sha256")
+        .update(appendix)
         .digest("hex"),
     };
   },

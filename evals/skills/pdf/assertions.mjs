@@ -88,7 +88,10 @@ export function evaluateCreationWorkflow({
     const filePath = event.args?.filePath;
     if (typeof filePath !== "string" || basename(filePath) !== "create_pdf.py")
       continue;
-    if (!scripts.some((script) => resolve(filePath) === resolve(script)))
+    if (
+      !existsSync(filePath) ||
+      !scripts.some((script) => realpathSync(filePath) === realpathSync(script))
+    )
       return result(
         false,
         "A create_pdf.py edit targeted a path outside the approved working directory.",
@@ -106,13 +109,24 @@ export function evaluateCreationWorkflow({
       call.start.tool === "bash" &&
       call.end.exitCode === 0 &&
       python.test(call.start.args?.command ?? "") &&
-      scripts.some(
-        (script) =>
-          call.start.args.command.includes(script) ||
-          (resolve(call.start.args?.workdir ?? taskFolder) ===
-            dirname(script) &&
-            /create_pdf\.py(?:[\s"']|$)/.test(call.start.args.command)),
-      ) &&
+      scripts.some((script) => {
+        const command = call.start.args.command;
+        const workingDirectory = dirname(script);
+        const entersApprovedDirectory = [
+          `cd "${workingDirectory}" &&`,
+          `cd '${workingDirectory}' &&`,
+          `cd ${workingDirectory} &&`,
+        ].some((prefix) => command.includes(prefix));
+        return (
+          command.includes(script) ||
+          ((resolve(call.start.args?.workdir ?? taskFolder) ===
+            workingDirectory ||
+            entersApprovedDirectory) &&
+            /(?:^|&&\s*)kowork-python(?:\.cmd)?\s+create_pdf\.py(?:[\s"']|$)/.test(
+              command,
+            ))
+        );
+      }) &&
       /quarterly\.pdf(?:[\s"']|$)/.test(call.start.args.command),
   );
   if (!create)
@@ -305,4 +319,194 @@ export function reportIsUnchanged(_output, context) {
       ? "The source report remained unchanged."
       : `The source report changed (expected ${expected}, received ${actual}).`,
   };
+}
+
+export function evaluateMergeWorkflow({ events, combinedPath, finalAnswer }) {
+  if (!isAbsolute(combinedPath ?? ""))
+    return result(false, "Missing absolute combined PDF path.");
+  const calls = events.flatMap((event, index) =>
+    event.type === "tool-start"
+      ? [completedCall(events, index)].filter(Boolean)
+      : [],
+  );
+  const commands = calls.filter((call) => call.start.tool === "bash");
+  if (
+    commands.some((call) =>
+      /\b(?:qpdf|pdftk|gs|ghostscript|pdftoppm)\b/i.test(
+        call.start.args?.command ?? "",
+      ),
+    )
+  )
+    return result(false, "An external PDF utility was used.");
+
+  const merge = commands.find((call) => {
+    const command = call.start.args?.command ?? "";
+    const pages = command.search(/pages\.py(?:[\s"']|$)/);
+    const operation = command.search(/\bmerge\b/);
+    const report = command.search(/report\.pdf(?:[\s"']|$)/);
+    const appendix = command.search(/appendix\.pdf(?:[\s"']|$)/);
+    const output = command.search(/combined\.pdf(?:[\s"']|$)/);
+    return (
+      call.end.exitCode === 0 &&
+      /\bkowork-python(?:\.cmd)?\b/.test(command) &&
+      pages >= 0 &&
+      pages < operation &&
+      operation < report &&
+      report < appendix &&
+      appendix < output &&
+      /(?:^|\s)(?:-o|--out)(?:\s|=)/.test(command)
+    );
+  });
+  if (!merge)
+    return result(
+      false,
+      "No successful kowork-python pages.py merge used report.pdf then appendix.pdf to create combined.pdf.",
+    );
+  if (!existsSync(combinedPath) || !statSync(combinedPath).isFile())
+    return result(
+      false,
+      "combined.pdf is missing from the task output folder.",
+    );
+
+  const validate = commands.find((call) => {
+    const command = call.start.args?.command ?? "";
+    return (
+      call.startIndex > merge.endIndex &&
+      call.end.exitCode === 0 &&
+      /\bkowork-python(?:\.cmd)?\b/.test(command) &&
+      /validate\.py(?:[\s"']|$)/.test(command) &&
+      /combined\.pdf(?:[\s"']|$)/.test(command) &&
+      !/(?:^|\s)--no-render(?:\s|$)/.test(command) &&
+      !/(?:^|\s)--pages(?:\s|=)/.test(command)
+    );
+  });
+  if (!validate)
+    return result(
+      false,
+      "The merged PDF was not successfully render-validated on all pages after merging.",
+    );
+
+  const presentations = events.flatMap((event, index) =>
+    event.type === "tool-start" && event.tool === "present_files"
+      ? [{ start: event, completion: completedCall(events, index) }]
+      : [],
+  );
+  if (
+    presentations.length !== 1 ||
+    !presentations[0].completion ||
+    presentations[0].completion.startIndex <= validate.endIndex ||
+    presentations[0].start.args?.files?.length !== 1 ||
+    !existsSync(presentations[0].start.args.files[0]?.path ?? "") ||
+    realpathSync(presentations[0].start.args.files[0].path) !==
+      realpathSync(combinedPath)
+  )
+    return result(
+      false,
+      "Expected one present_files call with only combined.pdf after validation.",
+    );
+
+  const finalIndex = events.findLastIndex(
+    (event) =>
+      event.type === "text" &&
+      event.messageID === finalAnswer?.messageID &&
+      event.partID === finalAnswer?.partID,
+  );
+  if (finalIndex <= presentations[0].completion.endIndex)
+    return result(false, "The final answer did not follow PDF presentation.");
+  return result(
+    true,
+    "The PDF skill merged the sources in order, validated all pages, and presented the result.",
+  );
+}
+
+export function mergeWorkflow(_output, context) {
+  const evidence = readEvidence(context);
+  if (evidence.error)
+    return result(false, `Provider error: ${JSON.stringify(evidence.error)}`);
+  return evaluateMergeWorkflow({
+    events: evidence.events,
+    combinedPath: context.vars?.combinedPath,
+    finalAnswer: evidence.finalAnswer,
+  });
+}
+
+export function evaluateMergedPdfPages(document) {
+  const source = [...(document.report ?? []), ...(document.appendix ?? [])];
+  const merged = document.combined ?? [];
+  const pass =
+    document.report?.length === 2 &&
+    document.appendix?.length === 1 &&
+    merged.length === 3 &&
+    source.every(
+      (text, index) =>
+        typeof text === "string" &&
+        text.trim().length > 0 &&
+        text.replaceAll(/\s+/g, " ").trim() ===
+          String(merged[index] ?? "")
+            .replaceAll(/\s+/g, " ")
+            .trim(),
+    );
+  return result(
+    pass,
+    pass
+      ? "combined.pdf has the two report pages followed by the appendix page."
+      : "combined.pdf must contain the two report pages followed by the appendix page, with matching text on each page.",
+  );
+}
+
+export function mergedPdfHasRequestedPages(_output, context) {
+  const {
+    reportPath,
+    appendixPath,
+    combinedPath,
+    reportSha256,
+    appendixSha256,
+  } = context.vars ?? {};
+  const python = process.env.KOWORK_EVAL_PYTHON_EXE;
+  if (
+    [reportPath, appendixPath, combinedPath, reportSha256, appendixSha256].some(
+      (value) => typeof value !== "string",
+    ) ||
+    !python
+  )
+    throw new Error(
+      "Missing merge paths, checksums, or bundled Python interpreter",
+    );
+  if (!existsSync(combinedPath))
+    return result(false, "combined.pdf is missing.");
+  for (const [path, expected] of [
+    [reportPath, reportSha256],
+    [appendixPath, appendixSha256],
+  ]) {
+    const actual = createHash("sha256")
+      .update(readFileSync(path))
+      .digest("hex");
+    if (actual !== expected)
+      return result(false, `${basename(path)} was changed during the merge.`);
+  }
+
+  const inspection = spawnSync(
+    python,
+    [
+      "-c",
+      `import json, sys
+from pypdf import PdfReader
+print(json.dumps({name: [page.extract_text() or "" for page in PdfReader(path).pages]
+                  for name, path in zip(("report", "appendix", "combined"), sys.argv[1:])}))`,
+      reportPath,
+      appendixPath,
+      combinedPath,
+    ],
+    { encoding: "utf8", timeout: 20_000 },
+  );
+  if (inspection.status !== 0)
+    return result(
+      false,
+      `Could not inspect merged PDF: ${inspection.stderr?.trim() || inspection.error?.message || "unknown error"}`,
+    );
+  try {
+    return evaluateMergedPdfPages(JSON.parse(inspection.stdout));
+  } catch {
+    return result(false, "Merged PDF inspection returned invalid JSON.");
+  }
 }

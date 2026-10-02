@@ -13,6 +13,8 @@ import { afterEach, test } from "node:test";
 import {
   evaluateCreatedPdfContent,
   evaluateCreationWorkflow,
+  evaluateMergedPdfPages,
+  evaluateMergeWorkflow,
 } from "./assertions.mjs";
 
 const roots = [];
@@ -79,6 +81,14 @@ test("accepts a canonical presentation path for the same final PDF", () => {
   assert.equal(evaluateCreationWorkflow(input).pass, true);
 });
 
+test("accepts a successful retry after changing into the approved script directory", () => {
+  const input = fixture();
+  input.events[0].args.command =
+    `cd "${join(input.approvedTempRoot, input.sessionId, "pdf-task-abc123")}" && ` +
+    `kowork-python -c "print('repair')" && kowork-python create_pdf.py "${input.quarterlyPath}"`;
+  assert.equal(evaluateCreationWorkflow(input).pass, true);
+});
+
 test("rejects a working script in the task output folder", () => {
   const input = fixture();
   writeFileSync(
@@ -97,6 +107,17 @@ test("rejects an edit targeting an unapproved temporary directory", () => {
     args: { filePath: join(input.root, "temp", "other", "create_pdf.py") },
   });
   assert.match(evaluateCreationWorkflow(input).reason, /outside the approved/);
+});
+
+test("accepts an edit through the canonical path to the approved script", () => {
+  const input = fixture();
+  input.events.unshift({
+    type: "tool-start",
+    tool: "edit",
+    callID: "edit",
+    args: { filePath: realpathSync(input.script) },
+  });
+  assert.equal(evaluateCreationWorkflow(input).pass, true);
 });
 
 test("rejects presentation before validation", () => {
@@ -124,4 +145,110 @@ test("accepts a summary sentence wrapped across extracted text lines", () => {
     ],
   });
   assert.equal(result.pass, true);
+});
+
+function mergeFixture() {
+  const root = mkdtempSync(join(tmpdir(), "kowork-pdf-merge-test-"));
+  roots.push(root);
+  const combinedPath = join(root, "combined.pdf");
+  writeFileSync(combinedPath, "%PDF-1.7");
+  const events = [
+    {
+      type: "tool-start",
+      tool: "bash",
+      callID: "merge",
+      args: {
+        command: `kowork-python /skill/pages.py merge ${root}/report.pdf ${root}/appendix.pdf -o ${combinedPath}`,
+      },
+    },
+    { type: "tool-end", tool: "bash", callID: "merge", exitCode: 0 },
+    {
+      type: "tool-start",
+      tool: "bash",
+      callID: "validate",
+      args: { command: `kowork-python /skill/validate.py ${combinedPath}` },
+    },
+    { type: "tool-end", tool: "bash", callID: "validate", exitCode: 0 },
+    {
+      type: "tool-start",
+      tool: "present_files",
+      callID: "present",
+      args: { files: [{ path: combinedPath }] },
+    },
+    { type: "tool-end", tool: "present_files", callID: "present" },
+    { type: "text", messageID: "msg_1", partID: "part_1" },
+  ];
+  return {
+    combinedPath,
+    events,
+    finalAnswer: { messageID: "msg_1", partID: "part_1" },
+  };
+}
+
+test("accepts the ordered merge, full validation, and presentation", () => {
+  assert.equal(evaluateMergeWorkflow(mergeFixture()).pass, true);
+});
+
+test("rejects a merge with appendix first", () => {
+  const input = mergeFixture();
+  input.events[0].args.command = input.events[0].args.command.replace(
+    /report\.pdf (.*)appendix\.pdf/,
+    "appendix.pdf $1report.pdf",
+  );
+  assert.match(
+    evaluateMergeWorkflow(input).reason,
+    /report\.pdf then appendix/,
+  );
+});
+
+test("rejects validation limited to one page", () => {
+  const input = mergeFixture();
+  input.events[2].args.command += " --pages 1";
+  assert.match(evaluateMergeWorkflow(input).reason, /all pages/);
+});
+
+test("rejects presentation before validation", () => {
+  const input = mergeFixture();
+  const validate = input.events.splice(2, 2);
+  input.events.splice(5, 0, ...validate);
+  assert.match(evaluateMergeWorkflow(input).reason, /after validation/);
+});
+
+test("rejects an extra incomplete presentation attempt", () => {
+  const input = mergeFixture();
+  input.events.splice(6, 0, {
+    type: "tool-start",
+    tool: "present_files",
+    callID: "extra",
+    args: { files: [{ path: input.combinedPath }] },
+  });
+  assert.match(evaluateMergeWorkflow(input).reason, /one present_files call/);
+});
+
+test("rejects an external PDF utility", () => {
+  const input = mergeFixture();
+  input.events[0].args.command += " && qpdf --check combined.pdf";
+  assert.match(evaluateMergeWorkflow(input).reason, /external PDF utility/);
+});
+
+test("accepts three pages in source order", () => {
+  assert.equal(
+    evaluateMergedPdfPages({
+      report: ["Report page 1", "Report page 2"],
+      appendix: ["Appendix page"],
+      combined: ["Report page 1", "Report\npage 2", "Appendix page"],
+    }).pass,
+    true,
+  );
+});
+
+test("rejects reversed pages even when the page count is three", () => {
+  assert.equal(
+    evaluateMergedPdfPages({
+      report: ["Report page 1", "Report page 2"],
+      appendix: ["Appendix page"],
+      combined: ["Appendix page", "Report page 1", "Report page 2"],
+    }).pass,
+    false,
+  );
 });
