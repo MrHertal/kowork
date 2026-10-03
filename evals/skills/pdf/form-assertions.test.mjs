@@ -10,7 +10,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { afterEach, test } from "node:test";
 
 import {
@@ -53,14 +53,26 @@ function fixture() {
   roots.push(root);
   const formPath = join(root, "application-form.pdf");
   const filledPath = join(root, "application-filled.pdf");
-  const preview = join(root, "preview", "page_001.png");
+  const approvedTempRoot = join(root, "temp", "opencode");
+  const sessionId = "ses_1234";
+  const work = join(approvedTempRoot, sessionId, "pdf-task-abc123");
+  const previewDir = join(work, "preview");
+  const preview = join(previewDir, "page_001.png");
+  const valuesPath = join(work, "values.json");
+  mkdirSync(previewDir, { recursive: true });
+  writeFileSync(valuesPath, "{}");
+  writeFileSync(join(work, "answers.json"), "{}");
   copyFileSync(source, formPath);
   copyFileSync(source, filledPath);
-  mkdirSync(join(root, "preview"));
   writeFileSync(preview, "preview");
   const shell = (id, command) => call("bash", id, { command }, { exitCode: 0 });
   return {
     root,
+    approvedTempRoot,
+    sessionId,
+    work,
+    previewDir,
+    valuesPath,
     formPath,
     filledPath,
     preview,
@@ -71,11 +83,11 @@ function fixture() {
       ),
       ...shell(
         "fill",
-        `kowork-python /skill/forms.py fill "${formPath}" values.json -o "${filledPath}"`,
+        `kowork-python /skill/forms.py fill "${formPath}" "${valuesPath}" -o "${filledPath}"`,
       ),
       ...shell(
         "render",
-        `kowork-python /skill/render.py "${filledPath}" "${root}/preview"`,
+        `kowork-python /skill/render.py "${filledPath}" "${previewDir}"`,
       ),
       ...call("read", "preview", { filePath: preview }),
       ...shell("validate", `kowork-python /skill/validate.py "${filledPath}"`),
@@ -99,7 +111,7 @@ test("accepts relative paths, info alias, quoted script, flags, and && chaining"
       "chain",
       {
         workdir: input.root,
-        command: `kowork-python -B '/skill/forms.py' inspect application-form.pdf && kowork-python '/skill/forms.py' fill application-form.pdf answers.json --out application-filled.pdf`,
+        command: `kowork-python -B '/skill/forms.py' inspect application-form.pdf && kowork-python '/skill/forms.py' fill application-form.pdf "${relative(input.root, join(input.work, "answers.json"))}" --out application-filled.pdf`,
       },
       { exitCode: 0 },
     ),
@@ -170,7 +182,7 @@ for (const [name, modify, reason] of [
         i.formPath,
       );
     },
-    /Read/,
+    /render|Read/,
   ],
   [
     "Read unrelated image",
@@ -348,4 +360,87 @@ test("rejects a modified or removed source", () => {
 });
 test("inspection reports interpreter errors without misreporting values", () => {
   assert.ok(inspectStoredFormValues("/nonexistent/python", source).error);
+});
+
+test("rejects extra host runtime calls even when the fill workflow is correct", () => {
+  const input = fixture();
+  input.events.unshift({
+    type: "tool-start",
+    tool: "bash",
+    callID: "extra",
+    args: { command: "python3 helper.py" },
+  });
+  assert.match(evaluateFormWorkflow(input).reason, /runtime invocation/);
+});
+test("rejects values JSON in the user's task output folder", () => {
+  const input = fixture();
+  const wrong = join(input.root, "values.json");
+  writeFileSync(wrong, "{}");
+  input.events[2].args.command = input.events[2].args.command.replace(
+    input.valuesPath,
+    wrong,
+  );
+  assert.match(evaluateFormWorkflow(input).reason, /Form JSON files/);
+});
+test("rejects values JSON directly in the approved session root", () => {
+  const input = fixture();
+  const wrong = join(input.approvedTempRoot, input.sessionId, "values.json");
+  writeFileSync(wrong, "{}");
+  input.events[2].args.command = input.events[2].args.command.replace(
+    input.valuesPath,
+    wrong,
+  );
+  assert.match(evaluateFormWorkflow(input).reason, /Form JSON files/);
+});
+test("accepts retained field discovery JSON inside the task directory", () => {
+  const input = fixture();
+  const fields = join(input.work, "fields.json");
+  writeFileSync(fields, "{}");
+  input.events[0].args.command = `kowork-python /skill/forms.py fields --out="${fields}" "${input.formPath}"`;
+  assert.equal(evaluateFormWorkflow(input).pass, true);
+});
+test("rejects field discovery JSON outside the task directory", () => {
+  const input = fixture();
+  const fields = join(input.root, "fields.json");
+  writeFileSync(fields, "{}");
+  input.events[0].args.command += ` -o "${fields}"`;
+  assert.match(evaluateFormWorkflow(input).reason, /Form JSON files/);
+});
+test("rejects another temporary JSON written outside the approved task directory", () => {
+  const input = fixture();
+  const wrong = join(input.root, "intermediate.json");
+  writeFileSync(wrong, "{}");
+  input.events.unshift(
+    ...call("write", "extra-json", { filePath: wrong, content: "{}" }),
+  );
+  assert.match(evaluateFormWorkflow(input).reason, /Form JSON files/);
+});
+test("rejects missing retained values JSON", () => {
+  const input = fixture();
+  rmSync(input.valuesPath);
+  assert.match(evaluateFormWorkflow(input).reason, /Form JSON files/);
+});
+test("rejects an output preview in the user's folder", () => {
+  const input = fixture();
+  input.events[4].args.command = input.events[4].args.command.replace(
+    input.previewDir,
+    input.root,
+  );
+  assert.match(evaluateFormWorkflow(input).reason, /previews must be inside/);
+});
+test("rejects an output preview directly under the session root", () => {
+  const input = fixture();
+  input.events[4].args.command = input.events[4].args.command.replace(
+    input.previewDir,
+    join(input.approvedTempRoot, input.sessionId),
+  );
+  assert.match(evaluateFormWorkflow(input).reason, /previews must be inside/);
+});
+
+test("accepts the constant-variable form workflow observed in the model trace", () => {
+  const input = fixture();
+  input.events[2].args.command = `S='/skill' && T='${input.work}' && F='${input.root}' && kowork-python "$S/forms.py" fill "$F/application-form.pdf" "$T/values.json" -o "$F/application-filled.pdf" && kowork-python "$S/validate.py" "$F/application-filled.pdf"`;
+  input.events[4].args.command = `S='/skill' && T='${input.work}' && kowork-python "$S/render.py" '${input.filledPath}' "$T/preview"`;
+  input.events.splice(8, 2);
+  assert.equal(evaluateFormWorkflow(input).pass, true);
 });

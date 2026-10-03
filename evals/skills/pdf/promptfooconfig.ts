@@ -98,6 +98,7 @@ export default {
         "Fills and presents real AcroForm values with the built-in PDF skill",
       vars: { request: formRequest, formPath, formSha256, filledPath },
       assert: [
+        { type: "javascript", value: "file://workflow.mjs:runtimeCompliance" },
         {
           type: "javascript",
           value: "file://../../trace-assertions.mjs:toolUsed",
@@ -123,6 +124,7 @@ export default {
         "Creates, validates, and presents a PDF with the built-in PDF skill",
       vars: { request: createScenario.prompt, quarterlyPath },
       assert: [
+        { type: "javascript", value: "file://workflow.mjs:runtimeCompliance" },
         {
           type: "javascript",
           value: "file://../../trace-assertions.mjs:toolUsed",
@@ -149,6 +151,7 @@ export default {
       description: "Extracts a real table with the built-in PDF skill",
       vars: { request: readRequest, reportPath, reportSha256 },
       assert: [
+        { type: "javascript", value: "file://workflow.mjs:runtimeCompliance" },
         {
           type: "javascript",
           value: "file://../../trace-assertions.mjs:toolUsed",
@@ -163,19 +166,7 @@ export default {
         },
         {
           type: "javascript",
-          value: "file://../../trace-assertions.mjs:toolUsed",
-          config: {
-            tool: "bash",
-            argsRegex: {
-              command: String.raw`^\s*kowork-python(?:\.cmd)?(?=[\s\S]*read_pdf\.py)(?=[\s\S]*report\.pdf)(?=[\s\S]*--tables(?:\s|$))`,
-            },
-            status: "success",
-            exitCode: 0,
-            min: 1,
-            commandOutput: true,
-            nonEmptyOutput: true,
-            beforeFinalAnswer: true,
-          },
+          value: "file://assertions.mjs:readingWorkflow",
         },
         {
           type: "javascript",
@@ -207,6 +198,7 @@ export default {
         combinedPath,
       },
       assert: [
+        { type: "javascript", value: "file://workflow.mjs:runtimeCompliance" },
         {
           type: "javascript",
           value: "file://../../trace-assertions.mjs:toolUsed",

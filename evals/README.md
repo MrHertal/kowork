@@ -102,30 +102,54 @@ reading a table from an attached PDF, creating `quarterly.pdf`, merging
 `application-form.pdf` into `application-filled.pdf`. These are manifest scenarios
 1, 2, 3, and 5. The manifest also lists page preview (4), flat-form overlay (6),
 and password protection (7); those are not standalone runnable scenarios.
-The creation
-check requires a retained working script in a child of the pre-approved session
-temporary directory, successful validation, presentation of the final PDF, and
-the requested title, table, and summary. It does not score visual layout.
-The merge check requires the bundled `pages.py merge` path, full render validation,
-presentation of the final file, and three pages in the requested source order.
-The interactive-form check reuses the manifest prompt and fixture. It checks
-successful field discovery before filling, reads the output's actual AcroForm
-`/V` values with bundled Python (Dana Lee, checkbox `/Yes`, radio `/Pro`), and
-checks the source checksum. Visible page text or an assistant's claim of success
-cannot substitute for stored field values. Its trace checks require full render
-validation after the final fill, followed by one successful presentation of only
-the final PDF and then the final answer. It also requires a successful Read of
-an image produced by rendering the filled output before presentation. Trace
-evidence establishes image inspection, but does not grade placement or prove
-that the model understood the image. The existing trace records arguments,
-completion, output lengths, and shell exit codes, not image pixels or tool output.
-Script recognition accepts quoted/relative paths, separate calls, and successful
-`&&` chains; it does not interpret arbitrary shell programs.
+The creation check requires a retained working script in a child of the
+pre-approved session temporary directory, the requested title, table, and summary,
+and a final PDF in the task output folder. The merge check requires the bundled
+`pages.py merge` path and three pages in source order. The interactive-form check
+reuses the manifest prompt and fixture, requires field discovery before filling,
+reads the output's actual AcroForm `/V` values with bundled Python (Dana Lee,
+checkbox `/Yes`, radio `/Pro`), and checks the source checksum. Visible page text
+or an assistant's claim of success cannot substitute for stored field values.
+
+All four scenarios audit attempted shell invocations for host Python/Node runtimes
+and prohibited external PDF tools, including failed or incomplete extra attempts.
+Quoted prose, comments, executable lookups, and heredoc contents are not treated
+as invocations. The audit recognizes direct calls, common `env`/`command`/
+`timeout`/`nice` wrappers, explicit shell `-c` commands, and constant variable
+assignments within a shell call. It is a bounded trace check, not a shell
+interpreter: it does not establish what arbitrary scripts, unresolved variable
+expansion, or hidden subprocesses execute. Required PDF operations still must use
+`kowork-python`; the runner supplies the production bundled runtime.
+
+Creation, merging, and form filling require full render validation after the last
+successful output modification, followed by one successful presentation of only
+the final PDF and then the final answer. Partial-page or structure-only validation
+cannot satisfy that check. These scenarios also require a successful Read of at
+least one image produced by rendering the final output after that modification
+and before presentation. The preview directory and image must be inside a task
+directory under the approved session temporary directory. Form values JSON,
+exported field-discovery JSON, and JSON authored through Write/Edit must also be
+retained there. Containment uses canonical paths to reject symlink escapes,
+files directly in the session root, and files belonging to another session.
+
+Trace evidence establishes a preview Read, but does not grade layout, placement,
+inspection of every page, or whether the model understood the image. The existing
+trace records arguments, completion, output lengths, and shell exit codes, not
+image pixels or tool output. Successful script evidence accepts quoted/relative
+paths, option placement, separate calls, and successful `&&` chains. Other shell
+control flow cannot prove individual script success from the recorded exit code.
+The creation check establishes script location, execution, and retention during
+the run; it does not prove template-copy provenance, random directory naming,
+or reuse across a later revision or restart.
 
 Run the deterministic PDF assertion tests with
-`node --test evals/skills/pdf/*.test.mjs`. The form tests use the existing bundled
-runtime and real PDFs to cover wrong field values, blank or flattened outputs,
-corrupt/missing outputs, source changes, and failed or misordered trace steps.
+`node --test evals/skills/pdf/*.test.mjs`. Tests use the existing bundled runtime
+and real PDFs for stored-value checks, plus trace cases for temporary-file
+containment, runtime violations and harmless mentions, wrong or flattened
+artifacts, failed or misordered steps, and validation/preview evidence made stale
+by a later modification. Before comparing a skill rewrite, capture a completed
+model run of the current skill, including any behavior failures. A deterministic
+assertion-test pass verifies the evaluator, not the evaluated skill.
 Model outcomes are measured here and are not part of `./scripts/check` or CI.
 
 ## Adding tool and Skill checks

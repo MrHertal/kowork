@@ -7,21 +7,22 @@ import {
   realpathSync,
   statSync,
 } from "node:fs";
-import {
-  basename,
-  dirname,
-  isAbsolute,
-  join,
-  relative,
-  resolve,
-  sep,
-} from "node:path";
+import { basename, dirname, isAbsolute, join, relative, sep } from "node:path";
 
 import { readEvidence } from "../../trace-assertions.mjs";
 
-function result(pass, reason) {
-  return { pass, score: pass ? 1 : 0, reason };
-}
+import {
+  completedCalls,
+  evaluateRuntimeCompliance,
+  fullValidation,
+  inspectOutputPreview,
+  optionValue,
+  positionals,
+  result,
+  sameFile,
+  scriptSteps,
+  targets,
+} from "./workflow.mjs";
 
 function within(parent, child) {
   const rel = relative(parent, child);
@@ -31,20 +32,6 @@ function within(parent, child) {
     !rel.startsWith(`..${sep}`) &&
     !isAbsolute(rel)
   );
-}
-
-function completedCall(events, startIndex) {
-  const start = events[startIndex];
-  const endIndex = events.findIndex(
-    (event, index) =>
-      index > startIndex &&
-      event.type === "tool-end" &&
-      event.tool === start.tool &&
-      event.callID === start.callID,
-  );
-  return endIndex < 0
-    ? null
-    : { start, startIndex, end: events[endIndex], endIndex };
 }
 
 export function evaluateCreationWorkflow({
@@ -58,6 +45,8 @@ export function evaluateCreationWorkflow({
     return result(false, "Missing PDF creation session ID.");
   if (!isAbsolute(approvedTempRoot ?? "") || !isAbsolute(quarterlyPath ?? ""))
     return result(false, "Missing absolute evaluation paths.");
+  const runtime = evaluateRuntimeCompliance(events);
+  if (!runtime.pass) return runtime;
   const sessionTemp = join(approvedTempRoot, sessionId);
   if (!existsSync(sessionTemp))
     return result(
@@ -98,36 +87,12 @@ export function evaluateCreationWorkflow({
       );
   }
 
-  const calls = events.flatMap((event, index) =>
-    event.type === "tool-start"
-      ? [completedCall(events, index)].filter(Boolean)
-      : [],
-  );
-  const python = /(?:^|[;&|]\s*)\s*kowork-python(?:\.cmd)?(?:\s|$)/;
-  const create = calls.find(
-    (call) =>
-      call.start.tool === "bash" &&
-      call.end.exitCode === 0 &&
-      python.test(call.start.args?.command ?? "") &&
-      scripts.some((script) => {
-        const command = call.start.args.command;
-        const workingDirectory = dirname(script);
-        const entersApprovedDirectory = [
-          `cd "${workingDirectory}" &&`,
-          `cd '${workingDirectory}' &&`,
-          `cd ${workingDirectory} &&`,
-        ].some((prefix) => command.includes(prefix));
-        return (
-          command.includes(script) ||
-          ((resolve(call.start.args?.workdir ?? taskFolder) ===
-            workingDirectory ||
-            entersApprovedDirectory) &&
-            /(?:^|&&\s*)kowork-python(?:\.cmd)?\s+create_pdf\.py(?:[\s"']|$)/.test(
-              command,
-            ))
-        );
-      }) &&
-      /quarterly\.pdf(?:[\s"']|$)/.test(call.start.args.command),
+  const calls = completedCalls(events);
+  const steps = scriptSteps(calls, taskFolder);
+  const create = steps.findLast(
+    (s) =>
+      scripts.some((script) => sameFile(s.scriptPath, script)) &&
+      targets(s, positionals(s)[0], quarterlyPath),
   );
   if (!create)
     return result(
@@ -140,25 +105,7 @@ export function evaluateCreationWorkflow({
       "quarterly.pdf was not created in the task output folder.",
     );
 
-  const validate = calls.find(
-    (call) =>
-      (call.startIndex > create.endIndex ||
-        (call.startIndex === create.startIndex &&
-          call.start.args.command.indexOf("validate.py") >
-            call.start.args.command.indexOf("create_pdf.py") &&
-          call.start.args.command
-            .slice(
-              call.start.args.command.indexOf("create_pdf.py"),
-              call.start.args.command.indexOf("validate.py"),
-            )
-            .includes("&&"))) &&
-      call.start.tool === "bash" &&
-      call.end.exitCode === 0 &&
-      python.test(call.start.args?.command ?? "") &&
-      /validate\.py(?:[\s"']|$)/.test(call.start.args.command) &&
-      /quarterly\.pdf(?:[\s"']|$)/.test(call.start.args.command) &&
-      !/(?:^|\s)--no-render(?:\s|$)/.test(call.start.args.command),
-  );
+  const validate = fullValidation(steps, create, quarterlyPath);
   if (!validate)
     return result(
       false,
@@ -171,7 +118,7 @@ export function evaluateCreationWorkflow({
           {
             ...event,
             startIndex: index,
-            completion: completedCall(events, index),
+            completion: calls.find((call) => call.startIndex === index),
           },
         ]
       : [],
@@ -189,6 +136,17 @@ export function evaluateCreationWorkflow({
       false,
       "Expected one successful present_files call with only the final PDF, after validation.",
     );
+
+  const preview = inspectOutputPreview({
+    calls,
+    steps,
+    mutation: create,
+    outputPath: quarterlyPath,
+    presentation: presentations[0].completion,
+    approvedTempRoot,
+    sessionId,
+  });
+  if (!preview.pass) return preview;
 
   const finalIndex = events.findLastIndex(
     (event) =>
@@ -302,6 +260,47 @@ export function containsRevenueByItem(output) {
   };
 }
 
+export function evaluateReadingWorkflow({ events, reportPath, finalAnswer }) {
+  if (!isAbsolute(reportPath ?? ""))
+    return result(false, "Missing absolute source report path.");
+  const runtime = evaluateRuntimeCompliance(events);
+  if (!runtime.pass) return runtime;
+  const finalIndex = events.findLastIndex(
+    (e) =>
+      e.type === "text" &&
+      e.messageID === finalAnswer?.messageID &&
+      e.partID === finalAnswer?.partID,
+  );
+  const extracted = scriptSteps(
+    completedCalls(events),
+    dirname(reportPath),
+  ).some(
+    (s) =>
+      s.script === "read_pdf.py" &&
+      targets(s, positionals(s)[0], reportPath) &&
+      s.argv.includes("--tables") &&
+      s.end.commandOutput === true &&
+      s.end.outputLength > 0 &&
+      s.endIndex < finalIndex,
+  );
+  return result(
+    extracted,
+    extracted
+      ? "The source table was extracted through bundled Python before the answer."
+      : "Expected successful table extraction from report.pdf with actual shell output before the final answer.",
+  );
+}
+
+export function readingWorkflow(_output, context) {
+  const evidence = readEvidence(context);
+  if (evidence.error)
+    return result(false, `Provider error: ${JSON.stringify(evidence.error)}`);
+  return evaluateReadingWorkflow({
+    ...evidence,
+    reportPath: context.vars?.reportPath,
+  });
+}
+
 export function reportIsUnchanged(_output, context) {
   const reportPath = context.vars?.reportPath;
   const expected = context.vars?.reportSha256;
@@ -321,42 +320,35 @@ export function reportIsUnchanged(_output, context) {
   };
 }
 
-export function evaluateMergeWorkflow({ events, combinedPath, finalAnswer }) {
+export function evaluateMergeWorkflow({
+  events,
+  combinedPath,
+  finalAnswer,
+  approvedTempRoot,
+  sessionId,
+}) {
   if (!isAbsolute(combinedPath ?? ""))
     return result(false, "Missing absolute combined PDF path.");
-  const calls = events.flatMap((event, index) =>
-    event.type === "tool-start"
-      ? [completedCall(events, index)].filter(Boolean)
-      : [],
+  const runtime = evaluateRuntimeCompliance(events);
+  if (!runtime.pass) return runtime;
+  const calls = completedCalls(events);
+  const steps = scriptSteps(calls, dirname(combinedPath));
+  const merge = steps.findLast(
+    (s) =>
+      s.script === "pages.py" &&
+      positionals(s)[0] === "merge" &&
+      targets(
+        s,
+        positionals(s)[1],
+        join(dirname(combinedPath), "report.pdf"),
+      ) &&
+      targets(
+        s,
+        positionals(s)[2],
+        join(dirname(combinedPath), "appendix.pdf"),
+      ) &&
+      targets(s, optionValue(s.argv, ["-o", "--out"]), combinedPath),
   );
-  const commands = calls.filter((call) => call.start.tool === "bash");
-  if (
-    commands.some((call) =>
-      /\b(?:qpdf|pdftk|gs|ghostscript|pdftoppm)\b/i.test(
-        call.start.args?.command ?? "",
-      ),
-    )
-  )
-    return result(false, "An external PDF utility was used.");
-
-  const merge = commands.find((call) => {
-    const command = call.start.args?.command ?? "";
-    const pages = command.search(/pages\.py(?:[\s"']|$)/);
-    const operation = command.search(/\bmerge\b/);
-    const report = command.search(/report\.pdf(?:[\s"']|$)/);
-    const appendix = command.search(/appendix\.pdf(?:[\s"']|$)/);
-    const output = command.search(/combined\.pdf(?:[\s"']|$)/);
-    return (
-      call.end.exitCode === 0 &&
-      /\bkowork-python(?:\.cmd)?\b/.test(command) &&
-      pages >= 0 &&
-      pages < operation &&
-      operation < report &&
-      report < appendix &&
-      appendix < output &&
-      /(?:^|\s)(?:-o|--out)(?:\s|=)/.test(command)
-    );
-  });
   if (!merge)
     return result(
       false,
@@ -368,18 +360,7 @@ export function evaluateMergeWorkflow({ events, combinedPath, finalAnswer }) {
       "combined.pdf is missing from the task output folder.",
     );
 
-  const validate = commands.find((call) => {
-    const command = call.start.args?.command ?? "";
-    return (
-      call.startIndex > merge.endIndex &&
-      call.end.exitCode === 0 &&
-      /\bkowork-python(?:\.cmd)?\b/.test(command) &&
-      /validate\.py(?:[\s"']|$)/.test(command) &&
-      /combined\.pdf(?:[\s"']|$)/.test(command) &&
-      !/(?:^|\s)--no-render(?:\s|$)/.test(command) &&
-      !/(?:^|\s)--pages(?:\s|=)/.test(command)
-    );
-  });
+  const validate = fullValidation(steps, merge, combinedPath);
   if (!validate)
     return result(
       false,
@@ -388,7 +369,12 @@ export function evaluateMergeWorkflow({ events, combinedPath, finalAnswer }) {
 
   const presentations = events.flatMap((event, index) =>
     event.type === "tool-start" && event.tool === "present_files"
-      ? [{ start: event, completion: completedCall(events, index) }]
+      ? [
+          {
+            start: event,
+            completion: calls.find((call) => call.startIndex === index),
+          },
+        ]
       : [],
   );
   if (
@@ -404,6 +390,17 @@ export function evaluateMergeWorkflow({ events, combinedPath, finalAnswer }) {
       false,
       "Expected one present_files call with only combined.pdf after validation.",
     );
+
+  const preview = inspectOutputPreview({
+    calls,
+    steps,
+    mutation: merge,
+    outputPath: combinedPath,
+    presentation: presentations[0].completion,
+    approvedTempRoot,
+    sessionId,
+  });
+  if (!preview.pass) return preview;
 
   const finalIndex = events.findLastIndex(
     (event) =>
@@ -426,6 +423,8 @@ export function mergeWorkflow(_output, context) {
   return evaluateMergeWorkflow({
     events: evidence.events,
     combinedPath: context.vars?.combinedPath,
+    approvedTempRoot: process.env.KOWORK_EVAL_APPROVED_TEMP_ROOT,
+    sessionId: context.providerResponse.sessionId,
     finalAnswer: evidence.finalAnswer,
   });
 }

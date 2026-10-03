@@ -1,120 +1,44 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, realpathSync } from "node:fs";
-import { basename, dirname, isAbsolute, join, resolve } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, isAbsolute, resolve } from "node:path";
 
 import { readEvidence } from "../../trace-assertions.mjs";
 
-const result = (pass, reason) => ({ pass, score: pass ? 1 : 0, reason });
-
-function completedCalls(events) {
-  return events.flatMap((start, startIndex) => {
-    if (start.type !== "tool-start") return [];
-    const endIndex = events.findIndex(
-      (end, index) =>
-        index > startIndex &&
-        end.type === "tool-end" &&
-        end.tool === start.tool &&
-        end.callID === start.callID,
-    );
-    return endIndex < 0
-      ? []
-      : [{ start, startIndex, end: events[endIndex], endIndex }];
-  });
-}
-
-// Recognize script invocations rather than requiring a particular quoting style,
-// absolute script path, JSON filename, or one tool call per command. Only &&
-// chains prove that earlier steps succeeded from the shell's final exit status.
-function scriptSteps(calls, taskFolder) {
-  return calls.flatMap((call) => {
-    if (call.start.tool !== "bash" || call.end.exitCode !== 0) return [];
-    const tokens =
-      (call.start.args?.command ?? "")
-        .trim()
-        .match(/(?:[^\s"';&|]+|"[^"]*"|'[^']*')+|&&|[;&|\n]/g) ?? [];
-    // A later command can hide an earlier failure with these separators.
-    // Ignore only line breaks continuing an && chain.
-    if (
-      tokens.some(
-        (token, i) =>
-          /^[;&|\n]$/.test(token) &&
-          !(
-            token === "\n" &&
-            (tokens[i - 1] === "&&" || tokens[i + 1] === "&&")
-          ),
-      )
-    )
-      return [];
-    const segments = [[]];
-    for (const token of tokens) {
-      if (token === "&&") segments.push([]);
-      else if (token !== "\n")
-        segments.at(-1).push(token.replace(/(["'])(.*?)\1/g, "$2"));
-    }
-    let cwd = resolve(taskFolder, call.start.args?.workdir ?? taskFolder);
-    return segments.flatMap((argv, step) => {
-      if (argv[0] === "cd" && argv.length === 2) {
-        cwd = resolve(cwd, argv[1]);
-        return [];
-      }
-      if (!/^kowork-python(?:\.cmd)?$/.test(basename(argv[0] ?? ""))) return [];
-      let index = 1;
-      while (["-B", "-u"].includes(argv[index])) index++;
-      if (
-        !["forms.py", "render.py", "validate.py"].includes(
-          basename(argv[index] ?? ""),
-        )
-      )
-        return [];
-      return [
-        {
-          ...call,
-          step,
-          script: basename(argv[index]),
-          argv: argv.slice(index + 1),
-          cwd,
-        },
-      ];
-    });
-  });
-}
-
-function before(a, b) {
-  return a.startIndex === b.startIndex
-    ? a.step < b.step
-    : a.endIndex < b.startIndex;
-}
-function targets(step, argument, path) {
-  return (
-    typeof argument === "string" &&
-    resolve(step.cwd, argument) === resolve(path)
-  );
-}
-function sameFile(a, b) {
-  return (
-    typeof a === "string" &&
-    existsSync(a) &&
-    existsSync(b) &&
-    realpathSync(a) === realpathSync(b)
-  );
-}
+import {
+  approvedTaskPath,
+  before,
+  completedCalls,
+  evaluateRuntimeCompliance,
+  fullValidation,
+  inspectOutputPreview,
+  optionValue,
+  positionals,
+  result,
+  sameFile,
+  scriptSteps,
+  targets,
+} from "./workflow.mjs";
 
 export function evaluateFormWorkflow({
   events,
   formPath,
   filledPath,
   finalAnswer,
+  approvedTempRoot,
+  sessionId,
 }) {
   if (!isAbsolute(formPath ?? "") || !isAbsolute(filledPath ?? ""))
     return result(false, "Missing absolute form evaluation paths.");
+  const runtime = evaluateRuntimeCompliance(events);
+  if (!runtime.pass) return runtime;
   const calls = completedCalls(events);
   const steps = scriptSteps(calls, dirname(formPath));
   const fills = steps.filter(
     (s) =>
       s.script === "forms.py" &&
-      s.argv[0] === "fill" &&
-      targets(s, s.argv[1], formPath) &&
+      positionals(s)[0] === "fill" &&
+      targets(s, positionals(s)[1], formPath) &&
       s.argv.some(
         (arg, i) =>
           (["-o", "--out"].includes(arg) &&
@@ -128,8 +52,8 @@ export function evaluateFormWorkflow({
     steps.some(
       (s) =>
         s.script === "forms.py" &&
-        ["info", "inspect", "fields"].includes(s.argv[0]) &&
-        targets(s, s.argv[1], formPath) &&
+        ["info", "inspect", "fields"].includes(positionals(s)[0]) &&
+        targets(s, positionals(s)[1], formPath) &&
         before(s, fill),
     );
   if (!discovered)
@@ -138,13 +62,34 @@ export function evaluateFormWorkflow({
       "Expected successful field discovery on the source before filling the output.",
     );
 
-  const validate = steps.find(
-    (s) =>
-      s.script === "validate.py" &&
-      targets(s, s.argv[0], filledPath) &&
-      !s.argv.some((arg) => /^--(?:no-render|pages)(?:=|$)/.test(arg)) &&
-      before(fill, s),
-  );
+  const temporaryFiles = [
+    ...fills.map((s) => resolve(s.cwd, positionals(s)[2] ?? "")),
+    ...steps
+      .filter((s) => s.script === "forms.py" && positionals(s)[0] === "fields")
+      .map((s) => ({ step: s, output: optionValue(s.argv, ["-o", "--out"]) }))
+      .filter(({ output }) => output !== undefined)
+      .map(({ step, output }) => resolve(step.cwd, output)),
+  ];
+  for (const event of events) {
+    if (
+      event.type === "tool-start" &&
+      ["write", "edit"].includes(event.tool) &&
+      typeof event.args?.filePath === "string" &&
+      event.args.filePath.endsWith(".json")
+    )
+      temporaryFiles.push(event.args.filePath);
+  }
+  if (
+    temporaryFiles.some(
+      (file) => !approvedTaskPath({ approvedTempRoot, sessionId }, file),
+    )
+  )
+    return result(
+      false,
+      "Form JSON files must be retained inside a task directory under the approved session temporary directory.",
+    );
+
+  const validate = fullValidation(steps, fill, filledPath);
   if (!validate)
     return result(
       false,
@@ -167,34 +112,16 @@ export function evaluateFormWorkflow({
       "Expected one successful presentation of only application-filled.pdf after validation.",
     );
 
-  const inspectedPreview = steps.some((s) => {
-    if (
-      s.script !== "render.py" ||
-      !targets(s, s.argv[0], filledPath) ||
-      !before(fill, s)
-    )
-      return false;
-    const previewDir = resolve(s.cwd, s.argv[1] ?? "");
-    return calls.some((c) => {
-      const image = c.start.args?.filePath;
-      return (
-        c.start.tool === "read" &&
-        c.startIndex > s.endIndex &&
-        c.endIndex < present.startIndex &&
-        c.end.outputLength > 0 &&
-        typeof image === "string" &&
-        [
-          join(previewDir, "page_001.png"),
-          join(previewDir, "page_001.jpg"),
-        ].some((p) => sameFile(image, p))
-      );
-    });
+  const preview = inspectOutputPreview({
+    calls,
+    steps,
+    mutation: fill,
+    outputPath: filledPath,
+    presentation: present,
+    approvedTempRoot,
+    sessionId,
   });
-  if (!inspectedPreview)
-    return result(
-      false,
-      "No successful Read of a rendered filled-output preview before presentation.",
-    );
+  if (!preview.pass) return preview;
   const finalIndex = events.findLastIndex(
     (e) =>
       e.type === "text" &&
@@ -220,6 +147,8 @@ export function formWorkflow(_output, context) {
     ...evidence,
     formPath: context.vars?.formPath,
     filledPath: context.vars?.filledPath,
+    approvedTempRoot: process.env.KOWORK_EVAL_APPROVED_TEMP_ROOT,
+    sessionId: context.providerResponse.sessionId,
   });
 }
 
