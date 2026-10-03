@@ -9,6 +9,7 @@ import {
   evalSystemPrompt,
   pdfAppendixFixturePath,
   pdfFixturePath,
+  pdfFormFixturePath,
 } from "./system-prompt";
 
 const repoRoot = path.resolve(import.meta.dirname, "../../..");
@@ -26,13 +27,19 @@ process.exitCode = await runSidecarEval({
   async prepareTaskFolder({ taskFolder }) {
     const reportPath = path.join(taskFolder, "report.pdf");
     const appendixPath = path.join(taskFolder, "appendix.pdf");
+    const formPath = path.join(taskFolder, "application-form.pdf");
     await copyFile(pdfFixturePath, reportPath);
     await copyFile(pdfAppendixFixturePath, appendixPath);
+    await copyFile(pdfFormFixturePath, formPath);
     const [report, appendix] = await Promise.all([
       readFile(pdfFixturePath),
       readFile(pdfAppendixFixturePath),
     ]);
     return {
+      KOWORK_EVAL_PDF_FORM_PATH: formPath,
+      KOWORK_EVAL_PDF_FORM_SHA256: createHash("sha256")
+        .update(await readFile(pdfFormFixturePath))
+        .digest("hex"),
       KOWORK_EVAL_PDF_REPORT_PATH: reportPath,
       KOWORK_EVAL_PDF_REPORT_SHA256: createHash("sha256")
         .update(report)

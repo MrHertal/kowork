@@ -14,12 +14,16 @@ const reportPath = process.env.KOWORK_EVAL_PDF_REPORT_PATH;
 const reportSha256 = process.env.KOWORK_EVAL_PDF_REPORT_SHA256;
 const appendixPath = process.env.KOWORK_EVAL_PDF_APPENDIX_PATH;
 const appendixSha256 = process.env.KOWORK_EVAL_PDF_APPENDIX_SHA256;
+const formPath = process.env.KOWORK_EVAL_PDF_FORM_PATH;
+const formSha256 = process.env.KOWORK_EVAL_PDF_FORM_SHA256;
 if (
   !baseUrl ||
   !reportPath ||
   !reportSha256 ||
   !appendixPath ||
-  !appendixSha256
+  !appendixSha256 ||
+  !formPath ||
+  !formSha256
 ) {
   throw new Error("Run this evaluation with `pnpm eval:skill:pdf`.");
 }
@@ -30,10 +34,24 @@ const manifest = JSON.parse(readFileSync(pdfEvalManifestPath, "utf8")) as {
 const createScenario = manifest.evals.find(({ id }) => id === 1);
 const readScenario = manifest.evals.find(({ id }) => id === 2);
 const mergeScenario = manifest.evals.find(({ id }) => id === 3);
-if (!createScenario || !readScenario || !mergeScenario)
-  throw new Error("PDF skill creation, reading, or merge scenario is missing");
+const formScenario = manifest.evals.find(({ id }) => id === 5);
+if (!createScenario || !readScenario || !mergeScenario || !formScenario)
+  throw new Error(
+    "PDF skill creation, reading, merge, or form scenario is missing",
+  );
 const quarterlyPath = join(dirname(reportPath), "quarterly.pdf");
 const combinedPath = join(dirname(reportPath), "combined.pdf");
+const filledPath = join(dirname(formPath), "application-filled.pdf");
+const formRequest = `${formScenario.prompt}
+
+<kowork_attachments>
+  <attachment>
+    <name>application-form.pdf</name>
+    <path>${formPath}</path>
+    <format>pdf</format>
+    <position>1</position>
+  </attachment>
+</kowork_attachments>`;
 
 const readRequest = `${readScenario.prompt}
 
@@ -77,9 +95,36 @@ export default {
   tests: [
     {
       description:
+        "Fills and presents real AcroForm values with the built-in PDF skill",
+      vars: { request: formRequest, formPath, formSha256, filledPath },
+      assert: [
+        { type: "javascript", value: "file://workflow.mjs:runtimeCompliance" },
+        {
+          type: "javascript",
+          value: "file://../../trace-assertions.mjs:toolUsed",
+          config: {
+            tool: "skill",
+            args: { name: "kowork-pdf" },
+            nonEmptyOutput: true,
+            beforeFinalAnswer: true,
+          },
+        },
+        {
+          type: "javascript",
+          value: "file://form-assertions.mjs:formWorkflow",
+        },
+        {
+          type: "javascript",
+          value: "file://form-assertions.mjs:filledFormHasRequestedValues",
+        },
+      ],
+    },
+    {
+      description:
         "Creates, validates, and presents a PDF with the built-in PDF skill",
       vars: { request: createScenario.prompt, quarterlyPath },
       assert: [
+        { type: "javascript", value: "file://workflow.mjs:runtimeCompliance" },
         {
           type: "javascript",
           value: "file://../../trace-assertions.mjs:toolUsed",
@@ -106,6 +151,7 @@ export default {
       description: "Extracts a real table with the built-in PDF skill",
       vars: { request: readRequest, reportPath, reportSha256 },
       assert: [
+        { type: "javascript", value: "file://workflow.mjs:runtimeCompliance" },
         {
           type: "javascript",
           value: "file://../../trace-assertions.mjs:toolUsed",
@@ -120,19 +166,7 @@ export default {
         },
         {
           type: "javascript",
-          value: "file://../../trace-assertions.mjs:toolUsed",
-          config: {
-            tool: "bash",
-            argsRegex: {
-              command: String.raw`^\s*kowork-python(?:\.cmd)?(?=[\s\S]*read_pdf\.py)(?=[\s\S]*report\.pdf)(?=[\s\S]*--tables(?:\s|$))`,
-            },
-            status: "success",
-            exitCode: 0,
-            min: 1,
-            commandOutput: true,
-            nonEmptyOutput: true,
-            beforeFinalAnswer: true,
-          },
+          value: "file://assertions.mjs:readingWorkflow",
         },
         {
           type: "javascript",
@@ -164,6 +198,7 @@ export default {
         combinedPath,
       },
       assert: [
+        { type: "javascript", value: "file://workflow.mjs:runtimeCompliance" },
         {
           type: "javascript",
           value: "file://../../trace-assertions.mjs:toolUsed",
