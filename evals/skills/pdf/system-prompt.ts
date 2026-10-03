@@ -21,6 +21,10 @@ export const pdfAppendixFixturePath = path.join(
   builtinSkillsDir,
   "pdf/evals/files/appendix.pdf",
 );
+export const pdfFormFixturePath = path.join(
+  builtinSkillsDir,
+  "pdf/evals/files/application-form.pdf",
+);
 
 const skills = readdirSync(builtinSkillsDir, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())

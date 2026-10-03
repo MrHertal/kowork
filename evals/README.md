@@ -97,13 +97,35 @@ checks that the reported results are accurate and plainly explained.
 ## PDF Skill evaluation
 
 Run `pnpm eval:skill:pdf` to test the built-in PDF Skill. The suite covers
-reading a table from an attached PDF, creating `quarterly.pdf`, and merging
-`report.pdf` then `appendix.pdf` into `combined.pdf`. The creation
+reading a table from an attached PDF, creating `quarterly.pdf`, merging
+`report.pdf` then `appendix.pdf` into `combined.pdf`, and filling the interactive
+`application-form.pdf` into `application-filled.pdf`. These are manifest scenarios
+1, 2, 3, and 5. The manifest also lists page preview (4), flat-form overlay (6),
+and password protection (7); those are not standalone runnable scenarios.
+The creation
 check requires a retained working script in a child of the pre-approved session
 temporary directory, successful validation, presentation of the final PDF, and
 the requested title, table, and summary. It does not score visual layout.
 The merge check requires the bundled `pages.py merge` path, full render validation,
 presentation of the final file, and three pages in the requested source order.
+The interactive-form check reuses the manifest prompt and fixture. It checks
+successful field discovery before filling, reads the output's actual AcroForm
+`/V` values with bundled Python (Dana Lee, checkbox `/Yes`, radio `/Pro`), and
+checks the source checksum. Visible page text or an assistant's claim of success
+cannot substitute for stored field values. Its trace checks require full render
+validation after the final fill, followed by one successful presentation of only
+the final PDF and then the final answer. It also requires a successful Read of
+an image produced by rendering the filled output before presentation. Trace
+evidence establishes image inspection, but does not grade placement or prove
+that the model understood the image. The existing trace records arguments,
+completion, output lengths, and shell exit codes, not image pixels or tool output.
+Script recognition accepts quoted/relative paths, separate calls, and successful
+`&&` chains; it does not interpret arbitrary shell programs.
+
+Run the deterministic PDF assertion tests with
+`node --test evals/skills/pdf/*.test.mjs`. The form tests use the existing bundled
+runtime and real PDFs to cover wrong field values, blank or flattened outputs,
+corrupt/missing outputs, source changes, and failed or misordered trace steps.
 Model outcomes are measured here and are not part of `./scripts/check` or CI.
 
 ## Adding tool and Skill checks
