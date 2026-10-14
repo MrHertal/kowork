@@ -137,7 +137,7 @@ jobs:
 
       # electron-builder signs from this keychain via CSC_KEYCHAIN below; its own
       # CSC_LINK keychain import is broken on macOS 26 (electron-builder#10066).
-      - uses: apple-actions/import-codesign-certs@5142e029c445c10ffc7149d172e540235a065466 # v7
+      - uses: apple-actions/import-codesign-certs@77ba2a2a8f5cfc8c405ebf3159f767c323e238f9 # v7
         if: runner.os == 'macOS'
         with:
           keychain: build
